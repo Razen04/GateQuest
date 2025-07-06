@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATE Prep Question LaTeX Preview</title>
+
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+
+    <!-- PrismJS for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+
+    <style>
+        /* Base styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fb;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: #2d3748;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .file-upload {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        button {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2b6cb0;
+        }
+
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+        }
+
+        /* Question card styles */
+        .question-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .question-header {
+            padding: 1rem;
+            background: linear-gradient(to right, #f7fafc, #edf2f7);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .question-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        .badge-difficulty-easy {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-difficulty-medium {
+            background-color: #fefcbf;
+            color: #744210;
+        }
+
+        .badge-difficulty-hard {
+            background-color: #fed7d7;
+            color: #822727;
+        }
+
+        .badge-difficulty-unknown {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .badge-year {
+            background-color: #bee3f8;
+            color: #2a4365;
+        }
+
+        .badge-type {
+            background-color: #e9d8fd;
+            color: #44337a;
+        }
+
+        .badge-marks {
+            background-color: #fbd5e0;
+            color: #702459;
+        }
+
+        .question-content {
+            padding: 1.5rem;
+        }
+
+        .question-text {
+            font-size: 1.125rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Inline image styles */
+        .inline-image {
+            max-width: 100%;
+            max-height: 400px;
+            display: block;
+            margin: 1rem auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .image-error {
+            padding: 1rem;
+            background-color: #fed7d7;
+            color: #822727;
+            border-radius: 4px;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .options-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .option-item {
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            display: flex;
+        }
+
+        .option-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e0;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-checkbox.square {
+            border-radius: 4px;
+        }
+
+        .option-checkbox.selected {
+            background-color: #4299e1;
+            border-color: #4299e1;
+        }
+
+        .option-checkbox.correct {
+            background-color: #48bb78;
+            border-color: #48bb78;
+        }
+
+        .option-checkbox.correct:after {
+            content: "✓";
+            color: white;
+            font-size: 12px;
+        }
+
+        .numerical-answer {
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: #2d3748;
+            margin-top: 1rem;
+        }
+
+        .question-footer {
+            background-color: #f7fafc;
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .question-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #edf2f7;
+            color: #4a5568;
+            border-radius: 9999px;
+        }
+
+        /* Table styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #e2e8f0;
+        }
+
+        th,
+        td {
+            padding: 0.5rem 1rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f7fafc;
+            font-weight: 600;
+        }
+
+        /* Pseudocode table styles */
+        .code-table {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+        }
+
+        .code-table td {
+            padding: 0.25rem 1rem;
+            vertical-align: top;
+        }
+
+        /* Code block styles */
+        .code-block {
+            background-color: #2d2d2d;
+            border-radius: 0.375rem;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #1e1e1e;
+            color: #ccc;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .code-content {
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre;
+            color: #f8f8f2;
+            overflow-x: auto;
+        }
+
+        /* Inline code */
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f7fafc;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.25rem;
+            font-size: 0.9em;
+            border: 1px solid #edf2f7;
+        }
+
+        /* Error states */
+        .error {
+            background-color: #fed7d7;
+            color: #822727;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning {
+            background-color: #fefcbf;
+            color: #744210;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info {
+            background-color: #bee3f8;
+            color: #2a4365;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Helper classes */
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-gray {
+            color: #718096;
+        }
+
+        .katex {
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>GATE Prep Question LaTeX Preview</h1>
+        <p>Upload a JSON file to preview how LaTeX formatting will render in the GATE Prep app.</p>
+
+        <div class="info">
+            <h3>Supported Formats</h3>
+            <p>This preview tool supports:</p>
+            <ul>
+                <li>LaTeX math expressions: <code>$E = mc^2$</code></li>
+                <li>Markdown images: <code>![alt text](path/to/image.png)</code></li>
+                <li>Code blocks: <code>```language code here ```</code></li>
+                <li>Inline code: <code>`code`</code></li>
+                <li>Tables with <code>|</code> separators, including pseudocode</li>
+            </ul>
+            <p>For questions with embedded images, make sure images are in their relative paths as specified in the
+                markdown.</p>
+        </div>
+
+        <div class="file-upload">
+            <input type="file" id="jsonFileInput" accept=".json">
+            <button id="loadFileBtn">Load Questions</button>
+        </div>
+    </div>
+
+    <div id="questionsContainer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fileInput = document.getElementById('jsonFileInput');
+            const loadButton = document.getElementById('loadFileBtn');
+            const questionsContainer = document.getElementById('questionsContainer');
+
+            loadButton.addEventListener('click', handleFileLoad);
+
+            function handleFileLoad() {
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('Please select a JSON file first');
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    try {
+                        // Parse the JSON content
+                        const questions = JSON.parse(e.target.result);
+
+                        // Clear previous questions
+                        questionsContainer.innerHTML = '';
+
+                        if (!Array.isArray(questions)) {
+                            showError('Invalid JSON format: Expected an array of questions');
+                            return;
+                        }
+
+                        // Check for questions with embedded content
+                        const hasCode = questions.some(q => q.question && (q.question.includes('```') || q.question.includes('`')));
+                        if (hasCode) {
+                            const infoDiv = document.createElement('div');
+                            infoDiv.className = 'info container';
+                            infoDiv.innerHTML = `
+                                <h3>Questions with Code Detected</h3>
+                                <p>Some questions contain code blocks or inline code. These will be rendered with appropriate formatting.</p>
+                            `;
+                            questionsContainer.appendChild(infoDiv);
+                        }
+
+                        // Display question count
+                        const countDiv = document.createElement('div');
+                        countDiv.className = 'container';
+                        countDiv.innerHTML = `<h2>Loaded ${questions.length} Questions</h2>`;
+                        questionsContainer.appendChild(countDiv);
+
+                        // Render each question
+                        questions.forEach((question, index) => {
+                            renderQuestion(question, index);
+                        });
+
+                        // Process all LaTeX expressions
+                        setTimeout(() => {
+                            renderMathInElement(document.body, {
+                                delimiters: [
+                                    { left: "$$", right: "$$", display: true },
+                                    { left: "$", right: "$", display: false }
+                                ],
+                                throwOnError: false
+                            });
+
+                            // Apply syntax highlighting
+                            Prism.highlightAll();
+                        }, 100);
+                    } catch (error) {
+                        showError(`Error parsing JSON: ${error.message}`);
+                    }
+                };
+
+                reader.readAsText(file);
+            }
+
+            function showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                questionsContainer.innerHTML = '';
+                questionsContainer.appendChild(errorDiv);
+            }
+
+            // Function to process text and handle various formats
+            function processText(text) {
+                if (!text) return '';
+
+                let processedText = text;
+
+                // Handle markdown images
+                processedText = convertMarkdownImages(processedText);
+
+                // Handle code blocks with language
+                processedText = convertCodeBlocks(processedText);
+
+                // Handle inline code
+                processedText = convertInlineCode(processedText);
+
+                return processedText;
+            }
+
+            // Function to convert markdown images to HTML images
+            function convertMarkdownImages(text) {
+                if (!text) return '';
+
+                // This regex matches the markdown image pattern ![alt](url)
+                const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+
+                return text.replace(imageRegex, (match, alt, src) => {
+                    return `<img src="${src}" alt="${alt}" class="inline-image" onerror="this.onerror=null; this.parentNode.innerHTML+='<div class=\\'image-error\\'><strong>Image not found:</strong> ${src}<br><small>Make sure the image exists at this path relative to the HTML file</small></div>';">`;
+                });
+            }
+
+            // Function to convert code blocks to HTML
+            function convertCodeBlocks(text) {
+                if (!text) return '';
+
+                // This regex matches markdown code blocks: ```language code```
+                const codeBlockRegex = /```([a-zA-Z]*)\s*([\s\S]*?)```/g;
+
+                return text.replace(codeBlockRegex, (match, language, code) => {
+                    language = language || 'plaintext';
+                    return `
+                        <div class="code-block">
+                            <div class="code-header">${language}</div>
+                            <pre class="language-${language}"><code class="language-${language}">${escapeHtml(code.trim())}</code></pre>
+                        </div>
+                    `;
+                });
+            }
+
+            // Function to convert inline code to HTML
+            function convertInlineCode(text) {
+                if (!text) return '';
+
+                // This regex matches inline code: `code`
+                // But avoids matching triple backticks which are already handled
+                const inlineCodeRegex = /(?<![`])`(?!`)(.*?)(?<!`)`(?![`])/g;
+
+                return text.replace(inlineCodeRegex, (match, code) => {
+                    return `<code>${escapeHtml(code)}</code>`;
+                });
+            }
+
+            // Function to escape HTML special characters
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            function renderQuestion(question, index) {
+                // Create question card
+                const card = document.createElement('div');
+                card.className = 'question-card';
+
+                // Question header
+                const header = document.createElement('div');
+                header.className = 'question-header';
+
+                const title = document.createElement('h3');
+                title.textContent = `Question ${index + 1}${question.id ? ` (ID: ${question.id})` : ''}`;
+                header.appendChild(title);
+
+                const badges = document.createElement('div');
+                badges.className = 'question-badges';
+
+                // Difficulty badge
+                let difficultyClass = 'unknown';
+                let difficultyText = 'Unknown';
+
+                if (question.difficulty) {
+                    let normalizedDifficulty = question.difficulty.toLowerCase();
+                    if (normalizedDifficulty === 'normal') normalizedDifficulty = 'medium';
+                    difficultyClass = normalizedDifficulty;
+                    difficultyText = normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1);
+                }
+
+                const difficultyBadge = document.createElement('span');
+                difficultyBadge.className = `badge badge-difficulty-${difficultyClass}`;
+                difficultyBadge.textContent = difficultyText;
+                badges.appendChild(difficultyBadge);
+
+                // Year badge
+                if (question.year) {
+                    const yearBadge = document.createElement('span');
+                    yearBadge.className = 'badge badge-year';
+                    yearBadge.textContent = `GATE ${question.year}`;
+                    badges.appendChild(yearBadge);
+                }
+
+                // Question type badge
+                if (question.questionType) {
+                    const typeBadge = document.createElement('span');
+                    typeBadge.className = 'badge badge-type';
+                    typeBadge.textContent = getQuestionTypeText(question);
+                    badges.appendChild(typeBadge);
+                }
+
+                // Marks badge
+                if (question.marks) {
+                    const marksBadge = document.createElement('span');
+                    marksBadge.className = 'badge badge-marks';
+                    marksBadge.textContent = `${question.marks} Mark${question.marks !== 1 ? 's' : ''}`;
+                    badges.appendChild(marksBadge);
+                }
+
+                header.appendChild(badges);
+                card.appendChild(header);
+
+                // Question content
+                const content = document.createElement('div');
+                content.className = 'question-content';
+
+                // Question text
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+
+                if (question.question) {
+                    // Check if it contains a table format
+                    if (isPseudocodeTable(question.question)) {
+                        // Special handling for pseudocode tables
+                        questionText.innerHTML = renderPseudocodeTable(question.question);
+                    } else if (isTableFormat(question.question)) {
+                        // Regular table format
+                        questionText.innerHTML = renderTable(question.question);
+                    } else {
+                        // Process text with all our supported formats
+                        questionText.innerHTML = processText(question.question);
+                    }
+                } else {
+                    questionText.textContent = 'Question text not available';
+                }
+
+                content.appendChild(questionText);
+
+                // Handle options
+                const isNumerical = isNumericalQuestion(question);
+                const isMultipleSelection = isMultipleSelectQuestion(question);
+
+                if (question.options && Array.isArray(question.options) && question.options.length > 0) {
+                    const optionsList = document.createElement('ul');
+                    optionsList.className = 'options-list';
+
+                    question.options.forEach((option, optIndex) => {
+                        const optionItem = document.createElement('li');
+                        optionItem.className = 'option-item';
+
+                        // Create option checkbox/radio indicator
+                        const checkbox = document.createElement('div');
+                        checkbox.className = isMultipleSelection ? 'option-checkbox square' : 'option-checkbox';
+
+                        // Mark correct answers
+                        if (question.correctAnswer) {
+                            if (Array.isArray(question.correctAnswer) && question.correctAnswer.includes(optIndex)) {
+                                checkbox.className += ' correct';
+                            }
+                        }
+
+                        // Option text
+                        const optionContent = document.createElement('div');
+                        optionContent.style.flexGrow = '1';
+
+                        // Process option text for LaTeX, code, etc.
+                        if (option.includes('$') || option.includes('`') || option.includes('![')) {
+                            optionContent.innerHTML = processText(option);
+                        } else {
+                            optionContent.innerText = option;
+                        }
+
+                        optionItem.appendChild(checkbox);
+                        optionItem.appendChild(optionContent);
+                        optionsList.appendChild(optionItem);
+                    });
+
+                    content.appendChild(optionsList);
+                }
+
+                // Numerical answer
+                if (isNumerical && question.correctAnswer) {
+                    const numericalAnswer = document.createElement('div');
+                    numericalAnswer.className = 'numerical-answer';
+                    numericalAnswer.textContent = `Numerical Answer: ${question.correctAnswer}`;
+                    content.appendChild(numericalAnswer);
+                }
+
+                card.appendChild(content);
+
+                // Question footer
+                const footer = document.createElement('div');
+                footer.className = 'question-footer';
+
+                // Metadata
+                const meta = document.createElement('div');
+                meta.className = 'text-sm text-gray';
+
+                let metaText = '';
+                if (question.subject) metaText += `Subject: ${question.subject} `;
+                if (question.topic) metaText += `| Topic: ${question.topic} `;
+
+                meta.textContent = metaText;
+                footer.appendChild(meta);
+
+                // Tags
+                if (question.tags && Array.isArray(question.tags) && question.tags.length > 0) {
+                    const tagsContainer = document.createElement('div');
+                    tagsContainer.className = 'question-tags';
+
+                    question.tags.forEach(tag => {
+                        const tagSpan = document.createElement('span');
+                        tagSpan.className = 'tag';
+                        tagSpan.textContent = tag;
+                        tagsContainer.appendChild(tagSpan);
+                    });
+
+                    footer.appendChild(tagsContainer);
+                }
+
+                card.appendChild(footer);
+                questionsContainer.appendChild(card);
+            }
+
+            // Function to detect if the text contains a pseudocode table format
+            function isPseudocodeTable(text) {
+                if (!text) return false;
+
+                // Check if it contains table markers and pseudocode keywords
+                const hasTableFormat = text.includes('|') && text.includes('\n');
+                const hasPseudocodeKeywords = /\b(for|while|if|else|function|procedure|algorithm|return|end)\b/i.test(text);
+
+                return hasTableFormat && hasPseudocodeKeywords;
+            }
+
+            // Function to render pseudocode tables with special formatting
+            function renderPseudocodeTable(text) {
+                if (!text) return '';
+
+                const parts = [];
+                let inTable = false;
+                let tableContent = '';
+                let textContent = '';
+
+                // Split the text by lines and process
+                const lines = text.split('\n');
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+
+                    // Check if this line is part of the table
+                    if (line.includes('|') && (line.trim().startsWith('|') || inTable)) {
+                        if (!inTable) {
+                            // Start of a new table
+                            if (textContent) {
+                                parts.push({ type: 'text', content: textContent });
+                                textContent = '';
+                            }
+                            inTable = true;
+                        }
+                        tableContent += line + '\n';
+                    } else {
+                        // Not a table line
+                        if (inTable) {
+                            // End of table
+                            parts.push({ type: 'table', content: tableContent });
+                            tableContent = '';
+                            inTable = false;
+                        }
+                        textContent += line + '\n';
+                    }
+                }
+
+                // Add any remaining content
+                if (inTable && tableContent) {
+                    parts.push({ type: 'table', content: tableContent });
+                } else if (textContent) {
+                    parts.push({ type: 'text', content: textContent });
+                }
+
+                // Process each part
+                let result = '';
+                parts.forEach(part => {
+                    if (part.type === 'text') {
+                        // Process regular text
+                        result += processText(part.content);
+                    } else if (part.type === 'table') {
+                        // Create pseudocode table
+                        result += createPseudocodeTableHTML(part.content);
+                    }
+                });
+
+                return result;
+            }
+
+            // Create HTML for pseudocode tables
+            function createPseudocodeTableHTML(tableContent) {
+                if (!tableContent) return '';
+
+                const lines = tableContent.split('\n').filter(line => line.trim());
+                if (lines.length === 0) return '';
+
+                let html = '<table class="code-table">';
+
+                // Process each line
+                lines.forEach(line => {
+                    const cells = line.split('|')
+                        .filter(cell => cell.trim() !== '')
+                        .map(cell => cell.trim());
+
+                    html += '<tr>';
+                    cells.forEach(cell => {
+                        html += `<td>${cell}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</table>';
+                return html;
+            }
+
+            function isNumericalQuestion(question) {
+                if (!question) return false;
+
+                if (question.questionType === 'Numerical Answer') return true;
+
+                if (question.tags && Array.isArray(question.tags)) {
+                    return question.tags.some(tag =>
+                        tag.toLowerCase().includes('numerical')
+                    );
+                }
+
+                return (!question.options || question.options.length === 0) &&
+                    (typeof question.correctAnswer === 'number');
+            }
+
+            function isMultipleSelectQuestion(question) {
+                if (!question) return false;
+
+                if (question.questionType === 'MSQ' ||
+                    question.questionType === 'Multiple Select Question') return true;
+
+                if (question.tags && Array.isArray(question.tags)) {
+                    return question.tags.some(tag =>
+                        tag.toLowerCase().includes('multiple-select') ||
+                        tag.toLowerCase().includes('multiple select')
+                    );
+                }
+
+                return Array.isArray(question.correctAnswer) && question.correctAnswer.length > 1;
+            }
+
+            function getQuestionTypeText(question) {
+                if (!question.questionType) return 'Question';
+
+                if (isMultipleSelectQuestion(question)) {
+                    return 'Multiple Select Question';
+                }
+
+                switch (question.questionType) {
+                    case 'MCQ':
+                    case 'multiple-choice':
+                        return 'Multiple Choice Question';
+                    case 'MSQ':
+                    case 'Multiple Select Question':
+                        return 'Multiple Select Question';
+                    case 'Numerical Answer':
+                        return 'Numerical Answer';
+                    case 'Descriptive':
+                        return 'Descriptive Question';
+                    case 'Match the following':
+                        return 'Match the Following';
+                    default:
+                        return question.questionType;
+                }
+            }
+
+            function isTableFormat(text) {
+                return text &&
+                    text.includes('|') &&
+                    text.includes('\n') &&
+                    text.split('\n').filter(line => line.trim().startsWith('|')).length >= 2;
+            }
+
+            function renderTable(text) {
+                const lines = text.split('\n');
+
+                // Extract table lines and non-table text
+                const tableParts = [];
+                let currentText = '';
+                let inTable = false;
+
+                lines.forEach(line => {
+                    const trimmedLine = line.trim();
+
+                    if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+                        // This is a table line
+                        if (!inTable) {
+                            // Start of a new table
+                            if (currentText) {
+                                tableParts.push({ type: 'text', content: currentText });
+                                currentText = '';
+                            }
+                            inTable = true;
+                            tableParts.push({ type: 'table', content: [line] });
+                        } else {
+                            // Continuation of current table
+                            tableParts[tableParts.length - 1].content.push(line);
+                        }
+                    } else {
+                        // This is regular text
+                        if (inTable) {
+                            inTable = false;
+                            currentText = line + '\n';
+                        } else {
+                            currentText += line + '\n';
+                        }
+                    }
+                });
+
+                // Add any remaining text
+                if (currentText) {
+                    tableParts.push({ type: 'text', content: currentText });
+                }
+
+                // Process each part
+                let result = '';
+                tableParts.forEach(part => {
+                    if (part.type === 'text') {
+                        result += processText(part.content);
+                    } else if (part.type === 'table') {
+                        result += createTableHTML(part.content);
+                    }
+                });
+
+                return result;
+            }
+
+            function createTableHTML(tableLines) {
+                if (tableLines.length < 2) return tableLines.join('\n');
+
+                let html = '<table>';
+
+                // Process header
+                const headerCells = tableLines[0].split('|')
+                    .filter(cell => cell.trim() !== '')
+                    .map(cell => cell.trim());
+
+                html += '<thead><tr>';
+                headerCells.forEach(cell => {
+                    html += `<th>${cell}</th>`;
+                });
+                html += '</tr></thead>';
+
+                // Skip separator line (if present) and process data rows
+                const startRow = tableLines[1].includes('-') ? 2 : 1;
+
+                html += '<tbody>';
+                for (let i = startRow; i < tableLines.length; i++) {
+                    const cells = tableLines[i].split('|')
+                        .filter(cell => cell.trim() !== '')
+                        .map(cell => cell.trim());
+
+                    html += '<tr>';
+                    cells.forEach(cell => {
+                        html += `<td>${cell}</td>`;
+                    });
+                    html += '</tr>';
+                }
+                html += '</tbody></table>';
+
+                return html;
+            }
+        });
+    </script>
+</body>
+
+</html>

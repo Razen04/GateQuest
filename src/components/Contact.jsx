@@ -5,6 +5,7 @@ import {
     FaChevronDown, FaChevronUp, FaTwitter,
     FaFacebook, FaLinkedin, FaInstagram, FaDiscord
 } from 'react-icons/fa'
+import axios from 'axios'
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -28,27 +29,19 @@ const Contact = () => {
     }
 
     // Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setLoading(true)
-
-        // Simulate API request
-        setTimeout(() => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axios.post('http://localhost:5000/api/contact', formData);
+            setMessageSent(true);
+        } catch (err) {
+            console.error("Error sending message:", err);
+            alert("Failed to send message");
+        } finally {
             setLoading(false)
-            setMessageSent(true)
-            setFormData({
-                name: '',
-                email: '',
-                subject: 'General Inquiry',
-                message: ''
-            })
-
-            // Reset success message after 5 seconds
-            setTimeout(() => {
-                setMessageSent(false)
-            }, 5000)
-        }, 1500)
-    }
+        }
+    };
 
     // Toggle FAQ accordion
     const toggleAccordion = (id) => {
@@ -204,8 +197,8 @@ const Contact = () => {
                                         type="submit"
                                         disabled={loading}
                                         className={`w-full py-3 rounded-lg text-white font-medium transition-all ${loading
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+                                            ? 'bg-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
                                             }`}
                                     >
                                         {loading ? (
