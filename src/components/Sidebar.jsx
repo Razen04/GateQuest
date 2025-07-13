@@ -11,12 +11,10 @@ import {
     FaDiscord
 } from 'react-icons/fa'
 import { FaGithub, FaReddit } from 'react-icons/fa6'
-import { ThemeContext } from '../context/ThemeContext'
 
-const Sidebar = () => {
+const Sidebar = ({ showSidebar, setShowSidebar }) => {
     const navigate = useNavigate()
     const location = useLocation()
-    const { dark } = useContext(ThemeContext)
 
     // Determine active tab based on current path
     const getActiveTab = () => {
@@ -41,14 +39,17 @@ const Sidebar = () => {
     const handleTabClick = (tabId, path) => {
         setActiveTab(tabId)
         navigate(path)
+        setShowSidebar(false)
     }
 
     return (
         <motion.div
-            className='w-64 h-lvh border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-lg transition-colors duration-1000'
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            className={`w-64 z-10 absolute h-[100dvh] lg:static lg:block border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-lg transition-colors duration-1000`}
+            initial={{ x: '-100%' }}
+            animate={{ x: showSidebar || window.innerWidth >= 1024 ? 0 : '-100%' }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', duration: 0.4, ease: 'easeIn' }}
+            style={{ display: showSidebar || window.innerWidth >= 1024 ? 'block' : 'none' }}
         >
             <div className="flex flex-col h-full bg-primary dark:bg-primary-dark">
                 {/* Branding */}

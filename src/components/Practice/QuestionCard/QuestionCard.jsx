@@ -483,12 +483,12 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             transition={{ duration: 0.5 }}
         >
             {/* Question Header */}
-            <div className="px-6 py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
-                <div className="flex justify-between items-center">
-                    <h3 className="font-bold">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h3 className="font-bold text-base sm:text-lg">
                         Question {questions.findIndex(q => q.id === currentIndex) + 1} of {questions.length}
                     </h3>
-                    <div className="flex space-x-3 items-center">
+                    <div className="flex flex-wrap gap-2 sm:space-x-3 items-center">
                         <QuestionBookmark handleBookmark={handleBookmark} />
                         <QuestionTimer timer={timer} handleTimer={handleTimer} minutes={minutes} seconds={seconds} />
                         <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyClassNames()}`}>
@@ -525,9 +525,9 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             </div>
 
             {/* Question Content */}
-            <div className="p-6">
-                <div className="mb-6">
-                    <div className="text-lg">
+            <div className="p-4 sm:p-6">
+                <div className="mb-4 sm:mb-6">
+                    <div className="text-base md:text-lg">
                         {currentQuestion.question ? (
                             <MathRenderer text={currentQuestion.question} />
                         ) : (
@@ -538,7 +538,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
 
                 {/* Options - Only show if the question has options */}
                 {hasOptions && (
-                    <div className="space-y-3 mb-6">
+                    <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                         {currentQuestion.options.map((option, index) => (
                             <motion.div
                                 key={index}
@@ -657,16 +657,16 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             </div>
 
             {/* Question ID Badge and Tags */}
-            <div className="px-6 py-3 border-t border-border-primary dark:border-border-primary-dark">
-                <div className="flex flex-wrap items-center justify-between">
-                    <div className="flex items-center text-xs mb-2 sm:mb-0">
-                        <span className="mr-4">ID: {currentQuestion.id || 'Unknown'}</span>
+            <div className="px-4 sm:px-6 py-2 sm:py-3 border-t border-border-primary dark:border-border-primary-dark">
+                <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-2">
+                    <div className="flex items-center text-xs mb-2 sm:mb-0 gap-4">
+                        <span>ID: {currentQuestion.id || 'Unknown'}</span>
                         <span>Subject: {subject.toUpperCase()}</span>
                     </div>
 
                     {/* Tags display */}
                     {currentQuestion.tags && Array.isArray(currentQuestion.tags) && currentQuestion.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 items-center">
                             <span className="text-xs flex items-center">
                                 <FaTag className="mr-1" /> Tags:
                             </span>

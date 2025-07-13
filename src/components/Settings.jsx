@@ -48,7 +48,7 @@ const Settings = () => {
     ]
 
     return (
-        <div className={`p-8 min-h-screen transition-colors duration-500 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark`}>
+        <div className={`p-8 min-h-[100dvh] transition-colors duration-500 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark`}>
             {/* Header Section */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -64,12 +64,12 @@ const Settings = () => {
 
             {/* Settings Tabs Navigation */}
             <div className="mb-8 overflow-x-auto">
-                <div className="flex space-x-1 min-w-max shadow-sm rounded-xl p-1 border border-border-primary dark:border-border-primary-dark">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2 min-w-0 shadow-sm rounded-xl p-1 border border-border-primary dark:border-border-primary-dark">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex cursor-pointer items-center px-4 py-3 rounded-lg transition-all ${activeTab === tab.id
+                            className={`flex cursor-pointer items-center px-4 py-2 sm:py-3 rounded-lg transition-all whitespace-nowrap text-sm sm:text-base ${activeTab === tab.id
                                 ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
                                 : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-text-primary dark:text-text-primary-dark'
                                 }`}

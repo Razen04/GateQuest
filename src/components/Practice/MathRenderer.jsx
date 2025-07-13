@@ -63,13 +63,13 @@ const MathRenderer = ({ text }) => {
                         return <br key={index} />;
                     case 'image':
                         return (
-                            <div key={index} className="image-container flex justify-center my-4 w-full">
-                                <div className="max-w-full overflow-hidden">
+                            <div key={index} className="image-container flex justify-center my-4 w-full text-xs">
+                                <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl overflow-hidden">
                                     <img
                                         src={segment.src}
                                         alt={segment.alt || "Image"}
-                                        className="max-w-full h-auto object-contain rounded shadow-lg mx-auto"
-                                        style={{ maxHeight: '500px' }}
+                                        className="w-full max-w-full h-auto object-contain rounded shadow-lg mx-auto"
+                                        style={{ maxHeight: '50vh', minWidth: 0 }}
                                         loading="lazy"
                                         onError={(e) => {
                                             e.target.style.display = 'none';

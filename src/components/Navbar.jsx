@@ -3,8 +3,9 @@ import { motion } from 'framer-motion'
 import { BiBell, BiSearch, BiSolidBell } from 'react-icons/bi'
 import Notification from './Notification'
 import { getUserProfile } from '../helper'
+import { FaHamburger } from 'react-icons/fa'
 
-const Navbar = () => {
+const Navbar = ({ setShowSidebar }) => {
     const [showSearchInput, setShowSearchInput] = useState(false)
     const [showNotifications, setShowNotifications] = useState(false)
     const [unreadNotifications, setUnreadNotifications] = useState(false)
@@ -34,35 +35,27 @@ const Navbar = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
         >
 
-            {/* Middle Section with Search */}
-            <motion.div
-                className="hidden md:flex items-center flex-1"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-            >
-                <div className="relative w-full max-w-md">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                        <BiSearch className="w-5 h-5" />
-                    </div>
-                    <input
-                        type="text"
-                        className="w-full py-2 pl-10 pr-4 text-sm bg-primary dark:bg-primary-dark border border-border-primary dark:border-border-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        placeholder="Search resources, topics, etc."
-                    />
-                </div>
+            {/* Hamburger menu only for mobile */}
+            <motion.div className="lg:hidden">
+                <button onClick={() => setShowSidebar(prev => !prev)} className='p-1 cursor-pointer'>
+                    <FaHamburger className='text-xl' />
+                </button>
             </motion.div>
 
-            {/* User Profile Section with Notification */}
+            <div className='flex-1 lg:block w-full'>
+                <h1 className='text-center text-2xl font-bold'><span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>GATE</span>Quest</h1>
+            </div>
+
+            {/* Notification */}
             <motion.div
-                className="personal-details flex items-center"
+                className="personal-details flex items-end"
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
             >
                 <div className="relative" ref={notificationRef}>
                     <motion.div
-                        className="relative mr-6 cursor-pointer"
+                        className="relative cursor-pointer"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowNotifications(!showNotifications)}
@@ -82,27 +75,6 @@ const Navbar = () => {
                         />
                     </div>
 
-                </div>
-
-                <div className="flex items-center">
-                    <motion.div
-                        className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-0.5 mr-3"
-                        whileHover={{ scale: 1.05 }}
-                    >
-                        <img
-                            src={profile?.avatar}
-                            alt="User"
-                            className="w-full h-full object-cover rounded-full bg-white p-0.5"
-                        />
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7 }}
-                    >
-                        <h2 className='text-base font-medium text-inherit'>{profile?.name}</h2>
-                        <p className='text-xs text-gray-500 dark:text-gray-400'>GATE {profile?.targetYear} CS</p>
-                    </motion.div>
                 </div>
             </motion.div>
         </motion.div>

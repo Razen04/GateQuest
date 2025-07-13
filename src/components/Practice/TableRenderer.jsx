@@ -28,12 +28,12 @@ const TableRenderer = ({ tableText }) => {
     const dataRows = rows.slice(2) // Skip the separator row
 
     return (
-        <div className="overflow-x-auto my-4">
-            <table className="min-w-full border border-gray-200 rounded-lg">
+        <div className="overflow-x-auto my-4 w-full text-xs">
+            <table className="min-w-[400px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
                 <thead className="bg-gray-50">
                     <tr>
                         {headers.map((header, i) => (
-                            <th key={i} className="px-4 py-2 text-left text-sm font-medium text-gray-600 border-b">
+                            <th key={i} className="px-2 sm:px-4 py-2 text-left font-medium text-gray-600 border-b whitespace-nowrap">
                                 <MathRenderer text={header} />
                             </th>
                         ))}
@@ -43,7 +43,7 @@ const TableRenderer = ({ tableText }) => {
                     {dataRows.map((row, rowIndex) => (
                         <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                             {row.map((cell, cellIndex) => (
-                                <td key={cellIndex} className="px-4 py-2 text-sm text-gray-700 border-t">
+                                <td key={cellIndex} className="px-2 sm:px-4 py-2 text-gray-700 border-t whitespace-nowrap">
                                     <MathRenderer text={cell} />
                                 </td>
                             ))}

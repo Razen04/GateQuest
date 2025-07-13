@@ -3,28 +3,28 @@ import Prism from 'prismjs'
 
 const CodeBlockRenderer = ({ code, language }) => {
     const codeRef = useRef(null);
-    
+
     // Process the code input
     let processedCode = code;
     let codeLang = language || '';
-    
+
     // If the code includes triple backticks, extract them
     if (processedCode.startsWith('```')) {
         const firstLineEnd = processedCode.indexOf('\n');
         const firstLine = processedCode.substring(3, firstLineEnd).trim();
-        
+
         // Check if first line specifies a language
         if (firstLine && !firstLine.includes('```')) {
             codeLang = firstLine;
         }
-        
+
         // Find the end of the code block
         const lastBacktickPos = processedCode.lastIndexOf('```');
-        
+
         // Extract the actual code
         processedCode = processedCode.substring(firstLineEnd + 1, lastBacktickPos).trim();
     }
-    
+
     // Normalize the language name
     let langClass = 'language-text'; // default
     if (codeLang) {
@@ -45,14 +45,14 @@ const CodeBlockRenderer = ({ code, language }) => {
     }, [processedCode, codeLang]);
 
     return (
-        <div className="code-block rounded-md overflow-hidden my-3">
+        <div className="code-block text-[10px] md:text-lg rounded-md overflow-hidden my-3">
             {codeLang && (
-                <div className="code-header bg-gray-800 text-gray-300 text-xs font-mono px-4 py-1">
+                <div className="code-header bg-gray-800 text-gray-300 text-xs font-mono px-2 sm:px-4 py-1">
                     {codeLang}
                 </div>
             )}
-            <pre className={`${langClass} rounded-b-md text-sm overflow-auto`}>
-                <code ref={codeRef} className={langClass}>
+            <pre className={`${langClass} rounded-b-md text-xs sm:text-sm overflow-x-auto p-2 sm:p-4`}>
+                <code ref={codeRef} className={langClass} style={{ fontFamily: 'Courier New, Courier, monospace' }}>
                     {processedCode}
                 </code>
             </pre>
@@ -63,10 +63,6 @@ const CodeBlockRenderer = ({ code, language }) => {
                 }
                 pre {
                     margin: 0;
-                    padding: 1rem;
-                }
-                code {
-                    font-family: 'Courier New', Courier, monospace;
                 }
             `}</style>
         </div>

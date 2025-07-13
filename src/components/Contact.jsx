@@ -98,9 +98,9 @@ const Contact = () => {
                 >
                     <motion.div
                         variants={itemVariants}
-                        className="p-8 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark"
+                        className="p-4 sm:p-8 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark"
                     >
-                        <h2 className="text-xl font-semibold mb-6">Send us a message</h2>
+                        <h2 className="text-lg sm:text-xl font-semibold mb-6">Send us a message</h2>
 
                         {messageSent ? (
                             <motion.div
@@ -117,7 +117,7 @@ const Contact = () => {
                             </motion.div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     <ContactField label="Your Name" type="text" name="name" placeholder="Enter your name" formData={formData} handleInputChange={handleInputChange} />
                                     <ContactField label="Email Address" type="email" name="email" placeholder="Enter your email" formData={formData} handleInputChange={handleInputChange} />
                                 </div>
@@ -154,7 +154,7 @@ const Contact = () => {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className={`w-full text-white py-3 rounded-lg font-medium transition-all ${loading
+                                        className={`w-full text-white py-3 rounded-lg font-medium transition-all text-sm sm:text-base ${loading
                                             ? 'bg-gray-400 cursor-not-allowed'
                                             : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 cursor-pointer'
                                             }`}
@@ -175,29 +175,6 @@ const Contact = () => {
                     </motion.div>
                 </motion.div>
             </div>
-
-            {/* Bottom CTA */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-                className="mt-10"
-            >
-                <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-xl p-8 text-white">
-                    <div className="max-w-3xl mx-auto text-center">
-                        <h2 className="text-2xl font-bold mb-3">Join our Community</h2>
-                        <p className="mb-6 opacity-90">Connect with fellow GATE aspirants, share resources, and get your questions answered</p>
-                        <div className="flex flex-wrap justify-center gap-4">
-                            <button className="px-6 py-3 bg-white text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors cursor-pointer">
-                                Join Discord Community
-                            </button>
-                            <button className="px-6 py-3 bg-white/20 text-white backdrop-blur-sm rounded-lg text-sm font-medium hover:bg-white/30 transition-colors cursor-pointer">
-                                Follow on Social Media
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
         </div>
     )
 }

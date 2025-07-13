@@ -25,7 +25,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="p-8 bg-gray-50 min-h-[100dvh]">
             {/* Welcome Section */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
