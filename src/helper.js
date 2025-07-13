@@ -28,8 +28,5 @@ export const syncUserToSupabase = async () => {
     if(error) {
         console.error("Sync failed", error)
         toast.error("Profile update failed, try again later.")
-    } else {
-        toast.success("Profile updated successfully.")
     }
-
 }

@@ -36,14 +36,14 @@ const Practice = () => {
         },
         {
             id: 2,
-            name: "Computer Organisation & Archtecture",
+            name: "Computer Organisation & Architecture",
             icon: <FaComputer className="h-5 w-5" />,
             category: "core",
             color: "red"
         },
         {
             id: 2.1,
-            name: "Computer Organisation & Archtecture",
+            name: "Computer Organisation & Architecture",
             icon: <FaComputer className="h-5 w-5" />,
             category: "bookmarked",
             color: "yellow"
@@ -102,51 +102,67 @@ const Practice = () => {
                 </div>
             ) : (
                 // Subject selection interface
-                <div className="max-w-6xl">
-                    {/* Header */}
-                    <div className="mb-6">
-                        <h1 className="text-3xl font-bold ">Practice by <span className='
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-8"
+                >
+                    <div className="max-w-6xl">
+                        {/* Header */}
+                        <div className="mb-6">
+                            <h1 className="text-3xl font-bold ">Practice by <span className='
                             bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>Subject</span></h1>
-                        <p>Select a subject to start practicing</p>
-                    </div>
-
-                    {/* Filter Tabs */}
-                    <div className="mb-6">
-                        <div className="flex flex-wrap gap-2">
-                            <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                            <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                            <FilterTabs label="Mathematics" type="math" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                            <FilterTabs label="General Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                            <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                            <p>Select a subject to start practicing</p>
                         </div>
-                    </div>
 
-                    {/* Subject Grid - Simplified */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredSubjects.map((subject) => (
-                            <div
-                                key={subject.id}
-                                className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
-                            >
-                                <div className="p-4">
-                                    <div className="flex items-center mb-4">
-                                        <div className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}>
-                                            {subject.icon}
-                                        </div>
-                                        <h3 className="font-medium">{subject.name}</h3>
-                                    </div>
-
-                                    <button
-                                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
-                                        onClick={() => handleSubjectSelect(subject.id)}
-                                    >
-                                        Practice
-                                    </button>
-                                </div>
+                        {/* Filter Tabs */}
+                        <div className="mb-6">
+                            <div className="flex flex-wrap gap-2">
+                                <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                                <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                                <FilterTabs label="Mathematics" type="math" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                                <FilterTabs label="General Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                                <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             </div>
-                        ))}
+                        </div>
+
+                        <motion.div
+                                initial={{ opacity: 0, y: 40 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                className="mb-8"
+                        >
+                                {/* Subject Grid - Simplified */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {filteredSubjects.map((subject) => (
+                                        <div
+                                            key={subject.id}
+                                            className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
+                                        >
+                                            <div className="p-4">
+                                                <div className="flex items-center mb-4">
+                                                    <div className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}>
+                                                        {subject.icon}
+                                                    </div>
+                                                    <h3 className="font-medium">{subject.name}</h3>
+                                                </div>
+
+                                                <button
+                                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                                                    onClick={() => handleSubjectSelect(subject.id)}
+                                                >
+                                                    Practice
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                        </motion.div>
+                        
                     </div>
-                </div>
+                </motion.div>
+
             )}
         </div>
     )

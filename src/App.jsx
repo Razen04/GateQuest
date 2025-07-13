@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './components/Dashboard'
@@ -10,6 +10,9 @@ import AppProvider from './context/AppProvider'
 import AuthProvider from './context/AuthProvider'
 
 function App() {
+
+  
+
   return (
     <AuthProvider>
       <AppProvider>
@@ -19,7 +22,6 @@ function App() {
               <Route path="/" element={<Layout />}>
                 <Route index element={<Dashboard />} />
                 <Route path="practice" element={<Practice />} />
-                <Route path="resources" element={<div className="p-8">Resources Content (Coming Soon)</div>} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
