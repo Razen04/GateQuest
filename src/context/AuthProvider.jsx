@@ -41,8 +41,6 @@ const AuthProvider = ({ children }) => {
                     }
                 }).select();
 
-
-                console.log(data)
                 const profile = {
                     ...data[0],
                     bookmark_questions: data[0].bookmark_questions || [],

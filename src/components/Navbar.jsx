@@ -1,18 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import reactLogo from '../assets/react.svg'
 import { BiBell, BiSearch, BiSolidBell } from 'react-icons/bi'
-import Notification, { getUnreadCount } from './Notification'
+import Notification from './Notification'
 import { getUserProfile } from '../helper'
 
 const Navbar = () => {
     const [showSearchInput, setShowSearchInput] = useState(false)
     const [showNotifications, setShowNotifications] = useState(false)
+    const [unreadNotifications, setUnreadNotifications] = useState(false)
     const notificationRef = useRef(null)
 
     const profile = getUserProfile();
-
-    const unreadCount = getUnreadCount()
 
     // Handle click outside notification panel to close it
     useEffect(() => {
@@ -70,7 +68,7 @@ const Navbar = () => {
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
                         {showNotifications ? (<BiSolidBell className="w-6 h-6" />) : (<BiBell className="w-6 h-6" />)}
-                        {unreadCount > 0 && (
+                        {unreadNotifications && (
                             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         )}
                     </motion.div>
@@ -80,6 +78,7 @@ const Navbar = () => {
                         <Notification
                             isOpen={showNotifications}
                             onClose={() => setShowNotifications(false)}
+                            setUnreadNotifications={setUnreadNotifications}
                         />
                     </div>
 

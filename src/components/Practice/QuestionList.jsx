@@ -28,7 +28,6 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         // Get unique years and sort descending
         const uniqueYears = [...new Set(allYears)].sort((a, b) => b - a);
-        console.log("Unique Years: ", uniqueYears)
 
         setYears(uniqueYears);
     }
@@ -103,7 +102,6 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
             if (activeFilter === "bookmarked") {
                 // ✅ Client-side filtering
                 let filtered = [...questions];
-                console.log("filtered: ", filtered)
 
                 if (searchQuery.trim()) {
                     const q = searchQuery.trim().toLowerCase();
@@ -126,7 +124,6 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                 const fetchFilteredQuestions = async () => {
                     try {
                         const queryParams = new URLSearchParams();
-                        console.log("subject: ", subject)
                         if (subject) queryParams.append("subject", subject);
                         if (searchQuery.trim()) queryParams.append("search", searchQuery.trim().toLowerCase());
                         if (difficultyFilter !== 'all') queryParams.append("difficulty", difficultyFilter);
