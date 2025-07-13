@@ -4,16 +4,20 @@ import { FaArrowLeft, FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa'
 import MathRenderer from './MathRenderer'
 import QuestionCard from './QuestionCard/QuestionCard'
 import axios from 'axios'
+import { getUserProfile } from '../../helper'
+import { toast } from 'sonner'
 
-const QuestionsList = ({ subject, onBack }) => {
+const QuestionsList = ({ subject, activeFilter, onBack }) => {
     const [questions, setQuestions] = useState([])
     const [filteredQuestions, setFilteredQuestions] = useState([])
     const [selectedQuestion, setSelectedQuestion] = useState(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [difficultyFilter, setDifficultyFilter] = useState('all')
     const [yearFilter, setYearFilter] = useState('all')
+    const [topicFilter, setTopicFilter] = useState('')
     const [showFilters, setShowFilters] = useState(false)
     const [years, setYears] = useState([])
+    const [topics, setTopics] = useState([])
     const [errorMessage, setErrorMessage] = useState('No questions match your criteria. Try adjusting your filters.')
 
     const getYears = (questions) => {
@@ -28,32 +32,57 @@ const QuestionsList = ({ subject, onBack }) => {
 
         setYears(uniqueYears);
     }
-    
+
+    const getTopics = (questions) => {
+        const allTopics = questions.map(q => q.topic)
+        const uniqueTopics = [...new Set(allTopics)]
+        setTopics(uniqueTopics)
+    }
+
 
     useEffect(() => {
         getYears(filteredQuestions)
+        getTopics(filteredQuestions)
     }, [filteredQuestions, subject])
 
-    // Load questions based on subject 
     useEffect(() => {
-        const fetchQuestions = async () => {
-            try {
-                const res = await axios.get(`http://localhost:5000/api/questions?subject=${subject}`)
-                let loadedQuestions = res.data;
+        if (!subject || !activeFilter) return; // wait until both are defined
 
-                // Sort questions by year (newest first)
-                loadedQuestions = sortQuestionsByYear(loadedQuestions);
+        const profile = getUserProfile();
 
-                setQuestions(loadedQuestions)
-                setFilteredQuestions(loadedQuestions)
-            } catch (err) {
-                setErrorMessage("Unable to fetch questions, try again later")
-                console.error("Unable to fetch questions, try again later", err);
+        const fetchBookmarkedQuestions = async (ids) => {
+            const joinedIds = ids.join(",");
+            const res = await axios.get(`http://localhost:5000/api/questions/bookmarked?ids=${joinedIds}`);
+            let loadedQuestions = res.data;
+            loadedQuestions = sortQuestionsByYear(loadedQuestions);
+            setQuestions(loadedQuestions);
+            setFilteredQuestions(loadedQuestions);
+        };
+
+        if (activeFilter === "bookmarked") {
+            const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
+
+            if (bookmarkedQuestions.length > 0) {
+                const ids = bookmarkedQuestions.map(q => q.id);
+                fetchBookmarkedQuestions(ids);
+            } else {
+                setQuestions([]);
+                setFilteredQuestions([]);
+                toast.message("No questions bookmarked yet.");
             }
+
+        } else {
+            const fetchAllQuestions = async () => {
+                const res = await axios.get(`http://localhost:5000/api/questions?subject=${subject}`);
+                let loadedQuestions = res.data;
+                loadedQuestions = sortQuestionsByYear(loadedQuestions);
+                setQuestions(loadedQuestions);
+                setFilteredQuestions(loadedQuestions);
+            };
+            fetchAllQuestions();
         }
 
-        fetchQuestions();
-    }, [subject]);
+    }, [subject, activeFilter]);
 
     // Add this helper function above the useEffect
     const sortQuestionsByYear = (questionsToSort) => {
@@ -61,7 +90,7 @@ const QuestionsList = ({ subject, onBack }) => {
             // Convert year to number (default to 0 if year is not present)
             const yearA = a.year ? parseInt(a.year) : 0;
             const yearB = b.year ? parseInt(b.year) : 0;
-            
+
             // Sort descending (newest first)
             return yearB - yearA;
         });
@@ -69,32 +98,58 @@ const QuestionsList = ({ subject, onBack }) => {
 
     // Apply filters when filter state changes
     useEffect(() => {
+
         const debounceTimer = setTimeout(() => {
-            const fetchFilteredQuestions = async () => {
-                try {
-                    const queryParams = new URLSearchParams();
-                    if (subject) queryParams.append("subject", subject);
-                    if (searchQuery.trim()) queryParams.append("search", searchQuery.trim().toLowerCase());
-                    if (difficultyFilter !== 'all') queryParams.append("difficulty", difficultyFilter);
-                    if (yearFilter !== 'all') queryParams.append("year", yearFilter);
+            if (activeFilter === "bookmarked") {
+                // ✅ Client-side filtering
+                let filtered = [...questions];
+                console.log("filtered: ", filtered)
 
-                    const res = await axios.get(`http://localhost:5000/api/questions?${queryParams.toString()}`);
-                    
-                    // Sort filtered questions by year
-                    const sortedFilteredQuestions = sortQuestionsByYear(res.data);
-                    setFilteredQuestions(sortedFilteredQuestions);
-                } catch (err) {
-                    setErrorMessage("Error fetching filtered questions.")
-                    console.error("Error fetching filtered questions:", err);
+                if (searchQuery.trim()) {
+                    const q = searchQuery.trim().toLowerCase();
+                    filtered = filtered.filter(qn =>
+                        qn.question?.toLowerCase().includes(q) ||
+                        qn.tags?.some(tag => tag.toLowerCase().includes(q))
+                    );
                 }
-            };
 
-            fetchFilteredQuestions();
+                if (difficultyFilter !== 'all') {
+                    filtered = filtered.filter(qn => qn.difficulty === difficultyFilter);
+                }
+
+                if (yearFilter !== 'all') {
+                    filtered = filtered.filter(qn => qn.year?.toString() === yearFilter);
+                }
+
+                setFilteredQuestions(filtered);
+            } else {
+                const fetchFilteredQuestions = async () => {
+                    try {
+                        const queryParams = new URLSearchParams();
+                        console.log("subject: ", subject)
+                        if (subject) queryParams.append("subject", subject);
+                        if (searchQuery.trim()) queryParams.append("search", searchQuery.trim().toLowerCase());
+                        if (difficultyFilter !== 'all') queryParams.append("difficulty", difficultyFilter);
+                        if (yearFilter !== 'all') queryParams.append("year", yearFilter);
+                        if (topicFilter.trim()) queryParams.append("topic", topicFilter)
+
+                        const res = await axios.get(`http://localhost:5000/api/questions?${queryParams.toString()}`);
+
+                        // Sort filtered questions by year
+                        const sortedFilteredQuestions = sortQuestionsByYear(res.data);
+                        setFilteredQuestions(sortedFilteredQuestions);
+                    } catch (err) {
+                        setErrorMessage("Error fetching filtered questions.")
+                        console.error("Error fetching filtered questions:", err);
+                    }
+                };
+                fetchFilteredQuestions();
+            }
         }, 300); // debounce delay
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery, difficultyFilter, yearFilter, subject]);
-    
+    }, [searchQuery, difficultyFilter, yearFilter, subject, activeFilter, questions, topicFilter]);
+
 
     // Get difficulty class names
     const getDifficultyClassNames = (difficulty) => {
@@ -154,7 +209,7 @@ const QuestionsList = ({ subject, onBack }) => {
                     <div className="flex items-center mb-6">
                         <button
                             onClick={() => setSelectedQuestion(null)}
-                            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                            className="flex items-center hover:text-blue-500 transition-colors cursor-pointer"
                         >
                             <FaArrowLeft className="mr-2" />
                             <span>Back to Questions</span>
@@ -175,7 +230,7 @@ const QuestionsList = ({ subject, onBack }) => {
                     <div className="flex flex-wrap items-center justify-between mb-6">
                         <button
                             onClick={onBack}
-                            className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+                            className="flex items-center hover:text-blue-500 transition-colors cursor-pointer"
                         >
                             <FaArrowLeft className="mr-2" />
                             <span>Back to Subjects</span>
@@ -189,14 +244,14 @@ const QuestionsList = ({ subject, onBack }) => {
                     </div>
 
                     {/* Search and filters */}
-                    <div className="bg-white rounded-xl p-4 mb-6 border border-gray-100">
+                    <div className="brounded-xl p-4 mb-6 border border-border-primary dark:border-border-primary-dark">
                         <div className="flex flex-col md:flex-row gap-4">
                             <div className="flex-1 relative">
                                 <FaSearch className="absolute left-3 top-3 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Search questions..."
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-4 py-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
@@ -204,7 +259,7 @@ const QuestionsList = ({ subject, onBack }) => {
 
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                className="flex items-center px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                             >
                                 <FaFilter className="mr-2" />
                                 <span>Filter</span>
@@ -218,13 +273,13 @@ const QuestionsList = ({ subject, onBack }) => {
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    className="mt-4 pt-4 border-t border-gray-100 overflow-hidden"
+                                    className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden"
                                 >
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                                            <label className="block text-sm font-medium mb-2">Difficulty</label>
                                             <select
-                                                className="w-full p-2 border border-gray-200 rounded-lg"
+                                                className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
                                                 value={difficultyFilter}
                                                 onChange={(e) => setDifficultyFilter(e.target.value)}
                                             >
@@ -235,15 +290,28 @@ const QuestionsList = ({ subject, onBack }) => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                                            <label className="block text-sm font-medium mb-2">Year</label>
                                             <select
-                                                className="w-full p-2 border border-gray-200 rounded-lg"
+                                                className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
                                                 value={yearFilter}
                                                 onChange={(e) => setYearFilter(e.target.value)}
                                             >
                                                 <option value="all">All Years</option>
                                                 {years.map((year) => (
                                                     <option key={year} value={year}>{year}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Topic</label>
+                                            <select
+                                                className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                                value={topicFilter}
+                                                onChange={(e) => setTopicFilter(e.target.value)}
+                                            >
+                                                <option value="all">All Topics</option>
+                                                {topics.map((topic) => (
+                                                    <option key={topic} value={topic}>{topic}</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -254,51 +322,51 @@ const QuestionsList = ({ subject, onBack }) => {
                     </div>
 
                     {/* Questions List */}
-                        <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
-                            <div className="p-4 bg-gray-50 border-b border-gray-100">
-                                <h2 className="font-semibold text-blue-800 text-xl">
-                                    {subject} Questions
-                                </h2>
-                            </div>
-
-                            {filteredQuestions.length > 0 ? (
-                                <div className="divide-y divide-gray-100">
-                                    {filteredQuestions.map((question, index) =>(
-                                        <motion.div
-                                            key={index}
-                                            whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
-                                            className="p-4 cursor-pointer transition-colors"
-                                            onClick={() => handleQuestionClick(question.id)}
-                                        >
-                                            <div className="flex justify-between">
-                                                <h3 className="font-medium text-gray-800 mb-2 pr-4">
-                                                    {getQuestionDisplayText(question)}
-                                                </h3>
-                                                <div className="flex space-x-2">
-                                                    <span className={`h-min text-xs px-2 py-1 rounded-full whitespace-nowrap ${getDifficultyClassNames(question.difficulty)}`}>
-                                                        {question.difficulty}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center text-xs text-gray-500">
-                                                {question.year ? (
-                                                    <span>GATE {question.year}</span>
-                                                ) : (
-                                                    <span>Year Unknown</span>
-                                                )}
-                                                <span className="mx-2">•</span>
-                                                <span>ID: {question.id || 'Unknown'}</span>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="p-8 text-center text-gray-500">
-                                    {errorMessage}
-                                </div>
-                            )}
+                    <div className="rounded-xl overflow-hidden border border-border-primary dark:border-border-primary-dark">
+                        <div className="p-4 border-b border-border-primary dark:border-border-primary-dark">
+                            <h2 className="font-semibold text-blue-500 text-xl">
+                                {subject} Questions
+                            </h2>
                         </div>
-                    </motion.div>
+
+                        {filteredQuestions.length > 0 ? (
+                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                                {filteredQuestions.map((question, index) => (
+                                    <motion.div
+                                        key={index}
+                                        whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
+                                        className="p-4 cursor-pointer transition-colors duration-50"
+                                        onClick={() => handleQuestionClick(question.id)}
+                                    >
+                                        <div className="flex justify-between">
+                                            <h3 className="font-medium  mb-2 pr-4">
+                                                {getQuestionDisplayText(question)}
+                                            </h3>
+                                            <div className="flex space-x-2">
+                                                <span className={`h-min text-xs px-2 py-1 rounded-full whitespace-nowrap ${getDifficultyClassNames(question.difficulty)}`}>
+                                                    {question.difficulty}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-xs">
+                                            {question.year ? (
+                                                <span>GATE {question.year}</span>
+                                            ) : (
+                                                <span>Year Unknown</span>
+                                            )}
+                                            <span className="mx-2">•</span>
+                                            <span>ID: {question.id || 'Unknown'}</span>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-8 text-center">
+                                {errorMessage}
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
             )}
         </AnimatePresence>
     )

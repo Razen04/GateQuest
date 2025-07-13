@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
@@ -7,12 +7,16 @@ import {
     FaBookOpen,
     FaCog,
     FaHeadset,
-    FaGraduationCap
+    FaGraduationCap,
+    FaDiscord
 } from 'react-icons/fa'
+import { FaGithub, FaReddit } from 'react-icons/fa6'
+import { ThemeContext } from '../context/ThemeContext'
 
 const Sidebar = () => {
     const navigate = useNavigate()
     const location = useLocation()
+    const { dark } = useContext(ThemeContext)
 
     // Determine active tab based on current path
     const getActiveTab = () => {
@@ -41,14 +45,14 @@ const Sidebar = () => {
 
     return (
         <motion.div
-            className='w-64 h-lvh border-r border-gray-200 bg-gradient-to-b from-gray-50 to-white shadow-lg'
+            className='w-64 h-lvh border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-lg transition-colors duration-1000'
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
         >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full bg-primary dark:bg-primary-dark">
                 {/* Branding */}
-                <div className='flex items-center justify-center py-8 border-b border-gray-100'>
+                <div className='flex items-center justify-center py-8 border-b border-border-primary dark:border-border-primary-dark transition-colors duration-1000'>
                     <motion.div
                         className="text-3xl text-blue-600"
                         initial={{ scale: 0.1 }}
@@ -78,26 +82,26 @@ const Sidebar = () => {
                                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                                 onClick={() => handleTabClick(tab.id, tab.path)}
                                 className={`relative flex items-center px-4 py-3 my-2 rounded-xl cursor-pointer group transition-all duration-300 ${activeTab === tab.id
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
-                                        : 'hover:bg-gray-100'
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
+                                    : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
                                     }`}
                             >
                                 <div className={`p-2 rounded-lg ${activeTab === tab.id
-                                        ? 'bg-white/20'
-                                        : 'bg-gray-100 group-hover:bg-gray-200'
+                                    ? 'bg-white/20'
+                                    : 'bg-gray-100 group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-700'
                                     }`}>
                                     <span
                                         className={`text-lg transition-transform duration-300 group-hover:scale-110 ${activeTab === tab.id
-                                                ? 'text-white'
-                                                : 'text-gray-700'
+                                            ? 'text-white'
+                                            : 'text-text-primary dark:text-text-primary-dark'
                                             }`}
                                     >
                                         {tab.icon}
                                     </span>
                                 </div>
                                 <span className={`ml-3 text-base transition-all duration-300 ${activeTab === tab.id
-                                        ? 'font-bold'
-                                        : 'text-gray-700 group-hover:text-gray-900'
+                                    ? 'font-bold'
+                                    : 'text-gray-700 group-hover:text-gray-900 dark:text-gray-200 dark:group-hover:text-gray-200'
                                     }`}>
                                     {tab.name}
                                 </span>
@@ -119,13 +123,15 @@ const Sidebar = () => {
 
                 {/* Footer */}
                 <motion.div
-                    className="p-4 mt-auto border-t border-gray-100"
+                    className="p-4 mt-auto border-t border-border-primary dark:border-border-primary-dark"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.6 }}
                 >
-                    <div className="px-4 py-2 text-xs text-center text-gray-500">
-                        © 2025 GateQuest
+                    <div className="px-2 py-2 text-xs text-center text-gray-500 flex justify-around items-center">
+                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><FaGithub /></span>
+                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><FaDiscord /></span>
+                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 hover:scale-150 transition-all hover:text-xl cursor-pointer'><FaReddit /></span>
                     </div>
                 </motion.div>
             </div>

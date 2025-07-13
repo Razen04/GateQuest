@@ -3,7 +3,6 @@ import { FaEye, FaCheck, FaTimes } from 'react-icons/fa'
 import MathRenderer from '../MathRenderer'
 
 const ResultMessage = ({ showAnswer, result, getCorrectAnswerText }) => {
-    console.log("Result: ", result)
     return (
         <AnimatePresence>
             {showAnswer && (
@@ -26,7 +25,7 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText }) => {
                     ) : result === 'incorrect' ? (
                         <div className="flex items-center">
                             <FaTimes className="mr-2 w-5 h-5" />
-                                <div><span className="font-semibold">Incorrect. The correct answer is:</span> <MathRenderer text={getCorrectAnswerText()} /></div>
+                                <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText()} /></span></div>
                         </div>
                     ) : (
                         <div className="flex items-center">

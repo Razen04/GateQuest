@@ -1,17 +1,31 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaCheck, FaTimes, FaTag } from 'react-icons/fa'
 import MathRenderer from '../MathRenderer'
 import ActionButtons from './ActionButtons'
 import ResultMessage from './ResultMessage'
+import QuestionTimer from './QuestionTimer'
+import AppSettingContext from '../../../context/AppSettingContext'
+import { toast } from 'sonner'
+import QuestionBookmark from './QuestionBookmark'
+import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../../helper'
 
 const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     const [currentIndex, setCurrentIndex] = useState(questionId)
     const [userAnswer, setUserAnswer] = useState(null)
     const [selectedOptions, setSelectedOptions] = useState([]) // For multiple selections
-    const [numericalAnswer, setNumericalAnswer] = useState(null) // For numerical input
+    const [numericalAnswer, setNumericalAnswer] = useState(null)
+    const [questionLink, setQuestionLink] = useState("");
+    const numInputRef = useRef(null);
     const [showAnswer, setShowAnswer] = useState(false)
     const [result, setResult] = useState(null) // correct, incorrect, or null
+    const [timer, setTimer] = useState(false)
+    const [timerVal, setTimerVal] = useState(0)
+    const intervalRef = useRef(null);
+
+    const { settings } = useContext(AppSettingContext)
+
+
 
     // Load questions based on subject and chapter
     useEffect(() => {
@@ -21,6 +35,135 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }, [subject, questionId])
 
     const currentQuestion = questions.find(q => q.id === currentIndex) || questions[0]
+
+    // Set question link after every question
+    useEffect(() => {
+        console.log(currentQuestion)
+        console.log(currentQuestion.explanation)
+        setQuestionLink(currentQuestion.explanation)
+    }, [currentQuestion])
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyStroke = (e) => {
+            if (
+                e.target.tagName === "INPUT" ||
+                e.target.tagName === "TEXTAREA" ||
+                e.metaKey ||
+                e.ctrlKey ||
+                e.altKey
+            ) return;
+
+            switch (e.code) {
+                case "KeyA":
+                    e.preventDefault();
+                    handlePrevious();
+                    break;
+                case "KeyD":
+                    e.preventDefault();
+                    handleNext();
+                    break;
+                case "Enter":
+                    e.preventDefault()
+                    handleShowAnswer()
+                    break;
+                case "KeyS":
+                    e.preventDefault();
+                    handleSkip();
+                    break;
+                case "KeyE":
+                    e.preventDefault();
+                    handleExplainationClick(questionLink);
+
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyStroke);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyStroke);
+        };
+    }, [currentQuestion]);
+
+    // Timer
+    const handleTimer = () => {
+        if (intervalRef.current !== null) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+            setTimer(false);
+            setTimerVal(0);
+        } else {
+            setTimerVal(0);
+            setTimer(true);
+            intervalRef.current = setInterval(() => {
+                setTimerVal(prev => prev + 1);
+            }, 1000);
+        }
+    };
+
+    useEffect(() => {
+        // Cleanup on unmount
+        return () => {
+            if (intervalRef.current !== null) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            setTimerVal(0);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Always clear previous interval before starting a new one
+        if (intervalRef.current !== null) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (!settings?.autoTimer) {
+            setTimer(false);
+            setTimerVal(0);
+        } else {
+            setTimerVal(0);
+            setTimer(true);
+            intervalRef.current = setInterval(() => {
+                setTimerVal(prev => prev + 1);
+            }, 1000);
+        }
+        // Cleanup on question change
+        return () => {
+            if (intervalRef.current !== null) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [currentQuestion, settings?.autoTimer]);
+
+    const minutes = String(Math.floor(timerVal / 60)).padStart(2, "0");
+    const seconds = String(timerVal % 60).padStart(2, "0")
+
+
+    // Handle bookmark
+    const handleBookmark = () => {
+        const profile = getUserProfile();
+
+        if (profile) {
+            const oldBookmark = profile.bookmark_questions || []
+
+            const bookmark_questions = [
+                ...oldBookmark,
+                { id: questionId, subject: subject }
+            ]
+
+            const updatedProfile = { ...profile, bookmark_questions }
+            console.log("User Profile: ", updatedProfile)
+            updateUserProfile(updatedProfile)
+            syncUserToSupabase()
+        } else {
+            toast.error("Unable to bookmark, try again later.")
+        }
+    }
 
     // Determine if current question is a multiple selection question
     const isMultipleSelection = () => {
@@ -66,6 +209,11 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         } else {
             // For single selection questions
             setUserAnswer(option);
+            setSelectedOptions([...selectedOptions, option])
+            if (option === userAnswer) {
+                setUserAnswer(null);
+                setSelectedOptions([]);
+            }
         }
     }
 
@@ -84,19 +232,53 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }
 
     // Handle show answer
-    const handleShowAnswer = () => {
+    const handleShowAnswer = (overrideAnswer) => {
         setShowAnswer(true);
+        setTimer(false);
+        if (intervalRef.current !== null) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+            document.activeElement.blur();
+        }
+
 
         try {
             if (isNumericalQuestion()) {
                 // Handle numerical answer checking
-                const userNumericValue = parseFloat(numericalAnswer);
+                console.log("🔥 overrideAnswer:", overrideAnswer);
+                console.log("📦 numericalAnswer (state):", numericalAnswer);
+                const raw = overrideAnswer !== undefined
+                    ? overrideAnswer.toString().trim()
+                    : numericalAnswer.toString().trim();
+
+                const answerToCheck = parseFloat(raw);
+                console.log("🔍 Parsed Answer:", answerToCheck);
+
+                console.log("📦 currentQuestion.correctAnswer:", currentQuestion?.correctAnswer);
+                console.log("✅ parsed value:", parseFloat(overrideAnswer ?? numericalAnswer));
+                console.log("✅ typeof overrideAnswer:", typeof overrideAnswer);
+
+                if (isNaN(answerToCheck)) {
+                    toast.error("You haven't entered a valid number.");
+                    setResult("unattempted");
+                    return;
+                }
+
+                const userNumericValue = answerToCheck;
                 const correctNumericValue = parseFloat(currentQuestion?.correctAnswer);
 
 
                 if (!isNaN(userNumericValue) && !isNaN(correctNumericValue)) {
-                    setResult(userNumericValue === correctNumericValue);
+                    if (userNumericValue === correctNumericValue) {
+                        setResult('correct');
+                    } else {
+                        setResult('incorrect')
+                    }
+
                 } else {
+                    console.log('unattempted')
                     setResult('unattempted');
                 }
 
@@ -192,6 +374,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
 
     // Reset question state
     const resetQuestion = () => {
+        setTimer(false);
         setUserAnswer(null);
         setSelectedOptions([]);
         setNumericalAnswer('');
@@ -222,22 +405,22 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }
 
     // Move to next question
-    const handleNext = () => {
+    const handleNext = useCallback(() => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition < questions.length - 1) {
             setCurrentIndex(questions[currentPosition + 1].id);
             resetQuestion();
         }
-    }
+    })
 
     // Move to previous question
-    const handlePrevious = () => {
+    const handlePrevious = useCallback(() => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition > 0) {
             setCurrentIndex(questions[currentPosition - 1].id);
             resetQuestion();
         }
-    }
+    })
 
     // Skip current question
     const handleSkip = () => {
@@ -294,18 +477,20 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
 
     return (
         <motion.div
-            className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+            className="max-w-3xl mx-auto rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
             {/* Question Header */}
-            <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100">
+            <div className="px-6 py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
                 <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-gray-800">
+                    <h3 className="font-bold">
                         Question {questions.findIndex(q => q.id === currentIndex) + 1} of {questions.length}
                     </h3>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3 items-center">
+                        <QuestionBookmark handleBookmark={handleBookmark} />
+                        <QuestionTimer timer={timer} handleTimer={handleTimer} minutes={minutes} seconds={seconds} />
                         <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyClassNames()}`}>
                             {getDifficultyDisplayText()}
                         </span>
@@ -342,11 +527,11 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             {/* Question Content */}
             <div className="p-6">
                 <div className="mb-6">
-                    <div className="text-gray-800 text-lg">
+                    <div className="text-lg">
                         {currentQuestion.question ? (
                             <MathRenderer text={currentQuestion.question} />
                         ) : (
-                            <span className="text-gray-500">Question content unavailable</span>
+                            <span>Question content unavailable</span>
                         )}
                     </div>
                 </div>
@@ -360,19 +545,19 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                                 whileHover={{ scale: 1.01 }}
                                 whileTap={{ scale: 0.99 }}
                                 className={`p-4 border rounded-lg cursor-pointer transition-all 
-                                    ${isOptionSelected(option) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}
+                                    ${isOptionSelected(option) ? 'border-blue-500 bg-blue-50 dark:bg-blue-600' : 'border-gray-200 dark:border-zinc-700 hover:border-blue-200'}
                                     ${showAnswer && currentQuestion.correctAnswer && (
                                         (Array.isArray(currentQuestion.correctAnswer) &&
                                             currentQuestion.correctAnswer.includes(index)) ||
                                         option === currentQuestion.correctAnswer
                                     )
-                                        ? 'border-green-500 bg-green-50'
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-600'
                                         : showAnswer && isOptionSelected(option) && currentQuestion.correctAnswer && (
                                             (Array.isArray(currentQuestion.correctAnswer) &&
                                                 !currentQuestion.correctAnswer.includes(index)) ||
                                             option !== currentQuestion.correctAnswer
                                         )
-                                            ? 'border-red-500 bg-red-50'
+                                            ? 'border-red-500 bg-red-50 dark:bg-red-600'
                                             : ''
                                     }
                                 `}
@@ -384,11 +569,11 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                                         <div className={`w-5 h-5 border rounded flex items-center justify-center mr-3 
                                             ${isOptionSelected(option)
                                                 ? 'border-blue-500 bg-blue-500'
-                                                : 'border-gray-300'
+                                                : 'border-gray-300 dark:border-gray-700'
                                             }`}
                                         >
                                             {isOptionSelected(option) && (
-                                                <FaCheck className="text-white text-xs" />
+                                                <FaCheck className="text-xs" />
                                             )}
                                         </div>
                                     ) : (
@@ -396,7 +581,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 
                                             ${userAnswer === option
                                                 ? 'border-blue-500 bg-blue-500'
-                                                : 'border-gray-300'
+                                                : 'border-gray-300 dark:border-gray-700'
                                             }`}
                                         >
                                             {userAnswer === option && (
@@ -405,28 +590,9 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                                         </div>
                                     )}
 
-                                    <div className="text-gray-700 flex-1">
+                                    <div className="flex-1">
                                         {option ? <MathRenderer text={option} /> : 'Option unavailable'}
                                     </div>
-
-                                    {showAnswer && (
-                                        <>
-                                            {/* Show check mark for correct answers */}
-                                            {((Array.isArray(currentQuestion.correctAnswer) &&
-                                                currentQuestion.correctAnswer.includes(index)) ||
-                                                option === currentQuestion.correctAnswer) && (
-                                                    <FaCheck className="ml-auto text-green-500" />
-                                                )}
-
-                                            {/* Show cross mark ONLY for incorrect answers that were selected */}
-                                            {isOptionSelected(option) &&
-                                                !((Array.isArray(currentQuestion.correctAnswer) &&
-                                                    currentQuestion.correctAnswer.includes(index)) ||
-                                                    option === currentQuestion.correctAnswer) && (
-                                                    <FaTimes className="ml-auto text-red-500" />
-                                                )}
-                                        </>
-                                    )}
                                 </div>
                             </motion.div>
                         ))}
@@ -436,19 +602,27 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                 {/* Numerical Answer Input */}
                 {isNumericalQuestion() && (
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium mb-2">
                             Enter your numerical answer:
                         </label>
                         <input
+                            ref={numInputRef}
                             type="text"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full p-3 border border-border-primary dark:border-border-primary-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={numericalAnswer}
-                            onChange={handleNumericalInputChange}
+                            onChange={(e) => handleNumericalInputChange(e)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault();
+
+                                    handleShowAnswer(numInputRef.current.value)
+                                }
+                            }}
                             placeholder="Enter your answer"
                             disabled={showAnswer}
                         />
                         {showAnswer && (numericalAnswer === getCorrectAnswerText()) && (
-                            <p className="mt-2 text-sm text-gray-600">
+                            <p className="mt-2 text-sm">
                                 Correct answer: {getCorrectAnswerText()}
                             </p>
                         )}
@@ -456,14 +630,18 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                 )}
 
                 {/* Result Message */}
-                <ResultMessage
-                    showAnswer={showAnswer}
-                    result={result}
-                    getCorrectAnswerText={getCorrectAnswerText}
-                />
+                {showAnswer && (
+                    <ResultMessage
+                        showAnswer={showAnswer}
+                        result={result}
+                        getCorrectAnswerText={getCorrectAnswerText}
+                    />
+                )}
+
 
                 {/* Action Buttons */}
                 <ActionButtons
+                    selectedOptions={selectedOptions}
                     isFirstQuestion={isFirstQuestion}
                     isLastQuestion={isLastQuestion}
                     handleNext={handleNext}
@@ -479,9 +657,9 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             </div>
 
             {/* Question ID Badge and Tags */}
-            <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
+            <div className="px-6 py-3 border-t border-border-primary dark:border-border-primary-dark">
                 <div className="flex flex-wrap items-center justify-between">
-                    <div className="flex items-center text-xs text-gray-500 mb-2 sm:mb-0">
+                    <div className="flex items-center text-xs mb-2 sm:mb-0">
                         <span className="mr-4">ID: {currentQuestion.id || 'Unknown'}</span>
                         <span>Subject: {subject.toUpperCase()}</span>
                     </div>
@@ -489,13 +667,13 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                     {/* Tags display */}
                     {currentQuestion.tags && Array.isArray(currentQuestion.tags) && currentQuestion.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2">
-                            <span className="text-xs text-gray-500 flex items-center">
+                            <span className="text-xs flex items-center">
                                 <FaTag className="mr-1" /> Tags:
                             </span>
                             {currentQuestion.tags.map((tag, index) => (
                                 <span
                                     key={index}
-                                    className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full"
+                                    className="text-xs px-2 py-1 rounded-full"
                                 >
                                     {tag}
                                 </span>

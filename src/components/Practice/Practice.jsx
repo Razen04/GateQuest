@@ -6,6 +6,20 @@ import {
 import QuestionsList from './QuestionList'
 import { FaComputer } from 'react-icons/fa6'
 
+const FilterTabs = ({ label, type, activeFilter, setActiveFilter }) => {
+    return (
+        <button
+            className={`px-4 py-2 cursor-pointer transition-all duration-300 hover:bg-blue-500 rounded-lg text-sm font-medium ${activeFilter === type
+                ? 'bg-blue-600 text-white'
+                : 'border border-border-primary dark:border-border-primary-dark'
+                }`}
+            onClick={() => setActiveFilter(type)}
+        >
+            {label}
+        </button>
+    )
+}
+
 const Practice = () => {
     const [activeFilter, setActiveFilter] = useState('all')
     const [selectedSubject, setSelectedSubject] = useState(null)
@@ -27,11 +41,18 @@ const Practice = () => {
             category: "core",
             color: "red"
         },
+        {
+            id: 2.1,
+            name: "Computer Organisation & Archtecture",
+            icon: <FaComputer className="h-5 w-5" />,
+            category: "bookmarked",
+            color: "yellow"
+        },
     ]
 
     // Filter subjects based on active filter
     const filteredSubjects = activeFilter === 'all'
-        ? subjects
+        ? subjects.filter(subject => subject.category !== "bookmarked")
         : subjects.filter(subject => subject.category === activeFilter)
 
     // Handle subject selection
@@ -43,6 +64,9 @@ const Practice = () => {
                 setSelectedSubject('Algorithms')
                 setViewMode('questions')
             } else if (subject.id === 2) {
+                setSelectedSubject('CO & Architecture')
+                setViewMode('questions')
+            } else if (subject.id === 2.1) {
                 setSelectedSubject('CO & Architecture')
                 setViewMode('questions')
             }
@@ -63,12 +87,13 @@ const Practice = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="min-h-screen bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-4 md:p-8">
             {viewMode === 'questions' ? (
                 // Show questions list
                 <div className="max-w-4xl mx-auto">
                     <QuestionsList
                         subject={selectedSubject}
+                        activeFilter={activeFilter}
                         onBack={() => {
                             setViewMode('subjects')
                             setSelectedSubject(null)
@@ -80,54 +105,19 @@ const Practice = () => {
                 <div className="max-w-6xl">
                     {/* Header */}
                     <div className="mb-6">
-                            <h1 className="text-3xl font-bold text-gray-800">Practice by <span className='
+                        <h1 className="text-3xl font-bold ">Practice by <span className='
                             bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>Subject</span></h1>
-                        <p className="text-gray-600">Select a subject to start practicing</p>
+                        <p>Select a subject to start practicing</p>
                     </div>
 
                     {/* Filter Tabs */}
                     <div className="mb-6">
                         <div className="flex flex-wrap gap-2">
-                            <button
-                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                    activeFilter === 'all' 
-                                    ? 'bg-blue-600 text-white' 
-                                    : 'bg-white text-gray-600 border border-gray-200'
-                                }`}
-                                onClick={() => setActiveFilter('all')}
-                            >
-                                All Subjects
-                            </button>
-                            <button
-                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                    activeFilter === 'core' 
-                                    ? 'bg-blue-600 text-white' 
-                                    : 'bg-white text-gray-600 border border-gray-200'
-                                }`}
-                                onClick={() => setActiveFilter('core')}
-                            >
-                                Core CS
-                            </button>
-                            <button
-                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                    activeFilter === 'math' 
-                                    ? 'bg-blue-600 text-white' 
-                                    : 'bg-white text-gray-600 border border-gray-200'
-                                }`}
-                                onClick={() => setActiveFilter('math')}
-                            >
-                                Mathematics
-                            </button>
-                            <button
-                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                    activeFilter === 'aptitude' 
-                                    ? 'bg-blue-600 text-white' 
-                                    : 'bg-white text-gray-600 border border-gray-200'
-                                }`}
-                                onClick={() => setActiveFilter('aptitude')}
-                            >
-                                General Aptitude
-                            </button>
+                            <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                            <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                            <FilterTabs label="Mathematics" type="math" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                            <FilterTabs label="General Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                            <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                         </div>
                     </div>
 
@@ -136,18 +126,18 @@ const Practice = () => {
                         {filteredSubjects.map((subject) => (
                             <div
                                 key={subject.id}
-                                className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+                                className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
                             >
                                 <div className="p-4">
                                     <div className="flex items-center mb-4">
                                         <div className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}>
                                             {subject.icon}
                                         </div>
-                                        <h3 className="font-medium text-gray-800">{subject.name}</h3>
+                                        <h3 className="font-medium">{subject.name}</h3>
                                     </div>
 
                                     <button
-                                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                                        className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
                                         onClick={() => handleSubjectSelect(subject.id)}
                                     >
                                         Practice

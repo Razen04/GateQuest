@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+body {
+    overflow: hidden;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* Background colors */
+    --color-primary: #fff;
+    /* light gray for light mode */
+    --color-primary-dark: #1a1a1a;
+    /* rich modern black (like Tailwind's zinc-950) */
+
+    /* Text colors */
+    --color-text-primary: #1f2937;
+    /* slate-800 */
+    --color-text-primary-dark: #f3f4f6;
+    /* gray-100 */
+
+    --color-border-primary: #f3f4f6;
+    /* gray-100 */
+    --color-border-primary-dark: #232327;
+    /* gray-500 */
+
+    /* Accent gradient (optional) */
+    --gradient-from: #2563eb;
+    /* blue-600 */
+    --gradient-to: #9333ea;
+    /* purple-600 */
+}

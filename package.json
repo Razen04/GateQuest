@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.50.4",
     "@tailwindcss/vite": "^4.1.6",
     "axios": "^1.9.0",
+    "clsx": "^2.1.1",
+    "dot-env": "^0.0.1",
     "framer-motion": "^12.11.0",
     "katex": "^0.16.22",
     "prismjs": "^1.30.0",
@@ -20,6 +25,7 @@
     "react-icons": "^5.5.0",
     "react-katex": "^3.1.0",
     "react-router-dom": "^7.6.0",
+    "sonner": "^2.0.6",
     "tailwindcss": "^4.1.6"
   },
   "devDependencies": {

@@ -5,24 +5,30 @@ import Dashboard from './components/Dashboard'
 import Practice from './components/Practice/Practice'
 import Settings from './components/Settings'
 import Contact from './components/Contact'
-import { ThemeProvider } from './context/ThemeContext'
+import ThemeProvider from './context/ThemeProvider'
+import AppProvider from './context/AppProvider'
+import AuthProvider from './context/AuthProvider'
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="practice" element={<Practice />} />
-            <Route path="resources" element={<div className="p-8">Resources Content (Coming Soon)</div>} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="contact" element={<Contact />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <AuthProvider>
+      <AppProvider>
+        <ThemeProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="practice" element={<Practice />} />
+                <Route path="resources" element={<div className="p-8">Resources Content (Coming Soon)</div>} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </Router>
+        </ThemeProvider>
+      </AppProvider>
+    </AuthProvider>
   )
 }
 
