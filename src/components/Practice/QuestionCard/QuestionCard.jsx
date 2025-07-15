@@ -405,22 +405,22 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }
 
     // Move to next question
-    const handleNext = useCallback(() => {
+    const handleNext = () => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition < questions.length - 1) {
             setCurrentIndex(questions[currentPosition + 1].id);
             resetQuestion();
         }
-    })
+    }
 
     // Move to previous question
-    const handlePrevious = useCallback(() => {
+    const handlePrevious = () => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition > 0) {
             setCurrentIndex(questions[currentPosition - 1].id);
             resetQuestion();
         }
-    })
+    }
 
     // Skip current question
     const handleSkip = () => {
@@ -651,35 +651,17 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                     handleSkip={handleSkip}
                     handleExplainationClick={handleExplainationClick}
                     currentQuestion={currentQuestion}
-                    currentIndex={currentIndex}
                     questions={questions}
                 />
             </div>
 
             {/* Question ID Badge and Tags */}
-            <div className="px-4 sm:px-6 py-2 sm:py-3 border-t border-border-primary dark:border-border-primary-dark">
+            <div className="px-4 sm:px-6 py-2 mb-10 md:mb-0 sm:py-3 border-t border-border-primary dark:border-border-primary-dark">
                 <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-2">
                     <div className="flex items-center text-xs mb-2 sm:mb-0 gap-4">
                         <span>ID: {currentQuestion.id || 'Unknown'}</span>
                         <span>Subject: {subject.toUpperCase()}</span>
                     </div>
-
-                    {/* Tags display */}
-                    {currentQuestion.tags && Array.isArray(currentQuestion.tags) && currentQuestion.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 items-center">
-                            <span className="text-xs flex items-center">
-                                <FaTag className="mr-1" /> Tags:
-                            </span>
-                            {currentQuestion.tags.map((tag, index) => (
-                                <span
-                                    key={index}
-                                    className="text-xs px-2 py-1 rounded-full"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </motion.div>

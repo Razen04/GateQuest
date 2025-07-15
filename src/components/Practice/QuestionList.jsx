@@ -51,7 +51,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         const fetchBookmarkedQuestions = async (ids) => {
             const joinedIds = ids.join(",");
-            const res = await axios.get(`http://localhost:5000/api/questions/bookmarked?ids=${joinedIds}`);
+            const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions/bookmarked?ids=${joinedIds}`);
             let loadedQuestions = res.data;
             loadedQuestions = sortQuestionsByYear(loadedQuestions);
             setQuestions(loadedQuestions);
@@ -72,7 +72,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         } else {
             const fetchAllQuestions = async () => {
-                const res = await axios.get(`http://localhost:5000/api/questions?subject=${subject}`);
+                const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${subject}`);
                 let loadedQuestions = res.data;
                 loadedQuestions = sortQuestionsByYear(loadedQuestions);
                 setQuestions(loadedQuestions);
@@ -130,7 +130,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                         if (yearFilter !== 'all') queryParams.append("year", yearFilter);
                         if (topicFilter.trim()) queryParams.append("topic", topicFilter)
 
-                        const res = await axios.get(`http://localhost:5000/api/questions?${queryParams.toString()}`);
+                        const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?${queryParams.toString()}`);
 
                         // Sort filtered questions by year
                         const sortedFilteredQuestions = sortQuestionsByYear(res.data);
@@ -154,9 +154,9 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         const difficultyLower = difficulty.toLowerCase()
 
-        if (difficultyLower === 'easy') return 'bg-green-100 text-green-700'
-        if (difficultyLower === 'medium' || difficultyLower === 'normal') return 'bg-yellow-100 text-yellow-700'
-        if (difficultyLower === 'hard') return 'bg-red-100 text-red-700'
+        if (difficultyLower === 'easy') return 'md:bg-green-100 text-green-700'
+        if (difficultyLower === 'medium' || difficultyLower === 'normal') return 'md:bg-yellow-100 text-yellow-700'
+        if (difficultyLower === 'hard') return 'md:bg-red-100 text-red-700'
 
         return 'bg-gray-100 text-gray-700' // Default fallback
     }
@@ -202,8 +202,9 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
+                    className="px-2"
                 >
-                    <div className="flex items-center mb-6">
+                    <div className="flex items-center mb-4 sm:mb-6">
                         <button
                             onClick={() => setSelectedQuestion(null)}
                             className="flex items-center hover:text-blue-500 transition-colors cursor-pointer"
@@ -222,33 +223,34 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
+                    className="px-2 sm:px-4"
                 >
                     {/* Header with back button */}
-                    <div className="flex flex-wrap items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-center mb-4 sm:mb-6 gap-2">
                         <button
                             onClick={onBack}
-                            className="flex items-center hover:text-blue-500 transition-colors cursor-pointer"
+                                className="flex items-center hover:text-blue-500 transition-colors cursor-pointer text-base sm:w-auto w-full"
                         >
                             <FaArrowLeft className="mr-2" />
                             <span>Back to Subjects</span>
                         </button>
 
-                        <div className="flex mt-4 sm:mt-0">
-                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm">
+                        <div className="flex mt-2 sm:mt-0 w-full sm:w-auto justify-end">
+                            <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-lg text-sm">
                                 {filteredQuestions.length} Questions
                             </span>
                         </div>
                     </div>
 
                     {/* Search and filters */}
-                    <div className="brounded-xl p-4 mb-6 border border-border-primary dark:border-border-primary-dark">
-                        <div className="flex flex-col md:flex-row gap-4">
+                    <div className="rounded-xl p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
+                        <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
                             <div className="flex-1 relative">
                                 <FaSearch className="absolute left-3 top-3 text-gray-400" />
                                 <input
                                     type="text"
                                     placeholder="Search questions..."
-                                    className="w-full pl-10 pr-4 py-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    className="w-full pl-10 pr-2 sm:pr-4 py-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
@@ -256,7 +258,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className="flex items-center px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+                                className="flex items-center px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer w-full md:w-auto"
                             >
                                 <FaFilter className="mr-2" />
                                 <span>Filter</span>
@@ -270,11 +272,11 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
-                                    className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden"
+                                    className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden"
                                 >
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">Difficulty</label>
+                                            <label className="block font-medium mb-2">Difficulty</label>
                                             <select
                                                 className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
                                                 value={difficultyFilter}
@@ -287,7 +289,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">Year</label>
+                                            <label className="block font-medium mb-2">Year</label>
                                             <select
                                                 className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
                                                 value={yearFilter}
@@ -300,7 +302,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">Topic</label>
+                                            <label className="block font-medium mb-2">Topic</label>
                                             <select
                                                 className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
                                                 value={topicFilter}
@@ -320,7 +322,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
                     {/* Questions List */}
                     <div className="rounded-xl overflow-hidden border border-border-primary dark:border-border-primary-dark">
-                        <div className="p-4 border-b border-border-primary dark:border-border-primary-dark">
+                        <div className="p-2 sm:p-4 border-b border-border-primary dark:border-border-primary-dark">
                             <h2 className="font-semibold text-blue-500 text-xl">
                                 {subject} Questions
                             </h2>
@@ -332,20 +334,20 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                     <motion.div
                                         key={index}
                                         whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
-                                        className="p-4 cursor-pointer transition-colors duration-50"
+                                        className="p-2 sm:p-4 cursor-pointer transition-colors duration-50"
                                         onClick={() => handleQuestionClick(question.id)}
                                     >
-                                        <div className="flex justify-between">
-                                            <h3 className="font-medium  mb-2 pr-4">
+                                        <div className="flex flex-col sm:flex-row justify-between">
+                                            <h3 className="font-medium mb-2 pr-0 sm:pr-4 text-xs md:text-base">
                                                 {getQuestionDisplayText(question)}
                                             </h3>
-                                            <div className="flex space-x-2">
-                                                <span className={`h-min text-xs px-2 py-1 rounded-full whitespace-nowrap ${getDifficultyClassNames(question.difficulty)}`}>
+                                            <div className="flex space-x-2 mt-2 sm:mt-0">
+                                                <span className={`h-min text-xs font-bold md:font-normal md:px-2 md:py-1 rounded-full whitespace-nowrap ${getDifficultyClassNames(question.difficulty)}`}>
                                                     {question.difficulty}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex items-center text-xs">
+                                        <div className="flex flex-wrap items-center text-xs mt-1">
                                             {question.year ? (
                                                 <span>GATE {question.year}</span>
                                             ) : (
@@ -358,7 +360,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="p-8 text-center">
+                            <div className="p-4 sm:p-8 text-center text-xs sm:text-base">
                                 {errorMessage}
                             </div>
                         )}

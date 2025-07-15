@@ -6,7 +6,7 @@ const QuestionTimer = ({ timer, seconds, minutes, handleTimer }) => {
     return (
         <div>
             <button
-                className='flex text-xs w-18 items-center justify-center space-x-2 bg-blue-400 px-1.5 py-1 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500'
+                className='flex text-xs w-18 items-center justify-center space-x-2 bg-blue-400 px-1.5 py-1 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400'
                 onClick={handleTimer}
             >
                 <AnimatePresence mode="wait" initial={false}>

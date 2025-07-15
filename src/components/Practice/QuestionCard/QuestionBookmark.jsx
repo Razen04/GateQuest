@@ -7,7 +7,7 @@ const QuestionBookmark = ({ handleBookmark }) => {
     return (
         <div>
             <button
-                className='flex items-center justify-center bg-blue-400 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 relative text-xs sm:text-sm'
+                className='flex items-center justify-center bg-blue-400 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 relative text-xs sm:text-sm'
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 onClick={handleBookmark}

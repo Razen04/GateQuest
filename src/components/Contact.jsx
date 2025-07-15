@@ -44,7 +44,7 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/contact', formData);
+            await axios.post(`http://${import.meta.env.VITE_PORT}:5000/api/contact`, formData);
             setMessageSent(true);
         } catch (err) {
             console.error("Error sending message:", err);

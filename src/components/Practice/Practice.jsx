@@ -9,10 +9,11 @@ import { FaComputer } from 'react-icons/fa6'
 const FilterTabs = ({ label, type, activeFilter, setActiveFilter }) => {
     return (
         <button
-            className={`px-4 py-2 cursor-pointer transition-all duration-300 hover:bg-blue-500 rounded-lg text-sm font-medium ${activeFilter === type
-                ? 'bg-blue-600 text-white'
-                : 'border border-border-primary dark:border-border-primary-dark'
-                }`}
+            className={`px-4 py-2 cursor-pointer transition-all duration-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95
+                ${activeFilter === type
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'border border-border-primary dark:border-border-primary-dark hover:bg-blue-500 hover:text-white'}
+            `}
             onClick={() => setActiveFilter(type)}
         >
             {label}
