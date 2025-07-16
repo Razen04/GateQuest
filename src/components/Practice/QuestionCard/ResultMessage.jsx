@@ -19,17 +19,14 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText }) => {
                 >
                     {result === 'correct' ? (
                         <div className="flex items-center">
-                            <FaCheck className="mr-2 w-5 h-5" />
                             <span>Correct! Well done.</span>
                         </div>
                     ) : result === 'incorrect' ? (
                         <div className="flex items-center">
-                            <FaTimes className="mr-2 w-5 h-5" />
                                 <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText()} /></span></div>
                         </div>
                     ) : (
                         <div className="flex items-center">
-                            <FaEye className="mr-2 w-5 h-5" />
                             <div>The correct answer is: <MathRenderer text={getCorrectAnswerText()} /></div>
                         </div>
                     )}

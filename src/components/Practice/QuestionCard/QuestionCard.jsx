@@ -419,12 +419,13 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         if (currentPosition > 0) {
             setCurrentIndex(questions[currentPosition - 1].id);
             resetQuestion();
+            
         }
     }
 
     // Skip current question
-    const handleSkip = () => {
-        handleNext();
+    const handleSubmit = () => {
+        handleShowAnswer();
     }
 
     if (!currentQuestion) {
@@ -648,7 +649,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                     handlePrevious={handlePrevious}
                     showAnswer={showAnswer}
                     handleShowAnswer={handleShowAnswer}
-                    handleSkip={handleSkip}
+                    handleSubmit={handleSubmit}
                     handleExplainationClick={handleExplainationClick}
                     currentQuestion={currentQuestion}
                     questions={questions}

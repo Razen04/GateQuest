@@ -72,11 +72,24 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         } else {
             const fetchAllQuestions = async () => {
-                const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${subject}`);
-                let loadedQuestions = res.data;
-                loadedQuestions = sortQuestionsByYear(loadedQuestions);
-                setQuestions(loadedQuestions);
-                setFilteredQuestions(loadedQuestions);
+                const localQuestions = JSON.parse(localStorage.getItem(subject))
+                if (Array.isArray(localQuestions) && localQuestions?.length > 0) {
+                    console.log("Getting")
+                    let loadedQuestions = localQuestions;
+                    setQuestions(loadedQuestions);
+                    setFilteredQuestions(loadedQuestions);
+                } else {
+                    console.log("Fetching")
+                    console.log("Subject: ", subject)
+                    const encodedSubject = encodeURIComponent(subject)
+                    const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${encodedSubject}`);
+                    let loadedQuestions = res.data;
+                    loadedQuestions = sortQuestionsByYear(loadedQuestions);
+                    localStorage.setItem(subject, JSON.stringify(loadedQuestions))
+                    setQuestions(loadedQuestions);
+                    setFilteredQuestions(loadedQuestions);
+                }
+
             };
             fetchAllQuestions();
         }
@@ -121,26 +134,33 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
                 setFilteredQuestions(filtered);
             } else {
-                const fetchFilteredQuestions = async () => {
-                    try {
-                        const queryParams = new URLSearchParams();
-                        if (subject) queryParams.append("subject", subject);
-                        if (searchQuery.trim()) queryParams.append("search", searchQuery.trim().toLowerCase());
-                        if (difficultyFilter !== 'all') queryParams.append("difficulty", difficultyFilter);
-                        if (yearFilter !== 'all') queryParams.append("year", yearFilter);
-                        if (topicFilter.trim()) queryParams.append("topic", topicFilter)
+                const filterQuestions = () => {
+                    let filtered = [...questions];
 
-                        const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?${queryParams.toString()}`);
-
-                        // Sort filtered questions by year
-                        const sortedFilteredQuestions = sortQuestionsByYear(res.data);
-                        setFilteredQuestions(sortedFilteredQuestions);
-                    } catch (err) {
-                        setErrorMessage("Error fetching filtered questions.")
-                        console.error("Error fetching filtered questions:", err);
+                    if (searchQuery.trim()) {
+                        const q = searchQuery.trim().toLowerCase();
+                        filtered = filtered.filter(qn =>
+                            qn.question?.toLowerCase().includes(q) || qn.tags?.some(tag => tag.toLowerCase().includes(q))
+                        )
                     }
-                };
-                fetchFilteredQuestions();
+
+                    if (difficultyFilter !== 'all') {
+                        filtered = filtered.filter(qn => qn.difficulty === difficultyFilter)
+                    }
+
+                    if (yearFilter !== 'all') {
+                        filtered = filtered.filter(qn => qn.year?.toString() === yearFilter)
+                    }
+
+                    if (topicFilter && topicFilter !== 'all') {
+                        filtered = filtered.filter(qn => qn.topic === topicFilter)
+                    }
+
+                    filtered = sortQuestionsByYear(filtered);
+
+                    setFilteredQuestions(filtered)
+                }
+                filterQuestions();
             }
         }, 300); // debounce delay
 
@@ -226,16 +246,16 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                     className="px-2 sm:px-4"
                 >
                     {/* Header with back button */}
-                    <div className="flex flex-col sm:flex-row flex-wrap items-center mb-4 sm:mb-6 gap-2">
+                    <div className="flex justify-between items-center w-full  mb-4 sm:mb-6">
                         <button
                             onClick={onBack}
-                                className="flex items-center hover:text-blue-500 transition-colors cursor-pointer text-base sm:w-auto w-full"
+                            className="flex items-center hover:text-blue-500 transition-colors cursor-pointer text-base sm:w-auto"
                         >
                             <FaArrowLeft className="mr-2" />
                             <span>Back to Subjects</span>
                         </button>
 
-                        <div className="flex mt-2 sm:mt-0 w-full sm:w-auto justify-end">
+                        <div className="flex">
                             <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-lg text-sm">
                                 {filteredQuestions.length} Questions
                             </span>

@@ -85,7 +85,7 @@ const Contact = () => {
                 className="mb-8"
             >
                 <h1 className="text-3xl font-bold">Get in <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Touch</span></h1>
-                <p className="mt-2">Have questions or need assistance? We're here to help.</p>
+                <p className="mt-2">Have questions or need assistance? I am here to help.</p>
             </motion.div>
 
             <div>
@@ -100,7 +100,7 @@ const Contact = () => {
                         variants={itemVariants}
                         className="p-4 sm:p-8 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark"
                     >
-                        <h2 className="text-lg sm:text-xl font-semibold mb-6">Send us a message</h2>
+                        <h2 className="text-lg sm:text-xl font-semibold mb-6">Send me a message</h2>
 
                         {messageSent ? (
                             <motion.div
@@ -112,7 +112,7 @@ const Contact = () => {
                                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
                                     </svg>
-                                    Thank you for your message! We'll get back to you shortly.
+                                    Thank you for your message! I'll get back to you shortly.
                                 </p>
                             </motion.div>
                         ) : (
@@ -145,7 +145,7 @@ const Contact = () => {
                                         onChange={handleInputChange}
                                         required
                                         rows="5"
-                                        placeholder="How can we help you?"
+                                        placeholder="How can I help you?"
                                             className="w-full p-3 border border-border-primary dark:border-border-primary-dark  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     ></textarea>
                                 </div>

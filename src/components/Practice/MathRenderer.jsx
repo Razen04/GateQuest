@@ -54,9 +54,25 @@ const MathRenderer = ({ text }) => {
             {segments.map((segment, index) => {
                 switch (segment.type) {
                     case 'math':
-                        return <InlineMath key={index} math={cleanLatexContent(segment.content)} />;
+                        return (
+                            <div
+                                key={index}
+                                className="inline-block whitespace-nowrap scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
+                                style={{ verticalAlign: 'middle', display: 'inline-flex' }}
+                            >
+                                <InlineMath math={cleanLatexContent(segment.content)} />
+                            </div>
+                        );
                     case 'blockMath':
-                        return <BlockMath key={index} math={cleanLatexContent(segment.content)} />;
+                        return (
+                            <div
+                                key={index}
+                                className="block scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 p-2 rounded"
+                                style={{ display: 'block' }}
+                            >
+                                <BlockMath math={cleanLatexContent(segment.content)} />
+                            </div>
+                        );
                     case 'code':
                         return <CodeBlockRenderer key={index} code={segment.content} language={segment.language} />;
                     case 'lineBreak':

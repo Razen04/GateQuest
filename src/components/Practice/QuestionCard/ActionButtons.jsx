@@ -1,6 +1,6 @@
-import { FaChevronLeft, FaChevronRight, FaEye, FaRedo, FaComment } from 'react-icons/fa'
+import { FaChevronLeft, FaChevronRight, FaEye, FaRedo, FaComment, FaFlag } from 'react-icons/fa'
 
-const ActionButtons = ({ selectedOptions, isFirstQuestion, isLastQuestion, handleNext, handlePrevious, showAnswer, handleShowAnswer, handleSkip, handleExplainationClick, currentQuestion, currentIndex, questions }) => {
+const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrevious, showAnswer, handleShowAnswer, handleSubmit, handleExplainationClick, currentQuestion, }) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 flex-row justify-between items-center gap-2 p-2 sm:pt-4 bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
             {/* Previous */}
@@ -23,19 +23,19 @@ const ActionButtons = ({ selectedOptions, isFirstQuestion, isLastQuestion, handl
                 <>
                     <button
                         className="flex-1 px-2 py-3 bg-blue-100 text-blue-700 rounded-lg text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"
-                        onClick={() => handleShowAnswer()}
-                        title="Show Answer"
+                        onClick={() => handleSubmit()}
+                        title="Submit"
                     >
                         <FaEye className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">{selectedOptions ? 'Submit' : 'Show Answer'}</span>
+                        <span className="hidden md:inline ml-2">Submit</span>
                     </button>
                     <button
                         className="flex-1 px-2 py-3 bg-purple-100 text-purple-700 rounded-lg text-base font-semibold hover:bg-purple-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 active:scale-95 active:bg-purple-200"
-                        onClick={handleSkip}
-                        title="Skip"
+                        onClick={() => handleShowAnswer()}
+                        title="Show Answer"
                     >
-                        <FaChevronRight className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">Skip</span>
+                        <FaFlag className="inline text-lg" />
+                        <span className="hidden md:inline ml-2">Show Answer</span>
                     </button>
                 </>
             ) : (
