@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaCheck, FaTimes, FaTag } from 'react-icons/fa'
 import MathRenderer from '../MathRenderer'
@@ -8,9 +8,19 @@ import QuestionTimer from './QuestionTimer'
 import AppSettingContext from '../../../context/AppSettingContext'
 import { toast } from 'sonner'
 import QuestionBookmark from './QuestionBookmark'
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../../helper'
+import { getUserProfile, recordAttempt, syncUserToSupabase, updateUserProfile } from '../../../helper'
+import AuthContext from '../../../context/AuthContext'
 
 const QuestionCard = ({ subject, questions, questionId = 0 }) => {
+    const profile = getUserProfile();
+    let user;
+    if (profile) {
+        user = profile;
+    } else {
+        user = {
+            id: 1,
+        }
+    }
     const [currentIndex, setCurrentIndex] = useState(questionId)
     const [userAnswer, setUserAnswer] = useState(null)
     const [selectedOptions, setSelectedOptions] = useState([]) // For multiple selections
@@ -22,8 +32,10 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     const [timer, setTimer] = useState(false)
     const [timerVal, setTimerVal] = useState(0)
     const intervalRef = useRef(null);
+    const [userRecord, setUserRecord] = useState(null);
 
     const { settings } = useContext(AppSettingContext)
+    const { isLogin } = useContext(AuthContext)
 
 
 
@@ -38,9 +50,20 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
 
     // Set question link after every question
     useEffect(() => {
-        console.log(currentQuestion)
-        console.log(currentQuestion.explanation)
         setQuestionLink(currentQuestion.explanation)
+    }, [currentQuestion])
+
+    useEffect(() => {
+        // ...removed console.log...
+        setUserRecord({
+            user_id: user.id,
+            question_id: currentQuestion.id,
+            subject: currentQuestion.subject,
+            was_correct: null,
+            time_taken: 0,
+            attempted_at: new Date().toISOString(),
+            attempt_number: 0
+        })
     }, [currentQuestion])
 
     // Keyboard shortcuts
@@ -66,10 +89,6 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                 case "Enter":
                     e.preventDefault()
                     handleShowAnswer()
-                    break;
-                case "KeyS":
-                    e.preventDefault();
-                    handleSkip();
                     break;
                 case "KeyE":
                     e.preventDefault();
@@ -159,7 +178,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             const updatedProfile = { ...profile, bookmark_questions }
             console.log("User Profile: ", updatedProfile)
             updateUserProfile(updatedProfile)
-            syncUserToSupabase()
+            syncUserToSupabase(isLogin)
         } else {
             toast.error("Unable to bookmark, try again later.")
         }
@@ -232,33 +251,44 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }
 
     // Handle show answer
-    const handleShowAnswer = (overrideAnswer) => {
+    const handleShowAnswer = async (overrideAnswer) => {
         setShowAnswer(true);
         setTimer(false);
+
         if (intervalRef.current !== null) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
         }
-        if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+
+        if (document.activeElement?.tagName === "BUTTON") {
             document.activeElement.blur();
         }
 
+        // ...removed console.log...
+
+        const baseAttempt = {
+            user_id: user?.id,
+            question_id: currentQuestion?.id,
+            subject: currentQuestion?.subject,
+            attempted_at: new Date().toISOString(),
+            time_taken: timerVal,
+            attempt_number: (userRecord?.attempt_number ?? 0) + 1
+        };
+        if (!user?.id) {
+            console.warn("User ID is undefined when attempting to record attempt.", user);
+            toast.error("User not loaded. Please refresh or login again.");
+            return;
+        }
 
         try {
+            // 🔢 Numerical Questions
             if (isNumericalQuestion()) {
-                // Handle numerical answer checking
-                console.log("🔥 overrideAnswer:", overrideAnswer);
-                console.log("📦 numericalAnswer (state):", numericalAnswer);
                 const raw = overrideAnswer !== undefined
                     ? overrideAnswer.toString().trim()
                     : numericalAnswer.toString().trim();
 
                 const answerToCheck = parseFloat(raw);
-                console.log("🔍 Parsed Answer:", answerToCheck);
-
-                console.log("📦 currentQuestion.correctAnswer:", currentQuestion?.correctAnswer);
-                console.log("✅ parsed value:", parseFloat(overrideAnswer ?? numericalAnswer));
-                console.log("✅ typeof overrideAnswer:", typeof overrideAnswer);
+                const correctValue = parseFloat(currentQuestion?.correctAnswer);
 
                 if (isNaN(answerToCheck)) {
                     toast.error("You haven't entered a valid number.");
@@ -266,68 +296,60 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                     return;
                 }
 
-                const userNumericValue = answerToCheck;
-                const correctNumericValue = parseFloat(currentQuestion?.correctAnswer);
+                const isCorrect = answerToCheck === correctValue;
+                const attemptData = { ...baseAttempt, was_correct: isCorrect };
 
-
-                if (!isNaN(userNumericValue) && !isNaN(correctNumericValue)) {
-                    if (userNumericValue === correctNumericValue) {
-                        setResult('correct');
-                    } else {
-                        setResult('incorrect')
-                    }
-
-                } else {
-                    console.log('unattempted')
-                    setResult('unattempted');
-                }
-
-
-
-            } else if (isMultipleSelection()) {
-                // Handle multiple selection checking
-                if (Array.isArray(currentQuestion?.correctAnswer) && selectedOptions.length > 0) {
-                    // Get correct options based on indices
-                    const correctOptions = currentQuestion.correctAnswer.map(index =>
-                        currentQuestion.options[index]
-                    ).filter(Boolean);
-
-                    // Check if selected options match correct options
-                    const allCorrectSelected = correctOptions.every(opt =>
-                        selectedOptions.includes(opt)
-                    );
-                    const noExtraSelected = selectedOptions.every(opt =>
-                        correctOptions.includes(opt)
-                    );
-
-                    setResult(allCorrectSelected && noExtraSelected ? 'correct' : 'incorrect');
-                } else {
-                    setResult('unattempted');
-                }
-            } else if (userAnswer) {
-                // Handle single selection checking
-                if (Array.isArray(currentQuestion?.correctAnswer)) {
-                    const correctIndex = currentQuestion.correctAnswer[0];
-                    if (currentQuestion.options &&
-                        Array.isArray(currentQuestion.options) &&
-                        correctIndex !== undefined &&
-                        currentQuestion.options[correctIndex] !== undefined) {
-                        const correctOption = currentQuestion.options[correctIndex];
-                        setResult(userAnswer === correctOption ? 'correct' : 'incorrect');
-                    } else {
-                        setResult('unattempted');
-                    }
-                } else if (currentQuestion?.correctAnswer) {
-                    setResult(userAnswer === currentQuestion.correctAnswer ? 'correct' : 'incorrect');
-                } else {
-                    setResult('unattempted');
-                }
-            } else {
-                setResult('unattempted');
+                setUserRecord(attemptData);
+                setResult(isCorrect ? "correct" : "incorrect");
+                recordAttempt(attemptData, isLogin);
+                return;
             }
+
+            // ✅ Multiple Select (MSQ)
+            if (isMultipleSelection()) {
+                const correctOptions = currentQuestion.correctAnswer.map(i => currentQuestion.options[i]);
+                const allCorrect = correctOptions.every(opt => selectedOptions.includes(opt));
+                const noExtras = selectedOptions.every(opt => correctOptions.includes(opt));
+                const isCorrect = allCorrect && noExtras && selectedOptions.length > 0;
+
+                const attemptData = { ...baseAttempt, was_correct: isCorrect };
+                setUserRecord(attemptData);
+                setResult(isCorrect ? "correct" : "incorrect");
+                recordAttempt(attemptData, isLogin);
+
+                return;
+            }
+
+            // ☝️ Single Select (MCQ)
+            if (userAnswer) {
+                let isCorrect = false;
+
+                if (Array.isArray(currentQuestion.correctAnswer)) {
+                    const correctOption = currentQuestion.options?.[currentQuestion.correctAnswer[0]];
+                    isCorrect = userAnswer === correctOption;
+                } else {
+                    isCorrect = userAnswer === currentQuestion.correctAnswer;
+                }
+
+                const attemptData = { ...baseAttempt, was_correct: isCorrect };
+                setUserRecord(attemptData);
+                setResult(isCorrect ? "correct" : "incorrect");
+                recordAttempt(attemptData, isLogin);
+                return;
+            }
+
+            // ❓ Unattempted Fallback
+            const attemptData = { ...baseAttempt, was_correct: false };
+            setUserRecord(attemptData);
+            setResult("unattempted");
+            recordAttempt(attemptData, isLogin);
         } catch (error) {
             console.error("Error determining answer correctness:", error);
-            setResult('unattempted');
+            const attemptData = { ...baseAttempt, was_correct: false };
+            setUserRecord(attemptData);
+            setResult("unattempted");
+            recordAttempt(attemptData, isLogin);
+
         }
     }
 
@@ -419,7 +441,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         if (currentPosition > 0) {
             setCurrentIndex(questions[currentPosition - 1].id);
             resetQuestion();
-            
+
         }
     }
 

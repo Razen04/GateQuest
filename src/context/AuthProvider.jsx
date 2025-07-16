@@ -4,29 +4,27 @@ import { supabase } from '../../supabaseClient';
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [isLogin, setIsLogin] = useState(false);
-
-    const toggleLogin = () => {
-        setIsLogin(!isLogin);
-    }
+    const [showLogin, setShowLogin] = useState(false);
 
     useEffect(() => {
-        if (user) {
-            setIsLogin(false)
-        }
-    }, [user])
+        setIsLogin(!!user);
+    }, [user]);
 
     useEffect(() => {
         const getSession = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
-        }
+            setLoading(false);
+        };
 
         getSession();
 
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            const supaUser = session?.user || null
+            const supaUser = session?.user || null;
             setUser(supaUser);
+            setLoading(false);
             if (supaUser) {
                 const { data, error } = await supabase.from('users').upsert({
                     id: supaUser.id,
@@ -46,40 +44,38 @@ const AuthProvider = ({ children }) => {
                     bookmark_questions: data[0].bookmark_questions || [],
                     college: data[0].college || "",
                     targetYear: data[0].targetYear || 2026
-                }
+                };
 
-                if (error) {
-                    console.error("User upsert failed:", error);
-                } else if (data) {
+                if (!error && data) {
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));
                 }
             }
-        })
+        });
 
-        return () => {
-            listener.subscription.unsubscribe();
-        }
-    }, [])
+        return () => listener.subscription.unsubscribe();
+    }, []);
 
     // Login function
-    const login = async () => {
+    const handleLogin = async () => {
+        console.log("Clicked")
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google'
-        })
-
+        });
         if (error) {
-            console.error('Login failed: ', error.message)
+            console.error('Login failed: ', error.message);
         }
-    }
+    };
 
     // Logout function
     const logout = async () => {
         await supabase.auth.signOut();
-    }
+        setUser(null);
+        localStorage.removeItem("gate_user_profile");
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLogin, toggleLogin }}>{children}</AuthContext.Provider>
-    )
-}
+        <AuthContext.Provider value={{ user, handleLogin, logout, isLogin, loading, showLogin, setShowLogin }}>{children}</AuthContext.Provider>
+    );
+};
 
 export default AuthProvider

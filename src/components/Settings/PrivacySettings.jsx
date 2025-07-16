@@ -17,7 +17,7 @@ const PrivacyButtons = ({ label, format = "", type = "", onClick }) => {
 }
 
 const PrivacySettings = ({ settings, toggleSetting }) => {
-    const { user, toggleLogin, logout } = useContext(AuthContext);
+    const { user, logout, setShowLogin } = useContext(AuthContext);
 
     return (
         <div>
@@ -45,7 +45,7 @@ const PrivacySettings = ({ settings, toggleSetting }) => {
                         <div className="space-y-3">
                             <PrivacyButtons label="Export My Data" format="JSON / CSV" />
                             <PrivacyButtons label="Clear Local Storage" format="34.2 MB" />
-                            {user ? (<PrivacyButtons label="Logout" type="delete" onClick={logout} />) : (<PrivacyButtons label="Sign up/Login" type="login" onClick={toggleLogin} />)}
+                            {user ? (<PrivacyButtons label="Logout" type="delete" onClick={logout} />) : (<PrivacyButtons label="Sign up/Login" type="login" onClick={() => setShowLogin(true)}/>)}
                         </div>
                     </div>
                 </div>

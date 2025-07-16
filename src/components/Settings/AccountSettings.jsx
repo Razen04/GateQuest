@@ -3,6 +3,7 @@ import { FaUserCircle } from 'react-icons/fa'
 import Buttons from '../Buttons'
 import { FaUser } from 'react-icons/fa6'
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper'
+import AuthContext from '../../context/AuthContext'
 
 const InputSection = ({ type, label, placeholder, value, onChange }) => {
     return (
@@ -22,6 +23,7 @@ const InputSection = ({ type, label, placeholder, value, onChange }) => {
 
 const AccountSettings = () => {
     const user = getUserProfile();
+    const { isLogin } = useContext(AuthContext)
 
     const [name, setName] = useState(user?.name || '');
     const [college, setCollege] = useState(user?.college || '');
@@ -30,7 +32,7 @@ const AccountSettings = () => {
     const handleSaveButton = () => {
         const updated = { ...user, name, college, targetYear };
         updateUserProfile(updated)
-        syncUserToSupabase();
+        syncUserToSupabase(isLogin);
     }
 
     return (

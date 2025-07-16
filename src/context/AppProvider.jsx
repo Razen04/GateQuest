@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AppSettingContext from './AppSettingContext'
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../helper'
+import AuthContext from './AuthContext'
 
 const AppProvider = ({ children }) => {
+    const { isLogin } = useContext(AuthContext)
     const [settings, setSettings] = useState(() => {
         const profle = getUserProfile();
         return profle?.settings ||
@@ -22,12 +24,12 @@ const AppProvider = ({ children }) => {
     useEffect(() => {
         const profile = getUserProfile();
 
-        if(profile) {
+        if (profile) {
             const updatedProfile = { ...profile, settings }
             updateUserProfile(updatedProfile)
-            syncUserToSupabase()
+            syncUserToSupabase(isLogin)
         }
-        
+
     }, [settings])
 
     return (

@@ -74,13 +74,10 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
             const fetchAllQuestions = async () => {
                 const localQuestions = JSON.parse(localStorage.getItem(subject))
                 if (Array.isArray(localQuestions) && localQuestions?.length > 0) {
-                    console.log("Getting")
                     let loadedQuestions = localQuestions;
                     setQuestions(loadedQuestions);
                     setFilteredQuestions(loadedQuestions);
                 } else {
-                    console.log("Fetching")
-                    console.log("Subject: ", subject)
                     const encodedSubject = encodeURIComponent(subject)
                     const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${encodedSubject}`);
                     let loadedQuestions = res.data;
