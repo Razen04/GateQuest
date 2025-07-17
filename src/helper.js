@@ -33,27 +33,29 @@ export const syncUserToSupabase = async (isLogin = true) => {
     }
 }
 
-export const recordAttempt = async ({ user_id,
-    question_id,
-    subject,
-    was_correct,
-    time_taken,
-    attempted_at,
-    attempt_number }, isLogin = true) => {
+export const recordAttempt = async (params, isLogin = true) => {
+    
+    const user = getUserProfile();
+
     if (!isLogin) {
+        console.log("Early return: not logged in");
         toast.message("Please login to store your progress.");
         return;
     }
+    if (!user || !user.id) {
+        console.log("Early return: no valid user profile");
+        toast.error("No valid user profile found.");
+        return;
+    }
+
     const { data, error } = await supabase.from('user_question_activity').insert([{
-        user_id,
-        question_id,
-        subject,
-        was_correct,
-        time_taken,
-        attempted_at,
-        attempt_number
-    }])
+        ...params
+    }]);
+    console.log("Supabase insert result:", { data, error });
     if (error) {
-        console.error("Failed to record attempt: ", error.message)
+        toast.error("Failed to record attempt: " + error.message);
+        console.error("Failed to record attempt: ", error);
+    } else {
+        toast.success("Attempt recorded successfully!");
     }
 }

@@ -7,9 +7,11 @@ import {
 import Login from './Login';
 import AuthContext from '../context/AuthContext';
 import { getUserProfile } from '../helper';
+import StatsContext from '../context/StatsContext';
 
 const Dashboard = () => {
     const { isLogin, loading } = useContext(AuthContext);
+    const { stats } = useContext(StatsContext);
     const user = getUserProfile();
 
     // Animation variants
@@ -57,6 +59,7 @@ const Dashboard = () => {
     return (
         <div className="p-8 bg-gray-50 min-h-[100dvh]">
             {/* Welcome */}
+            {console.log(stats)}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -90,7 +93,7 @@ const Dashboard = () => {
                     <div>
                         <h3 className="text-gray-500 text-sm">Overall Progress</h3>
                         <div className="flex items-center mt-1">
-                            <span className="text-2xl font-bold text-gray-800">2%</span>
+                            <span className="text-2xl font-bold text-gray-800">{stats?.progress}%</span>
                             <span className="ml-2 text-xs text-green-500 bg-green-50 px-2 py-0.5 rounded-full">+2%</span>
                         </div>
                     </div>

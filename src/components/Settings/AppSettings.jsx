@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { FaGlobe } from 'react-icons/fa'
 import ToggleSwitch from '../ToggleSwitch'
 import AppSettingContext from '../../context/AppSettingContext'
@@ -6,6 +6,7 @@ import AppSettingContext from '../../context/AppSettingContext'
 
 const AppSettings = () => {
     const { settings, handleSettingToggle } = useContext(AppSettingContext)
+
     return (
         <div>
             <h2 className="text-xl font-semibold mb-6 flex items-center">

@@ -5,12 +5,9 @@ import { supabase } from '../../supabaseClient';
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isLogin, setIsLogin] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
 
-    useEffect(() => {
-        setIsLogin(!!user);
-    }, [user]);
+    const isLogin = !!user;
 
     useEffect(() => {
         const getSession = async () => {
@@ -23,8 +20,15 @@ const AuthProvider = ({ children }) => {
 
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const supaUser = session?.user || null;
-            setUser(supaUser);
-            setLoading(false);
+
+            if (!supaUser) {
+                setShowLogin(false);
+                localStorage.removeItem("gate_user_profile");
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+            
             if (supaUser) {
                 const { data, error } = await supabase.from('users').upsert({
                     id: supaUser.id,
@@ -39,20 +43,31 @@ const AuthProvider = ({ children }) => {
                     }
                 }).select();
 
-                const profile = {
-                    ...data[0],
-                    bookmark_questions: data[0].bookmark_questions || [],
-                    college: data[0].college || "",
-                    targetYear: data[0].targetYear || 2026
-                };
-
                 if (!error && data) {
+                    const profile = {
+                        ...data[0],
+                        bookmark_questions: data[0].bookmark_questions || [],
+                        college: data[0].college || "",
+                        targetYear: data[0].targetYear || 2026
+                    };
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));
+                    setUser(supaUser);
                 }
+
+                setLoading(false);
             }
         });
 
         return () => listener.subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const profile = JSON.parse(localStorage.getItem("gate_user_profile"));
+        if (profile && profile.id) {
+            setUser(profile);
+        } else {
+            setUser(null);
+        }
     }, []);
 
     // Login function
@@ -68,9 +83,8 @@ const AuthProvider = ({ children }) => {
 
     // Logout function
     const logout = async () => {
+        console.log("Clicked")
         await supabase.auth.signOut();
-        setUser(null);
-        localStorage.removeItem("gate_user_profile");
     };
 
     return (

@@ -10,7 +10,9 @@ const AppProvider = ({ children }) => {
         return profle?.settings ||
         {
             sound: true,
-            autoTimer: true
+            autoTimer: true,
+            shareProgress: true,
+            dataCollection: true
         }
     })
 

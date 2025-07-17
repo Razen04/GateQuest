@@ -1,8 +1,9 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import { FaShieldAlt } from 'react-icons/fa'
 import ToggleSwitch from '../ToggleSwitch'
 import AuthContext from '../../context/AuthContext'
 import Login from '../Login'
+import AppSettingContext from '../../context/AppSettingContext'
 
 const PrivacyButtons = ({ label, format = "", type = "", onClick }) => {
     return (
@@ -16,12 +17,13 @@ const PrivacyButtons = ({ label, format = "", type = "", onClick }) => {
     )
 }
 
-const PrivacySettings = ({ settings, toggleSetting }) => {
-    const { user, logout, setShowLogin } = useContext(AuthContext);
+const PrivacySettings = () => {
+    const { user, logout, showLogin, setShowLogin } = useContext(AuthContext);
+    const { settings, handleSettingToggle } = useContext(AppSettingContext);
 
     return (
         <div>
-            <div>
+            <div className={`${showLogin ? 'blur-2xl' : null}`}>
                 <h2 className="text-xl font-semibold mb-6 flex items-center">
                     <FaShieldAlt className="mr-2" /> Privacy & Data
                 </h2>
@@ -29,13 +31,13 @@ const PrivacySettings = ({ settings, toggleSetting }) => {
                 <div className="space-y-4">
                     <ToggleSwitch
                         isOn={settings.shareProgress}
-                        onToggle={() => toggleSetting('shareProgress')}
+                        onToggle={() => handleSettingToggle('shareProgress')}
                         label="Share My Progress & Ranking"
                     />
 
                     <ToggleSwitch
                         isOn={settings.dataCollection}
-                        onToggle={() => toggleSetting('dataCollection')}
+                        onToggle={() => handleSettingToggle('dataCollection')}
                         label="Remain Anonymous"
                     />
 
@@ -45,7 +47,7 @@ const PrivacySettings = ({ settings, toggleSetting }) => {
                         <div className="space-y-3">
                             <PrivacyButtons label="Export My Data" format="JSON / CSV" />
                             <PrivacyButtons label="Clear Local Storage" format="34.2 MB" />
-                            {user ? (<PrivacyButtons label="Logout" type="delete" onClick={logout} />) : (<PrivacyButtons label="Sign up/Login" type="login" onClick={() => setShowLogin(true)}/>)}
+                            {user ? (<PrivacyButtons label="Logout" type="delete" onClick={() => logout()} />) : (<PrivacyButtons label="Sign up/Login" type="login" onClick={() => setShowLogin(true)} />)}
                         </div>
                     </div>
                 </div>

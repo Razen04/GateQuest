@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion"
-import { FaEye, FaCheck, FaTimes } from 'react-icons/fa'
 import MathRenderer from '../MathRenderer'
 
-const ResultMessage = ({ showAnswer, result, getCorrectAnswerText }) => {
+const ResultMessage = ({ showAnswer, result, getCorrectAnswerText, currentQuestion }) => {
     return (
         <AnimatePresence>
             {showAnswer && (
@@ -23,11 +22,11 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText }) => {
                         </div>
                     ) : result === 'incorrect' ? (
                         <div className="flex items-center">
-                                <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText()} /></span></div>
+                                <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText(currentQuestion)} /></span></div>
                         </div>
                     ) : (
                         <div className="flex items-center">
-                            <div>The correct answer is: <MathRenderer text={getCorrectAnswerText()} /></div>
+                            <div>The correct answer is: <MathRenderer text={getCorrectAnswerText(currentQuestion)} /></div>
                         </div>
                     )}
                 </motion.div>

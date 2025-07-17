@@ -1,16 +1,19 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FaBookmark } from 'react-icons/fa'
+import AuthContext from '../../../context/AuthContext';
+import { handleBookmark } from '../../../utils/questionUtils';
 
-const QuestionBookmark = ({ handleBookmark }) => {
+const QuestionBookmark = ({ questionId, subject }) => {
     const [hovered, setHovered] = useState(false);
+    const { isLogin } = useContext(AuthContext);
     return (
         <div>
             <button
                 className='flex items-center justify-center bg-blue-400 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 relative text-xs sm:text-sm'
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                onClick={handleBookmark}
+                onClick={() => handleBookmark(isLogin, questionId, subject)}
             >
                 <FaBookmark className='h-3.5' />
                 <AnimatePresence>

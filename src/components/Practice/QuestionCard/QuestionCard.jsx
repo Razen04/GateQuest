@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaCheck, FaTimes, FaTag } from 'react-icons/fa'
-import MathRenderer from '../MathRenderer'
+import { motion } from 'framer-motion'
 import ActionButtons from './ActionButtons'
 import ResultMessage from './ResultMessage'
-import QuestionTimer from './QuestionTimer'
 import AppSettingContext from '../../../context/AppSettingContext'
-import { toast } from 'sonner'
-import QuestionBookmark from './QuestionBookmark'
-import { getUserProfile, recordAttempt, syncUserToSupabase, updateUserProfile } from '../../../helper'
+import { getUserProfile } from '../../../helper'
 import AuthContext from '../../../context/AuthContext'
+import StatsContext from '../../../context/StatsContext'
+import { getCorrectAnswerText, isMultipleSelection, isNumericalQuestion } from '../../../utils/questionUtils'
+import { useQuestionTimer } from '../../../hooks/useQuestionTimer'
+import { useQuestionState } from '../../../hooks/useQuestionState'
+import QuestionHeader from './QuestionHeader'
+import QuestionContent from './QuestionContent'
+import QuestionBadge from './QuestionBadge'
+import { submitAndRecordAnswer } from '../../../utils/answerHandler'
 
 const QuestionCard = ({ subject, questions, questionId = 0 }) => {
+
     const profile = getUserProfile();
     let user;
     if (profile) {
@@ -21,32 +25,34 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             id: 1,
         }
     }
+
+
+    const { updateStats } = useContext(StatsContext);
     const [currentIndex, setCurrentIndex] = useState(questionId)
-    const [userAnswer, setUserAnswer] = useState(null)
-    const [selectedOptions, setSelectedOptions] = useState([]) // For multiple selections
-    const [numericalAnswer, setNumericalAnswer] = useState(null)
     const [questionLink, setQuestionLink] = useState("");
     const numInputRef = useRef(null);
-    const [showAnswer, setShowAnswer] = useState(false)
-    const [result, setResult] = useState(null) // correct, incorrect, or null
-    const [timer, setTimer] = useState(false)
-    const [timerVal, setTimerVal] = useState(0)
-    const intervalRef = useRef(null);
     const [userRecord, setUserRecord] = useState(null);
+    const currentQuestion = questions.find(q => q.id === currentIndex) || questions[0]
+
 
     const { settings } = useContext(AppSettingContext)
     const { isLogin } = useContext(AuthContext)
 
+    const { time: timeTaken, toggle: toggleTimer, stop: stopTimer } = useQuestionTimer(settings?.autoTimer, currentQuestion);
 
+    // All answer/selection/result state is handled by this hook.
+    const {
+        userAnswerIndex, selectedOptionIndices, numericalAnswer, setNumericalAnswer,
+        showAnswer, setShowAnswer, result, setResult,
+        resetState: resetQuestionState, handleOptionSelect
+    } = useQuestionState(currentQuestion);
 
     // Load questions based on subject and chapter
     useEffect(() => {
         // Reset state when subject changes
         setCurrentIndex(questionId)
-        resetQuestion()
+        resetQuestionState()
     }, [subject, questionId])
-
-    const currentQuestion = questions.find(q => q.id === currentIndex) || questions[0]
 
     // Set question link after every question
     useEffect(() => {
@@ -54,7 +60,6 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }, [currentQuestion])
 
     useEffect(() => {
-        // ...removed console.log...
         setUserRecord({
             user_id: user.id,
             question_id: currentQuestion.id,
@@ -107,134 +112,6 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         };
     }, [currentQuestion]);
 
-    // Timer
-    const handleTimer = () => {
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-            setTimer(false);
-            setTimerVal(0);
-        } else {
-            setTimerVal(0);
-            setTimer(true);
-            intervalRef.current = setInterval(() => {
-                setTimerVal(prev => prev + 1);
-            }, 1000);
-        }
-    };
-
-    useEffect(() => {
-        // Cleanup on unmount
-        return () => {
-            if (intervalRef.current !== null) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-            setTimerVal(0);
-        };
-    }, []);
-
-    useEffect(() => {
-        // Always clear previous interval before starting a new one
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-        if (!settings?.autoTimer) {
-            setTimer(false);
-            setTimerVal(0);
-        } else {
-            setTimerVal(0);
-            setTimer(true);
-            intervalRef.current = setInterval(() => {
-                setTimerVal(prev => prev + 1);
-            }, 1000);
-        }
-        // Cleanup on question change
-        return () => {
-            if (intervalRef.current !== null) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-        };
-    }, [currentQuestion, settings?.autoTimer]);
-
-    const minutes = String(Math.floor(timerVal / 60)).padStart(2, "0");
-    const seconds = String(timerVal % 60).padStart(2, "0")
-
-
-    // Handle bookmark
-    const handleBookmark = () => {
-        const profile = getUserProfile();
-
-        if (profile) {
-            const oldBookmark = profile.bookmark_questions || []
-
-            const bookmark_questions = [
-                ...oldBookmark,
-                { id: questionId, subject: subject }
-            ]
-
-            const updatedProfile = { ...profile, bookmark_questions }
-            console.log("User Profile: ", updatedProfile)
-            updateUserProfile(updatedProfile)
-            syncUserToSupabase(isLogin)
-        } else {
-            toast.error("Unable to bookmark, try again later.")
-        }
-    }
-
-    // Determine if current question is a multiple selection question
-    const isMultipleSelection = () => {
-        if (!currentQuestion) return false;
-        if (currentQuestion.tags && Array.isArray(currentQuestion.tags)) {
-            return currentQuestion.tags.some(tag =>
-                tag.toLowerCase().includes('multiple-select') ||
-                tag.toLowerCase().includes('multiple select')
-            );
-        }
-        return currentQuestion.questionType === 'MSQ' ||
-            currentQuestion.questionType === 'Multiple Select Question';
-    }
-
-    // Determine if current question is a numerical question
-    const isNumericalQuestion = () => {
-        if (!currentQuestion) return false;
-
-        if (currentQuestion.questionType) {
-            return currentQuestion.questionType.toLowerCase().includes('numerical')
-        }
-
-        return currentQuestion.questionType === 'Numerical Answer' ||
-            (currentQuestion.options &&
-                Array.isArray(currentQuestion.options) &&
-                currentQuestion.options.length === 0);
-    }
-
-    // Handle single option selection
-    const handleOptionSelect = (option) => {
-        if (showAnswer) return;
-
-        if (isMultipleSelection()) {
-            // For multiple selection questions
-            const optionIndex = selectedOptions.indexOf(option);
-            if (optionIndex === -1) {
-                // Add option if not already selected
-                setSelectedOptions([...selectedOptions, option]);
-            } else {
-                // Remove option if already selected
-                setSelectedOptions(selectedOptions.filter((_, index) => index !== optionIndex));
-            }
-        } else {
-            // For single selection questions
-            setUserAnswer(option);
-            setSelectedOptions([...selectedOptions, option])
-            if (option === userAnswer) {
-                setUserAnswer(null);
-                setSelectedOptions([]);
-            }
-        }
-    }
 
     // Handle numerical input change
     const handleNumericalInputChange = (e) => {
@@ -242,196 +119,36 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         setNumericalAnswer(e.target.value);
     }
 
-    // Check if an option is selected (for multiple selection)
-    const isOptionSelected = (option) => {
-        if (isMultipleSelection()) {
-            return selectedOptions.includes(option);
-        }
-        return userAnswer === option;
-    }
-
     // Handle show answer
-    const handleShowAnswer = async (overrideAnswer) => {
+    const handleShowAnswer = async () => {
+        if (showAnswer) return;
+
+        stopTimer();
         setShowAnswer(true);
-        setTimer(false);
 
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
+        const resultStatus = await submitAndRecordAnswer({
+            currentQuestion,
+            selectedOptionIndices,
+            numericalAnswer,
+            timeTaken,
+            user,
+            isLogin,
+            updateStats
+        });
 
-        if (document.activeElement?.tagName === "BUTTON") {
-            document.activeElement.blur();
-        }
+        console.log("Result: ", resultStatus)
 
-        // ...removed console.log...
-
-        const baseAttempt = {
-            user_id: user?.id,
-            question_id: currentQuestion?.id,
-            subject: currentQuestion?.subject,
-            attempted_at: new Date().toISOString(),
-            time_taken: timerVal,
-            attempt_number: (userRecord?.attempt_number ?? 0) + 1
-        };
-        if (!user?.id) {
-            console.warn("User ID is undefined when attempting to record attempt.", user);
-            toast.error("User not loaded. Please refresh or login again.");
-            return;
-        }
-
-        try {
-            // 🔢 Numerical Questions
-            if (isNumericalQuestion()) {
-                const raw = overrideAnswer !== undefined
-                    ? overrideAnswer.toString().trim()
-                    : numericalAnswer.toString().trim();
-
-                const answerToCheck = parseFloat(raw);
-                const correctValue = parseFloat(currentQuestion?.correctAnswer);
-
-                if (isNaN(answerToCheck)) {
-                    toast.error("You haven't entered a valid number.");
-                    setResult("unattempted");
-                    return;
-                }
-
-                const isCorrect = answerToCheck === correctValue;
-                const attemptData = { ...baseAttempt, was_correct: isCorrect };
-
-                setUserRecord(attemptData);
-                setResult(isCorrect ? "correct" : "incorrect");
-                recordAttempt(attemptData, isLogin);
-                return;
-            }
-
-            // ✅ Multiple Select (MSQ)
-            if (isMultipleSelection()) {
-                const correctOptions = currentQuestion.correctAnswer.map(i => currentQuestion.options[i]);
-                const allCorrect = correctOptions.every(opt => selectedOptions.includes(opt));
-                const noExtras = selectedOptions.every(opt => correctOptions.includes(opt));
-                const isCorrect = allCorrect && noExtras && selectedOptions.length > 0;
-
-                const attemptData = { ...baseAttempt, was_correct: isCorrect };
-                setUserRecord(attemptData);
-                setResult(isCorrect ? "correct" : "incorrect");
-                recordAttempt(attemptData, isLogin);
-
-                return;
-            }
-
-            // ☝️ Single Select (MCQ)
-            if (userAnswer) {
-                let isCorrect = false;
-
-                if (Array.isArray(currentQuestion.correctAnswer)) {
-                    const correctOption = currentQuestion.options?.[currentQuestion.correctAnswer[0]];
-                    isCorrect = userAnswer === correctOption;
-                } else {
-                    isCorrect = userAnswer === currentQuestion.correctAnswer;
-                }
-
-                const attemptData = { ...baseAttempt, was_correct: isCorrect };
-                setUserRecord(attemptData);
-                setResult(isCorrect ? "correct" : "incorrect");
-                recordAttempt(attemptData, isLogin);
-                return;
-            }
-
-            // ❓ Unattempted Fallback
-            const attemptData = { ...baseAttempt, was_correct: false };
-            setUserRecord(attemptData);
-            setResult("unattempted");
-            recordAttempt(attemptData, isLogin);
-        } catch (error) {
-            console.error("Error determining answer correctness:", error);
-            const attemptData = { ...baseAttempt, was_correct: false };
-            setUserRecord(attemptData);
-            setResult("unattempted");
-            recordAttempt(attemptData, isLogin);
-
-        }
+        setResult(resultStatus)
     }
 
-    // Get correct answer text
-    const getCorrectAnswerText = () => {
-        if (!currentQuestion) return '';
-
-        try {
-            if (isNumericalQuestion()) {
-                return currentQuestion.correctAnswer?.toString()
-            }
-
-            if (isMultipleSelection() && Array.isArray(currentQuestion.correctAnswer)) {
-                // For multiple selection, show all correct options
-                const correctIndices = currentQuestion.correctAnswer;
-                if (Array.isArray(currentQuestion.options)) {
-                    const correctOptions = correctIndices.map(index =>
-                        currentQuestion.options[index]
-                    ).filter(Boolean);
-                    return correctOptions.join(', ');
-                }
-            }
-
-            if (Array.isArray(currentQuestion.correctAnswer) &&
-                currentQuestion.options &&
-                Array.isArray(currentQuestion.options)) {
-                const index = currentQuestion.correctAnswer[0];
-                if (index !== undefined && currentQuestion.options[index] !== undefined) {
-                    return currentQuestion.options[index];
-                }
-            }
-
-            // For questions that might have answerText
-            if (currentQuestion.answerText) {
-                return currentQuestion.answerText;
-            }
-
-            return currentQuestion.correctAnswer || 'Answer not available';
-        } catch (error) {
-            console.error("Error getting correct answer text:", error);
-            return 'Answer not available';
-        }
-    }
-
-    // Reset question state
-    const resetQuestion = () => {
-        setTimer(false);
-        setUserAnswer(null);
-        setSelectedOptions([]);
-        setNumericalAnswer('');
-        setShowAnswer(false);
-        setResult(null);
-    }
-
-    // Get question type text
-    const getQuestionTypeText = (type) => {
-        if (!type) return 'Question';
-
-        switch (type) {
-            case 'MCQ':
-            case 'multiple-choice':
-                return isMultipleSelection() ? 'Multiple Select Question' : 'Multiple Choice Question';
-            case 'MSQ':
-            case 'Multiple Select Question':
-                return 'Multiple Select Question';
-            case 'numerical':
-                return 'Numerical Answer';
-            case 'Descriptive':
-                return 'Descriptive Question';
-            case 'Match the following':
-                return 'Match the Following';
-            default:
-                return type;
-        }
-    }
 
     // Move to next question
     const handleNext = () => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition < questions.length - 1) {
             setCurrentIndex(questions[currentPosition + 1].id);
-            resetQuestion();
+            resetQuestionState();
+            toggleTimer()
         }
     }
 
@@ -440,22 +157,15 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         const currentPosition = questions.findIndex(q => q.id === currentIndex);
         if (currentPosition > 0) {
             setCurrentIndex(questions[currentPosition - 1].id);
-            resetQuestion();
-
+            resetQuestionState();
+            toggleTimer()
         }
     }
 
     // Skip current question
     const handleSubmit = () => {
+        stopTimer();
         handleShowAnswer();
-    }
-
-    if (!currentQuestion) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <p className="text-gray-500">Loading questions...</p>
-            </div>
-        );
     }
 
     // Determine if we should show options
@@ -463,30 +173,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         Array.isArray(currentQuestion.options) &&
         currentQuestion.options.length > 0;
 
-    // Normalize difficulty for display - handle null case
-    let normalizedDifficulty = 'unknown';
-    if (currentQuestion.difficulty) {
-        normalizedDifficulty = currentQuestion.difficulty.toLowerCase() === 'normal'
-            ? 'medium'
-            : currentQuestion.difficulty.toLowerCase();
-    }
 
-    // Get difficulty class names
-    const getDifficultyClassNames = () => {
-        if (!currentQuestion.difficulty) return 'bg-gray-100 text-gray-700';
-
-        if (normalizedDifficulty === 'easy') return 'bg-green-100 text-green-700';
-        if (normalizedDifficulty === 'medium') return 'bg-yellow-100 text-yellow-700';
-        if (normalizedDifficulty === 'hard') return 'bg-red-100 text-red-700';
-
-        return 'bg-gray-100 text-gray-700';
-    }
-
-    // Get difficulty display text
-    const getDifficultyDisplayText = () => {
-        if (!currentQuestion.difficulty) return 'Unknown';
-        return normalizedDifficulty.charAt(0).toUpperCase() + normalizedDifficulty.slice(1);
-    }
 
     // Redirect to explaination link
     const handleExplainationClick = (link) => {
@@ -498,6 +185,14 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
 
     const isFirstQuestion = questions.findIndex(q => q.id === currentIndex) === 0
 
+    if (!currentQuestion) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <p className="text-gray-500">Loading questions...</p>
+            </div>
+        );
+    }
+
     return (
         <motion.div
             className="max-w-3xl mx-auto rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden"
@@ -506,124 +201,21 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             transition={{ duration: 0.5 }}
         >
             {/* Question Header */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h3 className="font-bold text-base sm:text-lg">
-                        Question {questions.findIndex(q => q.id === currentIndex) + 1} of {questions.length}
-                    </h3>
-                    <div className="flex flex-wrap gap-2 sm:space-x-3 items-center">
-                        <QuestionBookmark handleBookmark={handleBookmark} />
-                        <QuestionTimer timer={timer} handleTimer={handleTimer} minutes={minutes} seconds={seconds} />
-                        <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyClassNames()}`}>
-                            {getDifficultyDisplayText()}
-                        </span>
-                        {currentQuestion.year && (
-                            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                                GATE {currentQuestion.year}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Question type and marks */}
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {currentQuestion.questionType && (
-                        <span className="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full">
-                            {getQuestionTypeText(currentQuestion.questionType)}
-                        </span>
-                    )}
-
-                    {currentQuestion.marks && (
-                        <span className="text-xs px-2 py-1 bg-purple-50 text-purple-600 rounded-full">
-                            {currentQuestion.marks} Mark{currentQuestion.marks !== 1 ? 's' : ''}
-                        </span>
-                    )}
-
-                    {isMultipleSelection() && (
-                        <span className="text-xs px-2 py-1 bg-orange-50 text-orange-600 rounded-full">
-                            Select all that apply
-                        </span>
-                    )}
-                </div>
-            </div>
+            <QuestionHeader subject={subject} questions={questions} currentIndex={currentIndex} currentQuestion={currentQuestion} questionId={questionId} />
 
             {/* Question Content */}
             <div className="p-4 sm:p-6">
-                <div className="mb-4 sm:mb-6">
-                    <div className="text-base md:text-lg">
-                        {currentQuestion.question ? (
-                            <MathRenderer text={currentQuestion.question} />
-                        ) : (
-                            <span>Question content unavailable</span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Options - Only show if the question has options */}
-                {hasOptions && (
-                    <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                        {currentQuestion.options.map((option, index) => (
-                            <motion.div
-                                key={index}
-                                whileHover={{ scale: 1.01 }}
-                                whileTap={{ scale: 0.99 }}
-                                className={`p-4 border rounded-lg cursor-pointer transition-all 
-                                    ${isOptionSelected(option) ? 'border-blue-500 bg-blue-50 dark:bg-blue-600' : 'border-gray-200 dark:border-zinc-700 hover:border-blue-200'}
-                                    ${showAnswer && currentQuestion.correctAnswer && (
-                                        (Array.isArray(currentQuestion.correctAnswer) &&
-                                            currentQuestion.correctAnswer.includes(index)) ||
-                                        option === currentQuestion.correctAnswer
-                                    )
-                                        ? 'border-green-500 bg-green-50 dark:bg-green-600'
-                                        : showAnswer && isOptionSelected(option) && currentQuestion.correctAnswer && (
-                                            (Array.isArray(currentQuestion.correctAnswer) &&
-                                                !currentQuestion.correctAnswer.includes(index)) ||
-                                            option !== currentQuestion.correctAnswer
-                                        )
-                                            ? 'border-red-500 bg-red-50 dark:bg-red-600'
-                                            : ''
-                                    }
-                                `}
-                                onClick={() => handleOptionSelect(option)}
-                            >
-                                <div className="flex items-center">
-                                    {isMultipleSelection() ? (
-                                        // Checkbox for multiple selection
-                                        <div className={`w-5 h-5 border rounded flex items-center justify-center mr-3 
-                                            ${isOptionSelected(option)
-                                                ? 'border-blue-500 bg-blue-500'
-                                                : 'border-gray-300 dark:border-gray-700'
-                                            }`}
-                                        >
-                                            {isOptionSelected(option) && (
-                                                <FaCheck className="text-xs" />
-                                            )}
-                                        </div>
-                                    ) : (
-                                        // Radio button for single selection
-                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 
-                                            ${userAnswer === option
-                                                ? 'border-blue-500 bg-blue-500'
-                                                : 'border-gray-300 dark:border-gray-700'
-                                            }`}
-                                        >
-                                            {userAnswer === option && (
-                                                <div className="w-2 h-2 bg-white rounded-full"></div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <div className="flex-1">
-                                        {option ? <MathRenderer text={option} /> : 'Option unavailable'}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
+                <QuestionContent
+                    currentQuestion={currentQuestion}
+                    hasOptions={hasOptions}
+                    showAnswer={showAnswer}
+                    selectedIndices={selectedOptionIndices}
+                    userAnswerIndex={userAnswerIndex}
+                    onOptionSelect={handleOptionSelect}
+                />
 
                 {/* Numerical Answer Input */}
-                {isNumericalQuestion() && (
+                {isNumericalQuestion(currentQuestion) && (
                     <div className="mb-6">
                         <label className="block text-sm font-medium mb-2">
                             Enter your numerical answer:
@@ -644,9 +236,9 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                             placeholder="Enter your answer"
                             disabled={showAnswer}
                         />
-                        {showAnswer && (numericalAnswer === getCorrectAnswerText()) && (
+                        {showAnswer && (numericalAnswer === getCorrectAnswerText(currentQuestion)) && (
                             <p className="mt-2 text-sm">
-                                Correct answer: {getCorrectAnswerText()}
+                                Correct answer: {getCorrectAnswerText(currentQuestion)}
                             </p>
                         )}
                     </div>
@@ -658,13 +250,14 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                         showAnswer={showAnswer}
                         result={result}
                         getCorrectAnswerText={getCorrectAnswerText}
+                        currentQuestion={currentQuestion}
                     />
                 )}
 
 
                 {/* Action Buttons */}
                 <ActionButtons
-                    selectedOptions={selectedOptions}
+                    selectedOptions={selectedOptionIndices}
                     isFirstQuestion={isFirstQuestion}
                     isLastQuestion={isLastQuestion}
                     handleNext={handleNext}
@@ -678,15 +271,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                 />
             </div>
 
-            {/* Question ID Badge and Tags */}
-            <div className="px-4 sm:px-6 py-2 mb-10 md:mb-0 sm:py-3 border-t border-border-primary dark:border-border-primary-dark">
-                <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-2">
-                    <div className="flex items-center text-xs mb-2 sm:mb-0 gap-4">
-                        <span>ID: {currentQuestion.id || 'Unknown'}</span>
-                        <span>Subject: {subject.toUpperCase()}</span>
-                    </div>
-                </div>
-            </div>
+            <QuestionBadge currentQuestion={currentQuestion} subject={subject} />
         </motion.div>
     );
 }

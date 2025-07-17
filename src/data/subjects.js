@@ -1,9 +1,12 @@
+import { FaLaptopCode, FaMicrochip, FaSquareRootAlt } from 'react-icons/fa';
+
 // Subject data
 const subjects = [
     {
         id: 1,
-        name: "Data Structures & Algorithms",
-        icon: <FaLaptopCode className="h-6 w-6" />,
+        name: "Algorithms",
+        apiName: "Algorithms",
+        icon: FaLaptopCode, // Store the component reference
         progress: 65,
         questions: 240,
         difficulty: "Medium",
@@ -12,8 +15,9 @@ const subjects = [
     },
     {
         id: 2,
-        name: "Computer Organization",
-        icon: <FaMicrochip className="h-6 w-6" />,
+        name: "Computer Organization & Architecture",
+        apiName: "CO & Architecture",
+        icon: FaMicrochip,
         progress: 42,
         questions: 180,
         difficulty: "Hard",
@@ -21,14 +25,15 @@ const subjects = [
         color: "purple"
     },
     {
-        id: 3,
-        name: "Engineering Mathematics",
-        icon: <FaSquareRootAlt className="h-6 w-6" />,
-        progress: 28,
-        questions: 320,
-        difficulty: "Medium",
-        category: "math",
-        color: "green"
+        id: 2.1,
+        name: "Computer Organization & Architecture",
+        apiName: "CO & Architecture",
+        icon: FaMicrochip,
+        progress: 42,
+        questions: 180,
+        difficulty: "Hard",
+        category: "bookmarked",
+        color: "purple"
     },
     // Other subjects remain the same...
 ]

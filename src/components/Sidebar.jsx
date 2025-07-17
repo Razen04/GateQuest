@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
@@ -11,23 +11,19 @@ import {
     FaDiscord
 } from 'react-icons/fa'
 import { FaGithub, FaReddit } from 'react-icons/fa6'
+import useWindowSize from '../hooks/useWindowSize'
 
 const Sidebar = ({ showSidebar, setShowSidebar }) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    // Determine active tab based on current path
-    const getActiveTab = () => {
-        const path = location.pathname
-        if (path.includes('/practice')) return 2
-        if (path.includes('/resources')) return 3
-        if (path.includes('/settings')) return 4
-        if (path.includes('/contact')) return 5
-        return 1 // Dashboard is default
+    const { width, height } = useWindowSize();
+
+    if (width === undefined) {
+        return (
+            <div>Loading size...</div>
+        )
     }
-
-    const [activeTab, setActiveTab] = useState(getActiveTab())
-
     const tabs = [
         { id: 1, name: "Dashboard", icon: <FaChartPie />, path: "/" },
         { id: 2, name: "Practice", icon: <FaLaptopCode />, path: "/practice" },
@@ -36,20 +32,20 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
     ]
 
     // Handle tab click with navigation
-    const handleTabClick = (tabId, path) => {
-        setActiveTab(tabId)
+    const handleTabClick = (path) => {
         navigate(path)
-        setShowSidebar(false)
+        if (showSidebar) {
+            setShowSidebar(false)
+        }
     }
 
     return (
         <motion.div
             className={`w-64 z-10 absolute h-[100dvh] lg:static lg:block border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-lg transition-colors duration-1000`}
             initial={{ x: '-100%' }}
-            animate={{ x: showSidebar || window.innerWidth >= 1024 ? 0 : '-100%' }}
+            animate={{ x: showSidebar || width >= 1024 ? 0 : '-100%' }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', duration: 0.4, ease: 'easeIn' }}
-            style={{ display: showSidebar || window.innerWidth >= 1024 ? 'block' : 'none' }}
         >
             <div className="flex flex-col h-full bg-primary dark:bg-primary-dark">
                 {/* Branding */}
@@ -75,50 +71,53 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                 {/* Navigation */}
                 <div className='flex-1 pt-6 overflow-y-auto scrollbar-hide'>
                     <nav className='px-4'>
-                        {tabs.map((tab, index) => (
-                            <motion.div
-                                key={tab.id}
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 * index, duration: 0.5 }}
-                                onClick={() => handleTabClick(tab.id, tab.path)}
-                                className={`relative flex items-center px-4 py-3 my-2 rounded-xl cursor-pointer group transition-all duration-300 ${activeTab === tab.id
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
-                                    : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
-                                    }`}
-                            >
-                                <div className={`p-2 rounded-lg ${activeTab === tab.id
-                                    ? 'bg-white/20'
-                                    : 'bg-gray-100 group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-700'
-                                    }`}>
-                                    <span
-                                        className={`text-lg transition-transform duration-300 group-hover:scale-110 ${activeTab === tab.id
-                                            ? 'text-white'
-                                            : 'text-text-primary dark:text-text-primary-dark'
-                                            }`}
-                                    >
-                                        {tab.icon}
+                        {tabs.map((tab, index) => {
+                            const isActive = location.pathname === tab.path;
+                            return (
+                                <motion.div
+                                    key={tab.id}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 * index, duration: 0.5 }}
+                                    onClick={() => handleTabClick(tab.path)}
+                                    className={`relative flex items-center px-4 py-3 my-2 rounded-xl cursor-pointer group transition-all duration-300 ${isActive
+                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
+                                        : 'hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
+                                        }`}
+                                >
+                                    <div className={`p-2 rounded-lg ${isActive
+                                        ? 'bg-white/20'
+                                        : 'bg-gray-100 group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-700'
+                                        }`}>
+                                        <span
+                                            className={`text-lg transition-transform duration-300 group-hover:scale-110 ${isActive
+                                                ? 'text-white'
+                                                : 'text-text-primary dark:text-text-primary-dark'
+                                                }`}
+                                        >
+                                            {tab.icon}
+                                        </span>
+                                    </div>
+                                    <span className={`ml-3 text-base transition-all duration-300 ${isActive
+                                        ? 'font-bold'
+                                        : 'text-gray-700 group-hover:text-gray-900 dark:text-gray-200 dark:group-hover:text-gray-200'
+                                        }`}>
+                                        {tab.name}
                                     </span>
-                                </div>
-                                <span className={`ml-3 text-base transition-all duration-300 ${activeTab === tab.id
-                                    ? 'font-bold'
-                                    : 'text-gray-700 group-hover:text-gray-900 dark:text-gray-200 dark:group-hover:text-gray-200'
-                                    }`}>
-                                    {tab.name}
-                                </span>
 
-                                {activeTab === tab.id && (
-                                    <motion.div
-                                        className="absolute right-4"
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        ))}
+                                    {isActive && (
+                                        <motion.div
+                                            className="absolute right-4"
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <div className="w-2 h-2 rounded-full bg-white"></div>
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            )
+                        })}
                     </nav>
                 </div>
 

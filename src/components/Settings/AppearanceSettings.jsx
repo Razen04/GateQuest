@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react'
-import { FaPallet, FaSun, FaMoon } from 'react-icons/fa'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useContext } from 'react'
+import { FaPallet } from 'react-icons/fa'
 import Buttons from '../Buttons'
 import ThemeContext from '../../context/ThemeContext'
 import ToggleSwitch from '../ToggleSwitch'

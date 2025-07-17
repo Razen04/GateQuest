@@ -1,15 +1,16 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
+import { toast } from 'sonner'
 
 const ContactField = ({ label, type, name, placeholder, formData, handleInputChange }) => {
     return (
         <div>
-            <label className="block text-sm font-medium mb-1">{label}</label>
+            <label htmlFor={name} className="block text-sm font-medium mb-1">{label}</label>
             <input
                 type={type}
                 name={name}
-                value={formData.name}
+                value={formData[name]}
                 onChange={handleInputChange}
                 required
                 placeholder={placeholder}
@@ -48,7 +49,7 @@ const Contact = () => {
             setMessageSent(true);
         } catch (err) {
             console.error("Error sending message:", err);
-            alert("Failed to send message");
+            toast.error("Failed to send message");
         } finally {
             setLoading(false)
         }

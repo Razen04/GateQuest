@@ -1,189 +1,46 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaArrowLeft, FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa'
-import MathRenderer from './MathRenderer'
 import QuestionCard from './QuestionCard/QuestionCard'
-import axios from 'axios'
-import { getUserProfile } from '../../helper'
-import { toast } from 'sonner'
+import useQuestions from '../../hooks/useQuestions'
+import useFilters from '../../hooks/useFilters'
+import { getDifficultyClassNames } from '../../utils/questionUtils'
+import MathRenderer from './MathRenderer'
 
 const QuestionsList = ({ subject, activeFilter, onBack }) => {
-    const [questions, setQuestions] = useState([])
-    const [filteredQuestions, setFilteredQuestions] = useState([])
+    const { questions, isLoading, error } = useQuestions(subject, activeFilter);
+
+    const { filteredQuestions,
+        searchQuery,
+        setSearchQuery,
+        difficultyFilter,
+        setDifficultyFilter,
+        yearFilter,
+        setYearFilter,
+        topicFilter,
+        setTopicFilter
+    } = useFilters(questions);
+
     const [selectedQuestion, setSelectedQuestion] = useState(null)
-    const [searchQuery, setSearchQuery] = useState('')
-    const [difficultyFilter, setDifficultyFilter] = useState('all')
-    const [yearFilter, setYearFilter] = useState('all')
-    const [topicFilter, setTopicFilter] = useState('')
     const [showFilters, setShowFilters] = useState(false)
-    const [years, setYears] = useState([])
-    const [topics, setTopics] = useState([])
-    const [errorMessage, setErrorMessage] = useState('No questions match your criteria. Try adjusting your filters.')
 
-    const getYears = (questions) => {
-        // Extract and sanitize all years
-        const allYears = questions
-            .map(q => parseInt(q.year))
-            .filter(year => !isNaN(year));  // Remove undefined, null, NaN
+    const errorMessage = "No questions match your criteria. Try adjusting your filters.";
+    // Dynamically generate years and topics for the dropdowns
+    const years = useMemo(() => {
+        const allYears = questions.map(q => parseInt(q.year)).filter(y => !isNaN(y));
+        return [...new Set(allYears)].sort((a, b) => b - a);
+    }, [questions]);
 
-        // Get unique years and sort descending
-        const uniqueYears = [...new Set(allYears)].sort((a, b) => b - a);
-
-        setYears(uniqueYears);
-    }
-
-    const getTopics = (questions) => {
-        const allTopics = questions.map(q => q.topic)
-        const uniqueTopics = [...new Set(allTopics)]
-        setTopics(uniqueTopics)
-    }
-
-
-    useEffect(() => {
-        getYears(filteredQuestions)
-        getTopics(filteredQuestions)
-    }, [filteredQuestions, subject])
-
-    useEffect(() => {
-        if (!subject || !activeFilter) return; // wait until both are defined
-
-        const profile = getUserProfile();
-
-        const fetchBookmarkedQuestions = async (ids) => {
-            const joinedIds = ids.join(",");
-            const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions/bookmarked?ids=${joinedIds}`);
-            let loadedQuestions = res.data;
-            loadedQuestions = sortQuestionsByYear(loadedQuestions);
-            setQuestions(loadedQuestions);
-            setFilteredQuestions(loadedQuestions);
-        };
-
-        if (activeFilter === "bookmarked") {
-            const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
-
-            if (bookmarkedQuestions.length > 0) {
-                const ids = bookmarkedQuestions.map(q => q.id);
-                fetchBookmarkedQuestions(ids);
-            } else {
-                setQuestions([]);
-                setFilteredQuestions([]);
-                toast.message("No questions bookmarked yet.");
-            }
-
-        } else {
-            const fetchAllQuestions = async () => {
-                const localQuestions = JSON.parse(localStorage.getItem(subject))
-                if (Array.isArray(localQuestions) && localQuestions?.length > 0) {
-                    let loadedQuestions = localQuestions;
-                    setQuestions(loadedQuestions);
-                    setFilteredQuestions(loadedQuestions);
-                } else {
-                    const encodedSubject = encodeURIComponent(subject)
-                    const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${encodedSubject}`);
-                    let loadedQuestions = res.data;
-                    loadedQuestions = sortQuestionsByYear(loadedQuestions);
-                    localStorage.setItem(subject, JSON.stringify(loadedQuestions))
-                    setQuestions(loadedQuestions);
-                    setFilteredQuestions(loadedQuestions);
-                }
-
-            };
-            fetchAllQuestions();
-        }
-
-    }, [subject, activeFilter]);
-
-    // Add this helper function above the useEffect
-    const sortQuestionsByYear = (questionsToSort) => {
-        return [...questionsToSort].sort((a, b) => {
-            // Convert year to number (default to 0 if year is not present)
-            const yearA = a.year ? parseInt(a.year) : 0;
-            const yearB = b.year ? parseInt(b.year) : 0;
-
-            // Sort descending (newest first)
-            return yearB - yearA;
-        });
-    };
-
-    // Apply filters when filter state changes
-    useEffect(() => {
-
-        const debounceTimer = setTimeout(() => {
-            if (activeFilter === "bookmarked") {
-                // ✅ Client-side filtering
-                let filtered = [...questions];
-
-                if (searchQuery.trim()) {
-                    const q = searchQuery.trim().toLowerCase();
-                    filtered = filtered.filter(qn =>
-                        qn.question?.toLowerCase().includes(q) ||
-                        qn.tags?.some(tag => tag.toLowerCase().includes(q))
-                    );
-                }
-
-                if (difficultyFilter !== 'all') {
-                    filtered = filtered.filter(qn => qn.difficulty === difficultyFilter);
-                }
-
-                if (yearFilter !== 'all') {
-                    filtered = filtered.filter(qn => qn.year?.toString() === yearFilter);
-                }
-
-                setFilteredQuestions(filtered);
-            } else {
-                const filterQuestions = () => {
-                    let filtered = [...questions];
-
-                    if (searchQuery.trim()) {
-                        const q = searchQuery.trim().toLowerCase();
-                        filtered = filtered.filter(qn =>
-                            qn.question?.toLowerCase().includes(q) || qn.tags?.some(tag => tag.toLowerCase().includes(q))
-                        )
-                    }
-
-                    if (difficultyFilter !== 'all') {
-                        filtered = filtered.filter(qn => qn.difficulty === difficultyFilter)
-                    }
-
-                    if (yearFilter !== 'all') {
-                        filtered = filtered.filter(qn => qn.year?.toString() === yearFilter)
-                    }
-
-                    if (topicFilter && topicFilter !== 'all') {
-                        filtered = filtered.filter(qn => qn.topic === topicFilter)
-                    }
-
-                    filtered = sortQuestionsByYear(filtered);
-
-                    setFilteredQuestions(filtered)
-                }
-                filterQuestions();
-            }
-        }, 300); // debounce delay
-
-        return () => clearTimeout(debounceTimer);
-    }, [searchQuery, difficultyFilter, yearFilter, subject, activeFilter, questions, topicFilter]);
-
-
-    // Get difficulty class names
-    const getDifficultyClassNames = (difficulty) => {
-        if (!difficulty) return 'bg-gray-100 text-gray-700' // Default for unknown
-
-        const difficultyLower = difficulty.toLowerCase()
-
-        if (difficultyLower === 'easy') return 'md:bg-green-100 text-green-700'
-        if (difficultyLower === 'medium' || difficultyLower === 'normal') return 'md:bg-yellow-100 text-yellow-700'
-        if (difficultyLower === 'hard') return 'md:bg-red-100 text-red-700'
-
-        return 'bg-gray-100 text-gray-700' // Default fallback
-    }
+    const topics = useMemo(() => {
+        const allTopics = questions.map(q => q.topic).filter(Boolean);
+        return [...new Set(allTopics)];
+    }, [questions]);
 
     // Handle question click
     const handleQuestionClick = (id) => {
         setSelectedQuestion(id)
     }
 
-    // Helper to safely display question text
     const getQuestionDisplayText = (question) => {
         if (!question || !question.question) return "Question content unavailable";
 
@@ -207,6 +64,19 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
         }
 
         return <MathRenderer text={truncated + "..."} />;
+    }
+    
+
+    if (isLoading) {
+        return (
+            <div>Loading...</div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div>Failed to load questions, try again later.</div>
+        )
     }
 
     return (
@@ -355,7 +225,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                         onClick={() => handleQuestionClick(question.id)}
                                     >
                                         <div className="flex flex-col sm:flex-row justify-between">
-                                            <h3 className="font-medium mb-2 pr-0 sm:pr-4 text-xs md:text-base">
+                                            <h3 className="font-medium mb-2 pr-0 sm:pr-4 text-sm md:text-base">
                                                 {getQuestionDisplayText(question)}
                                             </h3>
                                             <div className="flex space-x-2 mt-2 sm:mt-0">

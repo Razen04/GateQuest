@@ -1,17 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { BiBell, BiSearch, BiSolidBell } from 'react-icons/bi'
+import { BiBell, BiSolidBell } from 'react-icons/bi'
 import Notification from './Notification'
-import { getUserProfile } from '../helper'
 import { FaHamburger } from 'react-icons/fa'
 
 const Navbar = ({ setShowSidebar }) => {
-    const [showSearchInput, setShowSearchInput] = useState(false)
     const [showNotifications, setShowNotifications] = useState(false)
     const [unreadNotifications, setUnreadNotifications] = useState(false)
     const notificationRef = useRef(null)
-
-    const profile = getUserProfile();
 
     // Handle click outside notification panel to close it
     useEffect(() => {
@@ -37,8 +33,8 @@ const Navbar = ({ setShowSidebar }) => {
 
             {/* Hamburger menu only for mobile */}
             <motion.div className="lg:hidden">
-                <button onClick={() => setShowSidebar(prev => !prev)} className='p-1 cursor-pointer'>
-                    <FaHamburger className='text-xl' />
+                <button aria-label='Toggle navigation menu' onClick={() => setShowSidebar(prev => !prev)} className='p-1 cursor-pointer text-xl'>
+                    <FaHamburger />
                 </button>
             </motion.div>
 
@@ -53,7 +49,7 @@ const Navbar = ({ setShowSidebar }) => {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
             >
-                <div className="relative" ref={notificationRef}>
+                <button className="relative" ref={notificationRef}>
                     <motion.div
                         className="relative cursor-pointer"
                         whileHover={{ scale: 1.1 }}
@@ -67,15 +63,13 @@ const Navbar = ({ setShowSidebar }) => {
                     </motion.div>
 
                     {/* Notifications Panel */}
-                    <div className='z-10'>
-                        <Notification
-                            isOpen={showNotifications}
-                            onClose={() => setShowNotifications(false)}
-                            setUnreadNotifications={setUnreadNotifications}
-                        />
-                    </div>
+                    <Notification
+                        isOpen={showNotifications}
+                        onClose={() => setShowNotifications(false)}
+                        setUnreadNotifications={setUnreadNotifications}
+                    />
 
-                </div>
+                </button>
             </motion.div>
         </motion.div>
     )

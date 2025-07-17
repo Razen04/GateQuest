@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { supabase } from '../../supabaseClient'
 import { formatDistanceToNow } from 'date-fns'
 
-const Notification = ({ isOpen, onClose, setUnreadNotifications }) => {
+const Notification = ({ isOpen, setUnreadNotifications }) => {
 
     const [notifications, setNotifications] = useState([]);
     const [readNotifications, setReadNotifications] = useState(() => {
@@ -15,11 +15,14 @@ const Notification = ({ isOpen, onClose, setUnreadNotifications }) => {
 
 
     // Mark all notifications as read
-    const markAllAsRead = (notifications) => {
+    const markAllAsRead = () => {
         const allIds = notifications.map(n => n.id);
         const updatedRead = Array.from(new Set([...readNotifications, ...allIds]));
+
         setReadNotifications(updatedRead);
         localStorage.setItem('read_notifications', JSON.stringify(updatedRead));
+
+        setNotifications([]);
         setUnreadNotifications(false);
     };
 
@@ -27,26 +30,29 @@ const Notification = ({ isOpen, onClose, setUnreadNotifications }) => {
     // Fetch notifications on mount
     useEffect(() => {
         const fetchNotifications = async () => {
-            const { data, error } = await supabase.from('notifications').select('*').eq('active', true).order('created_at', { ascending: false });
+            const readIds = JSON.parse(localStorage.getItem("read_notifications")) || [];
+
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('active', true)
+                .order('created_at', { ascending: false });
+
             if (error) {
                 console.error('Error fetching notifications: ', error);
                 toast.message("Couldn't fetch notifications");
             } else {
-                setNotifications((data || []).filter(n => !readNotifications.includes(n.id)));
+                setNotifications((data || []).filter(n => !readIds.includes(n.id)));
             }
         };
+
         fetchNotifications();
     }, []);
 
     // Update unread status when notifications or readNotifications change
     useEffect(() => {
-        if (notifications.length === 0) {
-            setUnreadNotifications(false);
-            return;
-        }
-        const unread = notifications.some(n => !readNotifications?.includes(n.id));
-        setUnreadNotifications(unread)
-    }, [notifications, readNotifications, setUnreadNotifications]);
+        setUnreadNotifications(notifications.length > 0)
+    }, [notifications, setUnreadNotifications]);
 
     const getNotificationIcon = (notification) => {
         if (notification.type === "update") {
@@ -108,7 +114,7 @@ const Notification = ({ isOpen, onClose, setUnreadNotifications }) => {
                             })
                         ) : (
                             <div className="py-8 text-center">
-                                <p>No notifications yet</p>
+                                <p>What a lonely day.</p>
                             </div>
                         )}
                     </div>
