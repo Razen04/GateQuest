@@ -12,22 +12,31 @@ export const submitAndRecordAnswer = async ({
     updateStats
 }) => {
     // 1. Determine Correctness
-    let isCorrect = false;
-    const correctAnswer = currentQuestion.correctAnswer || []
-    if (isNumericalQuestion(currentQuestion)) {
-        const answerToCheck = parseFloat(numericalAnswer?.toString().trim());
-        const correctValue = parseFloat(currentQuestion?.correctAnswer);
-        isCorrect = !isNaN(answerToCheck) && answerToCheck === correctValue;
-    } else {
-        // This logic now works for both MCQ and MSQ perfectly.
-        // It checks if the user's selected indices match the correct answer indices exactly.
-        const sortedUserSelection = [...selectedOptionIndices].sort();
-        const sortedCorrectAnswer = [...correctAnswer].sort();
+    let isCorrect = null; // Default to null (unattempted)
+    const correctAnswer = currentQuestion.correctAnswer || [];
 
-        isCorrect = sortedUserSelection.length === sortedCorrectAnswer.length &&
-            sortedUserSelection.every((value, index) => value === sortedCorrectAnswer[index]);
+    const wasAttempted = selectedOptionIndices.length > 0 || (isNumericalQuestion(currentQuestion) && numericalAnswer?.trim() !== '');
+
+    if (wasAttempted) {
+        if (isNumericalQuestion(currentQuestion)) {
+            const answerToCheck = parseFloat(numericalAnswer?.toString().trim());
+            const correctValue = parseFloat(correctAnswer);
+            isCorrect = !isNaN(answerToCheck) && answerToCheck === correctValue;
+        } else {
+            // This logic works for both MCQ and MSQ.
+            function arraysMatch(a, b) {
+                if (a.length !== b.length) return false;
+
+                const sortedA = [...a].sort((x, y) => x - y);
+                const sortedB = [...b].sort((x, y) => x - y);
+
+                return sortedA.every((val, index) => val === sortedB[index]);
+            }
+
+            isCorrect = arraysMatch(selectedOptionIndices, correctAnswer);
+        }
     }
-
+    // If not attempted, `isCorrect` remains null.
 
     // 2. Record the Attempt
     if (user?.id) {
@@ -36,7 +45,7 @@ export const submitAndRecordAnswer = async ({
                 user_id: user.id,
                 question_id: currentQuestion.id,
                 subject: currentQuestion.subject,
-                was_correct: isCorrect,
+                was_correct: isCorrect, // This can now be true, false, or null
                 time_taken: timeTaken,
                 attempt_number: 1
             }, isLogin);
@@ -47,6 +56,8 @@ export const submitAndRecordAnswer = async ({
         }
     }
 
-    // 3. Return the result for the UI
-    return isCorrect ? 'correct' : 'incorrect';
+    // 3. Return a descriptive result for the UI
+    if (isCorrect === true) return 'correct';
+    if (isCorrect === false) return 'incorrect';
+    return 'unattempted'; // This is the new return value for null
 };

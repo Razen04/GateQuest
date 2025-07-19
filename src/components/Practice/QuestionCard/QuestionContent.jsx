@@ -9,13 +9,14 @@ const QuestionContent = ({
     currentQuestion,
     hasOptions,
     showAnswer,
-    selectedOptionIndices = [],
+    selectedOptionIndices,
     userAnswerIndex,
-    onOptionSelect // This is the handler function from QuestionCard
+    onOptionSelect,
+    result // This is the handler function from QuestionCard
 }) => {
     return (
         <div>
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-4 sm:mb-6 overflow-x-scroll">
                 <div className="text-base md:text-lg">
                     {currentQuestion.question ? (
                         <MathRenderer text={currentQuestion.question} />
@@ -29,12 +30,22 @@ const QuestionContent = ({
                 <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                     {currentQuestion.options.map((option, index) => {
                         // For MSQ: selectedOptionIndices, for MCQ: userAnswerIndex
-                        const isSelected = isMultipleSelection(currentQuestion)
-                            ? selectedOptionIndices.includes(index)
-                            : userAnswerIndex === index;
-                        const isCorrect = Array.isArray(currentQuestion.correctAnswer)
-                            ? currentQuestion.correctAnswer.includes(index)
-                            : currentQuestion.correctAnswer === index;
+                        let isSelected;
+                        if(isMultipleSelection(currentQuestion)) {
+                            isSelected = selectedOptionIndices?.includes(index) ?? false
+                        } else {
+                            isSelected = userAnswerIndex === index;
+                        }
+
+                        let isCorrect;
+                        let correctAnswer = currentQuestion.correctAnswer;
+                        if (isMultipleSelection(currentQuestion)) {
+                            // MSQ
+                            isCorrect = correctAnswer.includes(index);
+                        } else {
+                            // MCQ
+                            isCorrect = correctAnswer[0] === index;
+                        }
 
                         // Determine the final styles based on state
                         let optionStyle = 'border-gray-200 dark:border-zinc-700 hover:border-blue-200';

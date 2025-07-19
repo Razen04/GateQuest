@@ -22,7 +22,7 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText, currentQuesti
                         </div>
                     ) : result === 'incorrect' ? (
                         <div className="flex items-center">
-                                <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText(currentQuestion)} /></span></div>
+                            <div>Incorrect. The correct answer is: <span className="font-semibold"><MathRenderer text={getCorrectAnswerText(currentQuestion)} /></span></div>
                         </div>
                     ) : (
                         <div className="flex items-center">

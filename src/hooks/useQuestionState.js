@@ -4,7 +4,7 @@ import { isMultipleSelection } from '../utils/questionUtils';
 export const useQuestionState = (currentQuestion) => {
     const [userAnswerIndex, setUserAnswerIndex] = useState(null);
     const [selectedOptionIndices, setSelectedOptionIndices] = useState([]);
-    const [numericalAnswer, setNumericalAnswer] = useState('');
+    const [numericalAnswer, setNumericalAnswer] = useState("");
     const [showAnswer, setShowAnswer] = useState(false);
     const [result, setResult] = useState(null);
 
@@ -12,12 +12,12 @@ export const useQuestionState = (currentQuestion) => {
         if (showAnswer) return;
 
         if (isMultipleSelection(currentQuestion)) {
+            console.log("isMultipleSelection: ", isMultipleSelection(currentQuestion))
             setSelectedOptionIndices(prev =>
                 prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
             );
         } else {
             const newIndex = userAnswerIndex === index ? null : index;
-            console.log("newIndex: ", newIndex)
             setUserAnswerIndex(newIndex);
             setSelectedOptionIndices(newIndex !== null ? [newIndex] : []);
         }

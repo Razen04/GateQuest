@@ -6,7 +6,7 @@ import AppSettingContext from '../../../context/AppSettingContext'
 import { getUserProfile } from '../../../helper'
 import AuthContext from '../../../context/AuthContext'
 import StatsContext from '../../../context/StatsContext'
-import { getCorrectAnswerText, isMultipleSelection, isNumericalQuestion } from '../../../utils/questionUtils'
+import { getCorrectAnswerText, isNumericalQuestion } from '../../../utils/questionUtils'
 import { useQuestionTimer } from '../../../hooks/useQuestionTimer'
 import { useQuestionState } from '../../../hooks/useQuestionState'
 import QuestionHeader from './QuestionHeader'
@@ -123,6 +123,8 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     const handleShowAnswer = async () => {
         if (showAnswer) return;
 
+        console.log("selectedOptionIndices: ", selectedOptionIndices)
+
         stopTimer();
         setShowAnswer(true);
 
@@ -209,9 +211,10 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
                     currentQuestion={currentQuestion}
                     hasOptions={hasOptions}
                     showAnswer={showAnswer}
-                    selectedIndices={selectedOptionIndices}
+                    selectedOptionIndices={selectedOptionIndices}
                     userAnswerIndex={userAnswerIndex}
                     onOptionSelect={handleOptionSelect}
+                    result={result}
                 />
 
                 {/* Numerical Answer Input */}
