@@ -19,7 +19,6 @@ export const useQuestionTimer = (autoTimer = false, currentQuestion) => {
             intervalRef.current = null;
         }
 
-        console.log("Setting is active as false");
         setIsActive(false);
     };
 

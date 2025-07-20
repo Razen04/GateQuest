@@ -46,8 +46,7 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await axios.post(`${API_BASE}/api/contact`, formData);
-            console.log(response)
+            await axios.post(`${API_BASE}/api/contact`, formData);
             setMessageSent(true);
         } catch (err) {
             console.error("Error sending message:", err.response?.data);
@@ -149,7 +148,7 @@ const Contact = () => {
                                         required
                                         rows="5"
                                         placeholder="How can I help you?"
-                                            className="w-full p-3 border border-border-primary dark:border-border-primary-dark  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        className="w-full p-3 border border-border-primary dark:border-border-primary-dark  rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     ></textarea>
                                 </div>
 

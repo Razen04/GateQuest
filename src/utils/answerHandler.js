@@ -48,8 +48,8 @@ export const submitAndRecordAnswer = async ({
                 was_correct: isCorrect, // This can now be true, false, or null
                 time_taken: timeTaken,
                 attempt_number: 1
-            }, isLogin);
-            await updateStats(isLogin);
+            }, user);
+            await updateStats(user);
         } catch (error) {
             console.error("Failed to record attempt:", error);
             toast.error("Could not save your attempt.");

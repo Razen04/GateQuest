@@ -7,31 +7,19 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(false);
+    const { updateStats } = useContext(StatsContext)
 
     const isLogin = !!user;
 
-    const { updateStats } = useContext(StatsContext)
+
     useEffect(() => {
-        const getSession = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-            setLoading(false);
-        };
 
-        getSession();
-
-        const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const getSessionAndProfile = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
             const supaUser = session?.user || null;
 
-            if (!supaUser) {
-                setShowLogin(false);
-                localStorage.removeItem("gate_user_profile");
-                setUser(null);
-                setLoading(false);
-                return;
-            }
-
             if (supaUser) {
+                // 2. Get/update user profile
                 const { data, error } = await supabase.from('users').upsert({
                     id: supaUser.id,
                     email: supaUser.email,
@@ -53,30 +41,41 @@ const AuthProvider = ({ children }) => {
                         targetYear: data[0].targetYear || 2026
                     };
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));
-                    updateStats(true)
+                    updateStats(true);
                     setUser(supaUser);
                 }
+            } else {
+                setUser(null);
+                localStorage.removeItem("gate_user_profile");
+            }
 
+            setLoading(false);
+        }
+
+        getSessionAndProfile();
+
+        const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            const supaUser = session?.user || null;
+
+            if (supaUser) {
+                getSessionAndProfile();
+            } else {
+                setUser(null);
+                localStorage.removeItem("gate_user_profile");
                 setLoading(false);
             }
         });
 
-        return () => listener.subscription.unsubscribe();
-    }, []);
-
-    useEffect(() => {
-        const profile = JSON.parse(localStorage.getItem("gate_user_profile"));
-        if (profile && profile.id) {
-            setUser(profile);
-        } else {
-            setUser(null);
-        }
+        return () => listener?.subscription.unsubscribe();
     }, []);
 
     // Login function
     const handleLogin = async () => {
         const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google'
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
         });
         if (error) {
             console.error('Login failed: ', error.message);
@@ -85,7 +84,6 @@ const AuthProvider = ({ children }) => {
 
     // Logout function
     const logout = async () => {
-        console.log("Clicked")
         await supabase.auth.signOut();
     };
 

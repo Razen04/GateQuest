@@ -35,14 +35,12 @@ const StatsProvider = ({ children }) => {
     });
     const [loading, setLoading] = useState(true)
 
-    const updateStats = async (isLogin) => {
+    const updateStats = async (userData) => {
 
-        if (!isLogin) {
-            console.log("Not Running updateStats");
+        if (!userData) {
             return;
         }
 
-        console.log("Running updateStats")
         setLoading(true);
 
         const { data: { user } } = await supabase.auth.getUser();
@@ -51,8 +49,6 @@ const StatsProvider = ({ children }) => {
             return;
         }
 
-        console.log("getUserProfile():", user);
-        console.log("user.id:", user?.id, "typeof:", typeof user?.id);
         const { data, error } = await supabase.from('user_question_activity').select('*').eq('user_id', user.id);
 
         if (error) {
@@ -67,12 +63,9 @@ const StatsProvider = ({ children }) => {
             return;
         }
 
-        console.log("Supabase query result:", data);
-        console.log("Supabase error:", error);
         const totalQuestions = 196;
         const attempted = data.length;
         const correctAttempts = data.filter(q => q.was_correct == true).length
-        console.log("correctAttempts: ", correctAttempts)
         const totalStudyTime = calculateStudyTime(data)
 
         // calculating each subject stats

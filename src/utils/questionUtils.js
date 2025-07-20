@@ -27,9 +27,8 @@ export const handleBookmark = (isLogin, questionId, subject) => {
         ]
 
         const updatedProfile = { ...profile, bookmark_questions }
-        console.log("User Profile: ", updatedProfile)
         updateUserProfile(updatedProfile)
-        syncUserToSupabase(isLogin)
+        syncUserToSupabase()
     } else {
         toast.error("Unable to bookmark, try again later.")
     }

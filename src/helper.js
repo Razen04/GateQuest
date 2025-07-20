@@ -16,13 +16,11 @@ export const updateUserProfile = (updates) => {
     return updated
 }
 
-export const syncUserToSupabase = async (isLogin = true) => {
-    if (!isLogin) {
-        toast.message("Please login to sync your profile.");
-        return;
-    }
-    const user = JSON.parse(localStorage.getItem("gate_user_profile"));
+export const syncUserToSupabase = async () => {
+
+    const user = getUserProfile()
     if (!user || !user.id) {
+        toast.message("No user found.")
         console.warn("No user or missing user.id — cannot sync");
         return;
     }
@@ -33,17 +31,9 @@ export const syncUserToSupabase = async (isLogin = true) => {
     }
 }
 
-export const recordAttempt = async (params, isLogin = true) => {
-    
-    const user = getUserProfile();
+export const recordAttempt = async (params, user) => {
 
-    if (!isLogin) {
-        console.log("Early return: not logged in");
-        toast.message("Please login to store your progress.");
-        return;
-    }
     if (!user || !user.id) {
-        console.log("Early return: no valid user profile");
         toast.error("No valid user profile found.");
         return;
     }
@@ -51,7 +41,7 @@ export const recordAttempt = async (params, isLogin = true) => {
     const { data, error } = await supabase.from('user_question_activity').insert([{
         ...params
     }]);
-    
+
     if (error) {
         toast.error("Failed to record attempt: " + error.message);
         console.error("Failed to record attempt: ", error);

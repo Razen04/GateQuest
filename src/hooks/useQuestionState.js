@@ -12,7 +12,6 @@ export const useQuestionState = (currentQuestion) => {
         if (showAnswer) return;
 
         if (isMultipleSelection(currentQuestion)) {
-            console.log("isMultipleSelection: ", isMultipleSelection(currentQuestion))
             setSelectedOptionIndices(prev =>
                 prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
             );
