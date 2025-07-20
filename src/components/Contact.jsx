@@ -30,6 +30,7 @@ const Contact = () => {
 
     const [messageSent, setMessageSent] = useState(false)
     const [loading, setLoading] = useState(false)
+    const API_BASE = import.meta.env.VITE_API_BASE;
 
     // Handle form input changes
     const handleInputChange = (e) => {
@@ -45,10 +46,11 @@ const Contact = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post(`http://${import.meta.env.VITE_PORT}:5000/api/contact`, formData);
+            const response = await axios.post(`${API_BASE}/api/contact`, formData);
+            console.log(response)
             setMessageSent(true);
         } catch (err) {
-            console.error("Error sending message:", err);
+            console.error("Error sending message:", err.response?.data);
             toast.error("Failed to send message");
         } finally {
             setLoading(false)
