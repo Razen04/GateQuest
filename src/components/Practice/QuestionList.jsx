@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useContext, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FaArrowLeft, FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa'
+import { FaArrowLeft, FaFilter, FaSearch, FaChevronDown, FaChevronCircleLeft } from 'react-icons/fa'
 import QuestionCard from './QuestionCard/QuestionCard'
 import useQuestions from '../../hooks/useQuestions'
 import useFilters from '../../hooks/useFilters'
 import { getDifficultyClassNames } from '../../utils/questionUtils'
 import MathRenderer from './MathRenderer'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
 
 const QuestionsList = ({ subject, activeFilter, onBack }) => {
     const { questions, isLoading, error } = useQuestions(subject, activeFilter);
+    const [selectedQuestion, setSelectedQuestion] = useState(null)
 
     const { filteredQuestions,
         searchQuery,
@@ -18,11 +20,35 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
         yearFilter,
         setYearFilter,
         topicFilter,
-        setTopicFilter
-    } = useFilters(questions);
+        setTopicFilter,
+        attemptFilter,
+        setAttemptFilter
+    } = useFilters(questions, subject, selectedQuestion);
 
-    const [selectedQuestion, setSelectedQuestion] = useState(null)
+
     const [showFilters, setShowFilters] = useState(false)
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const QUESTIONS_PER_PAGE = 20;
+    const totalPages = Math.ceil(filteredQuestions.length / QUESTIONS_PER_PAGE);
+    const QuestionsListRef = useRef(null);
+
+    const paginatedQuestions = useMemo(() => {
+        const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
+        const end = start + QUESTIONS_PER_PAGE;
+        return filteredQuestions.slice(start, end);
+    }, [filteredQuestions, currentPage])
+
+    useEffect(() => {
+        if (QuestionsListRef.current) {
+            QuestionsListRef.current.scrollTop = 0;
+        }
+    }, [currentPage])
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter])
 
     const errorMessage = "No questions match your criteria. Try adjusting your filters.";
     // Dynamically generate years and topics for the dropdowns
@@ -65,7 +91,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
         return <MathRenderer text={truncated + "..."} />;
     }
-    
+
 
     if (isLoading) {
         return (
@@ -89,7 +115,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="px-2"
+                    className="mb-16"
                 >
                     <div className="flex items-center mb-4 sm:mb-6">
                         <button
@@ -105,6 +131,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
             ) : (
                 // Show questions list
                 <motion.div
+
                     key="questions-list"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -124,7 +151,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
                         <div className="flex">
                             <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-lg text-sm">
-                                {filteredQuestions.length} Questions
+                                {filteredQuestions.length} {attemptFilter.charAt(0).toUpperCase() + attemptFilter.slice(1)} Questions
                             </span>
                         </div>
                     </div>
@@ -201,6 +228,19 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                                                 ))}
                                             </select>
                                         </div>
+
+                                        <div>
+                                            <label className="block font-medium mb-2">Attempts</label>
+                                            <select
+                                                className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                                value={attemptFilter}
+                                                onChange={(e) => setAttemptFilter(e.target.value)}
+                                            >
+                                                <option value="all">All</option>
+                                                <option value="attempted">Attempted Questions</option>
+                                                <option value="unattempted">Unattempted Questions</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </motion.div>
                             )}
@@ -208,40 +248,31 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                     </div>
 
                     {/* Questions List */}
-                    <div className="rounded-xl overflow-hidden border border-border-primary dark:border-border-primary-dark">
-                        <div className="p-2 sm:p-4 border-b border-border-primary dark:border-border-primary-dark">
+                    <div className="rounded-xl overflow-hidden">
+                        <div className="mb-2">
                             <h2 className="font-semibold text-blue-500 text-xl">
                                 {subject} Questions
                             </h2>
                         </div>
 
                         {filteredQuestions.length > 0 ? (
-                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {filteredQuestions.map((question, index) => (
+                            <div ref={QuestionsListRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[60vh]">
+                                {paginatedQuestions.map((question, index) => (
                                     <motion.div
                                         key={index}
-                                        whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
-                                        className="p-2 sm:p-4 cursor-pointer transition-colors duration-50"
+                                        whileHover={{ scale: 1.02 }}
+                                        transition={{ duration: 0.2 }}
                                         onClick={() => handleQuestionClick(question.id)}
+                                        className="cursor-pointer border border-border-primary dark:border-border-primary-dark rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
                                     >
-                                        <div className="flex flex-col sm:flex-row justify-between">
-                                            <h3 className="font-medium mb-2 pr-0 sm:pr-4 text-sm md:text-base">
-                                                {getQuestionDisplayText(question)}
-                                            </h3>
-                                            <div className="flex space-x-2 mt-2 sm:mt-0">
-                                                <span className={`h-min text-xs font-bold md:font-normal md:px-2 md:py-1 rounded-full whitespace-nowrap ${getDifficultyClassNames(question.difficulty)}`}>
-                                                    {question.difficulty}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-wrap items-center text-xs mt-1">
-                                            {question.year ? (
-                                                <span>GATE {question.year}</span>
-                                            ) : (
-                                                <span>Year Unknown</span>
-                                            )}
-                                            <span className="mx-2">•</span>
-                                            <span>ID: {question.id || 'Unknown'}</span>
+                                        <h3 className="font-medium mb-3 text-sm md:text-base">
+                                            {getQuestionDisplayText(question)}
+                                        </h3>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className={`font-bold md:font-normal px-2 py-1 md:rounded-xl rounded-full ${getDifficultyClassNames(question.difficulty)}`}>
+                                                {question.difficulty}
+                                            </span>
+                                            <span>{question.year ? `GATE ${question.year}` : 'Year Unknown'}</span>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -252,8 +283,29 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                             </div>
                         )}
                     </div>
+                    <div className="flex justify-between items-center w-full py-2 z-20 mt-2">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="px-8 py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50 cursor-pointer"
+                        >
+                            <FaChevronLeft />
+                        </button>
+                        <span className="text-sm">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="px-8 cursor-pointer py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50"
+                        >
+                            <FaChevronRight />
+                        </button>
+                    </div>
                 </motion.div>
+
             )}
+
         </AnimatePresence>
     )
 }

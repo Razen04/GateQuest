@@ -7,9 +7,9 @@ export const getDifficultyClassNames = (difficulty) => {
 
     const difficultyLower = difficulty.toLowerCase()
 
-    if (difficultyLower === 'easy') return 'md:bg-green-100 text-green-700'
-    if (difficultyLower === 'medium' || difficultyLower === 'normal') return 'md:bg-yellow-100 text-yellow-700'
-    if (difficultyLower === 'hard') return 'md:bg-red-100 text-red-700'
+    if (difficultyLower === 'easy') return 'bg-green-100 text-green-700'
+    if (difficultyLower === 'medium' || difficultyLower === 'normal') return 'bg-yellow-100 text-yellow-700'
+    if (difficultyLower === 'hard') return 'bg-red-100 text-red-700'
 
     return 'bg-gray-100 text-gray-700' // Default fallback
 }

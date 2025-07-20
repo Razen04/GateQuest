@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-export const useQuestionTimer = (autoTimer, currentQuestion) => {
+export const useQuestionTimer = (autoTimer = false, currentQuestion) => {
     const [isActive, setIsActive] = useState(autoTimer);
     const [time, setTime] = useState(0);
     const intervalRef = useRef(null);
@@ -19,6 +19,7 @@ export const useQuestionTimer = (autoTimer, currentQuestion) => {
             intervalRef.current = null;
         }
 
+        console.log("Setting is active as false");
         setIsActive(false);
     };
 

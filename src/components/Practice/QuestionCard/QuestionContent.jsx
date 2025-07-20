@@ -12,7 +12,6 @@ const QuestionContent = ({
     selectedOptionIndices,
     userAnswerIndex,
     onOptionSelect,
-    result // This is the handler function from QuestionCard
 }) => {
     return (
         <div>

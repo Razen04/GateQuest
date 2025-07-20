@@ -31,14 +31,13 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     const [currentIndex, setCurrentIndex] = useState(questionId)
     const [questionLink, setQuestionLink] = useState("");
     const numInputRef = useRef(null);
-    const [userRecord, setUserRecord] = useState(null);
     const currentQuestion = questions.find(q => q.id === currentIndex) || questions[0]
 
 
     const { settings } = useContext(AppSettingContext)
     const { isLogin } = useContext(AuthContext)
 
-    const { time: timeTaken, toggle: toggleTimer, stop: stopTimer } = useQuestionTimer(settings?.autoTimer, currentQuestion);
+    const { isActive: isTimerActive, time: timeTaken, toggle: toggleTimer, reset: resetTimer } = useQuestionTimer(settings?.autoTimer, currentQuestion);
 
     // All answer/selection/result state is handled by this hook.
     const {
@@ -57,18 +56,6 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     // Set question link after every question
     useEffect(() => {
         setQuestionLink(currentQuestion.explanation)
-    }, [currentQuestion])
-
-    useEffect(() => {
-        setUserRecord({
-            user_id: user.id,
-            question_id: currentQuestion.id,
-            subject: currentQuestion.subject,
-            was_correct: null,
-            time_taken: 0,
-            attempted_at: new Date().toISOString(),
-            attempt_number: 0
-        })
     }, [currentQuestion])
 
     // Keyboard shortcuts
@@ -123,9 +110,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     const handleShowAnswer = async () => {
         if (showAnswer) return;
 
-        console.log("selectedOptionIndices: ", selectedOptionIndices)
-
-        stopTimer();
+        resetTimer();
         setShowAnswer(true);
 
         const resultStatus = await submitAndRecordAnswer({
@@ -137,8 +122,6 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             isLogin,
             updateStats
         });
-
-        console.log("Result: ", resultStatus)
 
         setResult(resultStatus)
     }
@@ -165,9 +148,8 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
     }
 
     // Skip current question
-    const handleSubmit = () => {
-        stopTimer();
-        handleShowAnswer();
+    const handleSubmit = async () => {
+        await handleShowAnswer();
     }
 
     // Determine if we should show options
@@ -203,7 +185,7 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
             transition={{ duration: 0.5 }}
         >
             {/* Question Header */}
-            <QuestionHeader subject={subject} questions={questions} currentIndex={currentIndex} currentQuestion={currentQuestion} questionId={questionId} />
+            <QuestionHeader subject={subject} questions={questions} currentIndex={currentIndex} currentQuestion={currentQuestion} questionId={questionId} resetTimer={resetTimer} isTimerActive={isTimerActive} />
 
             {/* Question Content */}
             <div className="p-4 sm:p-6">

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
+import StatsContext from "../context/StatsContext";
 
 // Add this helper function above the useEffect
 const sortQuestionsByYear = (questionsToSort) => {
@@ -12,12 +13,32 @@ const sortQuestionsByYear = (questionsToSort) => {
     });
 };
 
-const useFilters = (sourceQuestions) => {
+const useFilters = (sourceQuestions, subject, selectedQuestion) => {
 
     const [searchQuery, setSearchQuery] = useState('')
     const [difficultyFilter, setDifficultyFilter] = useState('all')
     const [yearFilter, setYearFilter] = useState('all')
     const [topicFilter, setTopicFilter] = useState('all')
+    const [attemptFilter, setAttemptFilter] = useState('unattempted')
+
+    const { stats } = useContext(StatsContext);
+    const subjectStats = stats?.subjectStats;
+
+    const attemptedIds = useMemo(() => {
+        if (!subjectStats) return new Set();
+
+        const merged = new Set();
+
+        subjectStats
+            .filter((s) => s.subject === subject)
+            .forEach((s) => {
+                for (const id of s.attemptedQuestionIds) {
+                    merged.add(id);
+                }
+            })
+
+        return merged;
+    }, [subjectStats, subject])
 
     // 2. useMemo will re-calculate the filtered list only when the source data or a filter changes
     const filteredQuestions = useMemo(() => {
@@ -47,8 +68,17 @@ const useFilters = (sourceQuestions) => {
             filtered = filtered.filter(qn => qn.topic === topicFilter);
         }
 
+        // Apply attempted filter
+        if (attemptFilter && attemptFilter !== 'all') {
+            filtered = filtered.filter(qn => {
+                const isAttempted = attemptedIds?.has(qn.id);
+                const isActive = qn.id === selectedQuestion;
+                return attemptFilter === 'attempted' ? isAttempted : !isAttempted || isActive;
+            });
+        }
+
         return sortQuestionsByYear(filtered);
-    }, [sourceQuestions, searchQuery, difficultyFilter, yearFilter, topicFilter]);
+    }, [sourceQuestions, searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter, attemptedIds, selectedQuestion]);
 
     // 3. Return the filtered data and the state setters for the UI to use
     return {
@@ -60,7 +90,9 @@ const useFilters = (sourceQuestions) => {
         yearFilter,
         setYearFilter,
         topicFilter,
-        setTopicFilter
+        setTopicFilter,
+        attemptFilter,
+        setAttemptFilter
     };
 }
 

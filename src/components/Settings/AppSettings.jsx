@@ -2,10 +2,12 @@ import React, { useContext, useState } from 'react'
 import { FaGlobe } from 'react-icons/fa'
 import ToggleSwitch from '../ToggleSwitch'
 import AppSettingContext from '../../context/AppSettingContext'
+import ThemeContext from '../../context/ThemeContext'
 
 
 const AppSettings = () => {
     const { settings, handleSettingToggle } = useContext(AppSettingContext)
+    const { dark, toggleDarkMode } = useContext(ThemeContext);
 
     return (
         <div>
@@ -25,6 +27,8 @@ const AppSettings = () => {
                     isOn={settings.autoTimer}
                 />
 
+                <ToggleSwitch label="Dark Mode" onToggle={toggleDarkMode} isOn={dark} />
+
                 <div className="py-3 border-t border-border-primary dark:border-border-primary-dark mt-3 pt-3">
                     <h3 className="text-lg font-medium mb-2">App Information</h3>
 
@@ -35,7 +39,7 @@ const AppSettings = () => {
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Last Updated</span>
-                            <span>May 13, 2025</span>
+                            <span>May 20, 2025</span>
                         </div>
                     </div>
                 </div>

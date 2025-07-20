@@ -1,4 +1,4 @@
-import { FaLaptopCode, FaMicrochip, FaSquareRootAlt } from 'react-icons/fa';
+import { FaLaptopCode, FaMicrochip } from 'react-icons/fa';
 
 // Subject data
 const subjects = [

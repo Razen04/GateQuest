@@ -49,7 +49,7 @@ const Navbar = ({ setShowSidebar }) => {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.6 }}
             >
-                <button className="relative" ref={notificationRef}>
+                <button className="relative" ref={notificationRef} aria-label='Notifications'>
                     <motion.div
                         className="relative cursor-pointer"
                         whileHover={{ scale: 1.1 }}

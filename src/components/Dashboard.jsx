@@ -1,18 +1,49 @@
 import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaBook, FaChartLine, FaClock,
+    FaChartLine, FaClock,
     FaLaptopCode, FaMedal
 } from 'react-icons/fa';
 import Login from './Login';
 import AuthContext from '../context/AuthContext';
 import { getUserProfile } from '../helper';
 import StatsContext from '../context/StatsContext';
+import subjects from '../data/subjects';
+
+const StatCard = ({ icon: Icon, title, value, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.5 }
+        }
+    };
+
+    return (
+        <motion.div
+            variants={itemVariants}
+            className="p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700 flex items-center"
+        >
+            <div className={`p-4 rounded-full ${bgColor} mr-4`}>
+                <Icon className={`h-6 w-6 ${iconColor}`} />
+            </div>
+            <div>
+                <h3 className="text-gray-500 dark:text-gray-100 text-sm">{title}</h3>
+                <div className="flex items-center mt-1">
+                    <span className={`text-2xl font-bold ${textColor}`}>{value}</span>
+                </div>
+            </div>
+        </motion.div>
+    )
+};
 
 const Dashboard = () => {
     const { isLogin, loading } = useContext(AuthContext);
     const { stats } = useContext(StatsContext);
     const user = getUserProfile();
+    const subjectStats = stats?.subjectStats;
 
     // Animation variants
     const containerVariants = {
@@ -23,15 +54,6 @@ const Dashboard = () => {
                 staggerChildren: 0.1,
                 delayChildren: 0.2
             }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: { duration: 0.5 }
         }
     };
 
@@ -57,22 +79,21 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-[100dvh]">
+        <div className="p-8 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
             {/* Welcome */}
-            {console.log(stats)}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="mb-8"
             >
-                <h1 className="text-3xl font-bold text-gray-800">
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
                     Welcome back,{' '}
                     <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                         {user?.name}
                     </span>
                 </h1>
-                <p className="text-gray-600 mt-2">Your preparation journey is 42% complete. Keep going!</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">Your preparation journey is {stats?.progress}% complete. Keep going!</p>
             </motion.div>
 
             {/* Stats */}
@@ -82,112 +103,106 @@ const Dashboard = () => {
                 animate="visible"
                 className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
             >
-                {/* Progress */}
-                <motion.div
-                    variants={itemVariants}
-                    className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center"
-                >
-                    <div className="p-4 rounded-full bg-blue-50 mr-4">
-                        <FaChartLine className="h-6 w-6 text-blue-500" />
-                    </div>
-                    <div>
-                        <h3 className="text-gray-500 text-sm">Overall Progress</h3>
-                        <div className="flex items-center mt-1">
-                            <span className="text-2xl font-bold text-gray-800">{stats?.progress}%</span>
-                            <span className="ml-2 text-xs text-green-500 bg-green-50 px-2 py-0.5 rounded-full">+2%</span>
-                        </div>
-                    </div>
-                </motion.div>
+                <StatCard
+                    icon={FaChartLine}
+                    title="Overall Progress"
+                    value={`${stats?.progress}%`}
+                    delta="2%"
+                    iconColor="text-blue-500"
+                    bgColor="bg-blue-50"
+                />
 
-                {/* Accuracy */}
-                <motion.div
-                    variants={itemVariants}
-                    className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center"
-                >
-                    <div className="p-4 rounded-full bg-purple-50 mr-4">
-                        <FaMedal className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                        <h3 className="text-gray-500 text-sm">Overall Accuracy</h3>
-                        <div className="flex items-center mt-1">
-                            <span className="text-2xl font-bold text-gray-800">2%</span>
-                            <span className="ml-2 text-xs text-green-500 bg-green-50 px-2 py-0.5 rounded-full">+2%</span>
-                        </div>
-                    </div>
-                </motion.div>
+                <StatCard
+                    icon={FaMedal}
+                    title="Overall Accuracy"
+                    value={`${stats?.accuracy}%`}
+                    delta="2%"
+                    iconColor="text-purple-500"
+                    bgColor="bg-purple-50"
+                />
 
-                {/* Study Time */}
-                <motion.div
-                    variants={itemVariants}
-                    className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center"
-                >
-                    <div className="p-4 rounded-full bg-indigo-50 mr-4">
-                        <FaClock className="h-6 w-6 text-indigo-500" />
-                    </div>
-                    <div>
-                        <h3 className="text-gray-500 text-sm">Study Time</h3>
-                        <div className="flex items-center mt-1">
-                            <span className="text-2xl font-bold text-gray-800">2</span>
-                            <span className="ml-2 text-xs text-green-500 bg-green-50 px-2 py-0.5 rounded-full">+2</span>
-                        </div>
-                    </div>
-                </motion.div>
+                <StatCard
+                    icon={FaClock}
+                    title="Study Time"
+                    value={`${stats?.totalTime} hours`}
+                    delta="2"
+                    iconColor="text-indigo-500"
+                    bgColor="bg-indigo-50"
+                />
+
             </motion.div>
 
-            {/* Courses / Recommendations */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Subject Stats */}
+            <div className="w-full">
                 <motion.div
                     className="lg:col-span-2 space-y-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                    <motion.div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <motion.div className="p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-gray-800">Recommended Courses</h2>
-                            <button className="text-blue-500 text-sm hover:underline">View All</button>
+                            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Subject Stats</h2>
                         </div>
 
-                        <div className="space-y-4">
-                            {/* DSA Course */}
-                            <motion.div
-                                className="flex items-start p-4 rounded-lg border border-gray-100 hover:bg-blue-50 transition-all cursor-pointer"
-                                whileHover={{ scale: 1.02 }}
-                            >
-                                <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white mr-4">
-                                    <FaLaptopCode className="h-6 w-6" />
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-gray-800">Data Structures & Algorithms</h3>
-                                    <p className="text-sm text-gray-500 mt-1">A comprehensive guide to DSA for GATE CS</p>
-                                    <div className="mt-2 flex items-center">
-                                        <div className="w-48 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-blue-500 rounded-full" style={{ width: '65%' }}></div>
-                                        </div>
-                                        <span className="ml-3 text-xs text-gray-500">65% Complete</span>
-                                    </div>
-                                </div>
-                            </motion.div>
+                        <div className="space-y-4 flex justify-around">
+                            {/* Courses */}
+                            <div className="overflow-x-auto">
+                                <div className="flex gap-4 sm:gap-6 md:gap-8 px-2 py-4 w-full">
+                                    {subjectStats?.map((subject, index) => {
+                                        const progress = Number(subject.progress) || 0;
+                                        const accuracy = Number(subject.accuracy) || 0;
+                                        // Find the subject meta info
+                                        const subjectMeta = subjects.find(s => s.apiName === subject.subject);
+                                        const Icon = subjectMeta?.icon || FaLaptopCode; // fallback icon
 
-                            {/* OS Course */}
-                            <motion.div
-                                className="flex items-start p-4 rounded-lg border border-gray-100 hover:bg-purple-50 transition-all cursor-pointer"
-                                whileHover={{ scale: 1.02 }}
-                            >
-                                <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white mr-4">
-                                    <FaBook className="h-6 w-6" />
+                                        return (
+                                            <motion.div
+                                                key={index}
+                                                className="min-w-[250px] sm:min-w-[280px] md:min-w-[300px] shadow-md rounded-xl border border-gray-100 dark:border-zinc-800 p-5 flex flex-col justify-between hover:shadow-lg hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                                                whileHover={{ scale: 1.03 }}
+                                            >
+                                                <div className="flex items-center mb-4">
+                                                    <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white mr-3">
+                                                        <Icon className="h-6 w-6" />
+                                                    </div>
+                                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{subject.subject}</h3>
+                                                </div>
+
+                                                {/* Progress Bar */}
+                                                <div className="mb-2">
+                                                    <span className="text-sm text-gray-60 dark:text-gray-300">Progress</span>
+                                                    <div className="w-full h-2 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
+                                                            style={{ width: `${progress}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-block">{progress}% complete</span>
+                                                </div>
+
+                                                {/* Accuracy */}
+                                                <div className="mb-2">
+                                                    <span className="text-sm text-gray-600 dark:text-gray-300">Accuracy</span>
+                                                    <div className="w-full h-2 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-green-500 rounded-full transition-all duration-300 ease-out"
+                                                            style={{ width: `${accuracy}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-block">{accuracy}% correct</span>
+                                                </div>
+
+                                                {/* Meta stats */}
+                                                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                    <p>Attempted: <strong>{subject.attempted}</strong></p>
+                                                    <p>Total Questions: <strong>{subject.totalAvailable}</strong></p>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-gray-800">Operating Systems</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Core concepts and practical applications</p>
-                                    <div className="mt-2 flex items-center">
-                                        <div className="w-48 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-purple-500 rounded-full" style={{ width: '32%' }}></div>
-                                        </div>
-                                        <span className="ml-3 text-xs text-gray-500">32% Complete</span>
-                                    </div>
-                                </div>
-                            </motion.div>
+                            </div>
                         </div>
                     </motion.div>
                 </motion.div>

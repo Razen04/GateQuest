@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AuthContext from './AuthContext';
 import { supabase } from '../../supabaseClient';
+import StatsContext from './StatsContext';
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -9,6 +10,7 @@ const AuthProvider = ({ children }) => {
 
     const isLogin = !!user;
 
+    const { updateStats } = useContext(StatsContext)
     useEffect(() => {
         const getSession = async () => {
             const { data: { user } } = await supabase.auth.getUser();
@@ -28,7 +30,7 @@ const AuthProvider = ({ children }) => {
                 setLoading(false);
                 return;
             }
-            
+
             if (supaUser) {
                 const { data, error } = await supabase.from('users').upsert({
                     id: supaUser.id,
@@ -51,6 +53,7 @@ const AuthProvider = ({ children }) => {
                         targetYear: data[0].targetYear || 2026
                     };
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));
+                    updateStats(true)
                     setUser(supaUser);
                 }
 
@@ -72,7 +75,6 @@ const AuthProvider = ({ children }) => {
 
     // Login function
     const handleLogin = async () => {
-        console.log("Clicked")
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google'
         });

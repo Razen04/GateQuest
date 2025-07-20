@@ -4,10 +4,10 @@ import { FaPause, FaStopwatch } from 'react-icons/fa6'
 import { useQuestionTimer } from '../../../hooks/useQuestionTimer'
 import AppSettingContext from '../../../context/AppSettingContext'
 
-const QuestionTimer = ({ currentQuestion }) => {
+const QuestionTimer = ({ currentQuestion, isTimerActive }) => {
 
     const { settings } = useContext(AppSettingContext);
-    const { isActive, minutes, seconds, toggle: toggleTimer } = useQuestionTimer(settings?.autoTimer, currentQuestion)
+    const { minutes, seconds, toggle: toggleTimer } = useQuestionTimer(settings?.autoTimer, currentQuestion)
 
     return (
         <div>
@@ -16,7 +16,7 @@ const QuestionTimer = ({ currentQuestion }) => {
                 onClick={toggleTimer}
             >
                 <AnimatePresence mode="wait" initial={false}>
-                    {isActive ? (
+                    {isTimerActive ? (
                         <motion.div
                             key="pause"
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -24,7 +24,7 @@ const QuestionTimer = ({ currentQuestion }) => {
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <FaPause className='animate-pulse' />
+                            <FaPause className={`${isTimerActive ? 'animate-pulse' : ''}`} />
                         </motion.div>
                     ) : (
                         <motion.div
@@ -39,7 +39,7 @@ const QuestionTimer = ({ currentQuestion }) => {
                     )}
                 </AnimatePresence>
                 <AnimatePresence>
-                    {isActive && (
+                    {isTimerActive && (
                         <motion.label
                             key="timer-label"
                             initial={{ opacity: 0, width: 0 }}

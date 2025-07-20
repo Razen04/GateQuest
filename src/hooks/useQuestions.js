@@ -5,6 +5,8 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { getUserProfile } from '../helper';
 
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 // Helper to sort questions by year, newest first
 const sortQuestionsByYear = (questionsToSort) => {
     return [...questionsToSort].sort((a, b) => {
@@ -37,7 +39,7 @@ const useQuestions = (subject, activeFilter) => {
 
                     if (bookmarkedQuestions.length > 0) {
                         const ids = bookmarkedQuestions.map(q => q.id).join(",");
-                        const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions/bookmarked?ids=${ids}`);
+                        const res = await axios.get(`${API_BASE}/api/questions/bookmarked?ids=${ids}`);
                         setQuestions(sortQuestionsByYear(res.data));
                     } else {
                         setQuestions([]); // No bookmarks for this subject
@@ -50,7 +52,7 @@ const useQuestions = (subject, activeFilter) => {
                         setQuestions(localQuestions);
                     } else {
                         const encodedSubject = encodeURIComponent(subject);
-                        const res = await axios.get(`http://${import.meta.env.VITE_PORT}:5000/api/questions?subject=${encodedSubject}`);
+                        const res = await axios.get(`${API_BASE}/api/questions?subject=${encodedSubject}`);
                         const loadedQuestions = sortQuestionsByYear(res.data);
                         localStorage.setItem(subject, JSON.stringify(loadedQuestions));
                         setQuestions(loadedQuestions);

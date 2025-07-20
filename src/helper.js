@@ -51,7 +51,7 @@ export const recordAttempt = async (params, isLogin = true) => {
     const { data, error } = await supabase.from('user_question_activity').insert([{
         ...params
     }]);
-    console.log("Supabase insert result:", { data, error });
+    
     if (error) {
         toast.error("Failed to record attempt: " + error.message);
         console.error("Failed to record attempt: ", error);

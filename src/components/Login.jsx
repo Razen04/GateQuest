@@ -11,7 +11,7 @@ const Login = ({ canClose = true, onClose }) => {
                 {canClose && <button aria-label='Close' onClick={onClose} className='p-2 rounded-full hover:bg-red-500 absolute right-3 top-3 cursor-pointer font-bold text-lg'><FaXmark className='text-zinc-300 font-bold text-2xl hover:text-black' /></button>}
                 <div className="mb-8 w-full text-center">
                     <h1 className="text-3xl font-extrabold dark:text-white mb-2 tracking-tight"><span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>Welcome to GATE</span>Quest</h1>
-                    <p className="text-gray-600 dark:text-gray-300 text-base italic">Sign up or log in to track your progress, bookmark important questions, and join the leaderboard!</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-base italic">Sign up or log in to track your progress, bookmark important questions, and join the leaderboard(in future)!</p>
                 </div>
                 <button
                     onClick={handleLogin}

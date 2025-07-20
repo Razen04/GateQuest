@@ -59,12 +59,12 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                         <FaGraduationCap />
                     </motion.div>
                     <motion.h1
-                        className='ml-3 text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'
+                        className='ml-3 text-2xl font-bold dark:text-white'
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
                     >
-                        GateQuest
+                        <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>GATE</span>Quest
                     </motion.h1>
                 </div>
 

@@ -12,11 +12,11 @@ import StatsProvider from './context/StatsProvider'
 
 function App() {
 
-  
+
 
   return (
-    <AuthProvider>
-      <StatsProvider>
+    <StatsProvider>
+      <AuthProvider>
         <AppProvider>
           <ThemeProvider>
             <Router>
@@ -32,8 +32,8 @@ function App() {
             </Router>
           </ThemeProvider>
         </AppProvider>
-      </StatsProvider>   
-    </AuthProvider>
+      </AuthProvider>
+    </StatsProvider>
   )
 }
 

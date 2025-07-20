@@ -5,7 +5,6 @@ import {
     FaShieldAlt, FaGlobe,
 } from 'react-icons/fa'
 import AccountSettings from './Settings/AccountSettings'
-import AppearanceSettings from './Settings/AppearanceSettings'
 import PrivacySettings from './Settings/PrivacySettings'
 import AppSettings from './Settings/AppSettings'
 import AuthContext from '../context/AuthContext'
@@ -20,7 +19,6 @@ const Settings = () => {
     // Define tabs
     const tabs = [
         { id: 'account', label: 'Account', icon: <FaUserCircle />, component: <AccountSettings /> },
-        { id: 'appearance', label: 'Appearance', icon: <FaPalette />, component: <AppearanceSettings /> },
         { id: 'privacy', label: 'Privacy & Data', icon: <FaShieldAlt />, component: <PrivacySettings /> },
         { id: 'app', label: 'App Settings', icon: <FaGlobe />, component: <AppSettings /> }
     ]
