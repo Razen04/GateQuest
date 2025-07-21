@@ -43,7 +43,7 @@ const StatsProvider = ({ children }) => {
 
         setLoading(true);
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = userData;
         if (!user) {
             setLoading(false);
             return;

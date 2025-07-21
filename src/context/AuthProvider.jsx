@@ -11,11 +11,11 @@ const AuthProvider = ({ children }) => {
 
     const isLogin = !!user;
 
-
     useEffect(() => {
+        let initialized = false;
 
-        const getSessionAndProfile = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+        const handleSession = async (session) => {
+
             const supaUser = session?.user || null;
 
             if (supaUser) {
@@ -41,7 +41,7 @@ const AuthProvider = ({ children }) => {
                         targetYear: data[0].targetYear || 2026
                     };
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));
-                    updateStats(true);
+                    updateStats(supaUser);
                     setUser(supaUser);
                 }
             } else {
@@ -52,18 +52,18 @@ const AuthProvider = ({ children }) => {
             setLoading(false);
         }
 
-        getSessionAndProfile();
+        const initSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!initialized) {
+                initialized = true;
+                await handleSession(session);
+            }
+        }
+
+        initSession();
 
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            const supaUser = session?.user || null;
-
-            if (supaUser) {
-                getSessionAndProfile();
-            } else {
-                setUser(null);
-                localStorage.removeItem("gate_user_profile");
-                setLoading(false);
-            }
+            await handleSession(session);
         });
 
         return () => listener?.subscription.unsubscribe();
