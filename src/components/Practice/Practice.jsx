@@ -87,7 +87,7 @@ const Practice = () => {
                                 <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                                 <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                                 <FilterTabs label="Mathematics" type="math" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                                <FilterTabs label="General Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
+                                <FilterTabs label="Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                                 <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             </div>
                         </div>
