@@ -8,7 +8,6 @@ export const submitAndRecordAnswer = async ({
     numericalAnswer,
     timeTaken,
     user,
-    isLogin,
     updateStats
 }) => {
     // 1. Determine Correctness
@@ -39,25 +38,27 @@ export const submitAndRecordAnswer = async ({
     // If not attempted, `isCorrect` remains null.
 
     // 2. Record the Attempt
-    if (user?.id) {
-        try {
-            await recordAttempt({
-                user_id: user.id,
-                question_id: currentQuestion.id,
-                subject: currentQuestion.subject,
-                was_correct: isCorrect, // This can now be true, false, or null
-                time_taken: timeTaken,
-                attempt_number: 1
-            }, user);
-            await updateStats(user);
-        } catch (error) {
-            console.error("Failed to record attempt:", error);
-            toast.error("Could not save your attempt.");
+    (async () => {
+        if (user?.id) {
+            try {
+                await recordAttempt({
+                    user_id: user.id,
+                    question_id: currentQuestion.id,
+                    subject: currentQuestion.subject,
+                    was_correct: isCorrect, // This can now be true, false, or null
+                    time_taken: timeTaken,
+                    attempt_number: 1
+                }, user);
+                await updateStats(user);
+            } catch (error) {
+                console.error("Failed to record attempt:", error);
+                toast.error("Could not save your attempt.");
+            }
         }
-    }
+    })();
 
-    // 3. Return a descriptive result for the UI
+
     if (isCorrect === true) return 'correct';
     if (isCorrect === false) return 'incorrect';
-    return 'unattempted'; // This is the new return value for null
+    return 'unattempted';
 };

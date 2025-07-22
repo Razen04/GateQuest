@@ -1,7 +1,41 @@
 import { motion, AnimatePresence } from "framer-motion"
 import MathRenderer from '../MathRenderer'
+import { useContext, useEffect, useRef } from "react"
+import AppSettingContext from "../../../context/AppSettingContext"
 
 const ResultMessage = ({ showAnswer, result, getCorrectAnswerText, currentQuestion }) => {
+    const { settings } = useContext(AppSettingContext);
+    // Use settings.sound value
+
+    const correctSoundRef = useRef(null)
+    const wrongSoundRef = useRef(null);
+
+    useEffect(() => {
+        if (settings.sound) {
+            correctSoundRef.current = new Audio('/correct.wav');
+            correctSoundRef.current.preload = 'auto';
+
+            wrongSoundRef.current = new Audio('wrong.wav');
+            wrongSoundRef.current.preload = 'auto';
+        }
+    }, [settings.sound]);
+
+    useEffect(() => {
+        if (!showAnswer || !settings.sound) return;
+
+        let soundToPlay = null;
+
+        if (result === 'correct') {
+            soundToPlay = correctSoundRef.current?.cloneNode();
+        } else if (result === 'incorrect') {
+            soundToPlay = wrongSoundRef.current?.cloneNode();
+        }
+
+        soundToPlay?.play().catch((e) => {
+            console.warn("Sound failed to play: ", e);
+        });
+    }, [showAnswer, result, settings.sound]);
+
     return (
         <AnimatePresence>
             {showAnswer && (
@@ -19,6 +53,7 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText, currentQuesti
                     {result === 'correct' ? (
                         <div className="flex items-center">
                             <span>Correct! Well done.</span>
+
                         </div>
                     ) : result === 'incorrect' ? (
                         <div className="flex items-center">

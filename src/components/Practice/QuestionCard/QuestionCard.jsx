@@ -14,7 +14,7 @@ import QuestionContent from './QuestionContent'
 import QuestionBadge from './QuestionBadge'
 import { submitAndRecordAnswer } from '../../../utils/answerHandler'
 
-const QuestionCard = ({ subject, questions, questionId = 0 }) => {
+const QuestionCard = ({ subject, questions, questionId = 0, setSelectedQuestion }) => {
 
     const profile = getUserProfile();
     let user;
@@ -52,6 +52,10 @@ const QuestionCard = ({ subject, questions, questionId = 0 }) => {
         setCurrentIndex(questionId)
         resetQuestionState()
     }, [subject, questionId])
+
+    useEffect(() => {
+        setSelectedQuestion(currentQuestion.id)
+    }, [currentQuestion])
 
     // Set question link after every question
     useEffect(() => {

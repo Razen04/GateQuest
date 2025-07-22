@@ -196,7 +196,6 @@ const Dashboard = () => {
                                                 {/* Meta stats */}
                                                 <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                                                     <p>Attempted: <strong>{subject.attempted}</strong></p>
-                                                    {console.log(subject)}
                                                     <p>Total Questions: <strong>{subject?.totalAvailable}</strong></p>
                                                 </div>
                                             </motion.div>

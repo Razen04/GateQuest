@@ -29,6 +29,7 @@ const PrivacySettings = () => {
                 </h2>
 
                 <div className="space-y-4">
+                    <h1 className='text-lg text-red-500 italic'>Placeholder Settings: Does not work as of now, except Logout/Login.</h1>
                     <ToggleSwitch
                         isOn={settings.shareProgress}
                         onToggle={() => handleSettingToggle('shareProgress')}
@@ -45,8 +46,6 @@ const PrivacySettings = () => {
                         <h3 className="text-base font-medium mb-4">Data Management</h3>
 
                         <div className="space-y-3">
-                            <PrivacyButtons label="Export My Data" format="JSON / CSV" />
-                            <PrivacyButtons label="Clear Local Storage" format="34.2 MB" />
                             {user ? (<PrivacyButtons label="Logout" type="delete" onClick={() => logout()} />) : (<PrivacyButtons label="Sign up/Login" type="login" onClick={() => setShowLogin(true)} />)}
                         </div>
                     </div>

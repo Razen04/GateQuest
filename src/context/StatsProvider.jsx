@@ -44,7 +44,7 @@ const StatsProvider = ({ children }) => {
         setLoading(true);
 
         const user = userData;
-        if (!user) {
+        if (!user || user.id === 1) {
             setLoading(false);
             return;
         }

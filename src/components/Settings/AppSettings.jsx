@@ -35,11 +35,11 @@ const AppSettings = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <span>Version</span>
-                            <span>0.1</span>
+                            <span>0.2</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Last Updated</span>
-                            <span>May 20, 2025</span>
+                            <span>July 22, 2025</span>
                         </div>
                     </div>
                 </div>

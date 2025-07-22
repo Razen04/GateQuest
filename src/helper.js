@@ -38,6 +38,11 @@ export const recordAttempt = async (params, user) => {
         return;
     }
 
+    if(user.id === 1) {
+        toast.message("Login to sync your profile.")
+        return;
+    }
+
     const { data, error } = await supabase.from('user_question_activity').insert([{
         ...params
     }]);

@@ -95,7 +95,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
     if (isLoading) {
         return (
-            <div>Loading...</div>
+            <div className='text-center text-xl'>First loading may take some seconds, subsequent won't.</div>
         )
     }
 
@@ -126,7 +126,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                             <span>Back to Questions</span>
                         </button>
                     </div>
-                    <QuestionCard subject={subject} questions={filteredQuestions} questionId={selectedQuestion} />
+                    <QuestionCard subject={subject} questions={filteredQuestions} questionId={selectedQuestion} setSelectedQuestion={setSelectedQuestion} />
                 </motion.div>
             ) : (
                 // Show questions list
