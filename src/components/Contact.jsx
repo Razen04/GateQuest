@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
 import { toast } from 'sonner'
+import { FaGithub, FaReddit } from 'react-icons/fa6'
 
 const ContactField = ({ label, type, name, placeholder, formData, handleInputChange }) => {
     return (
@@ -89,7 +90,6 @@ const Contact = () => {
                 <h1 className="text-3xl font-bold">Get in <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Touch</span></h1>
                 <p className="mt-2">Have questions or need assistance? I am here to help.</p>
             </motion.div>
-
             <div>
                 {/* Contact Form */}
                 <motion.div
@@ -98,6 +98,7 @@ const Contact = () => {
                     animate="visible"
                     className="lg:col-span-2"
                 >
+                    
                     <motion.div
                         variants={itemVariants}
                         className="p-4 sm:p-8 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark"

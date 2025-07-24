@@ -24,7 +24,7 @@ const Settings = () => {
     ]
 
     return (
-        <div className='relative'>
+        <div className='relative mb-10'>
             {showLogin && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-30">
                     <Login onClose={() => setShowLogin(false)} canClose={true} />

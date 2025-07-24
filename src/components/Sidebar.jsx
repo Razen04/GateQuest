@@ -4,14 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
     FaChartPie,
     FaLaptopCode,
-    FaBookOpen,
     FaCog,
     FaHeadset,
-    FaGraduationCap,
     FaDiscord
 } from 'react-icons/fa'
 import { FaGithub, FaReddit } from 'react-icons/fa6'
 import useWindowSize from '../hooks/useWindowSize'
+import appLogo from '/logo.svg'
 
 const Sidebar = ({ showSidebar, setShowSidebar }) => {
     const navigate = useNavigate()
@@ -39,6 +38,31 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
         }
     }
 
+    // Mobile: bottom navbar, Desktop: sidebar
+    const isMobile = width < 768;
+
+    if (isMobile) {
+        // Bottom navbar for mobile
+        return (
+            <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-primary-dark border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
+                {tabs.map((tab, index) => {
+                    const isActive = location.pathname === tab.path;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => handleTabClick(tab.path)}
+                            className={`flex flex-col items-center justify-center px-2 py-1 focus:outline-none transition-all ${isActive ? 'text-blue-600 font-bold' : 'text-gray-500 dark:text-gray-300'}`}
+                        >
+                            <span className={`text-xl mb-0.5 ${isActive ? 'scale-110' : ''}`}>{tab.icon}</span>
+                            <span className="text-xs">{tab.name}</span>
+                        </button>
+                    );
+                })}
+            </nav>
+        );
+    }
+
+    // Desktop sidebar
     return (
         <motion.div
             className={`w-64 z-10 absolute h-[100dvh] lg:static lg:block border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-lg transition-colors duration-1000`}
@@ -56,7 +80,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                         animate={{ scale: 1 }}
                         transition={{ duration: 0.6, ease: "easeOut" }}
                     >
-                        <FaGraduationCap />
+                        <img src={appLogo} alt="App logo" className='w-7' />
                     </motion.div>
                     <motion.h1
                         className='ml-3 text-2xl font-bold dark:text-white'
@@ -129,9 +153,8 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                     transition={{ delay: 0.8, duration: 0.6 }}
                 >
                     <div className="px-2 py-2 text-xs text-center text-gray-500 flex justify-around items-center">
-                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><FaGithub /></span>
-                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><FaDiscord /></span>
-                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 hover:scale-150 transition-all hover:text-xl cursor-pointer'><FaReddit /></span>
+                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><a href="https://github.com/Razen04/GateQuest" target="_blank" rel="noopener noreferrer"><FaGithub /></a></span>
+                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 hover:scale-150 transition-all hover:text-xl cursor-pointer'><a href="https://www.reddit.com/r/GATEtard/" target="_blank" rel="noopener noreferrer"><FaReddit /></a></span>
                     </div>
                 </motion.div>
             </div>

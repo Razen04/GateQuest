@@ -35,12 +35,13 @@ const useQuestions = (subject, activeFilter) => {
             try {
                 if (activeFilter === "bookmarked") {
                     const profile = getUserProfile();
+                    const subjectQuestions = JSON.parse(localStorage.getItem(subject) || "[]");
                     const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
 
                     if (bookmarkedQuestions.length > 0) {
-                        const ids = bookmarkedQuestions.map(q => q.id).join(",");
-                        const res = await axios.get(`${API_BASE}/api/questions/bookmarked?ids=${ids}`);
-                        setQuestions(sortQuestionsByYear(res.data));
+                        const ids = new Set(bookmarkedQuestions.map(q => q.id));
+                        const questions = subjectQuestions.filter(q => ids.has(q.id));
+                        setQuestions(sortQuestionsByYear(questions));
                     } else {
                         setQuestions([]); // No bookmarks for this subject
                         toast.message("No questions bookmarked yet.");

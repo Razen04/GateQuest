@@ -95,7 +95,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
     if (isLoading) {
         return (
-            <div className='text-center text-xl'>First loading may take some seconds, subsequent won't.</div>
+            <div className='w-full flex items-center justify-center'> <h1 className='italic text-xl'>First loading may take some seconds, subsequent won't.</h1></div>
         )
     }
 

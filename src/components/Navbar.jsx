@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { BiBell, BiSolidBell } from 'react-icons/bi'
 import Notification from './Notification'
-import { FaHamburger } from 'react-icons/fa'
 
-const Navbar = ({ setShowSidebar }) => {
+const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false)
     const [unreadNotifications, setUnreadNotifications] = useState(false)
     const notificationRef = useRef(null)
@@ -31,14 +30,7 @@ const Navbar = ({ setShowSidebar }) => {
             transition={{ duration: 0.6, ease: "easeOut" }}
         >
 
-            {/* Hamburger menu only for mobile */}
-            <motion.div className="lg:hidden">
-                <button aria-label='Toggle navigation menu' onClick={() => setShowSidebar(prev => !prev)} className='p-1 cursor-pointer text-xl'>
-                    <FaHamburger />
-                </button>
-            </motion.div>
-
-            <div className='flex-1 lg:block w-full'>
+            <div className='flex lg:block w-full'>
                 <h1 className='text-center text-2xl font-bold'><span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>GATE</span>Quest</h1>
             </div>
 
