@@ -42,7 +42,7 @@ const Practice = () => {
     
 
     return (
-        <div className="min-h-[100dvh] bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-4 md:p-8">
+        <div className="min-h-[100dvh] bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-4 mb-10 md:p-8">
             {viewMode === 'questions' ? (
                 // Show questions list
                 <div className="max-w-4xl mx-auto">

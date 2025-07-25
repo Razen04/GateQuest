@@ -259,7 +259,7 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
                         </div>
 
                         {filteredQuestions.length > 0 ? (
-                            <div ref={QuestionsListRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[60vh]">
+                            <div ref={QuestionsListRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[60vh] rounded-lg">
                                 {paginatedQuestions.map((question, index) => (
                                     <motion.div
                                         key={index}

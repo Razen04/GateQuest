@@ -80,7 +80,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-8 mb-10 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
+        <div className="p-8 mb-20 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
             {/* Welcome */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
