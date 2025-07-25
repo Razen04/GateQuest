@@ -44,7 +44,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
     if (isMobile) {
         // Bottom navbar for mobile
         return (
-            <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-primary-dark border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
+            <nav className="fixed h-16 bottom-0 left-0 right-0 z-20 bg-white dark:bg-primary-dark border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
                 {tabs.map((tab, index) => {
                     const isActive = location.pathname === tab.path;
                     return (

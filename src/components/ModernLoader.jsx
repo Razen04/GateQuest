@@ -6,7 +6,7 @@ export default function ModernLoader() {
             <div className="relative w-24 h-24 flex items-center justify-center">
                 {/* Glowing Pulse Dot */}
                 <motion.div
-                    className="absolute w-4 h-4 rounded-full bg-purple-500 shadow-xl"
+                    className="absolute w-4 h-4 rounded-full bg-blue-400 shadow-xl"
                     animate={{
                         scale: [1, 1.5, 1],
                         opacity: [1, 0.6, 1],
@@ -20,7 +20,7 @@ export default function ModernLoader() {
 
                 {/* Ring Spinner */}
                 <motion.div
-                    className="absolute w-full h-full border-[5px] border-purple-300/10 border-t-purple-600 rounded-full blur-[0.6px]"
+                    className="absolute w-full h-full border-[5px] border-blue-200/10 border-t-blue-500 rounded-full blur-[0.6px]"
                     animate={{ rotate: 360 }}
                     transition={{
                         repeat: Infinity,
@@ -30,7 +30,7 @@ export default function ModernLoader() {
                 />
 
                 {/* Inner Glow Ring */}
-                <div className="w-16 h-16 rounded-full bg-purple-600/10 backdrop-blur-md shadow-inner shadow-purple-600/40"></div>
+                <div className="w-16 h-16 rounded-full bg-blue-500/10 backdrop-blur-md shadow-inner shadow-blue-500/40"></div>
             </div>
         </div>
     );

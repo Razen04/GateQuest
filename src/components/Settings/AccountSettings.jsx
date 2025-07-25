@@ -36,7 +36,7 @@ const AccountSettings = () => {
     }
 
     return (
-        <div>
+        <div className='overflow-y-scroll'>
             <h2 className="text-xl font-semibold mb-6 flex items-center">
                 <FaUserCircle className="mr-2" /> Account Settings
             </h2>

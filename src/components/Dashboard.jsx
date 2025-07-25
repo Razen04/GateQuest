@@ -61,7 +61,7 @@ const Dashboard = () => {
     // Handle loading
     if (loading) {
         return (
-            <div className="w-full h-dvh flex justify-center items-center text-gray-600">
+            <div className="w-full flex justify-center items-center text-gray-600">
                 <ModernLoader />
             </div>
         );
@@ -80,7 +80,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-8 mb-20 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
+        <div className="p-8 mb-20 bg-gray-50 dark:bg-zinc-900">
             {/* Welcome */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
