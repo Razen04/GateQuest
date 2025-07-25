@@ -11,7 +11,7 @@ const Layout = () => {
             <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Navbar setShowSidebar={setShowSidebar} />
-                <main className="flex-1 overflow-y-auto dark:bg-gray-900">
+                <main className="flex-1 overflow-y-auto dark:bg-zinc-900">
                     <Outlet />
                 </main>
             </div>

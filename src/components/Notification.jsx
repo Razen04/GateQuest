@@ -99,13 +99,14 @@ const Notification = ({ isOpen, setUnreadNotifications }) => {
                                         <div className="p-2 rounded-full mr-3">
                                             {getNotificationIcon(notification)}
                                         </div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-start">
+                                        <div className="w-full flex flex-col">
+                                            <div className="w-full flex justify-between items-center">
                                                 <p className="text-sm font-medium">{notification.title}</p>
                                                 <span className="text-xs">{formatDistanceToNow(notification.created_at)}</span>
                                             </div>
-                                            <p className="text-xs mt-1">{notification.message}</p>
+                                            <p className="text-xs mt-1 w-fit">{notification.message}</p>
                                         </div>
+                                        
                                         {!isRead && (
                                             <span className="w-2 h-2 rounded-full bg-blue-500 mt-2 ml-2" title="Unread notification"></span>
                                         )}

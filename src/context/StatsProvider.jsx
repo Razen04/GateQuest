@@ -63,13 +63,13 @@ const StatsProvider = ({ children }) => {
             return;
         }
 
-        const totalQuestions = 382;
+        const totalQuestions = 582;
         const attempted = data.length;
         const correctAttempts = data.filter(q => q.was_correct == true).length
         const totalStudyTime = calculateStudyTime(data)
 
         // calculating each subject stats
-        const questionCounts = { "CO & Architecture": 146, "Aptitude": 236 };
+        const questionCounts = { "CO & Architecture": 146, "Aptitude": 236, "Theory of Computation": 200 };
 
         const grouped = {};
 

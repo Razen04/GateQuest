@@ -7,6 +7,7 @@ import useFilters from '../../hooks/useFilters'
 import { getDifficultyClassNames } from '../../utils/questionUtils'
 import MathRenderer from './MathRenderer'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
+import ModernLoader from '../ModernLoader'
 
 const QuestionsList = ({ subject, activeFilter, onBack }) => {
     const { questions, isLoading, error } = useQuestions(subject, activeFilter);
@@ -95,7 +96,9 @@ const QuestionsList = ({ subject, activeFilter, onBack }) => {
 
     if (isLoading) {
         return (
-            <div className='w-full flex items-center justify-center'> <h1 className='italic text-xl'>First loading may take some seconds, subsequent won't.</h1></div>
+            <div className="w-full h-lvh flex justify-center items-center text-gray-600">
+                <ModernLoader />
+            </div>
         )
     }
 

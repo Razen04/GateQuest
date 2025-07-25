@@ -1,54 +1,67 @@
 import { FaMicrochip } from 'react-icons/fa';
-import { FaBrain } from 'react-icons/fa6';
+import { FaBrain, FaDiagramProject } from 'react-icons/fa6';
 
-// Subject data
+// Subjects Data
 const subjects = [
     {
         id: 1,
         name: "Computer Organization & Architecture",
         apiName: "CO & Architecture",
         icon: FaMicrochip,
-        progress: 42,
         questions: 180,
         difficulty: "Hard",
         category: "core",
-        color: "purple"
+        color: "indigo"
     },
     {
-        id: 1.1,
+        id: 101,
         name: "Computer Organization & Architecture",
         apiName: "CO & Architecture",
         icon: FaMicrochip,
-        progress: 42,
         questions: 180,
         difficulty: "Hard",
         category: "bookmarked",
-        color: "purple"
+        color: "indigo"
     },
     {
         id: 2,
         name: "Aptitude",
         apiName: "Aptitude",
         icon: FaBrain,
-        progress: 42,
         questions: 236,
-        difficulty: "Medium",
+        difficulty: "Easy",
         category: "aptitude",
-        color: "purple"
+        color: "red"
     },
     {
-        id: 2.1,
+        id: 102,
         name: "Aptitude",
         apiName: "Aptitude",
         icon: FaBrain,
-        progress: 42,
         questions: 236,
-        difficulty: "Medium",
+        difficulty: "Easy",
         category: "bookmarked",
+        color: "red"
+    },
+    {
+        id: 3,
+        name: "Theory of Computation",
+        apiName: "Theory of Computation",
+        icon: FaDiagramProject,
+        questions: 200,
+        difficulty: "Hard",
+        category: "core",
         color: "purple"
     },
-
-    // Other subjects remain the same...
-]
-
+    {
+        id: 103,
+        name: "Theory of Computation",
+        apiName: "Theory of Computation",
+        icon: FaDiagramProject,
+        questions: 200,
+        difficulty: "Hard",
+        category: "bookmarked",
+        color: "purple"
+    }
+];
 export default subjects;

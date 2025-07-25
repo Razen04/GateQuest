@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import QuestionsList from './QuestionList'
 import subjects from '../../data/subjects'
+import { getBackgroundColor } from '../../helper'
 
 const FilterTabs = ({ label, type, activeFilter, setActiveFilter }) => {
     return (
@@ -38,18 +39,7 @@ const Practice = () => {
         }
     }
 
-    // Get background color based on subject
-    const getBackgroundColor = (color) => {
-        const colors = {
-            blue: "bg-blue-100 text-blue-600",
-            purple: "bg-purple-100 text-purple-600",
-            green: "bg-green-100 text-green-600",
-            indigo: "bg-indigo-100 text-indigo-600",
-            red: "bg-red-100 text-red-600",
-            orange: "bg-orange-100 text-orange-600"
-        }
-        return colors[color] || "bg-gray-100 text-gray-600"
-    }
+    
 
     return (
         <div className="min-h-[100dvh] bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-4 md:p-8">

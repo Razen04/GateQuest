@@ -1,14 +1,15 @@
 import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaChartLine, FaClock,
+    FaChartLine,
     FaLaptopCode, FaMedal
 } from 'react-icons/fa';
 import Login from './Login';
 import AuthContext from '../context/AuthContext';
-import { getUserProfile } from '../helper';
+import { getBackgroundColor, getUserProfile } from '../helper';
 import StatsContext from '../context/StatsContext';
 import subjects from '../data/subjects';
+import ModernLoader from './ModernLoader';
 
 const StatCard = ({ icon: Icon, title, value, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 
@@ -61,7 +62,7 @@ const Dashboard = () => {
     if (loading) {
         return (
             <div className="w-full h-dvh flex justify-center items-center text-gray-600">
-                Loading...
+                <ModernLoader />
             </div>
         );
     }
@@ -79,7 +80,7 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
+        <div className="p-8 mb-10 bg-gray-50 min-h-[100dvh] dark:bg-zinc-900">
             {/* Welcome */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -101,7 +102,7 @@ const Dashboard = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
             >
                 <StatCard
                     icon={FaChartLine}
@@ -119,15 +120,6 @@ const Dashboard = () => {
                     delta="2%"
                     iconColor="text-purple-500"
                     bgColor="bg-purple-50"
-                />
-
-                <StatCard
-                    icon={FaClock}
-                    title="Study Time"
-                    value={`${stats?.totalTime} hours`}
-                    delta="2"
-                    iconColor="text-indigo-500"
-                    bgColor="bg-indigo-50"
                 />
 
             </motion.div>
@@ -155,6 +147,8 @@ const Dashboard = () => {
                                         // Find the subject meta info
                                         const subjectMeta = subjects.find(s => s.apiName === subject.subject);
                                         const Icon = subjectMeta?.icon || FaLaptopCode; // fallback icon
+                                        const questionCount = subjectMeta?.questions;
+                                        const subjectColor = subjectMeta?.color;
 
                                         return (
                                             <motion.div
@@ -163,8 +157,8 @@ const Dashboard = () => {
                                                 whileHover={{ scale: 1.03 }}
                                             >
                                                 <div className="flex items-center mb-4">
-                                                    <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-white mr-3">
-                                                        <Icon className="h-6 w-6" />
+                                                    <div className={`p-3 ${getBackgroundColor(subjectColor)} rounded-lg text-white mr-3`}>
+                                                        <Icon className={`h-6 w-6 ${getBackgroundColor(subjectColor)}`} />
                                                     </div>
                                                     <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{subject.subject}</h3>
                                                 </div>
@@ -196,7 +190,7 @@ const Dashboard = () => {
                                                 {/* Meta stats */}
                                                 <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                                                     <p>Attempted: <strong>{subject.attempted}</strong></p>
-                                                    <p>Total Questions: <strong>{subject?.totalAvailable}</strong></p>
+                                                    <p>Total Questions: <strong>{questionCount}</strong></p>
                                                 </div>
                                             </motion.div>
                                         );
