@@ -24,7 +24,7 @@ const Navbar = () => {
 
     return (
         <motion.div
-            className='py-4 px-8 flex justify-between items-center border-b bg-primary dark:bg-primary-dark border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark'
+            className='py-4 px-6 flex justify-between items-center border-b bg-primary dark:bg-primary-dark border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark'
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}

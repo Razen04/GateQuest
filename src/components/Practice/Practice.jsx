@@ -42,10 +42,10 @@ const Practice = () => {
     
 
     return (
-        <div className="min-h-dvh bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-8 mb-10">
+        <div className="min-h-dvh bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-6 pb-20">
             {viewMode === 'questions' ? (
                 // Show questions list
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-4xl">
                     <QuestionsList
                         subject={selectedSubject}
                         activeFilter={activeFilter}

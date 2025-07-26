@@ -24,13 +24,13 @@ const Settings = () => {
     ]
 
     return (
-        <div className='relative mb-10'>
+        <div className='relative pb-10'>
             {showLogin && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-transparent bg-opacity-30">
                     <Login onClose={() => setShowLogin(false)} canClose={true} />
                 </div>
             )}
-            <div className={`p-8 min-h-[100dvh] transition-colors duration-500 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark ${showLogin ? 'blur-2xl' : null}`}>
+            <div className={`p-6 min-h-[100dvh] transition-colors duration-500 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark ${showLogin ? 'blur-2xl' : null}`}>
                 {/* Header Section */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
