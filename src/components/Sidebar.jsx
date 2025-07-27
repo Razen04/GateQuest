@@ -16,7 +16,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const { width, height } = useWindowSize();
+    const { width } = useWindowSize();
 
     if (width === undefined) {
         return (
@@ -24,7 +24,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
         )
     }
     const tabs = [
-        { id: 1, name: "Dashboard", icon: <FaChartPie />, path: "/" },
+        { id: 1, name: "Dashboard", icon: <FaChartPie />, path: "/dashboard" },
         { id: 2, name: "Practice", icon: <FaLaptopCode />, path: "/practice" },
         { id: 3, name: "Settings", icon: <FaCog />, path: "/settings" },
         { id: 4, name: "Contact", icon: <FaHeadset />, path: "/contact" }
@@ -45,8 +45,8 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
         // Bottom navbar for mobile
         return (
             <nav className="fixed h-16 bottom-0 left-0 right-0 z-20 bg-white dark:bg-primary-dark border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
-                {tabs.map((tab, index) => {
-                    const isActive = location.pathname === tab.path;
+                {tabs.map((tab) => {
+                    const isActive = location.pathname.startsWith(tab.path)
                     return (
                         <button
                             key={tab.id}
@@ -96,7 +96,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                 <div className='flex-1 pt-6 overflow-y-auto scrollbar-hide'>
                     <nav className='px-4'>
                         {tabs.map((tab, index) => {
-                            const isActive = location.pathname === tab.path;
+                            const isActive = location.pathname.startsWith(tab.path);
                             return (
                                 <motion.div
                                     key={tab.id}

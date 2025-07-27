@@ -1,8 +1,7 @@
 import React, { useContext } from 'react'
 import { FaShieldAlt } from 'react-icons/fa'
-import ToggleSwitch from '../ToggleSwitch'
+import ToggleSwitch from '../../components/ToggleSwitch'
 import AuthContext from '../../context/AuthContext'
-import Login from '../Login'
 import AppSettingContext from '../../context/AppSettingContext'
 
 const PrivacyButtons = ({ label, format = "", type = "", onClick }) => {

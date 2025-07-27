@@ -4,12 +4,12 @@ import {
     FaChartLine,
     FaLaptopCode, FaMedal
 } from 'react-icons/fa';
-import Login from './Login';
+import Login from '../components/Login';
 import AuthContext from '../context/AuthContext';
 import { getBackgroundColor, getUserProfile } from '../helper';
 import StatsContext from '../context/StatsContext';
 import subjects from '../data/subjects';
-import ModernLoader from './ModernLoader';
+import ModernLoader from '../components/ModernLoader';
 
 const StatCard = ({ icon: Icon, title, value, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 

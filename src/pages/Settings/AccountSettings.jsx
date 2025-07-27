@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { FaUserCircle } from 'react-icons/fa'
-import Buttons from '../Buttons'
+import Buttons from '../../components/Buttons'
 import { FaUser } from 'react-icons/fa6'
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper'
 import AuthContext from '../../context/AuthContext'

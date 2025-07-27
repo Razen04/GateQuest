@@ -16,14 +16,14 @@ const sortQuestionsByYear = (questionsToSort) => {
     });
 };
 
-const useQuestions = (subject, activeFilter) => {
+const useQuestions = (subject, bookmarked) => {
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         // Don't run if the necessary props aren't available yet
-        if (!subject || !activeFilter) {
+        if (!subject) {
             setIsLoading(false);
             return;
         }
@@ -33,7 +33,7 @@ const useQuestions = (subject, activeFilter) => {
             setError(null);
 
             try {
-                if (activeFilter === "bookmarked") {
+                if (bookmarked) {
                     const profile = getUserProfile();
                     const subjectQuestions = JSON.parse(localStorage.getItem(subject) || "[]");
                     const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
@@ -41,6 +41,7 @@ const useQuestions = (subject, activeFilter) => {
                     if (bookmarkedQuestions.length > 0) {
                         const ids = new Set(bookmarkedQuestions.map(q => q.id));
                         const questions = subjectQuestions.filter(q => ids.has(q.id));
+                        
                         setQuestions(sortQuestionsByYear(questions));
                     } else {
                         setQuestions([]); // No bookmarks for this subject
@@ -70,7 +71,7 @@ const useQuestions = (subject, activeFilter) => {
 
         fetchData();
 
-    }, [subject, activeFilter]); // Re-fetch whenever the subject or filter changes
+    }, [subject, bookmarked]); // Re-fetch whenever the subject or filter changes
 
     return { questions, isLoading, error };
 };
