@@ -16,7 +16,7 @@ const QuestionContent = ({
     return (
         <div>
             <div className="mb-4 sm:mb-6 overflow-x-scroll">
-                <div className="text-base md:text-lg">
+                <div className="text-sm md:text-lg">
                     {currentQuestion.question ? (
                         <MathRenderer text={currentQuestion.question} />
                     ) : (

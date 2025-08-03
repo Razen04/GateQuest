@@ -51,17 +51,19 @@ const QuestionHeader = ({ subject, questions, currentIndex, currentQuestion, que
                         </span>
                     )}
 
-                    {currentQuestion.marks && (
-                        <span className="px-2 py-1 bg-purple-50 text-purple-600 rounded-full">
-                            {currentQuestion.marks} Mark{currentQuestion.marks !== 1 ? 's' : ''}
-                        </span>
-                    )}
+                    <div className='flex items-center space-x-2'>
+                        {currentQuestion.marks && (
+                            <span className="px-2 py-1 bg-purple-50 text-purple-600 rounded-full">
+                                {currentQuestion.marks} Mark{currentQuestion.marks !== 1 ? 's' : ''}
+                            </span>
+                        )}
 
-                    {isMultipleSelection(currentQuestion) && (
-                        <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-full">
-                            Select all that apply
-                        </span>
-                    )}
+                        {isMultipleSelection(currentQuestion) && (
+                            <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-full">
+                                Select all that apply
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

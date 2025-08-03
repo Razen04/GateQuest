@@ -69,7 +69,7 @@ const StatsProvider = ({ children }) => {
         const totalStudyTime = calculateStudyTime(data)
 
         // calculating each subject stats
-        const questionCounts = { "CO & Architecture": 146, "Aptitude": 236, "Theory of Computation": 200 };
+        const questionCounts = { "CO & Architecture": 146, "Aptitude": 236, "Theory of Computation": 200, "Operating System": 235, "Data Structures": 250 };
 
         const grouped = {};
 

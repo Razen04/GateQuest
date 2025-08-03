@@ -79,7 +79,7 @@ const Contact = () => {
     }
 
     return (
-        <div className="p-8 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark max-h-[80vh] overflow-y-scroll">
+        <div className="p-8 bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark pb-2 h-[80vh] md:h-screen overflow-y-auto">
             {/* Header Section */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}

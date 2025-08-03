@@ -1,5 +1,5 @@
 import { FaMicrochip } from 'react-icons/fa';
-import { FaBrain, FaDiagramProject } from 'react-icons/fa6';
+import { FaBrain, FaDiagramProject, FaSitemap, FaLinux } from 'react-icons/fa6';
 
 // Subjects Data
 const subjects = [
@@ -62,6 +62,47 @@ const subjects = [
         difficulty: "Hard",
         category: "bookmarked",
         color: "purple"
+    },
+    {
+        id: 4,
+        name: "Operating System",
+        apiName: "Operating System",
+        icon: FaLinux,
+        questions: 235,
+        difficulty: "Medium",
+        category: "core",
+        color: "blue"
+    },
+    {
+        id: 104,
+        name: "Operating System",
+        apiName: "Operating System",
+        icon: FaLinux,
+        questions: 235,
+        difficulty: "Medium",
+        category: "bookmarked",
+        color: "blue"
+    },
+    {
+        id: 5,
+        name: "Data Structures",
+        apiName: "Data Structures",
+        icon: FaSitemap,
+        questions: 250,
+        difficulty: "Medium",
+        category: "core",
+        color: "green"
+    },
+    {
+        id: 105,
+        name: "Data Structures",
+        apiName: "Data Structures",
+        icon: FaSitemap,
+        questions: 250,
+        difficulty: "Medium",
+        category: "bookmarked",
+        color: "green"
     }
 ];
+
 export default subjects;
