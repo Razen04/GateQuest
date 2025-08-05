@@ -96,7 +96,7 @@ const Notification = ({ isOpen, setUnreadNotifications }) => {
                                         key={notification.id}
                                         className={`p-3 border-b border-border-primary dark:border-border-primary-dark hover:bg-gray-50 dark:hover:bg-zinc-700 cursor-pointer flex items-start`}
                                     >
-                                        <div className="p-2 rounded-full mr-3">
+                                        <div className="p-2 rounded-full mr-3 text-left">
                                             {getNotificationIcon(notification)}
                                         </div>
                                         <div className="w-full flex flex-col">
@@ -104,7 +104,7 @@ const Notification = ({ isOpen, setUnreadNotifications }) => {
                                                 <p className="text-sm font-medium">{notification.title}</p>
                                                 <span className="text-xs">{formatDistanceToNow(notification.created_at)}</span>
                                             </div>
-                                            <p className="text-xs mt-1 w-fit">{notification.message}</p>
+                                            <p className="text-xs mt-1 text-left">{notification.message}</p>
                                         </div>
                                         
                                         {!isRead && (
