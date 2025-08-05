@@ -1,30 +1,7 @@
 import React, { useState } from 'react'
 import StatsContext from './StatsContext';
 import { supabase } from '../../supabaseClient';
-
-const INACTIVITY_THRESHOLD_MINUTES = 10;
-
-function calculateStudyTime(attempts) {
-    if (!attempts || attempts.length === 0) return 0;
-
-    const sorted = attempts
-        .filter(a => a.attempted_at)
-        .sort((a, b) => new Date(a.attempted_at) - new Date(b.attempted_at));
-
-    let totalMillis = 0;
-    for (let i = 1; i < sorted.length; i++) {
-        const prev = new Date(sorted[i - 1].attempted_at);
-        const curr = new Date(sorted[i].attempted_at);
-        const diff = curr - prev;
-
-        // If diff < 15 minutes, count it
-        if (diff <= INACTIVITY_THRESHOLD_MINUTES * 60 * 1000) {
-            totalMillis += diff;
-        }
-    }
-
-    return Math.round(totalMillis / (1000 * 3600)).toFixed(2); // in seconds
-}
+import subjects from '../data/subjects';
 
 const StatsProvider = ({ children }) => {
 
@@ -63,13 +40,28 @@ const StatsProvider = ({ children }) => {
             return;
         }
 
-        const totalQuestions = 582;
+        const totalQuestions = subjects.reduce((sum, s) => {
+            if(s.category !== "bookmarked") {
+                return sum+s.questions;
+            }
+            return sum;
+        }, 0)
+        console.log("totalQuestions: ", totalQuestions)
         const attempted = data.length;
         const correctAttempts = data.filter(q => q.was_correct == true).length
-        const totalStudyTime = calculateStudyTime(data)
 
-        // calculating each subject stats
-        const questionCounts = { "CO & Architecture": 146, "Aptitude": 236, "Theory of Computation": 200, "Operating System": 235, "Data Structures": 250 };
+        let questionCounts = {};
+        subjects.map((s) => {
+            if(!questionCounts[s.apiName]) {
+                questionCounts[s.apiName] = 0;
+            }
+
+            if(s.category !== "bookmarked") {
+                questionCounts[s.apiName] = s.questions;
+            }
+
+            return questionCounts;
+        })
 
         const grouped = {};
 
@@ -98,10 +90,10 @@ const StatsProvider = ({ children }) => {
             }
         })
 
+        console.log("attempted: ", attempted)
         setStats({
             progress: Math.round((attempted / totalQuestions) * 100),
             accuracy: Math.round((correctAttempts / totalQuestions) * 100),
-            totalTime: totalStudyTime,
             question: new Set(data.question_id),
             subjectStats: result
         });

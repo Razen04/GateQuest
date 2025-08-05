@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { isNumericalQuestion } from './questionUtils';
-import { recordAttempt } from '../helper';
+import { recordAttemptLocally } from '../helper';
 
 export const submitAndRecordAnswer = async ({
     currentQuestion,
@@ -41,15 +41,14 @@ export const submitAndRecordAnswer = async ({
     (async () => {
         if (user?.id) {
             try {
-                await recordAttempt({
+                await recordAttemptLocally({
                     user_id: user.id,
                     question_id: currentQuestion.id,
                     subject: currentQuestion.subject,
                     was_correct: isCorrect, // This can now be true, false, or null
                     time_taken: timeTaken,
                     attempt_number: 1
-                }, user);
-                await updateStats(user);
+                }, user, updateStats);
             } catch (error) {
                 console.error("Failed to record attempt:", error);
                 toast.error("Could not save your attempt.");

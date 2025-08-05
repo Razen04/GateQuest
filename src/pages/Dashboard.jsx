@@ -10,8 +10,9 @@ import { getBackgroundColor, getUserProfile } from '../helper';
 import StatsContext from '../context/StatsContext';
 import subjects from '../data/subjects';
 import ModernLoader from '../components/ModernLoader';
+import StudyPlan from '../components/StudyPlan';
 
-const StatCard = ({ icon: Icon, title, value, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
+const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 
     const itemVariants = {
         hidden: { y: 20, opacity: 0 },
@@ -30,10 +31,16 @@ const StatCard = ({ icon: Icon, title, value, iconColor, bgColor, textColor = "t
             <div className={`p-4 rounded-full ${bgColor} mr-4`}>
                 <Icon className={`h-6 w-6 ${iconColor}`} />
             </div>
-            <div>
+            <div className='w-full'>
                 <h3 className="text-gray-500 dark:text-gray-100 text-sm">{title}</h3>
                 <div className="flex items-center mt-1">
                     <span className={`text-2xl font-bold ${textColor}`}>{value}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                    <div
+                        className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${quantity}%` }}
+                    ></div>
                 </div>
             </div>
         </motion.div>
@@ -97,6 +104,8 @@ const Dashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400 mt-2">Your preparation journey is {stats?.progress}% complete. Keep going!</p>
             </motion.div>
 
+            <StudyPlan />
+
             {/* Stats */}
             <motion.div
                 variants={containerVariants}
@@ -111,6 +120,7 @@ const Dashboard = () => {
                     delta="2%"
                     iconColor="text-blue-500"
                     bgColor="bg-blue-50"
+                    quantity={stats?.progress}
                 />
 
                 <StatCard
@@ -120,12 +130,13 @@ const Dashboard = () => {
                     delta="2%"
                     iconColor="text-purple-500"
                     bgColor="bg-purple-50"
+                    quantity={stats?.accuracy}
                 />
 
             </motion.div>
 
             {/* Subject Stats */}
-            <div className="w-full">
+            {subjectStats && <div className="w-full">
                 <motion.div
                     className="lg:col-span-2 space-y-8"
                     initial={{ opacity: 0, y: 20 }}
@@ -200,7 +211,7 @@ const Dashboard = () => {
                         </div>
                     </motion.div>
                 </motion.div>
-            </div>
+            </div>}
         </div>
     );
 };

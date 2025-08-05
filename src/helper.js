@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { supabase } from "../supabaseClient";
 
+
 export const getUserProfile = () => {
     try {
         return JSON.parse(localStorage.getItem("gate_user_profile"))
@@ -44,26 +45,69 @@ export const syncUserToSupabase = async () => {
     }
 }
 
-export const recordAttempt = async (params, user) => {
+// Storing attempts locally first
+export const recordAttemptLocally = async (params, user, updateStats) => {
+    if (!user || !user.id) {
+        toast.error("No valid user profile found.");
+        return;
+    }
+
+    if (user.id === 1) {
+        toast.message("Login to sync your profile.");
+        return;
+    }
+
+    const LOCAL_KEY = `attempt_buffer_${user.id}`;
+    const buffer = JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
+
+    // Check if this question already exists in buffer
+    const existingIndex = buffer.findIndex(
+        (item) => item.question_id === params.question_id
+    );
+
+    if (existingIndex !== -1) {
+        // If it exists, increment attempt_number
+        buffer[existingIndex].attempt_number =
+            (buffer[existingIndex].attempt_number || 1) + 1;
+        buffer[existingIndex].attempted_at = new Date().toISOString();
+    } else {
+        // If it doesn't exist, push it
+        buffer.push({
+            ...params,
+            attempted_at: new Date().toISOString(),
+        });
+    }
+
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(buffer));
+    toast.success("Attempt recorded successfully.")
+
+    if (buffer.length >= 5) {
+        await recordAttempt(buffer, user, updateStats); // your API sync function
+        localStorage.removeItem(LOCAL_KEY); // Clear after syncing
+    }
+
+    console.log("Attempt buffer:", buffer);
+};
+
+export const recordAttempt = async (buffer, user, updateStats) => {
 
     if (!user || !user.id) {
         toast.error("No valid user profile found.");
         return;
     }
 
-    if(user.id === 1) {
+    if (user.id === 1) {
         toast.message("Login to sync your profile.")
         return;
     }
 
-    const { data, error } = await supabase.from('user_question_activity').insert([{
-        ...params
-    }]);
+    const { data, error } = await supabase.from('user_question_activity').insert(buffer);
+    await updateStats(user)
 
     if (error) {
         toast.error("Failed to record attempt: " + error.message);
         console.error("Failed to record attempt: ", error);
     } else {
-        toast.success("Attempt recorded successfully!");
+        toast.success("Attempt synced successfully!");
     }
 }

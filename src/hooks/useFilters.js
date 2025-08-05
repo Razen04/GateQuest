@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import StatsContext from "../context/StatsContext";
 
 // Add this helper function above the useEffect
