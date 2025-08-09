@@ -18,8 +18,6 @@ const StudyPlan = () => {
         todayProgressPercent,
     } = useStudyPlan({ userId });
 
-    console.log("Loading: ", loading)
-
     if (loading) {
         return (
             <div className="p-6 bg-primary dark:bg-primary-dark rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mt-8">

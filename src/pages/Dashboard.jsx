@@ -11,6 +11,8 @@ import StatsContext from '../context/StatsContext';
 import subjects from '../data/subjects';
 import ModernLoader from '../components/ModernLoader';
 import StudyPlan from '../components/StudyPlan';
+import { ResponsiveTimeRange } from '@nivo/calendar';
+import ThemeContext from '../context/ThemeContext';
 
 const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 
@@ -26,7 +28,7 @@ const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, text
     return (
         <motion.div
             variants={itemVariants}
-            className="p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700 flex items-center"
+            className="p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark flex items-center"
         >
             <div className={`p-4 rounded-full ${bgColor} mr-4`}>
                 <Icon className={`h-6 w-6 ${iconColor}`} />
@@ -49,9 +51,14 @@ const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, text
 
 const Dashboard = () => {
     const { isLogin, loading } = useContext(AuthContext);
-    const { stats } = useContext(StatsContext);
+    const { stats, loading: statsLoading } = useContext(StatsContext);
+    const { dark: isDark } = useContext(ThemeContext);
     const user = getUserProfile();
     const subjectStats = stats?.subjectStats;
+    const toDate = new Date();
+    toDate.setMonth(toDate.getMonth() + 1);
+    const toIso = toDate.toISOString().slice(0, 10);
+    const toLabel = toDate.toLocaleDateString();
 
     // Animation variants
     const containerVariants = {
@@ -90,7 +97,7 @@ const Dashboard = () => {
         <div className="p-6 pb-40 bg-gray-50 dark:bg-zinc-900 h-dvh overflow-y-scroll">
             {/* Welcome */}
             <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="mb-8"
@@ -105,6 +112,71 @@ const Dashboard = () => {
             </motion.div>
 
             <StudyPlan />
+
+            {!statsLoading && stats?.heatmapData?.length > 0 && (
+                <div className="p-6 border mb-4 shadow-sm rounded-xl border-border-primary dark:border-border-primary-dark">
+                    <div className="mb-4">
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Streak Map</h2>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">Feb 7, 2025 → {toLabel}</span>
+                    </div>
+                    <div className='w-full overflow-x-auto sm:overflow-x-visible'>
+                        <div className='min-w-[860px] sm:min-w-0'>
+                            <div className='h-[200px] sm:h-[200px] md:h-[210px] lg:h-[230px] xl:h-[250px] pr-2'>
+                                <ResponsiveTimeRange
+                            data={stats.heatmapData.map(d => ({
+                                day: d.date,
+                                value: d.count
+                            }))}
+                            from="2025-02-07"
+                            to={toIso}
+                            emptyColor={isDark ? '#18181B' : '#F9FAFB'} // pitch black in dark mode
+                            colors={
+                                isDark
+                                    ? ['#1f2937', '#312e81', '#4338ca', '#4f46e5', '#6366f1'] // black → purple gradient
+                                    : ['#ebedf0', '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1'] // light gray → purple gradient
+                            }
+                            theme={{
+                                text: { fill: isDark ? '#e5e7eb' : '#111827' },
+                                labels: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                legends: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                tooltip: {
+                                    container: {
+                                        background: isDark ? '#111827' : '#ffffff',
+                                        color: isDark ? '#f9fafb' : '#111827',
+                                        fontSize: 12,
+                                        borderRadius: 6,
+                                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                                    }
+                                }
+                            }}
+                                margin={{ top: 30, right: 20, bottom: 10, left: 20 }}
+                            // yearSpacing is not used in TimeRange
+                            monthBorderColor={isDark ? '#18181B' : '#F9FAFB'}
+                            dayBorderWidth={2}
+                            dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}
+                            weekdayLegend={() => ''}
+                            legends={[
+                                {
+                                    anchor: 'bottom-right',
+                                    direction: 'row',
+                                    translateY: 36,
+                                    itemCount: 5,
+                                    itemWidth: 30,
+                                    itemHeight: 14,
+                                    itemsSpacing: 4,
+                                    itemDirection: 'right-to-left',
+                                    symbolShape: 'circle',
+                                    symbolSize: 14,
+                                    itemTextColor: isDark ? '#e5e7eb' : '#111827'
+                                }
+                            ]}
+                            />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            )}
 
             {/* Stats */}
             <motion.div
@@ -143,9 +215,9 @@ const Dashboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                 >
-                    <motion.div className="p-6 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
+                    <motion.div className="p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Subject Stats</h2>
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Subject Stats</h2>
                         </div>
 
                         <div className="space-y-4 flex justify-around">
