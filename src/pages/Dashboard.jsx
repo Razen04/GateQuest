@@ -13,6 +13,7 @@ import ModernLoader from '../components/ModernLoader';
 import StudyPlan from '../components/StudyPlan';
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import ThemeContext from '../context/ThemeContext';
+import { FaInfo } from 'react-icons/fa6';
 
 const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 
@@ -111,6 +112,11 @@ const Dashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400 mt-2">Your preparation journey is {stats?.progress}% complete. Keep going!</p>
             </motion.div>
 
+            <div className='flex items-center mb-[-20px]'>
+                <FaInfo className='text-sm text-red-500 mr-2' />
+                <p className='text-base text-red-500'>Attempt 5 questions for Dashboard to refresh.</p>
+            </div>
+            
             <StudyPlan />
 
             {!statsLoading && stats?.heatmapData?.length > 0 && (

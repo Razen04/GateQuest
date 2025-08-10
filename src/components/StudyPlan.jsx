@@ -43,7 +43,7 @@ const StudyPlan = () => {
         <div className="mx-auto p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mt-8 mb-4">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">Study Plan</h2>
+                    <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">Smart Study Plan</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         {daysLeft} day{daysLeft === 1 ? "" : "s"} left until exam (tentative)
                     </p>
