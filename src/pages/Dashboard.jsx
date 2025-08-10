@@ -97,7 +97,7 @@ const Dashboard = () => {
         <div className="p-6 pb-40 bg-gray-50 dark:bg-zinc-900 h-dvh overflow-y-scroll">
             {/* Welcome */}
             <motion.div
-                    initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="mb-8"
@@ -123,54 +123,54 @@ const Dashboard = () => {
                         <div className='min-w-[860px] sm:min-w-0'>
                             <div className='h-[200px] sm:h-[200px] md:h-[210px] lg:h-[230px] xl:h-[250px] pr-2'>
                                 <ResponsiveTimeRange
-                            data={stats.heatmapData.map(d => ({
-                                day: d.date,
-                                value: d.count
-                            }))}
-                            from="2025-02-07"
-                            to={toIso}
-                            emptyColor={isDark ? '#18181B' : '#F9FAFB'} // pitch black in dark mode
-                            colors={
-                                isDark
-                                    ? ['#1f2937', '#312e81', '#4338ca', '#4f46e5', '#6366f1'] // black → purple gradient
-                                    : ['#ebedf0', '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1'] // light gray → purple gradient
-                            }
-                            theme={{
-                                text: { fill: isDark ? '#e5e7eb' : '#111827' },
-                                labels: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
-                                legends: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
-                                tooltip: {
-                                    container: {
-                                        background: isDark ? '#111827' : '#ffffff',
-                                        color: isDark ? '#f9fafb' : '#111827',
-                                        fontSize: 12,
-                                        borderRadius: 6,
-                                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                                    data={stats.heatmapData.map(d => ({
+                                        day: d.date,
+                                        value: d.count
+                                    }))}
+                                    from="2025-02-07"
+                                    to={toIso}
+                                    emptyColor={isDark ? '#18181B' : '#F9FAFB'}
+                                    colors={
+                                        isDark
+                                            ? ['#1f2937', '#312e81', '#4338ca', '#4f46e5', '#6366f1', '#818cf8'] // no “zero” color
+                                            : ['#ebedf0', '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1', '#4f46e5']
                                     }
-                                }
-                            }}
-                                margin={{ top: 30, right: 20, bottom: 10, left: 20 }}
-                            // yearSpacing is not used in TimeRange
-                            monthBorderColor={isDark ? '#18181B' : '#F9FAFB'}
-                            dayBorderWidth={2}
-                            dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}
-                            weekdayLegend={() => ''}
-                            legends={[
-                                {
-                                    anchor: 'bottom-right',
-                                    direction: 'row',
-                                    translateY: 36,
-                                    itemCount: 5,
-                                    itemWidth: 30,
-                                    itemHeight: 14,
-                                    itemsSpacing: 4,
-                                    itemDirection: 'right-to-left',
-                                    symbolShape: 'circle',
-                                    symbolSize: 14,
-                                    itemTextColor: isDark ? '#e5e7eb' : '#111827'
-                                }
-                            ]}
-                            />
+                                    minValue={0} // start coloring from count=1
+                                    maxValue={Math.max(...stats.heatmapData.map(d => d.count))}
+                                    theme={{
+                                        text: { fill: isDark ? '#e5e7eb' : '#111827' },
+                                        labels: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                        legends: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                        tooltip: {
+                                            container: {
+                                                background: isDark ? '#111827' : '#ffffff',
+                                                color: isDark ? '#f9fafb' : '#111827',
+                                                fontSize: 12,
+                                                borderRadius: 6,
+                                                boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+                                            }
+                                        }
+                                    }}
+                                    margin={{ top: 30, right: 20, bottom: 10, left: 20 }}
+                                    monthBorderColor={isDark ? '#18181B' : '#F9FAFB'}
+                                    dayBorderWidth={2}
+                                    dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}
+                                    weekdayLegend={() => ''}
+                                    legends={[
+                                        {
+                                            anchor: 'bottom-right',
+                                            direction: 'row',
+                                            translateY: 36,
+                                            itemCount: 5,
+                                            itemWidth: 30,
+                                            itemHeight: 14,
+                                            itemsSpacing: 4,
+                                            itemDirection: 'right-to-left',
+                                            symbolSize: 14,
+                                            itemTextColor: isDark ? '#e5e7eb' : '#111827'
+                                        }
+                                    ]}
+                                />
                             </div>
                         </div>
                     </div>

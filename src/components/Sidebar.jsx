@@ -73,23 +73,23 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
         >
             <div className="flex flex-col h-full bg-primary dark:bg-primary-dark">
                 {/* Branding */}
-                <div className='flex items-center justify-center py-8 border-b border-border-primary dark:border-border-primary-dark transition-colors duration-1000'>
-                    <motion.div
-                        className="text-3xl text-blue-600"
-                        initial={{ scale: 0.1 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                    >
-                        <img src={appLogo} alt="App logo" className='w-7' />
-                    </motion.div>
+                <div className='py-8 border-b border-border-primary dark:border-border-primary-dark transition-colors duration-1000'>
                     <motion.h1
-                        className='ml-3 text-2xl font-bold dark:text-white'
+                        className='flex items-center justify-center text-2xl font-bold dark:text-white'
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2, duration: 0.6 }}
                     >
-                        <span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>GATE</span>Quest
+                        <img src={appLogo} alt="App logo" className='w-8 mr-3' />
+                        <div>
+                            <h1 className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+                                GATE<span className='text-black dark:text-white'>Quest</span>
+                            </h1>
+                            <p className='text-xs text-gray-500 dark:text-gray-400 font-medium mt-[-5px] text-right w-full'>Good Luck</p>
+                        </div>
+                        
                     </motion.h1>
+                    
                 </div>
 
                 {/* Navigation */}

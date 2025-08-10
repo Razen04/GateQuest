@@ -1,5 +1,5 @@
 import { FaMicrochip } from 'react-icons/fa';
-import { FaBrain, FaDiagramProject, FaSitemap, FaLinux } from 'react-icons/fa6';
+import { FaBrain, FaDiagramProject, FaSitemap, FaLinux, FaDatabase, FaNetworkWired } from 'react-icons/fa6';
 
 // Subjects Data
 const subjects = [
@@ -102,6 +102,48 @@ const subjects = [
         difficulty: "Medium",
         category: "bookmarked",
         color: "green"
+    },
+    // Networks
+    {
+        id: 6,
+        name: "Computer Networks",
+        apiName: "Computer Networks",
+        icon: FaNetworkWired,
+        questions: 144,
+        difficulty: "Medium",
+        category: "core",
+        color: "teal"
+    },
+    {
+        id: 106,
+        name: "Computer Networks",
+        apiName: "Computer Networks",
+        icon: FaNetworkWired,
+        questions: 144,
+        difficulty: "Medium",
+        category: "bookmarked",
+        color: "teal"
+    },
+    // Database
+    {
+        id: 7,
+        name: "Database Management Systems",
+        apiName: "Databases",
+        icon: FaDatabase,
+        questions: 172,
+        difficulty: "Medium",
+        category: "core",
+        color: "orange"
+    },
+    {
+        id: 107,
+        name: "Database Management Systems",
+        apiName: "Databases",
+        icon: FaDatabase,
+        questions: 172,
+        difficulty: "Medium",
+        category: "bookmarked",
+        color: "orange"
     }
 ];
 

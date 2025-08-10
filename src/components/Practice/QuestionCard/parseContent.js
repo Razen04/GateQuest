@@ -6,7 +6,8 @@ const parseContent = (text) => {
     while (remainingText.length > 0) {
         // Look for next special tokens
         const nextCodeBlock = remainingText.indexOf('```');
-        const nextInlineMath = remainingText.indexOf('$');
+    const nextInlineMath = remainingText.indexOf('$');
+    const nextInlineCode = remainingText.indexOf('`');
         const nextBlockMath = remainingText.indexOf('$$');
         const nextLineBreak = Math.min(
             remainingText.indexOf('<br>') !== -1 ? remainingText.indexOf('<br>') : Infinity,
@@ -38,6 +39,15 @@ const parseContent = (text) => {
                 (nextInlineMath === 0 || remainingText[nextInlineMath - 1] !== '$')) {
                 tokenPos = nextInlineMath;
                 tokenType = 'math';
+            }
+        }
+
+        if (nextInlineCode !== -1 && (tokenPos === -1 || nextInlineCode < tokenPos)) {
+            // Make sure it's not part of a ``` fenced code block
+            const isTriple = remainingText.startsWith('```', nextInlineCode);
+            if (!isTriple) {
+                tokenPos = nextInlineCode;
+                tokenType = 'inlineCode';
             }
         }
 
@@ -144,6 +154,29 @@ const parseContent = (text) => {
             segments.push({
                 type: 'math',
                 content: mathContent
+            });
+
+            // Update the remaining text
+            remainingText = remainingText.substring(endPos + 1);
+        }
+        else if (tokenType === 'inlineCode') {
+            // Find the end of the inline code
+            const endPos = remainingText.indexOf('`', tokenPos + 1);
+            if (endPos === -1) {
+                // Unclosed inline code, treat the rest as text
+                segments.push({
+                    type: 'text',
+                    content: remainingText.substring(tokenPos)
+                });
+                break;
+            }
+
+            // Extract the inline code content without the delimiters
+            const inlineCode = remainingText.substring(tokenPos + 1, endPos);
+
+            segments.push({
+                type: 'inlineCode',
+                content: inlineCode
             });
 
             // Update the remaining text
