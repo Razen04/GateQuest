@@ -104,7 +104,7 @@ const About = () => {
             question: 'What if I find an error in a question?',
             answer: [
                 { "type": "text", "content": "Most probably you will because everything is done manually so would like you to let me know about it either via  " },
-                { "type": "link", "text": "Discord server", "href": "https://discord.gg/your-invite-link" },
+                { "type": "link", "text": "Discord server", "href": "https://discord.gg/dFmg3g52c5" },
                 { "type": "text", "content": " or by opening an issue on GitHub. I will fix it as soon as possible and notify via in-app notification." }
             ]
         },
@@ -116,7 +116,7 @@ const About = () => {
                 { "type": "text", "content": "I welcome all contributions! Whether you are a developer or a designer (I really need one), the best place to start is our " },
                 { "type": "link", "text": "GitHub repository", "href": "https://github.com/Razen04/GateQuest" },
                 { "type": "text", "content": ". You can also join our " },
-                { "type": "link", "text": "Discord", "href": "https://discord.gg/your-invite-link" },
+                { "type": "link", "text": "Discord", "href": "https://discord.gg/dFmg3g52c5" },
                 { "type": "text", "content": " to discuss ideas." }
             ]
         },
@@ -126,7 +126,7 @@ const About = () => {
                 { "type": "text", "content": "The best way to report a bug or suggest a new feature is by opening an issue on our " },
                 { "type": "link", "text": "GitHub repository", "href": "https://github.com/Razen04/GateQuest/issues" },
                 { "type": "text", "content": ". This helps us track all feedback in one place. Since the repository is not public yet, you can also join our " },
-                { "type": "link", "text": "Discord server", "href": "https://discord.gg/your-invite-link" },
+                { "type": "link", "text": "Discord server", "href": "https://discord.gg/dFmg3g52c5" },
                 { "type": "text", "content": " and report the issue directly." }
             ]
         },
@@ -188,7 +188,7 @@ const About = () => {
                 <motion.div variants={fadeInUp} className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800">
                     <h2 className="text-3xl font-bold mb-4 flex items-center"><FaBook className="mr-3 text-blue-500" />Why GATEQuest?</h2>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        There are many websites great for GATE prep out there like GO or Examside but the UI is where they generally lack. I wanted to provided a clean, distraction-free UI so here it is.
+                        There are many websites great for GATE prep out there like GO or Examside but the UI felt less modern to me. I wanted to provided a clean, distraction-free UI so here it is.
                     </p>
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800">
@@ -200,7 +200,7 @@ const About = () => {
                         <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://github.com/Razen04/GATEQuest" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
                             <FaGithub className="mr-2 w-5" /> GitHub (Will Soon Public)
                         </motion.a>
-                        <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="#" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
+                        <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://discord.gg/dFmg3g52c5" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
                             <FaDiscord className="mr-2" /> Discord
                         </motion.a>
                     </div>
