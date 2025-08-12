@@ -45,7 +45,7 @@ const StudyPlan = () => {
                 <div>
                     <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">Smart Study Plan</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {daysLeft} day{daysLeft === 1 ? "" : "s"} left until exam (tentative)
+                        {daysLeft} day{daysLeft === 1 ? "" : "s"} left until exam
                     </p>
                 </div>
             </div>

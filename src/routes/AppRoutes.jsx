@@ -8,7 +8,7 @@ import Practice from "../pages/Practice Page/Practice";
 import QuestionsList from "../pages/Practice Page/QuestionList";
 import QuestionCard from "../pages/Practice Page/QuestionCard";
 import SettingsRoutes from "./SettingsRoutes";
-import Contact from "../pages/Contact";
+import About from "../pages/About";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 export default function AppRoutes() {
@@ -38,7 +38,7 @@ export default function AppRoutes() {
                         <Route path="practice/:subject" element={<QuestionsList />} />
                         <Route path="practice/:subject/:qid" element={<QuestionCard />} />
                         <Route path="settings/*" element={<SettingsRoutes />} />
-                        <Route path="contact" element={<Contact />} />
+                        <Route path="about" element={<About />} />
                         <Route path="*" element={<Navigate to="/" />} />
                     </Route>
                 </>

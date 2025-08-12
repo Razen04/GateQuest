@@ -4,11 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import {
     FaChartPie,
     FaLaptopCode,
-    FaCog,
-    FaHeadset,
-    FaDiscord
+    FaCog
 } from 'react-icons/fa'
-import { FaGithub, FaReddit } from 'react-icons/fa6'
+import { FaCircleInfo, FaGithub, FaReddit } from 'react-icons/fa6'
 import useWindowSize from '../hooks/useWindowSize'
 import appLogo from '/logo.svg'
 
@@ -27,7 +25,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
         { id: 1, name: "Dashboard", icon: <FaChartPie />, path: "/dashboard" },
         { id: 2, name: "Practice", icon: <FaLaptopCode />, path: "/practice" },
         { id: 3, name: "Settings", icon: <FaCog />, path: "/settings" },
-        { id: 4, name: "Contact", icon: <FaHeadset />, path: "/contact" }
+        { id: 4, name: "About", icon: <FaCircleInfo />, path: "/about" }
     ]
 
     // Handle tab click with navigation
@@ -144,19 +142,6 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                         })}
                     </nav>
                 </div>
-
-                {/* Footer */}
-                <motion.div
-                    className="p-4 mt-auto border-t border-border-primary dark:border-border-primary-dark"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8, duration: 0.6 }}
-                >
-                    <div className="px-2 py-2 text-xs text-center text-gray-500 flex justify-around items-center">
-                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 cursor-pointer transition-all hover:scale-150  hover:text-xl'><a href="https://github.com/Razen04/GateQuest" target="_blank" rel="noopener noreferrer"><FaGithub /></a></span>
-                        <span className='p-2 rounded-full bg-blue-500 text-white text-lg hover:bg-white hover:text-blue-500 hover:scale-150 transition-all hover:text-xl cursor-pointer'><a href="https://www.reddit.com/r/GATEtard/" target="_blank" rel="noopener noreferrer"><FaReddit /></a></span>
-                    </div>
-                </motion.div>
             </div>
         </motion.div>
     )

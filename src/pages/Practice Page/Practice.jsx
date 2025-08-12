@@ -71,7 +71,7 @@ const Practice = () => {
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="max-h-[calc(100vh-35vh)] overflow-y-scroll mb-8"
+                        className="max-h-[calc(100vh-39vh)] overflow-y-scroll mb-8 rounded-xl"
                     >
                         {/* Subject Grid - Simplified */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

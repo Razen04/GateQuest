@@ -8,7 +8,7 @@ const List = ({listRef, pageItems, handleQuestionClick, currentPage, totalPages,
     return (
         <div
             ref={listRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[56vh] rounded-lg"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[52vh] rounded-lg"
         >
             {pageItems.map((question, index) => (
                 <motion.div
