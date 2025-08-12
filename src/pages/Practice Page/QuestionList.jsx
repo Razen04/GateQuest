@@ -1,23 +1,51 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { FaArrowLeft, FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa'
-import useQuestions from '../../hooks/useQuestions'
-import useFilters from '../../hooks/useFilters'
-import { getDifficultyClassNames } from '../../utils/questionUtils'
-import MathRenderer from '../../components/Practice/MathRenderer'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
-import ModernLoader from '../../components/ModernLoader'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+// 1. Core and external library imports
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
+// 2. Custom hook imports - This is where we abstract all the heavy lifting.
+import useQuestions from '../../hooks/useQuestions'; // Fetches the raw question data.
+import useFilters from '../../hooks/useFilters'; // Applies all the search/filter logic.
+import useUrlFilters from '../../hooks/useUrlFilters'; // Syncs filter state with the URL. Super important for shareable links.
+import usePagination from '../../hooks/usePagination'; // Handles the pagination logic.
+
+// 3. Component imports - Breaking the UI into smaller, manageable pieces.
+import ModernLoader from '../../components/ModernLoader';
+import SearchAndFilters from '../../components/Practice/QuestionList/SearchAndFilters';
+import Header from '../../components/Practice/QuestionList/Header';
+import List from '../../components/Practice/QuestionList/List';
+
+// This component is the main hub for showing list of questions. It's responsible for:
+// - Fetching all questions for a subject.
+// - Providing UI for searching, filtering, and sorting.
+// - Displaying the filtered list of questions, with pagination.
+// - Navigating to the detailed QuestionCard view.
 const QuestionsList = () => {
-    const navigate = useNavigate();
-    const { subject } = useParams();
-    const [searchParams] = useSearchParams();
-    const bookmarked = searchParams.get('bookmarked') === "true";
-    const { questions, isLoading, error } = useQuestions(subject, bookmarked);
-    const [selectedQuestion, setSelectedQuestion] = useState(null)
+    // --- Initial Setup & Data Sourcing ---
 
-    const { filteredQuestions,
+    // Standard React Router hooks to get our bearings.
+    const navigate = useNavigate();
+    const { subject } = useParams(); // e.g., 'Aptitude', 'Data Structures' from the URL /practice/:subject
+
+    // We need to read URL params to initialize our state.
+    const [searchParams] = useSearchParams();
+    // Specifically pulling 'bookmarked' here because the initial data fetch depends on it.
+    // The other params are handled by the useUrlFilters hook.
+    const bookmarked = searchParams.get('bookmarked') === 'true';
+
+    // Fetch the questions. This hook handles the loading and error states for us.
+    // It takes the subject and the bookmarked flag to get the base dataset.
+    const { questions, isLoading, error } = useQuestions(subject, bookmarked);
+
+    // This state is just to keep track of which question was clicked.
+    const [selectedQuestion, setSelectedQuestion] = useState(null);
+
+    // --- Filtering and State Management ---
+
+    // This is the brain of the filtering. It takes the raw questions and returns
+    // the filtered list, along with all the state variables and setters for the filters.
+    const {
+        filteredQuestions,
         searchQuery,
         setSearchQuery,
         difficultyFilter,
@@ -27,278 +55,138 @@ const QuestionsList = () => {
         topicFilter,
         setTopicFilter,
         attemptFilter,
-        setAttemptFilter
+        setAttemptFilter,
     } = useFilters(questions, subject, selectedQuestion);
 
+    // This hook keeps the URL in sync with our filter state.
+    // It reads the URL on load to set the initial filter state,
+    // and updates the URL whenever a filter changes.
+    // It returns the generated query string to be used in navigation links.
+    const { queryString } = useUrlFilters({
+        searchQuery,
+        setSearchQuery,
+        difficultyFilter,
+        setDifficultyFilter,
+        yearFilter,
+        setYearFilter,
+        topicFilter,
+        setTopicFilter,
+        attemptFilter,
+        setAttemptFilter,
+    });
 
-    const [showFilters, setShowFilters] = useState(false)
+    // Simple state to toggle the visibility of the filter panel.
+    const [showFilters, setShowFilters] = useState(false);
 
-    // Pagination
-    const [currentPage, setCurrentPage] = useState(1);
-    const QUESTIONS_PER_PAGE = 20;
-    const totalPages = Math.ceil(filteredQuestions.length / QUESTIONS_PER_PAGE);
-    const QuestionsListRef = useRef(null);
+    // --- Pagination ---
 
-    const paginatedQuestions = useMemo(() => {
-        const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
-        const end = start + QUESTIONS_PER_PAGE;
-        return filteredQuestions.slice(start, end);
-    }, [filteredQuestions, currentPage])
+    // The pagination hook takes the (potentially large) filtered list and breaks it into pages.
+    // It returns the items for the current page and all the state needed to render pagination controls.
+    const { currentPage, setCurrentPage, totalPages, pageItems, listRef } = usePagination(filteredQuestions, 20);
 
-    useEffect(() => {
-        if (QuestionsListRef.current) {
-            QuestionsListRef.current.scrollTop = 0;
-        }
-    }, [currentPage])
+    // --- Derived State (for dropdowns) ---
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter])
-
-    const errorMessage = "No questions match your criteria. Try adjusting your filters.";
-    // Dynamically generate years and topics for the dropdowns
+    // I'm using useMemo here to prevent recalculating the years and topics on every single render.
+    // This will only rerun if the `filteredQuestions` array actually changes. It's a good performance optimization.
     const years = useMemo(() => {
-        const allYears = questions.map(q => parseInt(q.year)).filter(y => !isNaN(y));
+        // Grab all years, convert to numbers, filter out any bad data (NaN),
+        // then create a unique set and sort them in descending order.
+        const allYears = filteredQuestions.map((q) => parseInt(q.year)).filter((y) => !isNaN(y));
         return [...new Set(allYears)].sort((a, b) => b - a);
-    }, [questions]);
+    }, [filteredQuestions]);
 
     const topics = useMemo(() => {
-        const allTopics = questions.map(q => q.topic).filter(Boolean);
+        // Same idea for topics: get all topics, filter out any empty ones, then get the unique set.
+        const allTopics = filteredQuestions.map((q) => q.topic).filter(Boolean);
         return [...new Set(allTopics)];
-    }, [questions]);
+    }, [filteredQuestions]);
 
-    // Handle Back
+    // --- Event Handlers ---
+
+    // Simple navigation handler for the "Back" button which takes us to the Practice page where all subjects are visible.
     const handleBack = () => {
-        navigate('/practice')
-    }
+        navigate('/practice');
+    };
 
+    // This is the crucial navigation step to the QuestionCard.
     const handleQuestionClick = (id) => {
         setSelectedQuestion(id);
-        navigate(`/practice/${subject}/${id}?bookmarked=${bookmarked}`, {
-            state: { questions }
+        // Navigate to the specific question URL, making sure to include the current filter query string.
+        navigate(`/practice/${subject}/${id}?${queryString}`, {
+            // This is the most important part: we pass the entire filtered list in the route's state.
+            // This allows the QuestionCard to render instantly without re-fetching or re-filtering.
+            state: { questions: filteredQuestions },
         });
     };
 
-    const getQuestionDisplayText = (question) => {
-        if (!question || !question.question) return "Question content unavailable";
+    // --- Render Logic ---
 
-        // For list view, we'll truncate long questions but preserve LaTeX
-        const maxLength = 120;
-        if (question.question.length <= maxLength) {
-            return <MathRenderer text={question.question} />;
-        }
-
-        // Safely truncate, trying to keep LaTeX expressions intact
-        let truncated = question.question.substring(0, maxLength);
-
-        // Count open $ symbols to check if we've cut in the middle of a LaTeX expression
-        const openCount = (truncated.match(/\$/g) || []).length;
-        if (openCount % 2 !== 0) {
-            // We cut in the middle of a LaTeX expression, find the previous $ and truncate there
-            const lastDollarIndex = truncated.lastIndexOf('$');
-            if (lastDollarIndex > 0) {
-                truncated = truncated.substring(0, lastDollarIndex);
-            }
-        }
-
-        return <MathRenderer text={truncated + "..."} />;
-    }
-
-
+    // Handle the loading state while we're fetching questions.
     if (isLoading) {
         return (
             <div className="w-full pb-20 flex justify-center items-center text-gray-600">
                 <ModernLoader />
             </div>
-        )
+        );
     }
 
+    // Handle any errors during the fetch.
     if (error) {
-        return (
-            <div>Failed to load questions, try again later.</div>
-        )
+        return <div>Failed to load questions, try again later.</div>;
     }
 
     return (
+        // AnimatePresence allows for smooth transitions when components enter or exit the DOM.
         <AnimatePresence mode="wait">
-            // Show questions list
+            {/* The main container for the list view */}
             <motion.div
-
-                key="questions-list"
+                key="questions-list" // A unique key for AnimatePresence to track this component
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="p-6 mt-4 dark:text-white max-w-4xl mx-auto"
             >
-                {/* Header with back button */}
-                <div className="flex justify-between items-center w-full  mb-4 sm:mb-6">
-                    <button
-                        onClick={handleBack}
-                        className="flex items-center hover:text-blue-500 transition-colors cursor-pointer text-base sm:w-auto"
-                    >
-                        <FaArrowLeft className="mr-2" />
-                        <span>Back to Subjects</span>
-                    </button>
+                {/* The header component gets the back handler and some data to display stats. */}
+                <Header handleBack={handleBack} filteredQuestions={filteredQuestions} attemptFilter={attemptFilter} />
 
-                    <div className="flex">
-                        <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-lg text-sm">
-                            {filteredQuestions.length} {attemptFilter.charAt(0).toUpperCase() + attemptFilter.slice(1)} Questions
-                        </span>
-                    </div>
-                </div>
+                {/* The search and filter UI component. We pass down all the filter states and setters. */}
+                <SearchAndFilters
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                    showFilters={showFilters}
+                    setShowFilters={setShowFilters}
+                    difficultyFilter={difficultyFilter}
+                    setDifficultyFilter={setDifficultyFilter}
+                    yearFilter={yearFilter}
+                    setYearFilter={setYearFilter}
+                    topicFilter={topicFilter}
+                    setTopicFilter={setTopicFilter}
+                    attemptFilter={attemptFilter}
+                    setAttemptFilter={setAttemptFilter}
+                    years={years}
+                    topics={topics}
+                />
 
-                {/* Search and filters */}
-                <div className="rounded-xl p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
-                    <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
-                        <div className="flex-1 relative">
-                            <FaSearch className="absolute left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search questions..."
-                                className="w-full pl-10 pr-2 sm:pr-4 py-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer w-full md:w-auto"
-                        >
-                            <FaFilter className="mr-2" />
-                            <span>Filter</span>
-                            <FaChevronDown className={`ml-2 transition-transform ${showFilters ? 'transform rotate-180' : ''}`} />
-                        </button>
-                    </div>
-
-                    <AnimatePresence>
-                        {showFilters && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden"
-                            >
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-                                    <div>
-                                        <label className="block font-medium mb-2">Difficulty</label>
-                                        <select
-                                            className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
-                                            value={difficultyFilter}
-                                            onChange={(e) => setDifficultyFilter(e.target.value)}
-                                        >
-                                            <option value="all">All Difficulties</option>
-                                            <option value="Easy">Easy</option>
-                                            <option value="Medium">Medium</option>
-                                            <option value="Hard">Hard</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block font-medium mb-2">Year</label>
-                                        <select
-                                            className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
-                                            value={yearFilter}
-                                            onChange={(e) => setYearFilter(e.target.value)}
-                                        >
-                                            <option value="all">All Years</option>
-                                            {years.map((year) => (
-                                                <option key={year} value={year}>{year}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block font-medium mb-2">Topic</label>
-                                        <select
-                                            className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
-                                            value={topicFilter}
-                                            onChange={(e) => setTopicFilter(e.target.value)}
-                                        >
-                                            <option value="all">All Topics</option>
-                                            {topics.map((topic) => (
-                                                <option key={topic} value={topic}>{topic}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block font-medium mb-2">Attempts</label>
-                                        <select
-                                            className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
-                                            value={attemptFilter}
-                                            onChange={(e) => setAttemptFilter(e.target.value)}
-                                        >
-                                            <option value="all">All</option>
-                                            <option value="attempted">Attempted Questions</option>
-                                            <option value="unattempted">Unattempted Questions</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                {/* Questions List */}
-                <div className='pb-32 lg:pb-0 overflow-y-auto'>
+                {/* Container for the actual list of questions */}
+                <div className="pb-32 lg:pb-0 overflow-y-auto">
                     <div className="rounded-xl overflow-hidden">
                         <div className="mb-2">
-                            <h2 className="font-semibold text-blue-500 text-xl">
-                                {subject} Questions
-                            </h2>
+                            <h2 className="font-semibold text-blue-500 text-xl">{subject} Questions</h2>
                         </div>
 
+                        {/* Conditionally render the list or a "not found" message. */}
                         {filteredQuestions.length > 0 ? (
-                            <div ref={QuestionsListRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-y-scroll overflow-x-hidden max-h-[56vh] rounded-lg">
-                                {paginatedQuestions.map((question, index) => (
-                                    <motion.div
-                                        key={index}
-                                        whileHover={{ scale: 1.02 }}
-                                        transition={{ duration: 0.2 }}
-                                        onClick={() => handleQuestionClick(question.id)}
-                                        className="cursor-pointer border border-border-primary dark:border-border-primary-dark rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
-                                    >
-                                        <h3 className="font-medium mb-3 text-sm md:text-base">
-                                            {getQuestionDisplayText(question)}
-                                        </h3>
-                                        <div className="flex justify-between items-center text-xs">
-                                            <span className={`font-bold md:font-normal px-2 py-1 md:rounded-xl rounded-full ${getDifficultyClassNames(question.difficulty)}`}>
-                                                {question.difficulty}
-                                            </span>
-                                            <span>{question.year ? `GATE ${question.year}` : 'Year Unknown'}</span>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                                <div className="flex justify-between items-center w-full py-2 mt-2">
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                                        disabled={currentPage === 1}
-                                        className="px-8 py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50 cursor-pointer"
-                                    >
-                                        <FaChevronLeft />
-                                    </button>
-                                    <span className="text-sm">
-                                        Page {currentPage} of {totalPages}
-                                    </span>
-                                    <button
-                                        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                                        disabled={currentPage === totalPages}
-                                        className="px-8 cursor-pointer py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50"
-                                    >
-                                        <FaChevronRight />
-                                    </button>
-                                </div>
-                            </div>
+                            // The List component handles rendering the actual rows and pagination controls.
+                            <List listRef={listRef} pageItems={pageItems} handleQuestionClick={handleQuestionClick} currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} />
                         ) : (
-                            <div className="p-4 sm:p-8 text-center text-xs sm:text-base">
-                                {errorMessage}
-                            </div>
+                            <div className="p-4 sm:p-8 text-center text-xs sm:text-base">No questions match your criteria. Try adjusting your filters.</div>
                         )}
                     </div>
                 </div>
             </motion.div>
         </AnimatePresence>
-    )
-}
+    );
+};
 
-export default QuestionsList
+export default QuestionsList;

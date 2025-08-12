@@ -125,3 +125,27 @@ export const getCorrectAnswerText = (currentQuestion) => {
         return 'Answer not available';
     }
 }
+
+export const getQuestionDisplayText = (question) => {
+    if (!question || !question.question) return 'Question content unavailable';
+
+    const maxLength = 120;
+    if (question.question.length <= maxLength) {
+        // Just return the raw string
+        return question.question;
+    }
+
+    let truncated = question.question.substring(0, maxLength);
+
+    // ... (the rest of the truncation logic remains the same)
+    const openCount = (truncated.match(/\$/g) || []).length;
+    if (openCount % 2 !== 0) {
+        const lastDollarIndex = truncated.lastIndexOf('$');
+        if (lastDollarIndex > 0) {
+            truncated = truncated.substring(0, lastDollarIndex);
+        }
+    }
+
+    // Return the final processed string
+    return truncated + '...';
+};

@@ -8,6 +8,12 @@ export const useQuestionState = (currentQuestion) => {
     const [showAnswer, setShowAnswer] = useState(false);
     const [result, setResult] = useState(null);
 
+    // Handle numerical input change
+    const handleNumericalInputChange = (e) => {
+        if (showAnswer) return;
+        setNumericalAnswer(e.target.value);
+    }
+
     const handleOptionSelect = (index) => {
         if (showAnswer) return;
 
@@ -42,6 +48,7 @@ export const useQuestionState = (currentQuestion) => {
         showAnswer, setShowAnswer,
         result, setResult,
         handleOptionSelect,
-        resetState: reset
+        resetState: reset,
+        handleNumericalInputChange
     };
 };

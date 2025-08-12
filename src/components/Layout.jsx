@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
-import { getUserProfile, recordAttempt } from '../helper'
+import { getUserProfile } from '../helper'
 import StatsContext from '../context/StatsContext'
 import { supabase } from '../../supabaseClient'
 
@@ -14,7 +14,7 @@ const Layout = () => {
         useEffect(() => {
             const LOCAL_KEY = `attempt_buffer_${user?.id}`;
 
-            const handleBeforeUnload = async (e) => {
+            const handleBeforeUnload = async () => {
                 const buffer = JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]");
 
                 if (user?.id && buffer.length > 0) {

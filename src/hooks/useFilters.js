@@ -77,6 +77,7 @@ const useFilters = (sourceQuestions, subject, selectedQuestion) => {
             });
         }
 
+        console.log("filtered: ", filtered)
         return sortQuestionsByYear(filtered);
     }, [sourceQuestions, searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter, attemptedIds, selectedQuestion]);
 
