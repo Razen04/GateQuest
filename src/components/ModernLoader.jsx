@@ -52,7 +52,7 @@ export default function ModernLoader({ quotes: customQuotes }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 aria-live="polite"
-                className="mt-5 max-w-xl text-center text-sm sm:text-base text-gray-800 dark:text-gray-300 px-6"
+                className="mt-5 max-w-xl text-center text-sm sm:text-base text-black dark:text-gray-300 px-6"
             >
                 {quotes[idx]}
             </Framer.motion.div>
