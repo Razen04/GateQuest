@@ -41,12 +41,12 @@ const Practice = () => {
 
 
     return (
-        <div className="bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark p-6 pb-20">
+        <div className="flex flex-col h-[100dvh] bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="mb-8"
+                className="p-6 shrink-0"
             >
                 <div className="max-w-6xl">
                     {/* Header */}
@@ -57,7 +57,7 @@ const Practice = () => {
                     </div>
 
                     {/* Filter Tabs */}
-                    <div className="mb-6">
+                    <div className="">
                         <div className="flex overflow-x-scroll gap-2">
                             <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
@@ -66,40 +66,38 @@ const Practice = () => {
                             <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                         </div>
                     </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="max-h-[calc(100vh-39vh)] overflow-y-scroll mb-8 rounded-xl"
-                    >
-                        {/* Subject Grid - Simplified */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {filteredSubjects.map((subject) => (
-                                <div
-                                    key={subject.id}
-                                    className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
-                                >
-                                    <div className="p-4">
-                                        <div className="flex items-center mb-4">
-                                            <div className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}>
-                                                {<subject.icon className='h-6 w-6' />}
-                                            </div>
-                                            <h3 className="font-medium">{subject.name}</h3>
-                                        </div>
-
-                                        <button
-                                            className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
-                                            onClick={() => handleSubjectSelect(subject.id)}
-                                        >
-                                            Practice
-                                        </button>
+                </div>
+            </motion.div>
+            <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex-1 overflow-y-auto px-6 rounded-xl mb-[env(safe-area-inset-bottom)]"
+            >
+                {/* Subject Grid - Simplified */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
+                    {filteredSubjects.map((subject) => (
+                        <div
+                            key={subject.id}
+                            className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
+                        >
+                            <div className="p-4">
+                                <div className="flex items-center mb-4">
+                                    <div className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}>
+                                        {<subject.icon className='h-6 w-6' />}
                                     </div>
+                                    <h3 className="font-medium">{subject.name}</h3>
                                 </div>
-                            ))}
-                        </div>
-                    </motion.div>
 
+                                <button
+                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                                    onClick={() => handleSubjectSelect(subject.id)}
+                                >
+                                    Practice
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </motion.div>
         </div>

@@ -169,7 +169,7 @@ const QuestionsList = () => {
                 />
 
                 {/* Container for the actual list of questions */}
-                <div className="pb-32 lg:pb-0 overflow-y-auto">
+                <div>
                     <div className="rounded-xl overflow-hidden">
                         <div className="mb-2">
                             <h2 className="font-semibold text-blue-500 text-xl">{subject} Questions</h2>
