@@ -1,28 +1,22 @@
-// src/hooks/useQuestions.js
+// This custom hook is responsible for fetching questions for a given subject.
+// It handles loading and error states, and implements a caching strategy using localStorage to reduce network requests.
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { getUserProfile } from '../helper';
+import { getUserProfile, sortQuestionsByYear } from '../helper';
 
+// The base URL for the questions API is retrieved from environment variables.
 const API_BASE = import.meta.env.VITE_API_BASE;
 
-// Helper to sort questions by year, newest first
-const sortQuestionsByYear = (questionsToSort) => {
-    return [...questionsToSort].sort((a, b) => {
-        const yearA = a.year ? parseInt(a.year) : 0;
-        const yearB = b.year ? parseInt(b.year) : 0;
-        return yearB - yearA;
-    });
-};
-
+// Fetches questions for a specific subject, handling both regular and bookmarked questions.
 const useQuestions = (subject, bookmarked) => {
     const [questions, setQuestions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Don't run if the necessary props aren't available yet
+        // A guard to prevent fetching if the subject is not yet defined.
         if (!subject) {
             setIsLoading(false);
             return;
@@ -33,29 +27,37 @@ const useQuestions = (subject, bookmarked) => {
             setError(null);
 
             try {
+                // If the 'bookmarked' flag is true, we fetch bookmarked questions.
                 if (bookmarked) {
                     const profile = getUserProfile();
+                    // All questions for the subject are loaded from localStorage.
                     const subjectQuestions = JSON.parse(localStorage.getItem(subject) || "[]");
+                    // The user's bookmarked questions are retrieved from their profile.
                     const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
 
                     if (bookmarkedQuestions.length > 0) {
+                        // We create a Set of bookmarked IDs for efficient lookup.
                         const ids = new Set(bookmarkedQuestions.map(q => q.id));
+                        // Then, we filter the full list of subject questions to get the bookmarked ones.
                         const questions = subjectQuestions.filter(q => ids.has(q.id));
                         
                         setQuestions(sortQuestionsByYear(questions));
                     } else {
-                        setQuestions([]); // No bookmarks for this subject
+                        setQuestions([]); // If no bookmarks, return an empty array.
                         toast.message("No questions bookmarked yet.");
                     }
                 } else {
-                    // Check local storage first for non-bookmarked questions
+                    // For regular (non-bookmarked) questions, we first check localStorage for a cached version.
                     const localQuestions = JSON.parse(localStorage.getItem(subject));
                     if (Array.isArray(localQuestions) && localQuestions.length > 0) {
+                        // If a cached version exists, we use it directly.
                         setQuestions(localQuestions);
                     } else {
+                        // If not cached, we fetch the questions from the API.
                         const encodedSubject = encodeURIComponent(subject);
                         const res = await axios.get(`${API_BASE}/api/questions?subject=${encodedSubject}`);
                         const loadedQuestions = sortQuestionsByYear(res.data);
+                        // After fetching, we cache the questions in localStorage for future use.
                         localStorage.setItem(subject, JSON.stringify(loadedQuestions));
                         setQuestions(loadedQuestions);
                     }
@@ -65,14 +67,16 @@ const useQuestions = (subject, bookmarked) => {
                 setError(err);
                 toast.error("Could not load questions.");
             } finally {
+                // Ensure the loading state is set to false in all cases (success or error).
                 setIsLoading(false);
             }
         };
 
         fetchData();
 
-    }, [subject, bookmarked]); // Re-fetch whenever the subject or filter changes
+    }, [subject, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
 
+    // Expose the questions, loading state, and error state to the component.
     return { questions, isLoading, error };
 };
 

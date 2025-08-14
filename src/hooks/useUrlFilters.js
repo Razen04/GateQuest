@@ -1,7 +1,10 @@
-// src/hooks/useUrlFilters.js
+// This custom hook synchronizes the filter state of the question list with the URL's query parameters.
+// This allows filter states to be bookmarkable and shareable.
+
 import { useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+// Manages the two-way data binding between the filter state and the URL search parameters.
 export default function useUrlFilters({
     searchQuery, setSearchQuery,
     difficultyFilter, setDifficultyFilter,
@@ -10,14 +13,17 @@ export default function useUrlFilters({
     attemptFilter, setAttemptFilter,
 }) {
     const [searchParams, setSearchParams] = useSearchParams();
+    // A ref to ensure the initialization logic runs only once.
     const initRef = useRef(false);
 
-    // 1) Normalize defaults once
+    // This effect runs on mount to ensure the URL has a complete set of default filter parameters.
+    // This prevents an inconsistent state if a user navigates to a URL with missing parameters.
     useEffect(() => {
         if (initRef.current) return;
         initRef.current = true;
 
         const params = new URLSearchParams(searchParams);
+        // Define the default values for all filter parameters.
         const defaults = {
             bookmarked: searchParams.get('bookmarked') ?? 'false',
             q: searchParams.get('q') ?? '',
@@ -28,6 +34,7 @@ export default function useUrlFilters({
         };
 
         let changed = false;
+        // Check if any default parameter is missing from the URL and add it if so.
         Object.entries(defaults).forEach(([k, v]) => {
             if (params.get(k) === null) {
                 params.set(k, v);
@@ -35,10 +42,12 @@ export default function useUrlFilters({
             }
         });
 
+        // If any parameters were added, update the URL. 'replace: true' avoids creating a new history entry.
         if (changed) setSearchParams(params, { replace: true });
     }, [searchParams, setSearchParams]);
 
-    // 2) Hydrate filter state from URL once
+    // This effect runs once on mount to "hydrate" the local filter state from the URL.
+    // This ensures that if a user lands on a URL with pre-set filters, the UI reflects that state.
     useEffect(() => {
         const q = searchParams.get('q') ?? '';
         const diff = searchParams.get('diff') ?? 'all';
@@ -50,12 +59,15 @@ export default function useUrlFilters({
         setYearFilter(year);
         setTopicFilter(topic);
         setAttemptFilter(attempt);
+        // The exhaustive-deps rule is disabled because this effect is intentionally designed to run only once.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // run once
+    }, []);
 
-    // 3) Keep URL in sync with filter state
+    // This effect runs whenever the local filter state changes, and it updates the URL to match.
+    // This is the "state to URL" part of the two-way binding.
     useEffect(() => {
         const params = new URLSearchParams(searchParams);
+        // Construct the next state of the URL parameters based on the current filter state.
         const next = {
             bookmarked: searchParams.get('bookmarked') ?? 'false',
             q: searchQuery || '',
@@ -66,6 +78,7 @@ export default function useUrlFilters({
         };
 
         let changed = false;
+        // Compare the current URL params with the next state and update only what's necessary.
         Object.entries(next).forEach(([k, v]) => {
             if (params.get(k) !== v) {
                 params.set(k, v);
@@ -79,10 +92,11 @@ export default function useUrlFilters({
         searchParams, setSearchParams,
     ]);
 
+    // A derived boolean state for the 'bookmarked' filter.
     const bookmarked = searchParams.get('bookmarked') === 'true';
 
+    // Memoize the full query string. This is useful for constructing links that need to preserve the current filter state.
     const queryString = useMemo(() => {
-        
         return new URLSearchParams({
             bookmarked: String(bookmarked),
             q: searchQuery || '',
@@ -91,8 +105,8 @@ export default function useUrlFilters({
             topic: topicFilter,
             attempt: attemptFilter,
         }).toString();
-
     }, [bookmarked, searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter]);
 
+    // Expose the generated query string and the raw searchParams object.
     return { queryString, searchParams };
 }

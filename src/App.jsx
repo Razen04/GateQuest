@@ -1,3 +1,11 @@
+/**
+ * @file App.jsx
+ * @description This is the root component of the GATEQuest application.
+ * It sets up the global context providers and initializes the router.
+ * The component ensures that all child components have access to necessary
+ * contexts like authentication, application settings, stats, and theme.
+ */
+
 import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
 import ThemeProvider from './context/ThemeProvider'
@@ -6,14 +14,25 @@ import AuthProvider from './context/AuthProvider'
 import StatsProvider from './context/StatsProvider'
 import AppRoutes from './routes/AppRoutes'
 
+/**
+ * @function App
+ * @description The main application component that orchestrates the provider hierarchy.
+ * The order of providers is intentional: core functionalities like stats and auth
+ * wrap feature-specific contexts.
+ */
 function App() {
-
   return (
+    // StatsProvider manages user's practice statistics.
     <StatsProvider>
+      {/* AuthProvider handles user authentication state and logic. */}
       <AuthProvider>
+        {/* AppProvider manages general application settings, like sound effects. */}
         <AppProvider>
+          {/* ThemeProvider manages the light/dark mode theme. */}
           <ThemeProvider>
+            {/* Router provides the client-side routing functionality. */}
             <Router>
+              {/* AppRoutes contains all the defined application routes. */}
               <AppRoutes />
             </Router>
           </ThemeProvider>

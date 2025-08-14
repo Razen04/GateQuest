@@ -116,7 +116,7 @@ const Dashboard = () => {
                 <FaInfo className='text-sm text-red-500 mr-2' />
                 <p className='text-base text-red-500'>Attempt 5 questions for Dashboard to refresh.</p>
             </div>
-            
+
             <StudyPlan />
 
             {!statsLoading && stats?.heatmapData?.length > 0 && (
@@ -180,7 +180,6 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
-
                 </div>
             )}
 

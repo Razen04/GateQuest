@@ -1,12 +1,14 @@
+// This custom hook sets up global keyboard shortcuts for navigating and interacting with the practice question interface.
+
 import { useEffect } from 'react';
 
 /**
- * Global keyboard shortcuts for the practice card.
- * - A: previous
- * - D: next
+ * Attaches global keyboard event listeners for practice card actions.
+ * - A: previous question
+ * - D: next question
  * - Enter: show answer
  * - E: open explanation
- * Skips when typing in inputs/textarea and when meta/ctrl/alt pressed.
+ * The hook ensures these shortcuts don't interfere with text inputs.
  */
 export default function useKeyboardShortcuts(
   {
@@ -15,11 +17,13 @@ export default function useKeyboardShortcuts(
     onShowAnswer,
     onExplain,
   },
-  deps = []
+  deps = [] // Dependencies for the useEffect hook, passed from the calling component.
 ) {
   useEffect(() => {
+    // This function handles the 'keydown' event.
     const handleKeyStroke = (e) => {
       const tag = e.target?.tagName;
+      // We prevent the shortcuts from firing if the user is typing in an input field or if a modifier key (like Ctrl or Alt) is pressed.
       if (
         tag === 'INPUT' ||
         tag === 'TEXTAREA' ||
@@ -30,20 +34,21 @@ export default function useKeyboardShortcuts(
         return;
       }
 
+      // A switch statement to handle the different key presses.
       switch (e.code) {
-        case 'KeyA':
+        case 'KeyA': // 'A' for previous
           e.preventDefault();
-          onPrev?.();
+          onPrev?.(); // Optional chaining in case a handler isn't provided.
           break;
-        case 'KeyD':
+        case 'KeyD': // 'D' for next
           e.preventDefault();
           onNext?.();
           break;
-        case 'Enter':
+        case 'Enter': // 'Enter' to submit/show answer
           e.preventDefault();
           onShowAnswer?.();
           break;
-        case 'KeyE':
+        case 'KeyE': // 'E' for explanation
           e.preventDefault();
           onExplain?.();
           break;
@@ -52,8 +57,11 @@ export default function useKeyboardShortcuts(
       }
     };
 
+    // Add the event listener to the document when the component mounts.
     document.addEventListener('keydown', handleKeyStroke);
+    // The cleanup function removes the event listener when the component unmounts to prevent memory leaks.
     return () => document.removeEventListener('keydown', handleKeyStroke);
+    // The eslint-disable comment is here because the dependencies (`deps`) are intentionally passed from the parent component to control when the effect re-runs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

@@ -1,22 +1,31 @@
+// This custom hook provides a convenient interface for accessing the user's study plan data.
+// It abstracts the logic of retrieving data from the global StatsContext.
+
 import { useContext, useCallback } from "react";
 import StatsContext from "../context/StatsContext";
 import { getUserProfile } from "../helper";
 
-const useStudyPlan = (_params = {}) => {
+// A hook to easily consume and interact with the study plan portion of the stats.
+const useStudyPlan = () => {
+    // Access the global stats context, which contains all the calculated user statistics.
     const { stats, loading, updateStats } = useContext(StatsContext);
 
+    // A memoized function to manually trigger a refresh of the user's stats.
+    // This is useful for components that need to ensure they have the latest data.
     const refresh = useCallback(() => {
         const user = getUserProfile();
         if (user) {
             return updateStats(user);
         }
-    }, [updateStats]);
+    }, [updateStats]); // Depends on the updateStats function from the context.
 
+    // Safely access the studyPlan object from the stats, providing an empty object as a fallback.
     const sp = stats?.studyPlan || {};
 
+    // Return a flattened object with all the relevant study plan data.
+    // Default values (0 or false) are provided for each metric to prevent errors if the data is not yet available.
     return {
         loading,
-        error: null,
         uniqueAttemptCount: sp.uniqueAttemptCount || 0,
         todayUniqueAttemptCount: sp.todayUniqueAttemptCount || 0,
         dailyQuestionTarget: sp.dailyQuestionTarget || 0,
@@ -25,7 +34,7 @@ const useStudyPlan = (_params = {}) => {
         progressPercent: sp.progressPercent || 0,
         todayProgressPercent: sp.todayProgressPercent || 0,
         remainingQuestions: sp.remainingQuestions || 0,
-        refresh,
+        refresh, // Expose the refresh function to the component.
     };
 };
 

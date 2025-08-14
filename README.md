@@ -33,17 +33,21 @@
 GateQuest/
 ├── public/                # Static assets (logo, sounds)
 ├── src/
-│   ├── components/        # React components (Practice, Settings, Sidebar, etc.)
-│   ├── context/           # Context providers (Auth, Stats, AppSetting, Theme)
-│   ├── data/              # Static data (subjects.js)
-│   ├── hooks/             # Custom React hooks
-│   ├── utils/             # Utility functions (answer handling, question utils)
-│   ├── App.jsx            # Main app component
-│   ├── main.jsx           # Entry point
-│   └── index.css          # Tailwind & custom styles
-├── supabaseClient.js      # Supabase client setup
-├── vite.config.js         # Vite config (PWA, Tailwind)
-├── package.json           # Project metadata & scripts
+│   ├── assets/            # SVG icons and other assets
+│   ├── components/        # Reusable React components
+│   ├── context/           # React Context providers for state management
+│   ├── data/              # Static data like subject lists
+│   ├── hooks/             # Custom React hooks for component logic
+│   ├── pages/             # Top-level page components
+│   ├── routes/            # Route definitions for the application
+│   ├── utils/             # Utility functions
+│   ├── App.jsx            # Main application component
+│   ├── main.jsx           # Application entry point
+│   └── index.css          # Global and Tailwind CSS styles
+├── .github/               # GitHub-specific files (templates)
+├── supabaseClient.js      # Supabase client initialization
+├── vite.config.js         # Vite configuration
+├── package.json           # Project dependencies and scripts
 └── README.md              # This file
 ```
 
@@ -84,7 +88,11 @@ VITE_API_BASE=your_api_base_url
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+For major changes, please open an issue first to discuss what you would like to change. Please make sure to update tests as appropriate.
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) for more information.
 
 ## License
 
