@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react'
-import { FaUserCircle } from 'react-icons/fa'
 import Buttons from '../../components/Buttons'
-import { FaUser } from 'react-icons/fa6'
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper'
 import AuthContext from '../../context/AuthContext'
+import { User, UserCircle } from 'phosphor-react'
 
 const InputSection = ({ type, label, placeholder, value, onChange }) => {
     return (
@@ -38,7 +37,7 @@ const AccountSettings = () => {
     return (
         <div className='overflow-y-scroll'>
             <h2 className="text-xl font-semibold mb-6 flex items-center">
-                <FaUserCircle className="mr-2" /> Account Settings
+                <UserCircle className="mr-2" /> Account Settings
             </h2>
 
             <div className="space-y-6">
@@ -47,7 +46,7 @@ const AccountSettings = () => {
                         {user?.avatar ? (
                             <img src={user?.avatar} className='rounded-full w-full' />
                         ) : (
-                            <FaUser className="text-gray-600 dark:text-gray-300" />
+                            <User className="text-gray-600 dark:text-gray-300" />
                         )}
 
                     </div>

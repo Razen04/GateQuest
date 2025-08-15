@@ -18,6 +18,13 @@ export const faqs = [
             { "type": "text", "content": "Nope, that will defeat the purpose of being distraction-free. If money ever becomes a problem, I will either ask for donations upfront or bear the cost myself." }
         ]
     },
+    {
+        question: 'Is there an Android app or an iOS app?',
+        answer: [
+            { "type": "text", "content": "No there isn't any as of now, in future maybe if someone wishes to make can contact me on Discord but there is PWA and here is the link how to use it " },
+            { "type": "link", "text": "PWA", "href": "https://www.youtube.com/watch?v=iJteraObjgs" }
+        ]
+    },
 
     // --- Content: What's on the platform? ---
     {

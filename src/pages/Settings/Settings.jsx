@@ -1,9 +1,6 @@
 import React, { useContext } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import {
-    FaUserCircle, FaPalette,
-    FaShieldAlt, FaGlobe,
-} from 'react-icons/fa'
+import { motion } from 'framer-motion'
+import { User, ShieldCheck, Faders} from 'phosphor-react'
 
 import AuthContext from '../../context/AuthContext'
 import Login from '../../components/Login'
@@ -18,9 +15,9 @@ const Settings = () => {
 
     // Define tabs
     const tabs = [
-        { id: 'account', label: 'Account', icon: <FaUserCircle /> },
-        { id: 'privacy', label: 'Privacy & Data', icon: <FaShieldAlt /> },
-        { id: 'app-settings', label: 'App Settings', icon: <FaGlobe /> }
+        { id: 'account', label: 'Account', icon: <User size={20} weight="duotone" />, activeIcon: <User size={20} weight="fill" /> },
+        { id: 'privacy', label: 'Privacy & Data', icon: <ShieldCheck size={20} weight="duotone" />, activeIcon: <ShieldCheck size={20} weight="fill" /> },
+        { id: 'app-settings', label: 'App Settings', icon: <Faders size={20} weight="duotone" />, activeIcon: <Faders size={20} weight="fill" /> }
     ]
 
     return (
@@ -46,7 +43,7 @@ const Settings = () => {
 
                 {/* Settings Tabs Navigation */}
                 <div className="mb-8 overflow-x-auto">
-                    <nav className="flex sm:flex-nowrap gap-2 min-w-0 shadow-xs rounded-xl p-1 border border-border-primary dark:border-border-primary-dark">
+                    <nav className="flex sm:flex-nowrap gap-2 min-w-0 shadow-xs rounded-xl p-1">
                         {tabs.map((tab) => {
                             return (
                                 <button
@@ -57,7 +54,7 @@ const Settings = () => {
                                         : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-text-primary dark:text-text-primary-dark'
                                         }`}
                                 >
-                                    <span className="mr-2">{tab.icon}</span>
+                                    <span className="mr-2">{activeTab === tab.id ? tab.activeIcon : tab.icon}</span>
                                     <span className="font-medium">{tab.label}</span>
                                 </button>
                             )
@@ -66,14 +63,14 @@ const Settings = () => {
                 </div>
 
                 {/* Content Area */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark p-6 overflow-y-scroll h-[60vh] pb-20"
-                    >
-                        <Outlet />
-                    </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="rounded-xl shadow-sm p-6 overflow-y-scroll h-[60vh] pb-20"
+                >
+                    <Outlet />
+                </motion.div>
             </div>
         </div>
 

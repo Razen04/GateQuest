@@ -44,7 +44,7 @@ const AuthProvider = ({ children }) => {
                     total_xp: 0,
                     settings: {
                         sound: true,
-                        autoTimer: true
+                        autoTimer: true,
                         // Will add theme here itself in the future and remove the ThemeContext entirely, let's see.
                     }
                 }).select(); // .select() returns the created/updated profile data.
@@ -55,7 +55,11 @@ const AuthProvider = ({ children }) => {
                         ...data[0],
                         bookmark_questions: data[0].bookmark_questions || [],
                         college: data[0].college || "",
-                        targetYear: data[0].targetYear || 2026
+                        targetYear: data[0].targetYear || 2026,
+                        settings: {
+                            ...data[0].settings,
+                            darkMode: false
+                        }
                     };
                     // Store the user profile in localStorage for quick access elsewhere in the app.
                     localStorage.setItem("gate_user_profile", JSON.stringify(profile));

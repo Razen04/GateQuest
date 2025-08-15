@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCheck } from 'react-icons/fa'; // Assuming you use this
 import MathRenderer from '../MathRenderer';
 import { isMultipleSelection } from '../../../utils/questionUtils';
+import { CheckCircle } from 'phosphor-react';
 
 // This component now only receives props. It has NO hooks.
 const QuestionContent = ({
@@ -67,7 +67,7 @@ const QuestionContent = ({
                                     {isMultipleSelection(currentQuestion) ? (
                                         // Checkbox for multiple selection
                                         <div className={`w-5 h-5 border rounded flex items-center justify-center mr-3 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-700'}`}>
-                                            {isSelected && <FaCheck className="text-white text-xs" />}
+                                            {isSelected && <CheckCircle className="text-white text-xs" />}
                                         </div>
                                     ) : (
                                         // Radio button for single selection

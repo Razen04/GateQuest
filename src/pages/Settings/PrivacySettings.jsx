@@ -1,8 +1,8 @@
 import React, { useContext } from 'react'
-import { FaShieldAlt } from 'react-icons/fa'
 import ToggleSwitch from '../../components/ToggleSwitch'
 import AuthContext from '../../context/AuthContext'
 import AppSettingContext from '../../context/AppSettingContext'
+import { ShieldCheck } from 'phosphor-react'
 
 const PrivacyButtons = ({ label, format = "", type = "", onClick }) => {
     return (
@@ -24,7 +24,7 @@ const PrivacySettings = () => {
         <div>
             <div className={`${showLogin ? 'blur-2xl' : null}`}>
                 <h2 className="text-xl font-semibold mb-6 flex items-center">
-                    <FaShieldAlt className="mr-2" /> Privacy & Data
+                    <ShieldCheck className="mr-2" /> Privacy & Data
                 </h2>
 
                 <div className="space-y-4">

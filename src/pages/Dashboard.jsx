@@ -1,9 +1,5 @@
 import React, { useContext } from 'react';
 import { motion } from 'framer-motion';
-import {
-    FaChartLine,
-    FaLaptopCode, FaMedal
-} from 'react-icons/fa';
 import Login from '../components/Login';
 import AuthContext from '../context/AuthContext';
 import { getBackgroundColor, getUserProfile } from '../helper';
@@ -12,8 +8,8 @@ import subjects from '../data/subjects';
 import ModernLoader from '../components/ModernLoader';
 import StudyPlan from '../components/StudyPlan';
 import { ResponsiveTimeRange } from '@nivo/calendar';
-import ThemeContext from '../context/ThemeContext';
-import { FaInfo } from 'react-icons/fa6';
+import { ChartLine, Info, Laptop, Medal } from 'phosphor-react';
+import AppSettingContext from '../context/AppSettingContext';
 
 const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, textColor = "text-gray-800 dark:text-gray-100" }) => {
 
@@ -53,7 +49,7 @@ const StatCard = ({ icon: Icon, title, value, quantity, iconColor, bgColor, text
 const Dashboard = () => {
     const { isLogin, loading } = useContext(AuthContext);
     const { stats, loading: statsLoading } = useContext(StatsContext);
-    const { dark: isDark } = useContext(ThemeContext);
+    const { settings: { darkMode: isDark } } = useContext(AppSettingContext);
     const user = getUserProfile();
     const subjectStats = stats?.subjectStats;
     const toDate = new Date();
@@ -113,7 +109,7 @@ const Dashboard = () => {
             </motion.div>
 
             <div className='flex items-center mb-[-20px]'>
-                <FaInfo className='text-sm text-red-500 mr-2' />
+                <Info className='text-sm text-red-500 mr-2' />
                 <p className='text-base text-red-500'>Attempt 5 questions for Dashboard to refresh.</p>
             </div>
 
@@ -191,7 +187,7 @@ const Dashboard = () => {
                 className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
             >
                 <StatCard
-                    icon={FaChartLine}
+                    icon={ChartLine}
                     title="Overall Progress"
                     value={`${stats?.progress}%`}
                     delta="2%"
@@ -201,7 +197,7 @@ const Dashboard = () => {
                 />
 
                 <StatCard
-                    icon={FaMedal}
+                    icon={Medal}
                     title="Overall Accuracy"
                     value={`${stats?.accuracy}%`}
                     delta="2%"
@@ -234,7 +230,7 @@ const Dashboard = () => {
                                         const accuracy = Number(subject.accuracy) || 0;
                                         // Find the subject meta info
                                         const subjectMeta = subjects.find(s => s.apiName === subject.subject);
-                                        const Icon = subjectMeta?.icon || FaLaptopCode; // fallback icon
+                                        const Icon = subjectMeta?.icon || Laptop; // fallback icon
                                         const questionCount = subjectMeta?.questions;
                                         const subjectColor = subjectMeta?.color;
 

@@ -122,7 +122,7 @@ export const recordAttempt = async (buffer, user, updateStats) => {
     }
 
     // Insert the entire buffer as new rows in the activity table.
-    const { error } = await supabase.from('user_question_activity').insert(buffer);
+    const { error } = await supabase.from('user_question_activity').upsert(buffer, { onConflict: 'user_id,question_id' });
     // After syncing, immediately update the user's stats to reflect the new data.
     await updateStats(user)
 

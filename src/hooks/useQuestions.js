@@ -1,9 +1,11 @@
 // This custom hook is responsible for fetching questions for a given subject.
 // It handles loading and error states, and implements a caching strategy using localStorage to reduce network requests.
+// It also compresses data to save space in localStorage and handles migration for existing uncompressed data.
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import LZString from 'lz-string';
 import { getUserProfile, sortQuestionsByYear } from '../helper';
 
 // The base URL for the questions API is retrieved from environment variables.
@@ -31,7 +33,20 @@ const useQuestions = (subject, bookmarked) => {
                 if (bookmarked) {
                     const profile = getUserProfile();
                     // All questions for the subject are loaded from localStorage.
-                    const subjectQuestions = JSON.parse(localStorage.getItem(subject) || "[]");
+                    const compressedData = localStorage.getItem(subject);
+                    let subjectQuestions = [];
+
+                    if (compressedData) {
+                        try {
+                            // Attempt to parse directly for backward compatibility with uncompressed data.
+                            subjectQuestions = JSON.parse(compressedData);
+                        } catch {
+                            // If parsing fails, assume it's compressed and decompress it.
+                            const decompressedData = LZString.decompress(compressedData);
+                            subjectQuestions = JSON.parse(decompressedData || "[]");
+                        }
+                    }
+                    
                     // The user's bookmarked questions are retrieved from their profile.
                     const bookmarkedQuestions = profile?.bookmark_questions?.filter(q => q.subject === subject) || [];
 
@@ -48,17 +63,30 @@ const useQuestions = (subject, bookmarked) => {
                     }
                 } else {
                     // For regular (non-bookmarked) questions, we first check localStorage for a cached version.
-                    const localQuestions = JSON.parse(localStorage.getItem(subject));
-                    if (Array.isArray(localQuestions) && localQuestions.length > 0) {
-                        // If a cached version exists, we use it directly.
+                    const compressedData = localStorage.getItem(subject);
+
+                    if (compressedData) {
+                        let localQuestions;
+                        try {
+                            // Try parsing directly to handle old, uncompressed data.
+                            localQuestions = JSON.parse(compressedData);
+                            // If successful, it was uncompressed. We perform a graceful migration by re-compressing and saving it.
+                            const newlyCompressedData = LZString.compress(JSON.stringify(localQuestions));
+                            localStorage.setItem(subject, newlyCompressedData);
+                        } catch {
+                            // If parsing fails, assume it's new, compressed data.
+                            const decompressedData = LZString.decompress(compressedData);
+                            localQuestions = JSON.parse(decompressedData);
+                        }
                         setQuestions(localQuestions);
                     } else {
                         // If not cached, we fetch the questions from the API.
                         const encodedSubject = encodeURIComponent(subject);
                         const res = await axios.get(`${API_BASE}/api/questions?subject=${encodedSubject}`);
                         const loadedQuestions = sortQuestionsByYear(res.data);
-                        // After fetching, we cache the questions in localStorage for future use.
-                        localStorage.setItem(subject, JSON.stringify(loadedQuestions));
+                        // After fetching, we compress and cache the questions in localStorage for future use.
+                        const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
+                        localStorage.setItem(subject, dataToCache);
                         setQuestions(loadedQuestions);
                     }
                 }

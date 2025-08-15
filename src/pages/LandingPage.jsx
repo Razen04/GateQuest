@@ -1,28 +1,27 @@
 import React from 'react';
-import { FaGoogle, FaGithub, FaArrowRight } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import appLogo from '/logo.svg';
-import { FaBookOpen, FaCloudArrowUp, FaListCheck, FaM } from 'react-icons/fa6';
+import { ArrowRight, BookOpen, CloudArrowUp, GithubLogo, ListChecks, MagicWand } from 'phosphor-react';
 
 const features = [
     {
-        icon: FaBookOpen,
+        icon: BookOpen,
         title: 'Practice GATE Questions',
         desc: 'Organized by subject, year, and difficulty. Instant feedback and explanations.',
     },
     {
-        icon: FaListCheck,
+        icon: ListChecks,
         title: 'Track Progress',
         desc: 'See your stats and accuracy. Bookmark questions for review.',
     },
     {
-        icon: FaM,
+        icon: MagicWand,
         title: 'Modern Experience',
         desc: 'Dark mode, sound effects, animations, and PWA support for mobile.',
     },
     {
-        icon: FaCloudArrowUp,
+        icon: CloudArrowUp,
         title: 'Cloud Sync',
         desc: 'Sign in with Google. Your progress and bookmarks are always safe.',
     },
@@ -56,7 +55,7 @@ export default function LandingPage() {
                     className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow hover:from-blue-700 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition hidden md:block"
                     onClick={() => navigate('/practice')}
                 >
-                    Try Practice <FaArrowRight className="inline ml-2" />
+                    Try Practice <ArrowRight className="inline ml-2" />
                 </button>
             </header>
 
@@ -83,7 +82,7 @@ export default function LandingPage() {
                         className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold text-lg shadow hover:from-blue-700 hover:to-purple-700 hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition"
                         onClick={() => navigate('/practice')}
                     >
-                        Start Practicing <FaArrowRight />
+                        Start Practicing <ArrowRight />
                     </button>
                     <a
                         href="https://github.com/Razen04/GateQuest"
@@ -91,7 +90,7 @@ export default function LandingPage() {
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-900 text-white font-semibold text-lg shadow hover:bg-gray-800 transition"
                     >
-                        <FaGithub /> GitHub (Soon Public)
+                        <GithubLogo /> GitHub (Soon Public)
                     </a>
                 </motion.div>
             </section>

@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { FaBookmark } from 'react-icons/fa'
 import AuthContext from '../../../context/AuthContext';
 import { handleBookmark } from '../../../utils/questionUtils';
+import { Bookmark } from 'phosphor-react';
 
 const QuestionBookmark = ({ questionId, subject }) => {
     const [hovered, setHovered] = useState(false);
@@ -15,7 +15,7 @@ const QuestionBookmark = ({ questionId, subject }) => {
                 onMouseLeave={() => setHovered(false)}
                 onClick={() => handleBookmark(isLogin, questionId, subject)}
             >
-                <FaBookmark className='h-3.5' />
+                <Bookmark className='h-3.5' />
                 <AnimatePresence>
                     {hovered && (
                         <motion.span
@@ -24,7 +24,7 @@ const QuestionBookmark = ({ questionId, subject }) => {
                             initial={{ opacity: 0, x: 16, scale: 0.8 }}
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             exit={{ opacity: 0, x: 16, scale: 0.8 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 20, duration: 300 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 20, duration: 30 }}
                         >
                             Bookmark
                         </motion.span>

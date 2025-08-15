@@ -2,7 +2,6 @@
 // React and router stuff first, pretty standard.
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa6';
 
 // 2. Custom hook imports (application logic)
 // All the complex logic is abstracted into these hooks.
@@ -32,6 +31,7 @@ import QuestionBadge from '../../components/Practice/QuestionCard/QuestionBadge'
 import ActionButtons from '../../components/Practice/QuestionCard/ActionButtons';
 import ResultMessage from '../../components/Practice/QuestionCard/ResultMessage';
 import ModernLoader from '../../components/ModernLoader';
+import { ArrowLeft } from 'phosphor-react';
 
 // This component is the main event for the practice session. It's a "controller" component
 // that pulls together a bunch of hooks and smaller UI components to create the full question view.
@@ -213,7 +213,7 @@ const QuestionCard = () => {
                     onClick={handleBack}
                     className="flex items-center hover:text-blue-500 transition-colors cursor-pointer"
                 >
-                    <FaArrowLeft className="mr-2" />
+                    <ArrowLeft className="mr-2" />
                     <span>Back to Questions</span>
                 </button>
             </div>

@@ -18,6 +18,7 @@ const AppProvider = ({ children }) => {
         {
             sound: true,
             autoTimer: true,
+            darkMode: false,
             // Placeholder settings as of now
             shareProgress: true,
             dataCollection: true
@@ -40,6 +41,7 @@ const AppProvider = ({ children }) => {
         if (profile) {
             // Create an updated profile object with the new settings.
             const updatedProfile = { ...profile, settings }
+
             // Update the profile in localStorage.
             updateUserProfile(updatedProfile)
             // Sync the updated profile to the Supabase database if the user is logged in.
@@ -47,6 +49,16 @@ const AppProvider = ({ children }) => {
         }
 
     }, [settings]) // The dependency array ensures this runs only when settings change.
+
+    // This allows Tailwind CSS's dark mode variants to work globally.
+    useEffect(() => {
+        const root = document.documentElement;
+        if (settings.darkMode) {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+    }, [settings.darkMode]);
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaFilter, FaSearch, FaChevronDown } from 'react-icons/fa';
+import { CaretDown, Funnel, MagnifyingGlass } from 'phosphor-react';
 
 const SearchAndFilters = ({
   searchQuery,
@@ -22,7 +22,7 @@ const SearchAndFilters = ({
     <div className="rounded-xl p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
       <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
         <div className="flex-1 relative">
-          <FaSearch className="absolute left-3 top-3 text-gray-400" />
+          <MagnifyingGlass className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search questions..."
@@ -36,10 +36,10 @@ const SearchAndFilters = ({
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer w-full md:w-auto"
         >
-          <FaFilter className="mr-2" />
+          <Funnel className="mr-2" weight={`${showFilters ? 'fill' : 'duotone'}`} />
           <span>Filter</span>
-          <FaChevronDown
-            className={`ml-2 transition-transform ${showFilters ? 'transform rotate-180' : ''}`}
+          <CaretDown
+            className={`ml-2 transition-transform ${showFilters ? 'transform rotate-180 duration-500' : 'duration-500'}`}
           />
         </button>
       </div>

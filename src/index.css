@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ruda:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 @import "tailwindcss";
 
 body {
@@ -29,4 +32,8 @@ body {
     /* blue-600 */
     --gradient-to: #9333ea;
     /* purple-600 */
+
+    --font-nunito: Nunito Sans, "sans-serif";
+    --font-ruda: Ruda, "sans-serif";
+    --font-manrope: Manrope, "sans-serif";
 }

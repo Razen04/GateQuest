@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaArrowLeft } from 'react-icons/fa6'
+import { ArrowLeft } from 'phosphor-react'
 
 const Header = ({handleBack, filteredQuestions, attemptFilter}) => {
     return (
@@ -8,7 +8,7 @@ const Header = ({handleBack, filteredQuestions, attemptFilter}) => {
                 onClick={handleBack}
                 className="flex items-center hover:text-blue-500 transition-colors cursor-pointer text-base sm:w-auto"
             >
-                <FaArrowLeft className="mr-2" />
+                <ArrowLeft className="mr-2" />
                 <span>Back to Subjects</span>
             </button>
 

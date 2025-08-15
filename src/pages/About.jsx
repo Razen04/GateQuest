@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaGithub, FaDiscord, FaBook, FaHeart } from 'react-icons/fa';
 import { faqs } from '../data/faqs';
 import AccordionItem from '../components/About/AccordionItem';
+import { Book, DiscordLogo, GithubLogo, Heart } from 'phosphor-react';
 
 // To render links in the FAQ section
 const renderAnswer = (answerParts) => {
@@ -24,19 +24,19 @@ const About = () => {
     // Animation variants for scroll-triggered effects
     const fadeInUp = {
         initial: { opacity: 0, y: 40 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeInOut' } }
+        animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeInOut' } }
     };
 
     const staggerContainer = {
         animate: {
             transition: {
-                staggerChildren: 0.2
+                staggerChildren: 0.1
             }
         }
     };
 
     return (
-        <div className="mx-auto p-6 sm:p-8 dark:text-white overflow-scroll max-h-[calc(100vh-15vh)]">
+        <div className="mx-auto p-4 sm:p-8 pb-20 dark:text-white overflow-scroll max-h-screen">
             {/* Header Section */}
             <motion.header
                 initial="initial"
@@ -67,22 +67,22 @@ const About = () => {
                 className="max-w-5xl  mx-auto grid md:grid-cols-2 gap-8 my-20"
             >
                 <motion.div variants={fadeInUp} className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center"><FaBook className="mr-3 text-blue-500" />Why GATEQuest?</h2>
+                    <h2 className="text-3xl font-bold mb-4 flex items-center"><Book className="mr-3 text-blue-500" />Why GATEQuest?</h2>
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                         There are many websites great for GATE prep out there like GO or Examside but the UI felt less modern to me. I wanted to provided a clean, distraction-free UI so here it is.
                     </p>
                 </motion.div>
                 <motion.div variants={fadeInUp} className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800">
-                    <h2 className="text-3xl font-bold mb-4 flex items-center"><FaHeart className="mr-3 text-red-500" />Join Me</h2>
+                    <h2 className="text-3xl font-bold mb-4 flex items-center"><Heart className="mr-3 text-red-500" />Join Me</h2>
                     <p className="text-gray-700 dark:text-gray-300 mb-6">
                         I want this to become everyone's goto website for GATE prep so contributions are highly appreciated.
                     </p>
                     <div className="flex space-x-4">
                         <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://github.com/Razen04/GATEQuest" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
-                            <FaGithub className="mr-2 w-5" /> GitHub (Will Soon Public)
+                            <GithubLogo className="mr-2 w-5" /> GitHub
                         </motion.a>
                         <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://discord.gg/dFmg3g52c5" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
-                            <FaDiscord className="mr-2" /> Discord
+                            <DiscordLogo className="mr-2" /> Discord
                         </motion.a>
                     </div>
                 </motion.div>

@@ -8,7 +8,6 @@
 
 import React from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
-import ThemeProvider from './context/ThemeProvider'
 import AppProvider from './context/AppProvider'
 import AuthProvider from './context/AuthProvider'
 import StatsProvider from './context/StatsProvider'
@@ -28,14 +27,11 @@ function App() {
       <AuthProvider>
         {/* AppProvider manages general application settings, like sound effects. */}
         <AppProvider>
-          {/* ThemeProvider manages the light/dark mode theme. */}
-          <ThemeProvider>
-            {/* Router provides the client-side routing functionality. */}
-            <Router>
-              {/* AppRoutes contains all the defined application routes. */}
-              <AppRoutes />
-            </Router>
-          </ThemeProvider>
+          {/* Router provides the client-side routing functionality. */}
+          <Router>
+            {/* AppRoutes contains all the defined application routes. */}
+            <AppRoutes />
+          </Router>
         </AppProvider>
       </AuthProvider>
     </StatsProvider>

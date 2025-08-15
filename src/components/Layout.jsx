@@ -8,7 +8,7 @@ import { supabase } from '../../supabaseClient'
 
 const Layout = () => {
     const { updateStats } = useContext(StatsContext);
-    const [showSidebar, setShowSidebar] = useState(false)
+    const [showSidebar, setShowSidebar] = useState(false);
     const user = getUserProfile();
     function SyncOnUnload({ user, updateStats }) {
         useEffect(() => {

@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useContext } from 'react'
-import { FaPause, FaStopwatch } from 'react-icons/fa6'
 import { useQuestionTimer } from '../../../hooks/useQuestionTimer'
 import AppSettingContext from '../../../context/AppSettingContext'
+import { Pause, Timer } from 'phosphor-react'
 
 const QuestionTimer = ({ currentQuestion, isTimerActive }) => {
 
@@ -24,7 +24,7 @@ const QuestionTimer = ({ currentQuestion, isTimerActive }) => {
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <FaPause className={`${isTimerActive ? 'animate-pulse' : ''}`} />
+                            <Pause className={`${isTimerActive ? 'animate-pulse' : ''}`} />
                         </motion.div>
                     ) : (
                         <motion.div
@@ -34,7 +34,7 @@ const QuestionTimer = ({ currentQuestion, isTimerActive }) => {
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <FaStopwatch className='h-4' />
+                            <Timer className='h-4' />
                         </motion.div>
                     )}
                 </AnimatePresence>

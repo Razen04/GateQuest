@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BiCheckCircle } from 'react-icons/bi'
-import { FaBookOpen, FaCalendarAlt } from 'react-icons/fa'
 import { toast } from 'sonner'
 import { supabase } from '../../supabaseClient'
 import { formatDistanceToNow } from 'date-fns'
+import { BookOpen, Calendar, CircleWavyCheck } from 'phosphor-react'
 
-const Notification = ({ isOpen, setUnreadNotifications }) => {
+const NotificationDialog = ({ isOpen, setUnreadNotifications }) => {
 
     const [notifications, setNotifications] = useState([]);
     const [readNotifications, setReadNotifications] = useState(() => {
@@ -56,11 +55,11 @@ const Notification = ({ isOpen, setUnreadNotifications }) => {
 
     const getNotificationIcon = (notification) => {
         if (notification.type === "update") {
-            return (<BiCheckCircle className="text-green-500" />);
+            return (<CircleWavyCheck className="text-green-500" />);
         } else if (notification.type === "reminder") {
-            return (<FaCalendarAlt className="text-blue-500" />);
+            return (<Calendar className="text-blue-500" />);
         } else {
-            return (<FaBookOpen className="text-purple-500" />);
+            return (<BookOpen className="text-purple-500" />);
         }
     };
 
@@ -125,4 +124,4 @@ const Notification = ({ isOpen, setUnreadNotifications }) => {
     )
 }
 
-export default Notification
+export default NotificationDialog

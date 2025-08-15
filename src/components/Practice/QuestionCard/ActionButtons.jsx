@@ -1,4 +1,4 @@
-import { FaChevronLeft, FaChevronRight, FaEye, FaRedo, FaComment, FaFlag } from 'react-icons/fa'
+import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from 'phosphor-react'
 
 const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrevious, showAnswer, handleShowAnswer, handleSubmit, handleExplainationClick, currentQuestion, }) => {
     return (
@@ -14,7 +14,7 @@ const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrev
                 disabled={isFirstQuestion}
                 title="Previous"
             >
-                <FaChevronLeft className="inline text-lg" />
+                <ArrowLeft className="inline text-lg" />
                 <span className="hidden md:inline ml-2">Previous</span>
             </button>
 
@@ -26,7 +26,7 @@ const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrev
                         onClick={() => handleSubmit()}
                         title="Submit"
                     >
-                        <FaEye className="inline text-lg" />
+                        <Eye className="inline text-lg" />
                         <span className="hidden md:inline ml-2">Submit</span>
                     </button>
                     <button
@@ -34,7 +34,7 @@ const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrev
                         onClick={() => handleShowAnswer()}
                         title="Show Answer"
                     >
-                        <FaFlag className="inline text-lg" />
+                        <Flag className="inline text-lg" />
                         <span className="hidden md:inline ml-2">Show Answer</span>
                     </button>
                 </>
@@ -45,7 +45,7 @@ const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrev
                         onClick={() => handleExplainationClick(currentQuestion.explanation)}
                         title="Show Explanation"
                     >
-                        <FaComment className="inline text-lg" />
+                        <ChatCircle className="inline text-lg" />
                         <span className="hidden md:inline ml-2">Show Explanation</span>
                     </button>
                 </>
@@ -61,7 +61,7 @@ const ActionButtons = ({ isFirstQuestion, isLastQuestion, handleNext, handlePrev
                 disabled={isLastQuestion}
                 title="Next"
             >
-                <FaChevronRight className="inline text-lg" />
+                <ArrowRight className="inline text-lg" />
                 <span className="hidden md:inline ml-2">Next</span>
             </button>
         </div>

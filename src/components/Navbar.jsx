@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { BiBell, BiSolidBell } from 'react-icons/bi'
-import Notification from './Notification'
+import { Notification } from 'phosphor-react'
+import NotificationDialog from './NotificationDialog'
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false)
@@ -48,14 +48,14 @@ const Navbar = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
-                        {showNotifications ? (<BiSolidBell className="w-6 h-6" />) : (<BiBell className="w-6 h-6" />)}
+                        {showNotifications ? (<Notification size={20} weight="fill" />) : (<Notification size={20} weight="duotone" />)}
                         {unreadNotifications && (
                             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         )}
                     </motion.div>
 
                     {/* Notifications Panel */}
-                    <Notification
+                    <NotificationDialog
                         isOpen={showNotifications}
                         onClose={() => setShowNotifications(false)}
                         setUnreadNotifications={setUnreadNotifications}
