@@ -1,21 +1,93 @@
 {
   "name": "GATEQuest",
   "short_name": "GATEQuest",
+  "id": "/",
+  "description": "A distraction-free, minimalist app to help students prepare for the GATE exam efficiently.",
+  "start_url": "/",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg",
+      "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/logo.svg",
+      "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "display": "standalone"
+  "screenshots": [
+    {
+      "src": "/screenshots/Landing.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Minimalist Exam Prep"
+    },
+    {
+      "src": "/screenshots/Dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Personalized Dashboard"
+    },
+    {
+      "src": "/screenshots/Practice.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Practice Questions"
+    },
+    {
+      "src": "/screenshots/Questions.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Solve GATE PYQs Questions"
+    },
+    {
+      "src": "/screenshots/MCQ.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Multiple Choice Mode"
+    },
+    {
+      "src": "/screenshots/About.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "About GATEQuest"
+    },
+    {
+      "src": "/screenshots/Desktop.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Optimized for Desktop"
+    }
+  ],
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400,
+    "enabled": true
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+gatequest",
+      "url": "/handle-protocol?url=%s"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
 }

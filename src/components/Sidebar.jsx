@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ChartPieSlice, BookOpen, Gear, Info, CaretLeft, DiscordLogo, GithubLogo } from 'phosphor-react'
 import useWindowSize from '../hooks/useWindowSize'
-import appLogo from '/logo.svg'
+import appLogo from '/logo.png'
 
 const Sidebar = ({ showSidebar, setShowSidebar }) => {
     const navigate = useNavigate()

@@ -38,7 +38,7 @@ export const faqs = [
     {
         question: 'Are all questions present in the app?',
         answer: [
-            { "type": "text", "content": "Except for descriptive and out-of-syllabus questions, all are present in the app. I may add descriptive questions in the future." }
+            { "type": "text", "content": "Except for descriptive and out-of-syllabus questions, all are present in the app. I may add descriptive questions in the future. I am manually adding questions so not all subjects are added yet but rest assurred they will be added soon." }
         ]
     },
     {

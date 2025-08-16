@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import appLogo from '/logo.svg';
+import appLogo from '/logo.png';
 import { ArrowRight, BookOpen, CloudArrowUp, GithubLogo, ListChecks, MagicWand } from 'phosphor-react';
 
 const features = [

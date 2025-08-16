@@ -18,29 +18,30 @@
 - 🔐 **Google Login**: Secure authentication with Supabase
 - ☁️ **Cloud Sync**: User profile and progress synced to Supabase
 - 📱 **PWA**: Installable as a Progressive Web App
+- ↔️ **Collapsible Sidebar**: For a focused, distraction-free workspace
 
 ## Tech Stack
 
 - **Frontend**: React (Vite), Tailwind CSS
 - **State Management**: React Context API
 - **Backend**: Supabase (auth, database)
-- **Icons**: react-icons
-- **Animations**: framer-motion
+- **Icons**: Phosphor Icons
+- **Animations**: Framer Motion
 
 ## Project Structure
 
 ```
 GateQuest/
-├── public/                # Static assets (logo, sounds)
+├── public/                # Static assets (logo, sounds, favicons)
 ├── src/
 │   ├── assets/            # SVG icons and other assets
-│   ├── components/        # Reusable React components
+│   ├── components/        # Reusable React components (Dashboard, Practice, etc.)
 │   ├── context/           # React Context providers for state management
-│   ├── data/              # Static data like subject lists
+│   ├── data/              # Static data (FAQs, subjects)
 │   ├── hooks/             # Custom React hooks for component logic
 │   ├── pages/             # Top-level page components
 │   ├── routes/            # Route definitions for the application
-│   ├── utils/             # Utility functions
+│   ├── utils/             # Utility functions (motionVariants.js, etc.)
 │   ├── App.jsx            # Main application component
 │   ├── main.jsx           # Application entry point
 │   └── index.css          # Global and Tailwind CSS styles
@@ -63,10 +64,11 @@ GateQuest/
    npm install
    ```
 3. **Set up environment variables:**
-   - Copy `.env.example` to `.env` and fill in your Supabase project URL and anon key:
-     ```sh
-     cp .env.example .env
-     # Edit .env with your Supabase credentials
+   - Create a `.env` file in the root directory.
+   - Add your Supabase project URL and anon key:
+     ```
+     VITE_SUPABASE_PROJECT_URL=your_supabase_url
+     VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
      ```
 4. **Run the app locally:**
    ```sh
@@ -76,15 +78,6 @@ GateQuest/
    ```sh
    npm run build
    ```
-
-## Environment Variables
-
-Create a `.env` file with:
-```
-VITE_SUPABASE_PROJECT_URL=your_supabase_url
-VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
-VITE_API_BASE=your_api_base_url
-```
 
 ## Contributing
 
