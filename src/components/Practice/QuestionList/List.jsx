@@ -3,23 +3,27 @@ import { motion } from 'framer-motion'
 import { getDifficultyClassNames, getQuestionDisplayText } from '../../../utils/questionUtils'
 import Pagination from './Pagination'
 import MathRenderer from '../MathRenderer'
+import { fadeInUp, stagger } from '../../../utils/motionVariants'
 
-const List = ({listRef, pageItems, handleQuestionClick, currentPage, totalPages, setCurrentPage}) => {
+const List = ({ listRef, pageItems, handleQuestionClick, currentPage, totalPages, setCurrentPage }) => {
     return (
-        <div
+        <motion.div
+            initial="initial"
+            animate="animate"
+            variants={stagger}
+            viewport={{ once: true, amount: 0.2 }}
             ref={listRef}
             className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-x-hidden overflow-y-scroll rounded-lg pb-32 max-h-[59vh]"
         >
             {pageItems.map((question, index) => (
                 <motion.div
                     key={index}
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
+                    variants={fadeInUp}
                     onClick={() => handleQuestionClick(question.id)}
                     className="cursor-pointer border border-border-primary dark:border-border-primary-dark rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
                 >
                     <h3 className="font-medium mb-3 text-sm md:text-base">
-                        <MathRenderer text={getQuestionDisplayText(question)}/>
+                        <MathRenderer text={getQuestionDisplayText(question)} />
                     </h3>
                     <div className="flex justify-between items-center text-xs">
                         <span
@@ -34,7 +38,7 @@ const List = ({listRef, pageItems, handleQuestionClick, currentPage, totalPages,
                 </motion.div>
             ))}
             <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
-        </div>
+        </motion.div>
     )
 }
 

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { faqs } from '../data/faqs';
 import AccordionItem from '../components/About/AccordionItem';
 import { Book, DiscordLogo, GithubLogo, Heart } from 'phosphor-react';
+import { fadeInUp, stagger } from '../utils/motionVariants';
 
 // To render links in the FAQ section
 const renderAnswer = (answerParts) => {
@@ -21,34 +22,20 @@ const renderAnswer = (answerParts) => {
 
 const About = () => {
 
-    // Animation variants for scroll-triggered effects
-    const fadeInUp = {
-        initial: { opacity: 0, y: 40 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeInOut' } }
-    };
-
-    const staggerContainer = {
-        animate: {
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
-
     return (
-        <div className="mx-auto p-4 sm:p-8 pb-20 dark:text-white overflow-scroll max-h-screen">
+        <div className="mx-auto p-4 sm:p-8 pb-40 dark:text-white overflow-scroll max-h-screen">
             {/* Header Section */}
             <motion.header
                 initial="initial"
                 animate="animate"
-                variants={staggerContainer}
+                variants={stagger}
                 className="text-center my-8 sm:my-24"
             >
                 <motion.h1
                     variants={fadeInUp}
                     className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400"
                 >
-                    About GATEQuest
+                    About <span className='bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text'>GATE</span>Quest
                 </motion.h1>
                 <motion.p
                     variants={fadeInUp}
@@ -62,7 +49,7 @@ const About = () => {
             <motion.section
                 initial="initial"
                 whileInView="animate"
-                variants={staggerContainer}
+                variants={stagger}
                 viewport={{ once: true, amount: 0.4 }}
                 className="max-w-5xl  mx-auto grid md:grid-cols-2 gap-8 my-20"
             >
@@ -81,7 +68,7 @@ const About = () => {
                         <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://github.com/Razen04/GATEQuest" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
                             <GithubLogo className="mr-2 w-5" /> GitHub
                         </motion.a>
-                        <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://discord.gg/dFmg3g52c5" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
+                        <motion.a whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} href="https://discord.gg/dFmg3g52c5" target="_blank" rel="noopener noreferrer" className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg">
                             <DiscordLogo className="mr-2" /> Discord
                         </motion.a>
                     </div>
@@ -102,7 +89,7 @@ const About = () => {
                 <motion.div
                     initial="initial"
                     whileInView="animate"
-                    variants={staggerContainer}
+                    variants={stagger}
                     viewport={{ once: true, amount: 0.2 }}
                     className="max-w-3xl mx-auto"
                 >

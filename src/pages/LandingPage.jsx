@@ -90,7 +90,7 @@ export default function LandingPage() {
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-900 text-white font-semibold text-lg shadow hover:bg-gray-800 transition"
                     >
-                        <GithubLogo /> GitHub (Soon Public)
+                        <GithubLogo /> GitHub
                     </a>
                 </motion.div>
             </section>
@@ -131,7 +131,7 @@ export default function LandingPage() {
 
             {/* Footer */}
             <footer className="w-full py-6 text-center text-gray-400 text-sm border-t border-border-primary dark:border-border-primary-dark bg-white/60 dark:bg-zinc-900/60 mt-auto">
-                &copy; {new Date().getFullYear()} GATEQuest. Open Source on <a href="https://github.com/Razen04/GateQuest" className="text-blue-600 hover:underline">GitHub (Soon Public)</a>.
+                &copy; {new Date().getFullYear()} GATEQuest. Open Source on <a href="https://github.com/Razen04/GateQuest" className="text-blue-600 hover:underline">GitHub</a>.
             </footer>
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ChartPieSlice, BookOpen, Gear, Info, ArrowArcRight, CaretRight, CaretLeft } from 'phosphor-react'
+import { ChartPieSlice, BookOpen, Gear, Info, CaretLeft, DiscordLogo, GithubLogo } from 'phosphor-react'
 import useWindowSize from '../hooks/useWindowSize'
 import appLogo from '/logo.svg'
 
@@ -66,21 +66,28 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                     const isActive = location.pathname.startsWith(tab.path)
                     const IconComponent = isActive ? tab.activeIcon : tab.icon;
                     return (
-                        <button
+                        <motion.button
                             key={tab.id}
                             onClick={() => handleTabClick(tab.path)}
-                            className={`flex flex-col items-center justify-center px-2 py-1 focus:outline-none transition-all font-semibold ${isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-300'}`}
+                            className={`flex z-10 flex-col items-center justify-center px-2 py-1 focus:outline-none transition-all font-semibold`}
                         >
-                            <span className={`text-xl mb-0.5 px-3 py-0.5 inline-block ${isActive ? 'bg-gray-100 dark:bg-gray-800 rounded-2xl' : ''}`}>
+                            <span className={`relative text-xl mb-0.5 px-3 py-0.5 inline-block ${isActive ? 'text-white rounded-2xl' : 'text-black dark:text-white'}`}>
                                 <motion.div
                                     variants={tab.animation}
                                     animate={isActive ? "active" : "inactive"}
                                 >
                                     {IconComponent}
                                 </motion.div>
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="active-sidebar-tab"
+                                        className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl -z-10"
+                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                    />
+                                )}
                             </span>
-                            <span className="text-xs">{tab.name}</span>
-                        </button>
+                            <span className={`text-xs ${isActive ? 'text-blue-500' : 'text-black dark:text-white'}`}>{tab.name}</span>
+                        </motion.button>
                     );
                 })}
             </nav>
@@ -90,14 +97,14 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
     // Desktop sidebar
     return (
         <motion.div
-            className={`z-10 absolute h-[100dvh] lg:static lg:block border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-sm transition-colors duration-1000`}
+            className={`z-10 absolute h-[100dvh] lg:static lg:block border-r border-border-primary dark:border-border-primary-dark bg-gradient-to-b from-gray-50 to-white shadow-sm transition-colors duration-1000 overflow-x-hidden`}
             initial={{ x: '-100%' }}
             animate={{
                 x: showSidebar || width >= 1024 ? 0 : '-100%',
                 width: isCollapsed ? '5rem' : '16rem'
             }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 30 }}
         >
             <div className="flex flex-col h-full bg-primary dark:bg-primary-dark">
                 {/* Branding */}
@@ -110,7 +117,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                     >
                         <img src={appLogo} alt="App logo" className={`w-8 ${isCollapsed ? 'mr-0' : 'mr-3'} flex-shrink-0`} />
                         <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
-                            <h1 className='bg-gradient-to-r from-blue-600 to-purple-700 bg-clip-text text-transparent'>
+                            <h1 className='bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent'>
                                 GATE<span className='text-black dark:text-white'>Quest</span>
                             </h1>
                             <p className='text-xs text-gray-500 dark:text-gray-400 font-medium mt-[-5px] text-right w-full'>Good Luck</p>
@@ -126,19 +133,19 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                         {tabs.map((tab, index) => {
                             const isActive = location.pathname.startsWith(tab.path);
                             return (
-                                <motion.div
+                                <motion.button
                                     key={tab.id}
                                     initial={{ opacity: 0, y: -20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.1 * index, duration: 0.5 }}
                                     onClick={() => handleTabClick(tab.path)}
-                                    className={`relative flex items-center px-4 py-3 my-2 rounded-lg cursor-pointer group transition-all duration-300 ${isActive
-                                        ? `text-white ${isCollapsed ? '' : 'bg-gradient-to-br from-blue-800 to-blue-900 shadow-lg'}`
+                                    className={`relative w-full z-10 flex items-center px-4 py-3 my-2 rounded-lg cursor-pointer group transition-all duration-300 ${isActive
+                                        ? 'text-white'
                                         : `${isCollapsed ? '' : 'hover:bg-gray-200 dark:hover:bg-gray-700'} dark:text-white`
                                         } ${isCollapsed ? 'justify-center' : ''}`}
                                 >
                                     <div className={`p-2 rounded-lg ${isActive
-                                        ? `dark:bg-white/5 ${isCollapsed ? 'bg-gradient-to-br from-blue-800 to-blue-900' : ''}`
+                                        ? `dark:bg-white/5`
                                         : 'bg-gray-100 group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-700'
                                         }`}>
                                         <motion.div
@@ -159,6 +166,14 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                                         {tab.name}
                                     </span>
 
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="active-sidebar-tab"
+                                            className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg -z-10"
+                                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                        />
+                                    )}
+
                                     {isActive && !isCollapsed && (
                                         <motion.div
                                             className="absolute right-4"
@@ -169,20 +184,49 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                                             <div className="w-2 h-2 rounded-full bg-white"></div>
                                         </motion.div>
                                     )}
-                                </motion.div>
+                                </motion.button>
                             )
                         })}
                     </nav>
                 </div>
 
-                <div className={`w-full flex ${isCollapsed ? 'justify-center' : 'justify-end-safe'}`}>
-                    <button aria-label='Collapse or Uncollapse Sidebar' className='p-3 cursor-pointer dark:text-white hover:dark:text-black bg-white/5 hover:bg-blue-50 tranistion-all duration-300 rounded-full m-3' onClick={handleSidebarShow}>
-                        {isCollapsed ? (<CaretRight size={20} />) : (<CaretLeft size={20} />)}
-                    </button>
+                <div className="mt-auto p-4 border-t border-border-primary dark:border-border-primary-dark">
+                    <div className={`flex items-center transition-all duration-300 ${isCollapsed ? 'flex-col gap-4' : 'justify-between'}`}>
+                        {/* Social links */}
+                        <div className={`flex items-center ${isCollapsed ? 'flex-col gap-4' : 'space-x-2'}`}>
+                            <button
+                                className='p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
+                                aria-label="Join our Discord"
+                            >
+                                <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
+                                    <DiscordLogo size={20} />
+                                </a>
+                            </button>
+                            <button
+                                className='p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
+                                aria-label="Join our Discord"
+                            >
+                                <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
+                                    <GithubLogo size={20} />
+                                </a>
+                            </button>
+                        </div>
+
+                        {/* Collapse button */}
+                        <motion.button
+                            animate={{ rotate: isCollapsed ? 180 : 0 }}
+                            transition={{ duration: 0.3 }}
+                            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
+                            onClick={handleSidebarShow}
+                        >
+                            <CaretLeft size={20} />
+                        </motion.button>
+                    </div>
                 </div>
 
             </div>
-        </motion.div>
+        </motion.div >
     )
 }
 

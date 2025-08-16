@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import useStudyPlan from '../hooks/useStudyPlan';
-import { getUserProfile } from '../helper';
+import useStudyPlan from '../../hooks/useStudyPlan';
+import { getUserProfile } from '../../helper';
+import { itemVariants } from '../../utils/motionVariants';
 
 const StudyPlan = () => {
     // assume user is stored in localStorage as before
@@ -37,10 +38,15 @@ const StudyPlan = () => {
     // Status message logic
     const statusMessage = isTargetMetToday
         ? "Great job! You've met today's target."
-        : `You should attempt ${dailyQuestionTarget} questions today to stay on track.`;
+        : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more questions today to stay on track.`;
 
     return (
-        <div className="mx-auto p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mt-8 mb-4">
+        <motion.div
+            variants={itemVariants}
+            initial="initial"
+            animate="animate"
+            className="mx-auto p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mb-4"
+        >
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">Smart Study Plan</h2>
@@ -87,13 +93,13 @@ const StudyPlan = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className={`mt-6 p-4 rounded-lg text-center font-medium ${isTargetMetToday
-                        ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300"
-                        : "bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300"
+                    ? "bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300"
+                    : "bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300"
                     }`}
             >
                 {statusMessage}
             </motion.div>
-        </div>
+        </motion.div>
     );
 };
 

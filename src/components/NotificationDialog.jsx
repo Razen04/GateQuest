@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { supabase } from '../../supabaseClient'
 import { formatDistanceToNow } from 'date-fns'
-import { BookOpen, Calendar, CircleWavyCheck } from 'phosphor-react'
+import { BookOpen, Calendar, CheckSquareOffset, CircleWavyCheck } from 'phosphor-react'
 
 const NotificationDialog = ({ isOpen, setUnreadNotifications }) => {
 
@@ -68,7 +68,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }) => {
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="absolute right-0 mt-3 w-80 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-border-primary dark:border-border-primary-dark overflow-hidden z-50"
+                    className="absolute right-0 top-5 mt-3 w-80 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-border-primary dark:border-border-primary-dark overflow-hidden z-50"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -79,9 +79,9 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }) => {
                         <div className="flex space-x-2">
                             <button
                                 onClick={() => markAllAsRead(notifications)}
-                                className="text-xs font-semibold text-blue-500 hover:text-blue-700 cursor-pointer"
+                                className="font-semibold text-blue-500 hover:text-blue-400 cursor-pointer text-lg"
                             >
-                                Mark all as read
+                                <CheckSquareOffset />
                             </button>
                         </div>
                     </div>

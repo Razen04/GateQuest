@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import subjects from '../../data/subjects'
 import { getBackgroundColor } from '../../helper'
 import { useNavigate } from 'react-router-dom'
+import Buttons from '../../components/Buttons'
+import { containerVariants, fadeInUp, itemVariants, navItemVariants, stagger } from '../../utils/motionVariants'
 
 const FilterTabs = ({ label, type, activeFilter, setActiveFilter }) => {
     return (
@@ -42,42 +44,51 @@ const Practice = () => {
 
     return (
         <div className="flex flex-col h-[100dvh] bg-primary dark:bg-primary-dark text-text-primary dark:text-text-primary-dark">
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+            <div
                 className="p-6 shrink-0"
             >
                 <div className="max-w-6xl">
                     {/* Header */}
-                    <div className="mb-6">
+                    <motion.div
+                        variants={containerVariants}
+                        initial="initial"
+                        animate="animate"
+                        className="mb-6"
+                    >
                         <h1 className="text-3xl font-bold ">Practice by <span className='
-                            bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>Subject</span></h1>
+                            bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent'>Subject</span></h1>
                         <p>Select a subject to start practicing</p>
-                    </div>
+                    </motion.div>
 
                     {/* Filter Tabs */}
                     <div className="">
-                        <div className="flex overflow-x-scroll gap-2">
+                        <motion.div
+                            variants={navItemVariants}
+                            initial="initial"
+                            animate="animate"
+                            className="flex overflow-x-scroll gap-2"
+                        >
                             <FilterTabs label="All Subjects" type="all" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             <FilterTabs label="Core CS" type="core" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             <FilterTabs label="Mathematics" type="math" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             <FilterTabs label="Aptitude" type="aptitude" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
                             <FilterTabs label="Bookmarked Questions" type="bookmarked" activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
             <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
+                initial="initial"
+                animate="animate"
+                variants={stagger}
+                viewport={{ once: true, amount: 0.2 }}
                 className="flex-1 overflow-y-auto px-6 rounded-xl mb-[env(safe-area-inset-bottom)]"
             >
                 {/* Subject Grid - Simplified */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
                     {filteredSubjects.map((subject) => (
-                        <div
+                        <motion.div
+                            variants={fadeInUp}
                             key={subject.id}
                             className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
                         >
@@ -89,14 +100,14 @@ const Practice = () => {
                                     <h3 className="font-medium">{subject.name}</h3>
                                 </div>
 
-                                <button
-                                    className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+                                <Buttons
+                                    children="Practice"
+                                    active={true}
+                                    className='w-full'
                                     onClick={() => handleSubjectSelect(subject.id)}
-                                >
-                                    Practice
-                                </button>
+                                />
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </motion.div>

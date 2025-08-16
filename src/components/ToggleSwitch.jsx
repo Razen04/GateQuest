@@ -7,7 +7,7 @@ const ToggleSwitch = ({label, onToggle, isOn}) => {
           <span>{label}</span>
           <button
               onClick={onToggle}
-              className={`w-12 h-6 flex cursor-pointer items-center rounded-full p-1 transition-all duration-300 ${isOn ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gray-300 dark:bg-gray-700'
+              className={`w-12 h-6 flex cursor-pointer items-center rounded-full p-1 transition-all duration-300 ${isOn ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gray-300 dark:bg-gray-700'
                   }`}
           >
               <motion.div

@@ -15,7 +15,7 @@ const ResultMessage = ({ showAnswer, result, getCorrectAnswerText, currentQuesti
             correctSoundRef.current = new Audio('/correct.wav');
             correctSoundRef.current.preload = 'auto';
 
-            wrongSoundRef.current = new Audio('wrong.wav');
+            wrongSoundRef.current = new Audio('/wrong.wav');
             wrongSoundRef.current.preload = 'auto';
         }
     }, [settings.sound]);

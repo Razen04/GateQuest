@@ -31,19 +31,21 @@ const Navbar = () => {
         >
 
             <div className='flex lg:block w-full'>
-                <h1 className='text-center text-2xl font-bold'><span className='bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>GATE</span>Quest</h1>
+                <h1 className='text-center text-2xl font-bold'><span className='bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent'>GATE</span>Quest</h1>
             </div>
 
-            {/* Notification */}
-            <motion.div
-                className="personal-details flex items-end"
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.6 }}
-            >
-                <button className="relative" ref={notificationRef} aria-label='Notifications'>
-                    <motion.div
-                        className="relative cursor-pointer"
+            {/* Right section (Notification) */}
+            <div className="flex-1 flex justify-end">
+                <motion.div
+                    className="relative flex items-end"
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                    ref={notificationRef}
+                >
+                    <motion.button
+                        aria-label='Notifications'
+                        className="cursor-pointer"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowNotifications(!showNotifications)}
@@ -52,19 +54,17 @@ const Navbar = () => {
                         {unreadNotifications && (
                             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         )}
-                    </motion.div>
-
+                    </motion.button>
                     {/* Notifications Panel */}
                     <NotificationDialog
                         isOpen={showNotifications}
                         onClose={() => setShowNotifications(false)}
                         setUnreadNotifications={setUnreadNotifications}
                     />
-
-                </button>
-            </motion.div>
+                </motion.div>
+            </div>
         </motion.div>
-    )
-}
+    );
+};
 
 export default Navbar
