@@ -19,7 +19,7 @@ const StreakMap = ({ stats }) => {
             animate="animate"
             className="p-6 border mb-4 shadow-sm rounded-xl border-border-primary dark:border-border-primary-dark"
         >
-            <div className="mb-4">
+            <div className="mb-4 text-black dark:text-white">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Streak Map</h2>
                 <span className="text-sm text-gray-500 dark:text-gray-400">Feb 7, 2025 → {toLabel}</span>
                 <div className='flex space-x-4'>
