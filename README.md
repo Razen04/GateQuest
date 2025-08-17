@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="public/logo.svg" alt="GATEQuest Logo" width="100" />
+  <img src="public/logo.png" alt="GATEQuest Logo" width="100" />
   <h1>GATEQuest</h1>
   <p>Modern, open-source GATE exam practice and preparation app</p>
 </div>
@@ -34,7 +34,6 @@
 GateQuest/
 ├── public/                # Static assets (logo, sounds, favicons)
 ├── src/
-│   ├── assets/            # SVG icons and other assets
 │   ├── components/        # Reusable React components (Dashboard, Practice, etc.)
 │   ├── context/           # React Context providers for state management
 │   ├── data/              # Static data (FAQs, subjects)

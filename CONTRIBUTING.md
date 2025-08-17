@@ -1,6 +1,6 @@
-# Contributing to GateQuest
+# Contributing to GATEQuest
 
-First off, thank you for considering contributing to GateQuest! It's people like you that make GateQuest such a great tool.
+First off, thank you for considering contributing to GATEQuest! It's people like you that make GATEQuest such a great tool.
 
 ## Where do I go from here?
 

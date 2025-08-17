@@ -45,7 +45,7 @@ const AuthProvider = ({ children }) => {
                     settings: {
                         sound: true,
                         autoTimer: true,
-                        // Will add theme here itself in the future and remove the ThemeContext entirely, let's see.
+                        darkMode: true
                     }
                 }).select(); // .select() returns the created/updated profile data.
 
@@ -57,8 +57,14 @@ const AuthProvider = ({ children }) => {
                         college: data[0].college || "",
                         targetYear: data[0].targetYear || 2026,
                         settings: {
-                            ...data[0].settings,
-                            darkMode: false
+                            ...{
+                                sound: true,
+                                autoTimer: true,
+                                darkMode: false,
+                                shareProgress: false,
+                                dataCollection: false
+                            },
+                            ...data[0].settings
                         }
                     };
                     // Store the user profile in localStorage for quick access elsewhere in the app.
@@ -79,7 +85,7 @@ const AuthProvider = ({ children }) => {
         // This function attempts to get the initial session, retrying a few times.
         // This can help with race conditions where the app initializes before the Supabase client.
         const initSession = async () => {
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
                     await handleSession(session);
@@ -102,6 +108,7 @@ const AuthProvider = ({ children }) => {
 
         // Cleanup the listener when the component unmounts to prevent memory leaks.
         return () => listener?.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // The empty dependency array ensures this effect runs only once on mount.
 
     // Initiates the Google OAuth login flow provided by Supabase.

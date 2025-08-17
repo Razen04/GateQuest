@@ -48,7 +48,7 @@ const AppProvider = ({ children }) => {
             syncUserToSupabase(isLogin)
         }
 
-    }, [settings]) // The dependency array ensures this runs only when settings change.
+    }, [isLogin, settings]) // The dependency array ensures this runs only when settings change.
 
     // This allows Tailwind CSS's dark mode variants to work globally.
     useEffect(() => {
