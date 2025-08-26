@@ -13,6 +13,16 @@ const QuestionContent = ({
     userAnswerIndex,
     onOptionSelect,
 }) => {
+    // Helper function to detect if options contain images
+    const hasImageOptions = () => {
+        return currentQuestion.options && currentQuestion.options.some(option => 
+            option && typeof option === 'string' && option.includes('![')
+        );
+    };
+
+    // Determine if we should use grid layout (for image options on large screens)
+    const shouldUseGridLayout = hasImageOptions();
+
     return (
         <div>
             <div className="mb-4 sm:mb-6 overflow-x-scroll">
@@ -26,7 +36,11 @@ const QuestionContent = ({
             </div>
 
             {hasOptions && (
-                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                <div className={`mb-4 sm:mb-6 ${
+                    shouldUseGridLayout 
+                        ? 'grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4' 
+                        : 'space-y-2 sm:space-y-3'
+                }`}>
                     {currentQuestion.options.map((option, index) => {
                         // For MSQ: selectedOptionIndices, for MCQ: userAnswerIndex
                         let isSelected;

@@ -35,7 +35,10 @@ const parseContent = (text) => {
 
         if (nextInlineMath !== -1 && (tokenPos === -1 || nextInlineMath < tokenPos)) {
             // Make sure it's not part of a $$ expression
-            if ((nextInlineMath === remainingText.length - 1 || remainingText[nextInlineMath + 1] !== '$') &&
+            // Also check if it's an escaped dollar sign \$
+            const isEscaped = nextInlineMath > 0 && remainingText[nextInlineMath - 1] === '\\';
+            if (!isEscaped && 
+                (nextInlineMath === remainingText.length - 1 || remainingText[nextInlineMath + 1] !== '$') &&
                 (nextInlineMath === 0 || remainingText[nextInlineMath - 1] !== '$')) {
                 tokenPos = nextInlineMath;
                 tokenType = 'math';

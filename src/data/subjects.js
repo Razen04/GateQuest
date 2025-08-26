@@ -1,4 +1,4 @@
-import { LinuxLogo, Brain, Database, Globe, Cpu, Graph, Terminal } from 'phosphor-react';
+import { LinuxLogo, Brain, Database, Globe, Cpu, Graph, Terminal, Gear } from 'phosphor-react';
 
 // Subjects Data
 const subjects = [
@@ -141,6 +141,26 @@ const subjects = [
         icon: Database,
         questions: 172,
         difficulty: "Medium",
+        category: "bookmarked",
+        color: "orange"
+    },
+    {
+        id: 8,
+        name: "Compiler Design",
+        apiName: "Compiler Design",
+        icon: Gear,
+        questions: 162,
+        difficulty: "Hard",
+        category: "core",
+        color: "orange"
+    },
+    {
+        id: 108,
+        name: "Compiler Design",
+        apiName: "Compiler Design",
+        icon: Gear,
+        questions: 162,
+        difficulty: "Hard",
         category: "bookmarked",
         color: "orange"
     }

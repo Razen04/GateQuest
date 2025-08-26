@@ -27,6 +27,7 @@ const MathRenderer = ({ text }) => {
             .replace(/&gt;/g, '>')
             .replace(/&amp;/g, '&')
             .replace(/&nbsp;/g, ' ')
+            .replace(/&dollar;/g, '$')  // Handle encoded dollar signs
     }
 
     // Clean LaTeX content: decode entities and replace non-breaking spaces with regular spaces
@@ -41,10 +42,11 @@ const MathRenderer = ({ text }) => {
     const splitTextAndTables = (fullText) => {
         const ranges = []
 
-        // 1) Detect LaTeX tabular blocks
-        const latexRe = /\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g
+        // 1) Detect only LaTeX tabular blocks (not array - those should be handled as math)
+        const latexTabularRe = /\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g
+        
         let m
-        while ((m = latexRe.exec(fullText)) !== null) {
+        while ((m = latexTabularRe.exec(fullText)) !== null) {
             ranges.push({ start: m.index, end: m.index + m[0].length, kind: 'latex' })
         }
 
@@ -106,19 +108,45 @@ const MathRenderer = ({ text }) => {
         return segs
     }
 
-    // If the entire string is a code block
-    if (text.startsWith('```') && text.endsWith('```')) {
-        return <CodeBlockRenderer code={text} />
+    // If the entire string is an inline LaTeX expression
+    if (
+        text.startsWith('$') &&
+        text.endsWith('$') &&
+        text.indexOf('$', 1) === text.length - 1
+    ) {
+        let inner = text.slice(1, -1).trim();
+
+        // Normalize: decode entities and unescape \$ → $
+        inner = decodeEntities(inner).replace(/\\\$/g, '$');
+
+        // If it's literally just a "$", don't render as math
+        if (inner === '$') {
+            return <span>$</span>;
+        }
+
+        return <InlineMath math={cleanLatexContent(inner)} />;
     }
 
-    // If the entire string is a LaTeX expression
-    if (text.startsWith('$') && text.endsWith('$') && text.indexOf('$', 1) === text.length - 1) {
-        return <InlineMath math={cleanLatexContent(text.slice(1, -1))} />
-    }
 
     // If the entire string is a block LaTeX expression
-    if (text.startsWith('$$') && text.endsWith('$$') && text.indexOf('$$', 2) === text.length - 2) {
-        return <BlockMath math={cleanLatexContent(text.slice(2, -2))} />
+    if (
+        text.startsWith('$$') &&
+        text.endsWith('$$') &&
+        text.indexOf('$$', 2) === text.length - 2
+    ) {
+        const content = text.slice(2, -2).trim();
+
+        // Check if it contains table-like array structures that should be rendered as tables
+        if (content.includes('\\begin{array}') && (content.includes('\\hline') || content.includes('|'))) {
+            return <TableRenderer tableText={text} />
+        }
+
+        // Same safety: ignore escaped dollar block (rare but possible)
+        if (content === '\\$') {
+            return <span>$</span>;
+        }
+
+        return <BlockMath math={cleanLatexContent(content)} />;
     }
 
     // Split text into [text|table] segments first so tables don't swallow the rest of the question
@@ -136,6 +164,10 @@ const MathRenderer = ({ text }) => {
                     parseContent(outer.content).map((segment, index) => {
                         switch (segment.type) {
                             case 'math':
+                                // Handle escaped dollar signs - if the math content contains only \$, render as $
+                                if (segment.content.trim() === '\\$') {
+                                    return <span key={`${segIdx}-${index}`}>$</span>;
+                                }
                                 return (
                                     <div
                                         key={`${segIdx}-${index}`}
@@ -191,20 +223,32 @@ const MathRenderer = ({ text }) => {
                                     </div>
                                 );
                             default:
-                                // Process any remaining <br> tags in regular text content
-                                if (segment.content.includes('<br>') || segment.content.includes('<br/>') || segment.content.includes('<br />')) {
+                                // Process any remaining <br> tags and escaped LaTeX symbols in regular text content
+                                if (segment.content.includes('<br>') || segment.content.includes('<br/>') || segment.content.includes('<br />') || segment.content.includes('\\$') || segment.content.includes('\\mid') || segment.content.includes('`$`')) {
+                                    let processedContent = segment.content;
+                                    
+                                    // Handle escaped LaTeX symbols first
+                                    processedContent = processedContent.replace(/\\\$/g, '$'); // \$ -> $
+                                    processedContent = processedContent.replace(/\\mid\b/g, '|'); // \mid -> |
+                                    // Handle backtick-dollar-backtick pattern
+                                    processedContent = processedContent.replace(/`\$`/g, '$'); // `$` -> $
+                                    
                                     // Split by different br tag formats and render with React fragments
-                                    const parts = segment.content.split(/<br\s*\/?>/i);
-                                    return (
-                                        <React.Fragment key={`${segIdx}-${index}`}>
-                                            {parts.map((part, i) => (
-                                                <React.Fragment key={`${segIdx}-${index}-${i}`}>
-                                                    {decodeEntities(part)}
-                                                    {i < parts.length - 1 && <br />}
-                                                </React.Fragment>
-                                            ))}
-                                        </React.Fragment>
-                                    );
+                                    if (processedContent.includes('<br>') || processedContent.includes('<br/>') || processedContent.includes('<br />')) {
+                                        const parts = processedContent.split(/<br\s*\/?>/i);
+                                        return (
+                                            <React.Fragment key={`${segIdx}-${index}`}>
+                                                {parts.map((part, i) => (
+                                                    <React.Fragment key={`${segIdx}-${index}-${i}`}>
+                                                        {decodeEntities(part)}
+                                                        {i < parts.length - 1 && <br />}
+                                                    </React.Fragment>
+                                                ))}
+                                            </React.Fragment>
+                                        );
+                                    } else {
+                                        return <span key={`${segIdx}-${index}`}>{decodeEntities(processedContent)}</span>;
+                                    }
                                 }
                                 return <span key={`${segIdx}-${index}`}>{decodeEntities(segment.content)}</span>;
                         }
