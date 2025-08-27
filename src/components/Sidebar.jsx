@@ -198,7 +198,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                                 className='p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
                                 aria-label="Join our Discord"
                             >
-                                <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
+                                <a href="https://discord.gg/dFmg3g52c5" target="_blank" rel="noopener noreferrer">
                                     <DiscordLogo size={20} />
                                 </a>
                             </button>
@@ -206,7 +206,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }) => {
                                 className='p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white'
                                 aria-label="Join our Discord"
                             >
-                                <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
+                                <a href="https://github.com/Razen04/GATEQuest" target="_blank" rel="noopener noreferrer">
                                     <GithubLogo size={20} />
                                 </a>
                             </button>
