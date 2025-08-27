@@ -1,0 +1,77 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Notification } from 'phosphor-react';
+import NotificationDialog from './NotificationDialog.js';
+
+const Navbar = () => {
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadNotifications, setUnreadNotifications] = useState(false);
+    const notificationRef = useRef<HTMLDivElement | null>(null);
+
+    // Handle click outside notification panel to close it
+    const handleClickOutside = useCallback((event: MouseEvent) => {
+        if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+            setShowNotifications(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [handleClickOutside]);
+
+    return (
+        <motion.div
+            className="py-4 px-6 flex justify-between items-center border-b bg-primary dark:bg-primary-dark border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
+            <div className="flex lg:block w-full">
+                <h1 className="text-center text-2xl font-bold">
+                    <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
+                        GATE
+                    </span>
+                    Quest
+                </h1>
+            </div>
+
+            {/* Right section (Notification) */}
+            <div className="flex-1 flex justify-end">
+                <motion.div
+                    className="relative flex items-end"
+                    initial={{ x: 20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                    ref={notificationRef}
+                >
+                    <motion.button
+                        aria-label="Notifications"
+                        className="cursor-pointer"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowNotifications(!showNotifications)}
+                    >
+                        {showNotifications ? (
+                            <Notification size={20} weight="fill" />
+                        ) : (
+                            <Notification size={20} weight="duotone" />
+                        )}
+                        {unreadNotifications && (
+                            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        )}
+                    </motion.button>
+                    {/* Notifications Panel */}
+                    <NotificationDialog
+                        isOpen={showNotifications}
+                        setUnreadNotifications={setUnreadNotifications}
+                    />
+                </motion.div>
+            </div>
+        </motion.div>
+    );
+};
+
+export default Navbar;

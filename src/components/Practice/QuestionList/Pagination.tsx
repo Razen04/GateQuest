@@ -1,0 +1,34 @@
+import React from 'react';
+import { ArrowLeft, ArrowRight } from 'phosphor-react';
+
+type PaginationProps = {
+    currentPage: number;
+    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    totalPages: number;
+};
+
+const Pagination = ({ currentPage, setCurrentPage, totalPages }: PaginationProps) => {
+    return (
+        <div className="flex justify-between items-center w-full py-2 mt-2">
+            <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-8 py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50 cursor-pointer"
+            >
+                <ArrowLeft />
+            </button>
+            <span className="text-sm">
+                Page {currentPage} of {totalPages}
+            </span>
+            <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-8 cursor-pointer py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50"
+            >
+                <ArrowRight />
+            </button>
+        </div>
+    );
+};
+
+export default Pagination;

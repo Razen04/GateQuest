@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
-@import "tailwindcss";
+@import 'tailwindcss';
 
 body {
     overflow: hidden;
@@ -31,5 +31,5 @@ body {
     --gradient-to: #9333ea;
     /* purple-600 */
 
-    --font-manrope: Manrope, "sans-serif";
+    --font-manrope: Manrope, 'sans-serif';
 }
