@@ -1,20 +1,20 @@
 export type NumericalQuestion = {
     id: string;
     year: number;
-    questionNumber: number;
+    question_number: number;
     subject: string;
     topic?: string;
-    questionType: 'Numerical Answer';
+    question_type: 'Numerical Answer';
     question: string;
     options?: never;
-    correctAnswer: number;
-    answerText?: string;
+    correct_answer: number;
+    answer_text?: string;
     difficulty: string;
     marks: number;
     tags?: string[];
     source?: string;
-    sourceURL: string;
-    addedBy?: string;
+    source_url: string;
+    added_by?: string;
     verified: boolean;
     explanation: string;
     metadata: {
@@ -22,25 +22,26 @@ export type NumericalQuestion = {
         paperType: string;
         language: string;
     };
+    created_at: string;
 };
 
 export type MCQQuestion = {
     id: string;
     year: number;
-    questionNumber: number;
+    question_number: number;
     subject: string;
     topic?: string;
-    questionType: 'Multiple Choice Question';
+    question_type: 'Multiple Choice Question';
     question: string;
-    options: string[];
-    correctAnswer: number[]; // single index
-    answerText?: string;
+    options?: string[];
+    correct_answer: number[];
+    answer_text?: string;
     difficulty: string;
     marks: number;
     tags?: string[];
     source?: string;
-    sourceURL: string;
-    addedBy?: string;
+    source_url: string;
+    added_by?: string;
     verified: boolean;
     explanation: string;
     metadata: {
@@ -48,25 +49,26 @@ export type MCQQuestion = {
         paperType: string;
         language: string;
     };
+    created_at: string;
 };
 
 export type MSQQuestion = {
     id: string;
     year: number;
-    questionNumber: number;
+    question_number: number;
     subject: string;
     topic?: string;
-    questionType: 'Multiple Select Question';
+    question_type: 'Multiple Select Question';
     question: string;
-    options: string[];
-    correctAnswer: number[]; // multiple indices
-    answerText?: string;
+    options?: string[];
+    correct_answer: number[];
+    answer_text?: string;
     difficulty: string;
     marks: number;
     tags?: string[];
     source?: string;
-    sourceURL: string;
-    addedBy?: string;
+    source_url: string;
+    added_by?: string;
     verified: boolean;
     explanation: string;
     metadata: {
@@ -74,6 +76,7 @@ export type MSQQuestion = {
         paperType: string;
         language: string;
     };
+    created_at: string;
 };
 
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;

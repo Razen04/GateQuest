@@ -111,28 +111,22 @@ export const recordAttemptLocally = async ({
 
     const buffer = storedBuffer ? (JSON.parse(storedBuffer) as AttemptBufferItem[]) : [];
 
-    // If the same question is attempted again while still in the buffer,
-    // we update the existing entry instead of creating a new one.
-    const existingIndex = buffer.findIndex((item) => item.question_id === params.question_id);
-
-    if (existingIndex !== -1) {
-        // Increment the attempt number for the existing entry.
-        buffer[existingIndex]!.attempt_number = (buffer[existingIndex]!.attempt_number || 1) + 1;
-        buffer[existingIndex]!.attempted_at = new Date().toISOString();
-    } else {
-        // Add the new attempt to the buffer.
-        buffer.push({
-            ...params,
-            attempted_at: new Date().toISOString(),
-        });
-    }
+    // Add the new attempt to the buffer.
+    buffer.push({
+        ...params,
+        attempted_at: new Date().toISOString(),
+    });
 
     localStorage.setItem(LOCAL_KEY, JSON.stringify(buffer));
     toast.success('Attempt recorded successfully.');
 
     // When the buffer reaches a size of 5, sync it to the database.
     if (buffer.length >= 5) {
-        await recordAttempt({ buffer, user, updateStats });
+        const error = await recordAttempt({ buffer, user, updateStats });
+        if (error) {
+            toast.error('Failed to record attempt: ' + error.message);
+            return;
+        }
         localStorage.removeItem(LOCAL_KEY); // Clear the buffer after a successful sync.
     }
 };
@@ -157,16 +151,18 @@ export const recordAttempt = async ({ buffer, user, updateStats }: recordAttempt
     }
 
     // Insert the entire buffer as new rows in the activity table.
-    const { error } = await supabase
-        .from('user_question_activity')
-        .upsert(buffer, { onConflict: 'user_id,question_id' });
+    if (buffer.length !== 0) {
+        const { error } = await supabase.rpc('insert_user_question_activity_batch', {
+            batch: buffer,
+        });
+
+        if (error) {
+            console.error('Batch insert error:', error);
+            return error;
+        }
+    }
     // After syncing, immediately update the user's stats to reflect the new data.
     await updateStats(user);
 
-    if (error) {
-        toast.error('Failed to record attempt: ' + error.message);
-        console.error('Failed to record attempt: ', error);
-    } else {
-        toast.success('Attempt synced successfully!');
-    }
+    toast.success('Attempt synced successfully!');
 };

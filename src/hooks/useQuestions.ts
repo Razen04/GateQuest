@@ -3,14 +3,27 @@
 // It also compresses data to save space in localStorage and handles migration for existing uncompressed data.
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { toast } from 'sonner';
 import LZString from 'lz-string';
 import { getUserProfile, sortQuestionsByYear } from '../helper.ts';
 import type { Question } from '../types/question.ts';
+import { supabase } from '../utils/supabaseClient.ts';
 
-// The base URL for the questions API is retrieved from environment variables.
-const API_BASE = import.meta.env.VITE_API_BASE;
+// Questions fetch using supabase
+const getQuestionsBySubject = async (subject: string | undefined) => {
+    if (subject) {
+        const { data, error } = await supabase.from('questions').select('*').eq('subject', subject);
+
+        if (error) {
+            console.error('Error fetching questions: ', error.message);
+            return [];
+        }
+
+        return data;
+    }
+
+    return [];
+};
 
 // Fetches questions for a specific subject, handling both regular and bookmarked questions.
 const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
@@ -89,16 +102,14 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                         }
                         setQuestions(localQuestions);
                     } else {
-                        // If not cached, we fetch the questions from the API.
-                        const encodedSubject = encodeURIComponent(subject);
-                        const res = await axios.get(
-                            `${API_BASE}/api/questions?subject=${encodedSubject}`,
-                        );
-                        const loadedQuestions = sortQuestionsByYear(res.data);
+                        const loadedQuestions = await getQuestionsBySubject(subject);
+                        console.log('Loaded Questions: ', loadedQuestions);
                         // After fetching, we compress and cache the questions in localStorage for future use.
-                        const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
-                        localStorage.setItem(subject, dataToCache);
-                        setQuestions(loadedQuestions);
+                        if (loadedQuestions) {
+                            const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
+                            localStorage.setItem(subject, dataToCache);
+                            setQuestions(loadedQuestions);
+                        }
                     }
                 }
             } catch (err) {

@@ -33,7 +33,7 @@ export const submitAndRecordAnswer = async ({
 
     if (wasAttempted) {
         if (isNumericalQuestion(currentQuestion)) {
-            const correctAnswer = currentQuestion.correctAnswer;
+            const correctAnswer = currentQuestion.correct_answer;
             const answerToCheck = numericalAnswer;
             isCorrect = typeof answerToCheck === 'number' && answerToCheck === correctAnswer;
         } else {
@@ -47,7 +47,7 @@ export const submitAndRecordAnswer = async ({
                 return sortedA.every((val, index) => val === sortedB[index]);
             }
 
-            isCorrect = arraysMatch(selectedOptionIndices!, currentQuestion.correctAnswer);
+            isCorrect = arraysMatch(selectedOptionIndices!, currentQuestion.correct_answer);
         }
     }
     // If not attempted, `isCorrect` remains null.

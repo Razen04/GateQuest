@@ -54,15 +54,15 @@ export const isMultipleSelection = (currentQuestion: Question) => {
                 tag.toLowerCase().includes('multiple select'),
         );
     }
-    return currentQuestion.questionType === 'Multiple Select Question';
+    return currentQuestion.question_type === 'Multiple Select Question';
 };
 
 export function isNumericalQuestion(q: Question): q is NumericalQuestion {
-    return q.questionType.toLowerCase().includes('numerical');
+    return q.question_type.toLowerCase().includes('numerical');
 }
 
 export const getQuestionTypeText = (q: Question) => {
-    const type = q.questionType?.toLowerCase().trim();
+    const type = q.question_type?.toLowerCase().trim();
     if (!type) return 'Question';
 
     if (type.includes('numerical')) return 'Numerical Answer';
@@ -71,7 +71,7 @@ export const getQuestionTypeText = (q: Question) => {
     if (type.includes('multiple-choice')) return 'Multiple Choice Question';
 
     // Fallback: preserve original text as-is
-    return q.questionType!;
+    return q.question_type!;
 };
 
 // Get correct answer text
@@ -80,12 +80,12 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
 
     try {
         if (isNumericalQuestion(currentQuestion)) {
-            return currentQuestion.correctAnswer?.toString();
+            return currentQuestion.correct_answer?.toString();
         }
 
-        if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correctAnswer)) {
+        if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correct_answer)) {
             // For multiple selection, show all correct options
-            const correctIndices = currentQuestion.correctAnswer;
+            const correctIndices = currentQuestion.correct_answer;
             if (Array.isArray(currentQuestion.options)) {
                 const correctOptions = correctIndices
                     .map((index) => currentQuestion.options![index])
@@ -95,22 +95,17 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
         }
 
         if (
-            Array.isArray(currentQuestion.correctAnswer) &&
+            Array.isArray(currentQuestion.correct_answer) &&
             currentQuestion.options &&
             Array.isArray(currentQuestion.options)
         ) {
-            const index = currentQuestion.correctAnswer[0];
+            const index = currentQuestion.correct_answer[0];
             if (index !== undefined && currentQuestion.options[index] !== undefined) {
                 return currentQuestion.options[index];
             }
         }
 
-        // For questions that might have answerText
-        if (currentQuestion.answerText) {
-            return currentQuestion.answerText;
-        }
-
-        return currentQuestion.correctAnswer || 'Answer not available';
+        return currentQuestion.correct_answer || 'Answer not available';
     } catch (error) {
         console.error('Error getting correct answer text:', error);
         return 'Answer not available';

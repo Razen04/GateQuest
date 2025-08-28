@@ -72,6 +72,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             .from('user_question_activity')
             .select('*')
             .eq('user_id', user.id)
+            .eq('attempt_number', 1)
             .order('attempted_at', { ascending: true })
             .overrideTypes<UserQuestionActivity[]>();
 

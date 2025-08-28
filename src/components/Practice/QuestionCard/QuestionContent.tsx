@@ -48,7 +48,7 @@ const QuestionContent = ({
                             }
 
                             let isCorrect;
-                            let correctAnswer = currentQuestion.correctAnswer;
+                            let correctAnswer = currentQuestion.correct_answer;
                             if (isMultipleSelection(currentQuestion)) {
                                 // MSQ
                                 isCorrect = correctAnswer.includes(index);
