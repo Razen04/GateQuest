@@ -56,7 +56,7 @@ export default function AppRoutes() {
                         {/* Settings routes are modularized into their own component for clarity. */}
                         <Route path="settings/*" element={<SettingsRoutes />} />
                         {/* A static 'About' page. */}
-                        <Route path="about" element={<About />} />
+                        <Route path="about" element={<About landing={false} />} />
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />

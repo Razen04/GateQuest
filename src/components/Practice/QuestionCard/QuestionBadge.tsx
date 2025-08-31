@@ -3,10 +3,9 @@ import type { Question } from '../../../types/question.ts';
 
 type QuestionBadgeProps = {
     currentQuestion: Question;
-    subject: string | undefined;
 };
 
-const QuestionBadge = ({ currentQuestion, subject }: QuestionBadgeProps) => {
+const QuestionBadge = ({ currentQuestion }: QuestionBadgeProps) => {
     return (
         <div>
             {/* Question ID Badge and Tags */}
@@ -14,7 +13,8 @@ const QuestionBadge = ({ currentQuestion, subject }: QuestionBadgeProps) => {
                 <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-2">
                     <div className="flex items-center text-xs mb-2 sm:mb-0 gap-4">
                         <span>ID: {currentQuestion.id || 'Unknown'}</span>
-                        <span>Subject: {subject ? subject.toUpperCase() : ''}</span>
+                        <span>Subject: {currentQuestion.subject}</span>
+                        <span>Topic: {currentQuestion.topic}</span>
                     </div>
                 </div>
             </div>

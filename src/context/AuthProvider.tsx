@@ -1,13 +1,13 @@
 // This file provides authentication context for the application.
 // It manages user state, handles login/logout with Supabase, and synchronizes the user's profile with the database upon authentication.
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
-import StatsContext from './StatsContext.js';
 import { toast } from 'sonner';
 import type { AppUser } from '../types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
+import useStats from '../hooks/useStats.ts';
 
 // The AuthProvider component handles all authentication logic.
 // It exposes the user object, login/logout functions, and loading state to its children.
@@ -17,7 +17,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     // This state controls the visibility of a login modal/dialog.
     const [showLogin, setShowLogin] = useState(false);
     // We need the updateStats function from StatsContext to refresh stats after login.
-    const { updateStats } = useContext(StatsContext);
+    const { updateStats } = useStats();
 
     // True if a user object exists (includes guests, not just logged-in users).
     const isLogin = !!user && user.id !== '1';

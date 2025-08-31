@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     getDifficultyClassNames,
     getQuestionTypeText,
@@ -7,6 +7,11 @@ import {
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
 import type { Question } from '../../../types/question.ts';
+import { Warning } from 'phosphor-react';
+import ReportModal from '../../ReportModal.tsx';
+import { supabase } from '../../../utils/supabaseClient.ts';
+import useAuth from '../../../hooks/useAuth.ts';
+import { toast } from 'sonner';
 
 type QuestionHeaderProps = {
     subject: string | undefined;
@@ -25,6 +30,8 @@ const QuestionHeader = ({
     questionId,
     isTimerActive,
 }: QuestionHeaderProps) => {
+    const { user } = useAuth();
+    const [showReportModal, setShowReportModal] = useState(false);
     // Get difficulty display text
     const getDifficultyDisplayText = () => {
         if (!currentQuestion.difficulty) return 'Unknown';
@@ -40,9 +47,40 @@ const QuestionHeader = ({
                 : currentQuestion.difficulty.toLowerCase();
     }
 
+    const handleReportButton = async (reportType: string, reportText: string) => {
+        const report = {
+            user_id: user?.id,
+            question_id: currentQuestion.id,
+            report_type: reportType,
+            report_text: reportText,
+        };
+
+        const { data, error } = await supabase.from('question_reports').insert([report]);
+
+        if (error) {
+            if (error.code === '23505') {
+                toast.error("Already reported by you, don't spam please");
+            } else {
+                toast.error('There was an error in submitting the report.');
+            }
+            console.error('Error reporting question:', error);
+        } else {
+            toast.success('Thank you for making the platform great. ❤️');
+            console.log('Report submitted:', data);
+        }
+
+        setShowReportModal(false);
+    };
+
     return (
         <div>
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
+                {showReportModal && (
+                    <ReportModal
+                        onClose={() => setShowReportModal(false)}
+                        onSubmit={handleReportButton}
+                    />
+                )}
                 {/* Top Row: Title + Right Info */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
                     <h3 className="font-bold text-base sm:text-lg">
@@ -66,12 +104,18 @@ const QuestionHeader = ({
                                 GATE {currentQuestion.year}
                             </span>
                         )}
+                        <button
+                            onClick={() => setShowReportModal((prev) => !prev)}
+                            className="p-1 bg-red-200 text-red-600 rounded-full hover:bg-red-300 transition-all cursor-pointer"
+                        >
+                            <Warning />
+                        </button>
                     </div>
                 </div>
 
                 {/* Bottom Row: Type, Marks, Special Flags */}
                 <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs">
-                    {currentQuestion.questionType && (
+                    {currentQuestion.question_type && (
                         <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-full">
                             {getQuestionTypeText(currentQuestion)}
                         </span>

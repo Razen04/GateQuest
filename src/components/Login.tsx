@@ -1,7 +1,6 @@
-import React, { useContext } from 'react';
-import AuthContext from '../context/AuthContext.js';
 import { GoogleLogo, X } from 'phosphor-react';
 import Buttons from './Buttons.js';
+import useAuth from '../hooks/useAuth.ts';
 
 type LoginProp = {
     canClose?: boolean;
@@ -9,7 +8,7 @@ type LoginProp = {
 };
 
 const Login = ({ canClose = true, onClose }: LoginProp) => {
-    const { handleLogin } = useContext(AuthContext);
+    const { handleLogin } = useAuth();
     return (
         <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-2xl">
             <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-border-primary dark:border-border-primary-dark p-8 flex flex-col items-center animate-fade-in">

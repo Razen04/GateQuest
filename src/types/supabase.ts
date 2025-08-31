@@ -35,6 +35,155 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            question_peer_stats: {
+                Row: {
+                    avg_time_seconds: number | null;
+                    correct_attempts: number | null;
+                    question_id: string;
+                    total_attempts: number | null;
+                    updated_at: string | null;
+                    wrong_attempts: number | null;
+                };
+                Insert: {
+                    avg_time_seconds?: number | null;
+                    correct_attempts?: number | null;
+                    question_id: string;
+                    total_attempts?: number | null;
+                    updated_at?: string | null;
+                    wrong_attempts?: number | null;
+                };
+                Update: {
+                    avg_time_seconds?: number | null;
+                    correct_attempts?: number | null;
+                    question_id?: string;
+                    total_attempts?: number | null;
+                    updated_at?: string | null;
+                    wrong_attempts?: number | null;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'question_peer_stats_question_id_fkey';
+                        columns: ['question_id'];
+                        isOneToOne: true;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            question_reports: {
+                Row: {
+                    created_at: string | null;
+                    id: string;
+                    question_id: string | null;
+                    report_text: string;
+                    report_type: string | null;
+                    status: string | null;
+                    user_id: string;
+                };
+                Insert: {
+                    created_at?: string | null;
+                    id?: string;
+                    question_id?: string | null;
+                    report_text: string;
+                    report_type?: string | null;
+                    status?: string | null;
+                    user_id: string;
+                };
+                Update: {
+                    created_at?: string | null;
+                    id?: string;
+                    question_id?: string | null;
+                    report_text?: string;
+                    report_type?: string | null;
+                    status?: string | null;
+                    user_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'question_reports_question_id_fkey';
+                        columns: ['question_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'question_reports_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            questions: {
+                Row: {
+                    added_by: string | null;
+                    answer_text: string | null;
+                    correct_answer: Json;
+                    created_at: string | null;
+                    difficulty: string | null;
+                    explanation: string | null;
+                    id: string;
+                    marks: number | null;
+                    metadata: Json | null;
+                    options: string[] | null;
+                    question: string;
+                    question_number: number | null;
+                    question_type: string;
+                    source: string | null;
+                    source_url: string | null;
+                    subject: string;
+                    tags: string[] | null;
+                    topic: string | null;
+                    verified: boolean | null;
+                    year: number;
+                };
+                Insert: {
+                    added_by?: string | null;
+                    answer_text?: string | null;
+                    correct_answer: Json;
+                    created_at?: string | null;
+                    difficulty?: string | null;
+                    explanation?: string | null;
+                    id: string;
+                    marks?: number | null;
+                    metadata?: Json | null;
+                    options?: string[] | null;
+                    question: string;
+                    question_number?: number | null;
+                    question_type: string;
+                    source?: string | null;
+                    source_url?: string | null;
+                    subject: string;
+                    tags?: string[] | null;
+                    topic?: string | null;
+                    verified?: boolean | null;
+                    year: number;
+                };
+                Update: {
+                    added_by?: string | null;
+                    answer_text?: string | null;
+                    correct_answer?: Json;
+                    created_at?: string | null;
+                    difficulty?: string | null;
+                    explanation?: string | null;
+                    id?: string;
+                    marks?: number | null;
+                    metadata?: Json | null;
+                    options?: string[] | null;
+                    question?: string;
+                    question_number?: number | null;
+                    question_type?: string;
+                    source?: string | null;
+                    source_url?: string | null;
+                    subject?: string;
+                    tags?: string[] | null;
+                    topic?: string | null;
+                    verified?: boolean | null;
+                    year?: number;
+                };
+                Relationships: [];
+            };
             user_question_activity: {
                 Row: {
                     attempt_number: number | null;
@@ -115,7 +264,14 @@ export type Database = {
             [_ in never]: never;
         };
         Functions: {
-            [_ in never]: never;
+            insert_user_question_activity_batch: {
+                Args: { batch: Json };
+                Returns: undefined;
+            };
+            refresh_question_peer_stats: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
         };
         Enums: {
             [_ in never]: never;

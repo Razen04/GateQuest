@@ -29,6 +29,7 @@ import { ArrowLeft } from 'phosphor-react';
 import useStats from '../../hooks/useStats.js';
 import useAuth from '../../hooks/useAuth.js';
 import useSettings from '../../hooks/useSettings.js';
+import QuestionPeerStats from '../../components/Practice/QuestionCard/QuestionPeerStats.tsx';
 
 // This component is the main event for the practice session. It's a "controller" component
 // that pulls together a bunch of hooks and smaller UI components to create the full question view.
@@ -291,6 +292,8 @@ const QuestionCard = () => {
                         />
                     )}
 
+                    {showAnswer && <QuestionPeerStats questionId={questionId} />}
+
                     {/* The main action buttons (prev, next, submit). Pass down all the handlers. */}
                     <ActionButtons
                         isFirstQuestion={isFirstQuestion}
@@ -306,7 +309,7 @@ const QuestionCard = () => {
                 </div>
 
                 {/* The little badge at the bottom showing subject and current question ID. */}
-                <QuestionBadge currentQuestion={currentQuestion} subject={subject} />
+                <QuestionBadge currentQuestion={currentQuestion} />
             </div>
         </div>
     );

@@ -66,7 +66,7 @@ const QuestionContent = ({
                                 else if (isSelected)
                                     optionStyle = 'border-red-500 bg-red-50 dark:bg-red-600';
                             } else if (isSelected) {
-                                optionStyle = 'border-blue-500 bg-blue-50 dark:bg-blue-600';
+                                optionStyle = 'border-blue-500 ring ring-blue-500 ring-offset-0';
                             }
 
                             return (
