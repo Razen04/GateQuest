@@ -12,6 +12,7 @@ import AppProvider from './context/AppProvider.tsx';
 import AuthProvider from './context/AuthProvider.tsx';
 import StatsProvider from './context/StatsProvider.tsx';
 import AppRoutes from './routes/AppRoutes.tsx';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 /**
  * @function App
@@ -31,6 +32,9 @@ function App() {
                     <Router>
                         {/* AppRoutes contains all the defined application routes. */}
                         <AppRoutes />
+
+                        {/* Vercel Speed Insights */}
+                        <SpeedInsights />
                     </Router>
                 </AppProvider>
             </AuthProvider>
