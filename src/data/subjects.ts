@@ -1,4 +1,14 @@
-import { LinuxLogo, Brain, Database, Globe, Cpu, Graph, Terminal, Gear } from 'phosphor-react';
+import {
+    LinuxLogo,
+    Brain,
+    Database,
+    Globe,
+    Cpu,
+    Graph,
+    Terminal,
+    Gear,
+    GitBranch,
+} from 'phosphor-react';
 import type { Subject } from '../types/Subject.ts';
 
 // Subjects Data
@@ -164,6 +174,26 @@ const subjects: Subject[] = [
         difficulty: 'Hard',
         category: 'bookmarked',
         color: 'yellow',
+    },
+    {
+        id: 9,
+        name: 'Algorithms',
+        apiName: 'Algorithms',
+        icon: GitBranch,
+        questions: 229,
+        difficulty: 'Hard',
+        category: 'core',
+        color: 'green',
+    },
+    {
+        id: 109,
+        name: 'Algorithms',
+        apiName: 'Algorithms',
+        icon: GitBranch,
+        questions: 229,
+        difficulty: 'Hard',
+        category: 'bookmarked',
+        color: 'green',
     },
 ];
 

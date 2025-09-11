@@ -9,7 +9,10 @@ export default defineConfig({
         react(),
         tailwindcss(),
         VitePWA({
-            registerType: 'autoUpdate',
+            registerType: 'prompt',
+            devOptions: {
+                enabled: true, // allow testing in dev/preview
+            },
             includeAssets: ['favicon.svg', 'robots.txt'],
             manifest: {
                 name: 'GATEQuest',
