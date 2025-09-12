@@ -9,9 +9,10 @@ export default defineConfig({
         react(),
         tailwindcss(),
         VitePWA({
-            registerType: 'prompt',
+            registerType: 'autoUpdate',
             devOptions: {
-                enabled: true, // allow testing in dev/preview
+                enabled: true,
+                type: 'module',
             },
             includeAssets: ['favicon.svg', 'robots.txt'],
             manifest: {

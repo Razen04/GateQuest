@@ -1,3 +1,4 @@
+// main.tsx
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
@@ -5,7 +6,8 @@ import App from './App.tsx';
 import { Toaster } from 'sonner';
 import { registerSW } from 'virtual:pwa-register';
 
-const clearStaleData = () => {
+// --- helper to clear localStorage + Cache Storage ---
+const clearStaleData = async () => {
     const staleKeys = [
         'CO & Architecture',
         'Aptitude',
@@ -18,30 +20,49 @@ const clearStaleData = () => {
         'Algorithms',
     ];
 
-    staleKeys.forEach((key) => localStorage.removeItem(key));
-};
+    try {
+        staleKeys.forEach((k) => {
+            if (k) {
+                localStorage.removeItem(k);
+            }
+        });
+    } catch (e) {
+        console.warn('⚠️ localStorage clearing error:', e);
+    }
 
-let updateSW: (reloadPage?: boolean) => void;
-let swRegistered = false;
-
-const showUpdateAvailablePrompt = () => {
-    const userAccepted = window.confirm(
-        'A new version is available. Update now? Note: Your unsynced attempts will not be synced (You can attempt them again)',
-    );
-
-    if (userAccepted) {
-        clearStaleData();
-        if (updateSW) updateSW(true);
+    try {
+        const cacheNames = await caches.keys();
+        console.log('Cache names before delete:', cacheNames);
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+    } catch (e) {
+        console.warn('⚠️ Cache Storage clearing error:', e);
     }
 };
 
-if (!swRegistered) {
-    swRegistered = true;
+// --- instrument service worker lifecycle & registration ---
+if ('serviceWorker' in navigator) {
+    // Clear when a new SW takes control
+    navigator.serviceWorker.addEventListener('controllerchange', async () => {
+        await clearStaleData();
+    });
 
-    updateSW = registerSW({
-        onNeedRefresh() {
-            console.log('⚡ Update available...');
-            showUpdateAvailablePrompt();
+    // Register SW
+    registerSW({
+        immediate: true,
+        onRegistered(registration) {
+            if (registration) {
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    if (newWorker) {
+                        newWorker.addEventListener('statechange', () => {
+                            console.log('installing worker statechange:', newWorker.state);
+                        });
+                    }
+                });
+            }
+        },
+        onRegisterError(err) {
+            console.error('🔴 SW registration error:', err);
         },
         onOfflineReady() {
             console.log('✅ App ready to work offline');
