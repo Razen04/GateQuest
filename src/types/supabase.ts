@@ -4,7 +4,7 @@ export type Database = {
     // Allows to automatically instantiate createClient with right options
     // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
     __InternalSupabase: {
-        PostgrestVersion: '12.2.12 (cd3cf9e)';
+        PostgrestVersion: '12.2.3 (519615d)';
     };
     public: {
         Tables: {
@@ -19,7 +19,7 @@ export type Database = {
                 };
                 Insert: {
                     active?: boolean | null;
-                    created_at: string;
+                    created_at?: string;
                     id?: string;
                     message?: string | null;
                     title?: string | null;
@@ -38,27 +38,27 @@ export type Database = {
             question_peer_stats: {
                 Row: {
                     avg_time_seconds: number | null;
-                    correct_attempts: number | null;
+                    correct_attempts: number;
                     question_id: string;
-                    total_attempts: number | null;
-                    updated_at: string | null;
-                    wrong_attempts: number | null;
+                    total_attempts: number;
+                    updated_at: string;
+                    wrong_attempts: number;
                 };
                 Insert: {
                     avg_time_seconds?: number | null;
-                    correct_attempts?: number | null;
+                    correct_attempts?: number;
                     question_id: string;
-                    total_attempts?: number | null;
-                    updated_at?: string | null;
-                    wrong_attempts?: number | null;
+                    total_attempts?: number;
+                    updated_at?: string;
+                    wrong_attempts?: number;
                 };
                 Update: {
                     avg_time_seconds?: number | null;
-                    correct_attempts?: number | null;
+                    correct_attempts?: number;
                     question_id?: string;
-                    total_attempts?: number | null;
-                    updated_at?: string | null;
-                    wrong_attempts?: number | null;
+                    total_attempts?: number;
+                    updated_at?: string;
+                    wrong_attempts?: number;
                 };
                 Relationships: [
                     {
@@ -145,7 +145,7 @@ export type Database = {
                     created_at?: string | null;
                     difficulty?: string | null;
                     explanation?: string | null;
-                    id: string;
+                    id?: string;
                     marks?: number | null;
                     metadata?: Json | null;
                     options?: string[] | null;
@@ -192,7 +192,7 @@ export type Database = {
                     question_id: string | null;
                     subject: string | null;
                     time_taken: number | null;
-                    user_id: string;
+                    user_id: string | null;
                     was_correct: boolean | null;
                 };
                 Insert: {
@@ -202,7 +202,7 @@ export type Database = {
                     question_id?: string | null;
                     subject?: string | null;
                     time_taken?: number | null;
-                    user_id?: string;
+                    user_id?: string | null;
                     was_correct?: boolean | null;
                 };
                 Update: {
@@ -212,10 +212,18 @@ export type Database = {
                     question_id?: string | null;
                     subject?: string | null;
                     time_taken?: number | null;
-                    user_id?: string;
+                    user_id?: string | null;
                     was_correct?: boolean | null;
                 };
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: 'user_question_activity_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             users: {
                 Row: {

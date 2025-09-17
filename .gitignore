@@ -25,3 +25,6 @@ dist-ssr
 
 .env
 .env.local
+.env.dev
+
+dev-dist

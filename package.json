@@ -12,7 +12,15 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
-        "test": "vitest"
+        "test": "vitest",
+        "supabase:update:types": "supabase gen types typescript --project-id zewzixicpoxirmouyeje > src/types/supabase.ts",
+        "//": "--- LOCAL DEV ---",
+        "supabase:start": "supabase start",
+        "supabase:stop": "supabase stop",
+        "supabase:reset": "supabase db reset",
+        "//": "--- DEPLOYMENT ---",
+        "db:push:staging": "supabase link --project-ref yzkxnuobtjrheqcwecch && supabase db push",
+        "db:push:prod": "supabase link --project-ref zewzixicpoxirmouyeje && supabase db push"
     },
     "lint-staged": {
         "*.{js,ts,jsx,tsx,json,css,md}": "prettier --write"
@@ -57,6 +65,7 @@
         "postcss": "^8.5.6",
         "prettier": "^3.6.2",
         "prettier-plugin-tailwindcss": "^0.6.14",
+        "supabase": "^2.40.7",
         "tailwindcss": "^4.1.12",
         "typescript": "^5.9.2",
         "vite": "^6.3.5",

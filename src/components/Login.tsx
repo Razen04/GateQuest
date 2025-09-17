@@ -1,6 +1,7 @@
 import { GoogleLogo, X } from 'phosphor-react';
 import Buttons from './Buttons.js';
 import useAuth from '../hooks/useAuth.ts';
+import { supabase } from '../utils/supabaseClient.ts';
 
 type LoginProp = {
     canClose?: boolean;
@@ -8,6 +9,22 @@ type LoginProp = {
 };
 
 const Login = ({ canClose = true, onClose }: LoginProp) => {
+    // Function for dev login to work with supabase locally
+    const handleDevLogin = async () => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: 'test@example.com',
+            // The password can be anything when using the local dev environment
+            password: 'password',
+        });
+
+        if (error) {
+            console.error('Error logging in:', error.message);
+        } else {
+            console.log('Logged in successfully:', data.user);
+            // You might need to refresh the page or redirect
+            window.location.reload();
+        }
+    };
     const { handleLogin } = useAuth();
     return (
         <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-2xl">
@@ -45,6 +62,17 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                     <GoogleLogo className="mr-3 text-xl" />
                     <span>Continue with Google</span>
                 </Buttons>
+                {/* --- Dev Login for working with Supabase Locally --- */}
+                {import.meta.env.DEV && (
+                    <div style={{ marginTop: '20px', border: '1px solid red', padding: '10px' }}>
+                        <h3>Dev Tools</h3>
+                        <p>Login as `test@example.com`</p>
+                        <button onClick={handleDevLogin} className="bg-red-400 p-2">
+                            Log In (Local Dev)
+                        </button>
+                    </div>
+                )}
+                {/* --- End of dev part --- */}
                 <div className="mt-6 text-xs text-gray-400 text-center w-full">
                     <span>
                         By continuing, you agree to give your details like gmail, name and profile
