@@ -18,6 +18,7 @@ const clearStaleData = async () => {
         'Databases',
         'Compiler Design',
         'Algorithms',
+        'Discrete Maths',
     ];
 
     try {
