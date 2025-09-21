@@ -1,7 +1,7 @@
 {
     "name": "gate-prep",
     "private": true,
-    "version": "0.7.4",
+    "version": "0.7.5",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -18,7 +18,7 @@
         "supabase:start": "supabase start",
         "supabase:stop": "supabase stop",
         "supabase:reset": "supabase db reset",
-        "//": "--- DEPLOYMENT ---",
+        "///": "--- DEPLOYMENT ---",
         "db:push:staging": "supabase link --project-ref yzkxnuobtjrheqcwecch && supabase db push",
         "db:push:prod": "supabase link --project-ref zewzixicpoxirmouyeje && supabase db push"
     },
