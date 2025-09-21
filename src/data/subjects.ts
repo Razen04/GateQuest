@@ -8,6 +8,7 @@ import {
     Terminal,
     Gear,
     GitBranch,
+    Equals,
 } from 'phosphor-react';
 import type { Subject } from '../types/Subject.ts';
 
@@ -194,6 +195,26 @@ const subjects: Subject[] = [
         difficulty: 'Hard',
         category: 'bookmarked',
         color: 'green',
+    },
+    {
+        id: 10,
+        name: 'Discrete Maths',
+        apiName: 'Discrete Maths',
+        icon: Equals,
+        questions: 270,
+        difficulty: 'Medium',
+        category: 'math',
+        color: 'purple',
+    },
+    {
+        id: 110,
+        name: 'Discrete Maths',
+        apiName: 'Discrete Maths',
+        icon: Equals,
+        questions: 270,
+        difficulty: 'Medium',
+        category: 'bookmarked',
+        color: 'purple',
     },
 ];
 
