@@ -7,7 +7,7 @@ import {
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
 import type { Question } from '../../../types/question.ts';
-import { Warning } from 'phosphor-react';
+import { Warning, ShareFat } from '@phosphor-icons/react';
 import ReportModal from '../../ReportModal.tsx';
 import { supabase } from '../../../utils/supabaseClient.ts';
 import useAuth from '../../../hooks/useAuth.ts';
@@ -47,6 +47,7 @@ const QuestionHeader = ({
                 : currentQuestion.difficulty.toLowerCase();
     }
 
+    // Send question reports to Supabase
     const handleReportButton = async (reportType: string, reportText: string) => {
         const report = {
             user_id: user?.id,
@@ -72,6 +73,28 @@ const QuestionHeader = ({
         setShowReportModal(false);
     };
 
+    // Allow sharing question to peers
+    const handleSharingQuestion = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'GATEQuest PYQ question',
+                    text: 'Try out this question:',
+                    url: window.location.href,
+                });
+            } catch (err) {
+                console.error('Share cancelled or failed.', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.message('Question link copied successfully.');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    };
+
     return (
         <div>
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border-primary dark:border-border-primary-dark bg-gradient-to-r from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-800">
@@ -95,7 +118,7 @@ const QuestionHeader = ({
                             isTimerActive={isTimerActive}
                         />
                         <span
-                            className={`text-xs px-2 py-1 rounded-xl md:rounded-full font-bold ${getDifficultyClassNames(currentQuestion.difficulty)}`}
+                            className={`text-xs px-2 py-1 rounded-xl md:rounded-full ${getDifficultyClassNames(currentQuestion.difficulty)}`}
                         >
                             {getDifficultyDisplayText()}
                         </span>
@@ -109,6 +132,12 @@ const QuestionHeader = ({
                             className="p-1 bg-red-200 text-red-600 rounded-full hover:bg-red-300 transition-all cursor-pointer"
                         >
                             <Warning />
+                        </button>
+                        <button
+                            onClick={handleSharingQuestion}
+                            className="p-1 bg-green-200 text-green-600 rounded-full hover:bg-green-300 transition-all cursor-pointer"
+                        >
+                            <ShareFat />
                         </button>
                     </div>
                 </div>

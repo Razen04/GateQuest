@@ -25,11 +25,12 @@ import QuestionBadge from '../../components/Practice/QuestionCard/QuestionBadge.
 import ActionButtons from '../../components/Practice/QuestionCard/ActionButtons.js';
 import ResultMessage from '../../components/Practice/QuestionCard/ResultMessage.js';
 import ModernLoader from '../../components/ModernLoader.js';
-import { ArrowLeft } from 'phosphor-react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import useStats from '../../hooks/useStats.js';
 import useAuth from '../../hooks/useAuth.js';
 import useSettings from '../../hooks/useSettings.js';
 import QuestionPeerStats from '../../components/Practice/QuestionCard/QuestionPeerStats.tsx';
+import useQuestions from '../../hooks/useQuestions.ts';
 
 // This component is the main event for the practice session. It's a "controller" component
 // that pulls together a bunch of hooks and smaller UI components to create the full question view.
@@ -57,11 +58,15 @@ const QuestionCard = () => {
     // The question ID from the URL. Default to 0 if it's not there for some reason.
     const questionId = qid ? qid : 0;
 
+    // Fetching questions using useQuestions hook in-case the of shareable-link. For more details visit Issue #6 (https://github.com/Razen04/GateQuest/issues/6)
+    const { questions: questionFromHooks, isLoading } = useQuestions(subject, false);
+
     // This is the key to making next/prev work seamlessly.
     // The QuestionList passes the *entire* filtered list of questions in the navigation state.
-    // So, no need to re-fetch or re-filter here. Big performance win.
+    // So, no need to re-fetch or re-filter here
+    // Fallback to useQuestions hook
     const passed = location.state?.questions;
-    const filteredQuestions = Array.isArray(passed) && passed.length ? passed : [];
+    let filteredQuestions = Array.isArray(passed) && passed.length ? passed : questionFromHooks;
 
     // Keep the original query string around so we can go back to the list with the same filters applied.
     const qs = searchParams.toString();
@@ -114,15 +119,6 @@ const QuestionCard = () => {
     } = useQuestionState(currentQuestion);
 
     // --- Side Effects (useEffect) ---
-
-    // The "deep link" guardian. If someone lands on this URL directly without the question list
-    // in the location state, they get bounced back to the list page with the filters applied.
-    // This prevents the card from crashing with no data.
-    useEffect(() => {
-        if (!filteredQuestions.length) {
-            navigate(`/practice/${subject}?${qs}`, { replace: true });
-        }
-    }, [filteredQuestions.length, subject, qs, navigate]);
 
     // This effect is for when the user navigates to a *new* question.
     // It makes sure we reset all the state from the previous question (like selected answers).
@@ -216,6 +212,10 @@ const QuestionCard = () => {
     const handleBack = () => {
         navigate(`/practice/${subject}?${qs}`);
     };
+
+    if (isLoading) {
+        return <ModernLoader />;
+    }
 
     return (
         // The main container div
