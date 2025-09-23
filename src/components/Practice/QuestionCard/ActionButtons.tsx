@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from 'phosphor-react';
+import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
 import type { Question } from '../../../types/question.ts';
 
 type ActionButtonsProps = {

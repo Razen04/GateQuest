@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'phosphor-react';
+import { X } from '@phosphor-icons/react';
 
 const ReportModal = ({
     onClose,

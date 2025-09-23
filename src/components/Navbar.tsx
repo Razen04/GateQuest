@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Notification } from 'phosphor-react';
+import { Notification } from '@phosphor-icons/react';
 import NotificationDialog from './NotificationDialog.js';
 
 const Navbar = () => {

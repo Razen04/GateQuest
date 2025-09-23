@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import MathRenderer from '../MathRenderer.js';
 import { isMultipleSelection } from '../../../utils/questionUtils.js';
-import { CheckCircle } from 'phosphor-react';
+import { CheckCircle } from '@phosphor-icons/react';
 import type { Question } from '../../../types/question.ts';
 
 type QuestionContentProps = {

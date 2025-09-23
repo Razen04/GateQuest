@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { BookOpen, Calendar, CheckSquareOffset, CircleWavyCheck } from 'phosphor-react';
+import { BookOpen, Calendar, CheckSquareOffset, SealCheck } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../utils/supabaseClient.js';
 import type { Database } from '../types/supabase.js';
@@ -69,7 +69,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
     const getNotificationIcon = (notification: Notification) => {
         if (notification.type === 'update') {
-            return <CircleWavyCheck className="text-green-500" />;
+            return <SealCheck className="text-green-500" />;
         } else if (notification.type === 'reminder') {
             return <Calendar className="text-blue-500" />;
         } else {

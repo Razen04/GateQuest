@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useQuestionTimer } from '../../../hooks/useQuestionTimer.js';
-import { Pause, Timer } from 'phosphor-react';
+import { Pause, Timer } from '@phosphor-icons/react';
 import type { Question } from '../../../types/question.ts';
 import useSettings from '../../../hooks/useSettings.ts';
 

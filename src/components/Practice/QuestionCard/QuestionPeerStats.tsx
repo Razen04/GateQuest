@@ -1,4 +1,4 @@
-import { SpinnerGap, ChartBar } from 'phosphor-react';
+import { SpinnerGap, ChartBar } from '@phosphor-icons/react';
 import { usePeerBenchmark } from '../../../hooks/usePeerBenchmark.ts';
 
 type QuestionPeerStatsType = {

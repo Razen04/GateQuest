@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CaretDown, Funnel, MagnifyingGlass } from 'phosphor-react';
+import { CaretDown, Funnel, MagnifyingGlass } from '@phosphor-icons/react';
 
 type SearchAndFiltersProps = {
     searchQuery: string;

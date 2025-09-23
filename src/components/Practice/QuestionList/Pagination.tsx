@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight } from 'phosphor-react';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 
 type PaginationProps = {
     currentPage: number;

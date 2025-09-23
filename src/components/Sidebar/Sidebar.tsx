@@ -9,7 +9,7 @@ import {
     CaretLeft,
     DiscordLogo,
     GithubLogo,
-} from 'phosphor-react';
+} from '@phosphor-icons/react';
 import useWindowSize from '../../hooks/useWindowSize.js';
 import appLogo from '/logo.png';
 import MobileDock from './MobileDock.js';

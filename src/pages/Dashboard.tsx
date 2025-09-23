@@ -6,7 +6,7 @@ import StudyPlan from '../components/Dashboard/StudyPlan.jsx';
 import StreakMap from '../components/Dashboard/StreakMap.jsx';
 import StatCard from '../components/Dashboard/StatCard.jsx';
 import SubjectStats from '../components/Dashboard/SubjectStats.jsx';
-import { ChartLine, Info, Medal } from 'phosphor-react';
+import { ChartLine, Info, Medal } from '@phosphor-icons/react';
 import { containerVariants } from '../utils/motionVariants.ts';
 import useAuth from '../hooks/useAuth.ts';
 import useStats from '../hooks/useStats.ts';

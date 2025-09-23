@@ -17,7 +17,7 @@ import {
     Sun,
     Timer,
     Trophy,
-} from 'phosphor-react';
+} from '@phosphor-icons/react';
 import appLogo from '/logo.png';
 import useSettings from '../hooks/useSettings.ts';
 import About from './About.tsx';

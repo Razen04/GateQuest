@@ -1,4 +1,4 @@
-import { GoogleLogo, X } from 'phosphor-react';
+import { GoogleLogo, X } from '@phosphor-icons/react';
 import Buttons from './Buttons.js';
 import useAuth from '../hooks/useAuth.ts';
 import { supabase } from '../utils/supabaseClient.ts';
@@ -65,9 +65,12 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                 {/* --- Dev Login for working with Supabase Locally --- */}
                 {import.meta.env.DEV && (
                     <div style={{ marginTop: '20px', border: '1px solid red', padding: '10px' }}>
-                        <h3>Dev Tools</h3>
-                        <p>Login as `test@example.com`</p>
-                        <button onClick={handleDevLogin} className="bg-red-400 p-2">
+                        <h3 className="text-white">Dev Tools</h3>
+                        <p className="text-white">Login as `test@example.com`</p>
+                        <button
+                            onClick={handleDevLogin}
+                            className="bg-red-400 p-2 text-white cursor-pointer hover:bg-red-500 transition-all"
+                        >
                             Log In (Local Dev)
                         </button>
                     </div>

@@ -8,8 +8,8 @@ import {
     Terminal,
     Gear,
     GitBranch,
-    Equals,
-} from 'phosphor-react';
+    EqualsIcon,
+} from '@phosphor-icons/react';
 import type { Subject } from '../types/Subject.ts';
 
 // Subjects Data
@@ -200,7 +200,7 @@ const subjects: Subject[] = [
         id: 10,
         name: 'Discrete Maths',
         apiName: 'Discrete Maths',
-        icon: Equals,
+        icon: EqualsIcon,
         questions: 270,
         difficulty: 'Medium',
         category: 'math',
@@ -210,7 +210,7 @@ const subjects: Subject[] = [
         id: 110,
         name: 'Discrete Maths',
         apiName: 'Discrete Maths',
-        icon: Equals,
+        icon: EqualsIcon,
         questions: 270,
         difficulty: 'Medium',
         category: 'bookmarked',

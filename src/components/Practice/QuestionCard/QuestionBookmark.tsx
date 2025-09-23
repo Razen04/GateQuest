@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { handleBookmark } from '../../../utils/questionUtils.js';
-import { Bookmark } from 'phosphor-react';
+import { Bookmark } from '@phosphor-icons/react';
 import useAuth from '../../../hooks/useAuth.ts';
 
 type QuestionBookmarkProps = {

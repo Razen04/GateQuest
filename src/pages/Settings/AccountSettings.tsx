@@ -1,7 +1,7 @@
 import React, { useState, type ChangeEvent } from 'react';
 import Buttons from '../../components/Buttons.tsx';
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper.ts';
-import { User, UserCircle } from 'phosphor-react';
+import { User, UserCircle } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 
 type InputSectionProps = {

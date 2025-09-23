@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { User, ShieldCheck, Faders } from 'phosphor-react';
+import { User, ShieldCheck, Faders } from '@phosphor-icons/react';
 
 import Login from '../../components/Login.jsx';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';

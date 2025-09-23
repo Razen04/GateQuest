@@ -27,6 +27,7 @@
     },
     "dependencies": {
         "@nivo/calendar": "^0.99.0",
+        "@phosphor-icons/react": "^2.1.10",
         "@supabase/auth-ui-react": "^0.4.7",
         "@supabase/auth-ui-shared": "^0.1.8",
         "@supabase/supabase-js": "^2.50.4",
@@ -38,7 +39,6 @@
         "framer-motion": "^12.11.0",
         "katex": "^0.16.22",
         "lz-string": "^1.5.0",
-        "phosphor-react": "^1.4.1",
         "prismjs": "^1.30.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

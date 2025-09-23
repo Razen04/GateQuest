@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { faqs } from '../data/faqs.js';
 import AccordionItem from '../components/About/AccordionItem.js';
-import { Book, DiscordLogo, GithubLogo, Heart } from 'phosphor-react';
+import { Book, DiscordLogo, GithubLogo, Heart } from '@phosphor-icons/react';
 import { fadeInUp, stagger } from '../utils/motionVariants.js';
 
 type Answer =

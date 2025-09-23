@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft } from 'phosphor-react';
+import { ArrowLeft } from '@phosphor-icons/react';
 import type { Question } from '../../../types/question.js';
 
 type HeaderProps = {
