@@ -19,8 +19,11 @@ const QuestionPeerStats = ({ questionId }: QuestionPeerStatsType) => {
 
     if (message) {
         return (
-            <div className="mt-4 mb-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-center shadow-sm text-gray-600">
-                <ChartBar className="mx-auto mb-2 h-6 w-6 text-gray-400" weight="duotone" />
+            <div className="mt-4 mb-2 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-zinc-800 p-4 text-center shadow-sm text-gray-600 dark:text-gray-50">
+                <ChartBar
+                    className="mx-auto mb-2 h-6 w-6 text-gray-400 dark:text-gray-100"
+                    weight="duotone"
+                />
                 {message}
             </div>
         );
