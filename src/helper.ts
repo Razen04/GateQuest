@@ -26,6 +26,8 @@ const colors = {
     orange: 'bg-orange-100 text-orange-600',
     teal: 'bg-teal-100 text-teal-600',
     yellow: 'bg-yellow-100 text-yellow-600',
+    pink: 'bg-pink-100 text-pink-600',
+    violet: 'bg-violet-100 text-violet-600',
 } as const;
 
 type ColorKey = keyof typeof colors;
