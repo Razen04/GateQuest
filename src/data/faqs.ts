@@ -28,7 +28,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Nope, that will defeat the purpose of being distraction-free. If money ever becomes a problem, I will either ask for donations upfront or bear the cost myself.',
+                    'Nope, that will defeat the purpose of being distraction-free. If money ever becomes a problem, I will ask for donations upfront.',
             },
         ],
     },

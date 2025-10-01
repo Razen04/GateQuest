@@ -9,6 +9,7 @@ import {
     CaretLeft,
     DiscordLogo,
     GithubLogo,
+    Coffee,
 } from '@phosphor-icons/react';
 import useWindowSize from '../../hooks/useWindowSize.js';
 import appLogo from '/logo.png';
@@ -274,6 +275,18 @@ const Sidebar = ({ showSidebar, setShowSidebar }: SidebarProp) => {
                                     rel="noopener noreferrer"
                                 >
                                     <GithubLogo size={20} />
+                                </a>
+                            </button>
+                            <button
+                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
+                                aria-label="Support Me"
+                            >
+                                <a
+                                    href="https://buymeachai.ezee.li/Razen"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <Coffee size={20} />
                                 </a>
                             </button>
                         </div>

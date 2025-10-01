@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { faqs } from '../data/faqs.js';
 import AccordionItem from '../components/About/AccordionItem.js';
-import { Book, DiscordLogo, GithubLogo, Heart } from '@phosphor-icons/react';
+import { Book, DiscordLogo, GithubLogo, Heart, Coffee } from '@phosphor-icons/react';
 import { fadeInUp, stagger } from '../utils/motionVariants.js';
 
 type Answer =
@@ -105,26 +105,38 @@ const About = ({ landing = false }: AboutProps) => {
                         I want this to become everyone's goto website for GATE prep so contributions
                         are highly appreciated.
                     </p>
-                    <div className="flex space-x-4">
+                    <div className="flex flex-col space-y-2">
+                        <div className="flex flex-col lg:flex-row lg:space-x-2 space-y-2 lg:space-y-0">
+                            <motion.a
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                href="https://github.com/Razen04/GATEQuest"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                            >
+                                <GithubLogo className="mr-2 w-5" /> GitHub
+                            </motion.a>
+                            <motion.a
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                href="https://discord.gg/dFmg3g52c5"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                            >
+                                <DiscordLogo className="mr-2" /> Discord
+                            </motion.a>
+                        </div>
                         <motion.a
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            href="https://github.com/Razen04/GATEQuest"
+                            href="https://buymeachai.ezee.li/Razen"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                            className="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
                         >
-                            <GithubLogo className="mr-2 w-5" /> GitHub
-                        </motion.a>
-                        <motion.a
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            href="https://discord.gg/dFmg3g52c5"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
-                        >
-                            <DiscordLogo className="mr-2" /> Discord
+                            <Coffee className="mr-2" /> Buy Me A Chai
                         </motion.a>
                     </div>
                 </motion.div>
