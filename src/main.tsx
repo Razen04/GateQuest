@@ -19,6 +19,8 @@ const clearStaleData = async () => {
         'Compiler Design',
         'Algorithms',
         'Discrete Maths',
+        'Digital Logic',
+        'Engineering Mathematics',
     ];
 
     try {
