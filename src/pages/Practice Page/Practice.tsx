@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import subjects from '../../data/subjects.ts';
 import { getBackgroundColor } from '../../helper.ts';
@@ -10,6 +10,7 @@ import {
     navItemVariants,
     stagger,
 } from '../../utils/motionVariants.ts';
+import type { SubjectStat } from '../../types/Stats.ts';
 
 type FilterTabsType = {
     label: string;
@@ -38,6 +39,15 @@ const FilterTabs = ({ label, type, activeFilter, setActiveFilter }: FilterTabsTy
 const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
+    const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
+
+    // Getting stats on mount of this component
+    useEffect(() => {
+        const storedStats = localStorage.getItem('subjectStats');
+        if (storedStats) {
+            setSubjectStats(JSON.parse(storedStats));
+        }
+    }, []);
 
     // Filter subjects based on active filter
     const filteredSubjects =
@@ -129,31 +139,79 @@ const Practice = () => {
             >
                 {/* Subject Grid - Simplified */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
-                    {filteredSubjects.map((subject) => (
-                        <motion.div
-                            variants={fadeInUp}
-                            key={subject.id}
-                            className="rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                            <div className="p-4">
-                                <div className="flex items-center mb-4">
-                                    <div
-                                        className={`p-3 rounded-lg ${getBackgroundColor(subject.color)} mr-3`}
-                                    >
-                                        {<subject.icon className="h-6 w-6" />}
-                                    </div>
-                                    <h3 className="font-medium">{subject.name}</h3>
-                                </div>
+                    {filteredSubjects.map((subject) => {
+                        const stat = subjectStats.find((s) => s.subject === subject.apiName);
+                        const progress = stat ? stat.progress : 0;
 
-                                <Buttons
-                                    children="Practice"
-                                    active={true}
-                                    className="w-full"
+                        return (
+                            <motion.div
+                                variants={fadeInUp}
+                                key={subject.id}
+                                className="flex flex-col justify-between h-full rounded-lg shadow-sm border border-border-primary dark:border-border-primary-dark overflow-hidden hover:shadow-md transition-shadow"
+                            >
+                                <div
                                     onClick={() => handleSubjectSelect(subject.id)}
-                                />
-                            </div>
-                        </motion.div>
-                    ))}
+                                    className="p-4"
+                                >
+                                    <div className="flex items-start gap-2 mb-4">
+                                        <div
+                                            className={`p-3 rounded-lg shadow-sm ${getBackgroundColor(subject.color)} mr-3`}
+                                        >
+                                            {<subject.icon className="h-6 w-6" />}
+                                        </div>
+                                        <div className="w-full">
+                                            <div className="flex justify-between items-center w-full">
+                                                <h3 className="font-medium">{subject.name}</h3>
+                                                <h3
+                                                    className={`font-medium text-xs px-2 py-0.5 rounded-full text-white ${
+                                                        subject.difficulty === 'Easy'
+                                                            ? 'bg-green-500'
+                                                            : subject.difficulty === 'Medium'
+                                                              ? 'bg-yellow-500'
+                                                              : 'bg-red-500'
+                                                    }`}
+                                                >
+                                                    {subject.difficulty}
+                                                </h3>
+                                            </div>
+                                            {/* ✅ Animated Progress Bar */}
+                                            <div className="mt-2">
+                                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                                    <div
+                                                        className="h-full transition-all duration-700 ease-out rounded-full"
+                                                        style={{
+                                                            width: `${progress}%`,
+                                                            background: `linear-gradient(
+                                                      90deg,
+                                                      ${progress < 30 ? '#ef4444' : progress < 70 ? '#facc15' : '#22c55e'},
+                                                      ${progress < 30 ? '#f87171' : progress < 70 ? '#fde047' : '#4ade80'}
+                                                    )`,
+                                                        }}
+                                                    ></div>
+                                                </div>
+
+                                                <h4 className="text-xs text-gray-500 mt-1">
+                                                    Progress: {progress.toFixed(0)}% | Total
+                                                    Questions: {subject.questions}
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <Buttons
+                                        children="Practice"
+                                        active={true}
+                                        className="w-full"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSubjectSelect(subject.id);
+                                        }}
+                                    />
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </motion.div>
         </div>

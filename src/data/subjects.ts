@@ -8,80 +8,103 @@ import {
     Terminal,
     GitBranch,
     Binary,
-    Function,
+    Empty,
     FileCode,
+    Pi,
 } from '@phosphor-icons/react';
 import type { Subject } from '../types/Subject.ts';
 
 // Subjects Data
 const subjects: Subject[] = [
-    // 1. Discrete Maths
+    // 1. Engineering Mathematics
     {
-        id: 10,
-        name: 'Discrete Maths',
-        apiName: 'Discrete Maths',
-        icon: Function,
-        questions: 270,
+        id: 1,
+        name: 'Engineering Mathematics',
+        apiName: 'Engineering Mathematics',
+        icon: Pi,
+        questions: 137,
         difficulty: 'Medium',
         category: 'math',
         color: 'violet',
     },
     {
-        id: 110,
-        name: 'Discrete Maths',
-        apiName: 'Discrete Maths',
-        icon: Function,
-        questions: 270,
+        id: 101,
+        name: 'Engineering Mathematics',
+        apiName: 'Engineering Mathematics',
+        icon: Pi,
+        questions: 137,
         difficulty: 'Medium',
         category: 'bookmarked',
         color: 'violet',
     },
 
-    // 2. Digital Logic
+    // 2. Discrete Maths
     {
-        id: 11,
+        id: 2,
+        name: 'Discrete Maths',
+        apiName: 'Discrete Maths',
+        icon: Empty,
+        questions: 270,
+        difficulty: 'Hard',
+        category: 'math',
+        color: 'violet',
+    },
+    {
+        id: 102,
+        name: 'Discrete Maths',
+        apiName: 'Discrete Maths',
+        icon: Empty,
+        questions: 270,
+        difficulty: 'Hard',
+        category: 'bookmarked',
+        color: 'violet',
+    },
+
+    // 3. Digital Logic
+    {
+        id: 3,
         name: 'Digital Logic',
         apiName: 'Digital Logic',
         icon: Binary,
         questions: 207,
-        difficulty: 'Medium',
-        category: 'all',
+        difficulty: 'Easy',
+        category: 'core',
         color: 'pink',
     },
     {
-        id: 111,
+        id: 103,
         name: 'Digital Logic',
         apiName: 'Digital Logic',
         icon: Binary,
         questions: 207,
-        difficulty: 'Medium',
+        difficulty: 'Easy',
         category: 'bookmarked',
         color: 'pink',
     },
 
-    // 3. Computer Organization & Architecture
+    // 4. Computer Organization & Architecture
     {
-        id: 1,
+        id: 4,
         name: 'Computer Organization & Architecture',
         apiName: 'CO & Architecture',
         icon: Cpu,
         questions: 180,
-        difficulty: 'Hard',
+        difficulty: 'Medium',
         category: 'core',
         color: 'indigo',
     },
     {
-        id: 101,
+        id: 104,
         name: 'Computer Organization & Architecture',
         apiName: 'CO & Architecture',
         icon: Cpu,
         questions: 180,
-        difficulty: 'Hard',
+        difficulty: 'Medium',
         category: 'bookmarked',
         color: 'indigo',
     },
 
-    // 4. Data Structures
+    // 5. Data Structures
     {
         id: 5,
         name: 'Data Structures',
@@ -103,9 +126,9 @@ const subjects: Subject[] = [
         color: 'orange',
     },
 
-    // 5. Algorithms
+    // 6. Algorithms
     {
-        id: 9,
+        id: 6,
         name: 'Algorithms',
         apiName: 'Algorithms',
         icon: GitBranch,
@@ -115,7 +138,7 @@ const subjects: Subject[] = [
         color: 'teal',
     },
     {
-        id: 109,
+        id: 106,
         name: 'Algorithms',
         apiName: 'Algorithms',
         icon: GitBranch,
@@ -125,9 +148,9 @@ const subjects: Subject[] = [
         color: 'teal',
     },
 
-    // 6. Theory of Computation
+    // 7. Theory of Computation
     {
-        id: 3,
+        id: 7,
         name: 'Theory of Computation',
         apiName: 'Theory of Computation',
         icon: Terminal,
@@ -137,7 +160,7 @@ const subjects: Subject[] = [
         color: 'red',
     },
     {
-        id: 103,
+        id: 107,
         name: 'Theory of Computation',
         apiName: 'Theory of Computation',
         icon: Terminal,
@@ -147,14 +170,14 @@ const subjects: Subject[] = [
         color: 'red',
     },
 
-    // 7. Compiler Design
+    // 8. Compiler Design
     {
         id: 8,
         name: 'Compiler Design',
         apiName: 'Compiler Design',
         icon: FileCode,
         questions: 172,
-        difficulty: 'Hard',
+        difficulty: 'Medium',
         category: 'core',
         color: 'yellow',
     },
@@ -164,14 +187,14 @@ const subjects: Subject[] = [
         apiName: 'Compiler Design',
         icon: FileCode,
         questions: 172,
-        difficulty: 'Hard',
+        difficulty: 'Medium',
         category: 'bookmarked',
         color: 'yellow',
     },
 
-    // 8. Operating System
+    // 9. Operating System
     {
-        id: 4,
+        id: 9,
         name: 'Operating System',
         apiName: 'Operating System',
         icon: LinuxLogo,
@@ -181,7 +204,7 @@ const subjects: Subject[] = [
         color: 'blue',
     },
     {
-        id: 104,
+        id: 109,
         name: 'Operating System',
         apiName: 'Operating System',
         icon: LinuxLogo,
@@ -191,31 +214,31 @@ const subjects: Subject[] = [
         color: 'blue',
     },
 
-    // 9. Database Management Systems
+    // 10. Database Management Systems
     {
-        id: 7,
+        id: 10,
         name: 'Database Management Systems',
         apiName: 'Databases',
         icon: Database,
         questions: 172,
-        difficulty: 'Medium',
+        difficulty: 'Easy',
         category: 'core',
         color: 'purple',
     },
     {
-        id: 107,
+        id: 110,
         name: 'Database Management Systems',
         apiName: 'Databases',
         icon: Database,
         questions: 172,
-        difficulty: 'Medium',
+        difficulty: 'Easy',
         category: 'bookmarked',
         color: 'purple',
     },
 
-    // 10. Computer Networks
+    // 11. Computer Networks
     {
-        id: 6,
+        id: 11,
         name: 'Computer Networks',
         apiName: 'Computer Networks',
         icon: Globe,
@@ -225,7 +248,7 @@ const subjects: Subject[] = [
         color: 'green',
     },
     {
-        id: 106,
+        id: 111,
         name: 'Computer Networks',
         apiName: 'Computer Networks',
         icon: Globe,
@@ -235,9 +258,9 @@ const subjects: Subject[] = [
         color: 'green',
     },
 
-    // 11. Aptitude
+    // 12. Aptitude
     {
-        id: 2,
+        id: 12,
         name: 'Aptitude',
         apiName: 'Aptitude',
         icon: Brain,
@@ -247,7 +270,7 @@ const subjects: Subject[] = [
         color: 'red',
     },
     {
-        id: 102,
+        id: 112,
         name: 'Aptitude',
         apiName: 'Aptitude',
         icon: Brain,
