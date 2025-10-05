@@ -1,10 +1,10 @@
-import type { Icon } from '@phosphor-icons/react';
+import React from 'react';
 
 export type Subject = {
     id: number;
     name: string;
     apiName: string;
-    icon: Icon;
+    icon: React.ElementType;
     questions: number;
     difficulty: string;
     category: string;
