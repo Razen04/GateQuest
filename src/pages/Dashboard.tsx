@@ -17,6 +17,10 @@ const Dashboard = () => {
     const user = getUserProfile();
     const subjectStats = stats?.subjectStats;
 
+    if (subjectStats) {
+        localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
+    }
+
     // Handle loading
     if (loading) {
         return (

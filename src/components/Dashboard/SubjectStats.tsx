@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { getBackgroundColor } from '../../helper.ts';
-import { Laptop, type Icon } from '@phosphor-icons/react';
+import { Laptop } from '@phosphor-icons/react';
 import subjects from '../../data/subjects.ts';
 import { itemVariants } from '../../utils/motionVariants.ts';
 import type { SubjectStat } from '../../types/Stats.ts';
@@ -14,7 +14,7 @@ type subjectMetaType = {
     id: number;
     name: string;
     apiName: string;
-    icon: Icon;
+    icon: React.ElementType;
     questions: number;
     difficulty: string;
     category: string;

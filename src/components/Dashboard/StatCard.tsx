@@ -1,10 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { itemVariants } from '../../utils/motionVariants.ts';
-import type { Icon } from '@phosphor-icons/react';
 
 type StatCardType = {
-    icon: Icon;
+    icon: React.ElementType;
     title: string;
     value: string;
     iconColor: string;

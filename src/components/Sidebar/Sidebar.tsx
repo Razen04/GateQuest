@@ -267,7 +267,7 @@ const Sidebar = ({ showSidebar, setShowSidebar }: SidebarProp) => {
                             </button>
                             <button
                                 className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
-                                aria-label="Join our Discord"
+                                aria-label="Github"
                             >
                                 <a
                                     href="https://github.com/Razen04/GateQuest"

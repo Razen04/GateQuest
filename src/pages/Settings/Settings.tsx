@@ -63,7 +63,7 @@ const Settings = () => {
                         </span>{' '}
                         & Preferences
                     </h1>
-                    <p className="mt-2">Customize your GATE preparation experience</p>
+                    <p>Customize your GATE preparation experience</p>
                 </motion.div>
 
                 {/* Settings Tabs Navigation */}
@@ -115,7 +115,7 @@ const Settings = () => {
                     initial="initial"
                     animate="animate"
                     variants={itemVariants}
-                    className="rounded-xl shadow-sm p-6 overflow-y-scroll h-[60vh] pb-20"
+                    className="rounded-xl shadow-sm overflow-y-scroll h-[60vh] pb-20"
                 >
                     <Outlet />
                 </motion.div>
