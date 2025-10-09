@@ -33,6 +33,8 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
         setReadNotifications(updatedRead);
         localStorage.setItem('read_notifications', JSON.stringify(updatedRead));
+        const time = new Date();
+        localStorage.setItem('last_checked_notification', JSON.stringify(time));
 
         setNotifications([]);
         setUnreadNotifications(false);
@@ -41,6 +43,17 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
     // Fetch notifications on mount
     useEffect(() => {
         const fetchNotifications = async () => {
+            const lastCheckedStr = localStorage.getItem('last_checked_notification');
+
+            const lastChecked = lastCheckedStr ? new Date(JSON.parse(lastCheckedStr)) : null;
+
+            const now = new Date();
+            const diffInHours = lastChecked
+                ? (now.getTime() - lastChecked.getTime()) / (1000 * 60 * 60)
+                : Infinity;
+
+            if (diffInHours <= 6) return;
+
             const readIds = JSON.parse(
                 localStorage.getItem('read_notifications') || '[]',
             ) as string[];
