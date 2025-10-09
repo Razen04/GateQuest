@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import subjects from '../../data/subjects.ts';
 import { getBackgroundColor } from '../../helper.ts';
@@ -17,9 +17,10 @@ type FilterTabsType = {
     type: string;
     activeFilter: string;
     setActiveFilter: React.Dispatch<React.SetStateAction<string>>;
+    reference: (el: HTMLButtonElement | null) => void;
 };
 
-const FilterTabs = ({ label, type, activeFilter, setActiveFilter }: FilterTabsType) => {
+const FilterTabs = ({ label, type, activeFilter, setActiveFilter, reference }: FilterTabsType) => {
     return (
         <button
             className={`px-4 py-2 whitespace-nowrap cursor-pointer transition-all duration-300 rounded-lg text-sm font-medium focus:outline-none active:scale-95
@@ -30,6 +31,7 @@ const FilterTabs = ({ label, type, activeFilter, setActiveFilter }: FilterTabsTy
                 }
             `}
             onClick={() => setActiveFilter(type)}
+            ref={reference}
         >
             {label}
         </button>
@@ -40,6 +42,45 @@ const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
     const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
+
+    // Tab Reference
+    const filterRefs = useRef<Record<string, HTMLButtonElement>>({});
+
+    // This brings the active tab in view
+    useEffect(() => {
+        const activeEl = filterRefs.current[activeFilter];
+        if (activeEl) {
+            activeEl.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest',
+            });
+        }
+    }, [activeFilter]);
+
+    // Filter Tabs
+    const filterTabs = [
+        {
+            label: 'All Subjects',
+            type: 'all',
+        },
+        {
+            label: 'Core CS',
+            type: 'core',
+        },
+        {
+            label: 'Mathematics',
+            type: 'math',
+        },
+        {
+            label: 'Aptitude',
+            type: 'aptitude',
+        },
+        {
+            label: 'Bookmarked Questions',
+            type: 'bookmarked',
+        },
+    ];
 
     // Getting stats on mount of this component
     useEffect(() => {
@@ -96,36 +137,20 @@ const Practice = () => {
                             animate="animate"
                             className="flex overflow-x-scroll gap-2"
                         >
-                            <FilterTabs
-                                label="All Subjects"
-                                type="all"
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
-                            <FilterTabs
-                                label="Core CS"
-                                type="core"
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
-                            <FilterTabs
-                                label="Mathematics"
-                                type="math"
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
-                            <FilterTabs
-                                label="Aptitude"
-                                type="aptitude"
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
-                            <FilterTabs
-                                label="Bookmarked Questions"
-                                type="bookmarked"
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
+                            {filterTabs.map((tab) => {
+                                return (
+                                    <FilterTabs
+                                        key={tab.type}
+                                        label={tab.label}
+                                        type={tab.type}
+                                        activeFilter={activeFilter}
+                                        setActiveFilter={setActiveFilter}
+                                        reference={(el: HTMLButtonElement | null) => {
+                                            if (el) filterRefs.current[tab.type] = el;
+                                        }}
+                                    />
+                                );
+                            })}
                         </motion.div>
                     </div>
                 </div>
