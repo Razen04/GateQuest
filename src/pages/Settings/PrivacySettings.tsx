@@ -28,7 +28,7 @@ const PrivacySettings = () => {
     const { settings, handleSettingToggle } = useSettings();
 
     return (
-        <div className="pb-20">
+        <div className="pb-20 px-4">
             <div className={`${showLogin ? 'blur-2xl' : null}`}>
                 <h2 className="text-xl font-semibold mb-6 flex items-center">
                     <ShieldCheck className="mr-2" /> Privacy & Data

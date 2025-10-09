@@ -43,7 +43,7 @@ const AccountSettings = () => {
     };
 
     return (
-        <div className="overflow-y-scroll pb-20 px-2">
+        <div className="overflow-y-scroll pb-20 px-4">
             <h2 className="text-xl font-semibold mb-6 flex items-center">
                 <UserCircle className="mr-2" /> Account Settings
             </h2>

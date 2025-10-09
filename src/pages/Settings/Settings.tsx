@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { User, ShieldCheck, Faders } from '@phosphor-icons/react';
 
@@ -15,10 +15,25 @@ import useAuth from '../../hooks/useAuth.ts';
 const Settings = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const activeTab = location.pathname.split('/')[2] || 'account';
+    const activeTab: string = location.pathname.split('/')[2] || 'account';
     const { showLogin, setShowLogin } = useAuth();
 
-    // Define tabs
+    // Tab Reference
+    const tabRefs = useRef<Record<string, HTMLButtonElement>>({});
+
+    // This brings the active tab in view
+    useEffect(() => {
+        const activeEl = tabRefs.current[activeTab];
+        if (activeEl) {
+            activeEl.scrollIntoView({
+                behavior: 'smooth',
+                inline: 'center',
+                block: 'nearest',
+            });
+        }
+    }, [activeTab]);
+
+    // Tabs
     const tabs = [
         {
             id: 'account',
@@ -82,6 +97,9 @@ const Settings = () => {
                                     animate="animate"
                                     variants={navItemVariants}
                                     key={tab.id}
+                                    ref={(el: HTMLButtonElement | null) => {
+                                        if (el) tabRefs.current[tab.id] = el;
+                                    }}
                                     onClick={() => navigate(tab.id)}
                                     className={`relative flex cursor-pointer items-center px-4 py-2 sm:py-3 rounded-lg transition-colors duration-300 whitespace-nowrap text-sm sm:text-base z-10 ${
                                         isActive
@@ -115,7 +133,7 @@ const Settings = () => {
                     initial="initial"
                     animate="animate"
                     variants={itemVariants}
-                    className="rounded-xl shadow-sm overflow-y-scroll h-[60vh] pb-20"
+                    className="overflow-y-scroll h-[60vh] pb-20"
                 >
                     <Outlet />
                 </motion.div>
