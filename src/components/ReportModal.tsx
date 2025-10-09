@@ -21,12 +21,7 @@ const ReportModal = ({
     ];
 
     const handleSubmit = () => {
-        if (reportType === 'Other') {
-            // If "Other", submit the custom text if provided
-            onSubmit(reportType, reportText.trim() ? reportText : 'Other');
-        } else {
-            onSubmit(reportType, '');
-        }
+        onSubmit(reportType, reportText.trim() ? reportText : reportType);
     };
 
     return (
@@ -45,10 +40,13 @@ const ReportModal = ({
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h1 className="text-lg font-bold">Report This Question</h1>
-                        <p className="mt-4 text-sm font-light">
-                            For multiple just select other field and mention all the issues in the
-                            text box.
-                        </p>
+                        <div className="italic text-xs mt-4 text-center text-red-400">
+                            <p>
+                                Only report if there is a genuine discrepancy, and always refer to
+                                GateOverflow as the authoritative source.
+                            </p>
+                            <p>I follow the answers as they appear there.</p>
+                        </div>
                     </div>
                     <button
                         onClick={onClose}
@@ -74,16 +72,13 @@ const ReportModal = ({
                     ))}
                 </select>
 
-                {/* Optional text field when "Other" is selected */}
-                {reportType === 'Other' && (
-                    <textarea
-                        className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 bg-transparent p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none mb-4"
-                        placeholder="Please describe the issue..."
-                        value={reportText}
-                        onChange={(e) => setReportText(e.target.value)}
-                        rows={3}
-                    />
-                )}
+                <textarea
+                    className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 bg-transparent p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none mb-4"
+                    placeholder="Please describe the issue..."
+                    value={reportText}
+                    onChange={(e) => setReportText(e.target.value)}
+                    rows={3}
+                />
 
                 <div className="flex justify-end gap-2">
                     <button
@@ -94,7 +89,7 @@ const ReportModal = ({
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={!reportType || (reportType === 'Other' && !reportText.trim())}
+                        disabled={!reportType || !reportText.trim()}
                         className="px-4 py-2 rounded-xl text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                     >
                         Submit
