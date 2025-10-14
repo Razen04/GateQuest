@@ -5,15 +5,15 @@ import TableRenderer from './TableRenderer.js';
 import CodeBlockRenderer from './CodeBlockRenderer.js';
 import parseContent from './QuestionCard/parseContent.js';
 import 'prismjs/themes/prism-tomorrow.css';
-// @ts-expect-error Don't really why TS is showing error (help me)
+// @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-c';
-// @ts-expect-error Don't really why TS is showing error (help me)
+// @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-cpp';
-// @ts-expect-error Don't really why TS is showing error (help me)
+// @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-java';
-// @ts-expect-error Don't really why TS is showing error (help me)
+// @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-python';
-// @ts-expect-error Don't really why TS is showing error (help me)
+// @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-javascript';
 
 /**
@@ -24,6 +24,55 @@ import 'prismjs/components/prism-javascript';
 
 type MathRendererProps = {
     text: string | number | number[];
+};
+
+const renderSimpleHTML = (raw: string) => {
+    if (!raw) return null;
+
+    const elements: React.ReactNode[] = [];
+    let remaining = raw;
+
+    // Handle <ul>...</ul> blocks
+    const ulRegex = /<ul>([\s\S]*?)<\/ul>/gi;
+    let ulMatch;
+    while ((ulMatch = ulRegex.exec(raw)) !== null) {
+        const before = raw.slice(0, ulMatch.index);
+        if (before.trim()) elements.push(before);
+
+        const ulContent = ulMatch[1];
+        if (!ulContent) {
+            return;
+        }
+        const liItems = ulContent
+            .match(/<li>(.*?)<\/li>/gi)
+            ?.map((li) => li.replace(/<\/?li>/gi, ''));
+
+        if (liItems && liItems.length) {
+            elements.push(
+                <ul className="list-disc ml-6 my-2">
+                    {liItems.map((li, i) => (
+                        <li key={i}>{renderSimpleHTML(li)}</li>
+                    ))}
+                </ul>,
+            );
+        }
+
+        remaining = raw.slice(ulMatch.index + ulMatch[0].length);
+        raw = remaining;
+        ulRegex.lastIndex = 0;
+    }
+
+    // Handle bold text (<b>...</b>)
+    const boldSplit = remaining.split(/(<b>.*?<\/b>)/gi);
+    boldSplit.forEach((part, i) => {
+        if (part.startsWith('<b>') && part.endsWith('</b>')) {
+            elements.push(<strong key={i}>{part.replace(/<\/?b>/gi, '')}</strong>);
+        } else {
+            elements.push(part);
+        }
+    });
+
+    return elements;
 };
 
 const MathRenderer = ({ text }: MathRendererProps) => {
@@ -261,7 +310,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                 }
                                 return (
                                     <span key={`${segIdx}-${index}`}>
-                                        {decodeEntities(segment.content!)}
+                                        {renderSimpleHTML(decodeEntities(segment.content!))}
                                     </span>
                                 );
                         }
