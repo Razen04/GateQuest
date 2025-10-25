@@ -62,13 +62,15 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 
 ## 🛠️ Tech Stack
 
-| Category       | Technology                                                                                                                                                                                                                                                                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Frontend**   | ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) |
-| **Backend**    | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)                                                                                                                                                                                                                                       |
-| **State Mgmt** | ![React Context API](https://img.shields.io/badge/react-context-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                              |
-| **Animations** | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer)                                                                                                                                                                                                                                              |
-| **Icons**      | ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                                                                                                                         |
+| Category                 | Technology                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**             | ![TypeScript](https://img.shields.io/badge/typescript-%233178C6.svg?style=for-the-badge&logo=typescript&logoColor=white) ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) |
+| **Backend**              | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                |
+| **State Management**     | ![React Context API](https://img.shields.io/badge/react-context-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                                                                                                                                                       |
+| **Testing**              | ![Vitest](https://img.shields.io/badge/vitest-%236E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white) ![React Testing Library](https://img.shields.io/badge/testing%20library-%23E33332.svg?style=for-the-badge&logo=testing-library&logoColor=white)                                                                                                                                                                                                               |
+| **Animations**           | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer)                                                                                                                                                                                                                                                                                                                                                                       |
+| **Linting & Formatting** | ![ESLint](https://img.shields.io/badge/eslint-%234B32C3.svg?style=for-the-badge&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=white)                                                                                                                                                                                                                                                   |
+| **Icons**                | ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## 📂 Project Structure
 
@@ -76,19 +78,26 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 GateQuest/
 ├── public/                # Static assets (logo, sounds, favicons)
 ├── src/
+│   ├── __tests__/         # Vitest tests
 │   ├── components/        # Reusable React components
 │   ├── context/           # React Context providers
 │   ├── data/              # Static data (FAQs, subjects)
 │   ├── hooks/             # Custom React hooks
 │   ├── pages/             # Top-level page components
 │   ├── routes/            # Route definitions
+│   ├── types/             # TypeScript types and interfaces
 │   ├── utils/             # Utility functions
-│   ├── App.jsx            # Main application component
-│   ├── main.jsx           # Application entry point
+│   ├── App.tsx            # Main application component
+│   ├── main.tsx           # Application entry point
 │   └── index.css          # Global and Tailwind CSS styles
-├── .github/               # GitHub-specific files
-├── supabaseClient.js      # Supabase client initialization
-├── vite.config.js         # Vite configuration
+│   ├── helper.ts          # Helper functions which are used throughout app
+│   └── setupTests.ts      # Vitest setup
+├── supabase/              # Supabase local development configuration
+├── .github/               # GitHub-specific files (workflows, templates)
+├── .husky/                # Husky pre-commit hooks
+├── eslint.config.ts       # ESLint configuration
+├── tsconfig.json          # TypeScript configuration
+├── vite.config.ts         # Vite configuration
 ├── package.json           # Project dependencies and scripts
 └── README.md              # This file
 ```
@@ -101,6 +110,7 @@ To get a local copy up and running, follow these simple steps.
 
 - [Node.js](https://nodejs.org/en/) (v18.x or later)
 - [npm](https://www.npmjs.com/)
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
 
 ### Installation
 
@@ -113,21 +123,39 @@ To get a local copy up and running, follow these simple steps.
     ```sh
     npm install
     ```
-3.  **Set up environment variables:**
-    - Create a `.env` file in the root directory.
-    - Add your Supabase project URL and anon key:
-        ```env
-        VITE_SUPABASE_PROJECT_URL=your_supabase_url
-        VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
+3.  **Set up local Supabase instance:**
+    - Start the Supabase services:
+        ```sh
+        supabase start
         ```
-4.  **Run the development server:**
+    - The CLI will output your local Supabase URL, anon key, and service role key.
+    - Read more about the Supabase Setup in [SUPABASE_GUIDE](SUPABASE_GUIDE.md)
+    - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](SUPABASE_DOCUMENTATION.md)
+4.  **Set up environment variables:**
+    - Create a `.env` file in the root directory.
+    - Copy the local Supabase credentials into it:
+        ```env
+        VITE_SUPABASE_PROJECT_URL=your_local_supabase_url
+        VITE_SUPABASE_ANON_PUBLIC_KEY=your_local_supabase_anon_key
+        ```
+5.  **Run database migrations:**
+    ```sh
+    supabase db reset
+    ```
+6.  **Run the development server:**
     ```sh
     npm run dev
     ```
-5.  **Build for production:**
-    ```sh
-    npm run build
-    ```
+
+### Available Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the app for production.
+- `npm run lint`: Lints the codebase using ESLint.
+- `npm run format`: Formats the code using Prettier.
+- `npm test`: Runs tests using Vitest.
+- `npm run supabase:start`: Starts the local Supabase Docker container.
+- `npm run supabase:stop`: Stops the local Supabase Docker container.
 
 ## 🤝 Contributing
 
@@ -137,7 +165,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 1.  Fork the Project
 2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+3.  Commit your Changes (`git commit -m 'Added some AmazingFeature'`)
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 
