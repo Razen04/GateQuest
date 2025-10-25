@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
+import vitest from 'eslint-plugin-vitest';
 
 export default [
     { ignores: ['dist'] },
@@ -16,7 +17,7 @@ export default [
                 sourceType: 'module',
                 ecmaFeatures: { jsx: true },
             },
-            globals: globals.browser,
+            globals: { ...globals.browser, ...vitest.environments.env.globals },
         },
         plugins: {
             '@typescript-eslint': tsPlugin, // <--- add TypeScript plugin
@@ -26,7 +27,8 @@ export default [
         rules: {
             ...js.configs.recommended.rules,
             ...reactHooks.configs.recommended.rules,
-            ...tsPlugin.configs.recommended.rules, // TypeScript recommended rules
+            ...tsPlugin.configs.recommended.rules,
+            ...vitest.configs.recommended.rules, // TypeScript recommended rules
             'no-unused-vars': 'off',
             indent: 'off',
             'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],

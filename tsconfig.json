@@ -9,7 +9,8 @@
         // See also https://aka.ms/tsconfig/module
         "module": "nodenext",
         "target": "esnext",
-        "types": [],
+        "esModuleInterop": true,
+        "types": ["vitest/globals"],
         // For nodejs:
         // "lib": ["esnext"],
         // "types": ["node"],
