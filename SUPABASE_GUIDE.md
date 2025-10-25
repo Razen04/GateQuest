@@ -140,6 +140,8 @@ Commit the new migration file along with any other code changes. The migration f
 
 This section is for project maintainers.
 
+> Never delete any migration as it acts as a history. If done any mistake then revert previous migration using a new migration but never delete that old migration.
+
 1.  Review and merge the contributor's Pull Request containing the new migration file.
 2.  Pull the latest changes to your local `main` branch.
 3.  Link the CLI to the **Staging** project and push the new migrations.
