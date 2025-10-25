@@ -12,6 +12,8 @@ const ToggleSwitch = ({ label, onToggle, isOn }: ToggleSwitchProp) => {
         <div className="flex items-center justify-between py-3">
             <span>{label}</span>
             <button
+                role="switch"
+                aria-checked={isOn}
                 onClick={onToggle}
                 className={`w-12 h-6 flex cursor-pointer items-center rounded-full p-1 transition-all duration-300 ${
                     isOn
