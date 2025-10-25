@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.refresh_question_peer_stats();

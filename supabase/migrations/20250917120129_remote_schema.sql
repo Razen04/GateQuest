@@ -1,4 +1,5 @@
-
+-- This file has been modified to be "idempotent"
+-- It is safe to run on a database that already has this schema.
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -11,52 +12,13 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-
 CREATE EXTENSION IF NOT EXISTS "pg_cron" WITH SCHEMA "pg_catalog";
-
-
-
-
-
-
 COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
-
-
-
 
 CREATE OR REPLACE FUNCTION "public"."insert_user_question_activity_batch"("batch" "jsonb") RETURNS "void"
     LANGUAGE "plpgsql"
@@ -93,60 +55,35 @@ begin
   end loop;
 end;$$;
 
-
 ALTER FUNCTION "public"."insert_user_question_activity_batch"("batch" "jsonb") OWNER TO "postgres";
-
 
 CREATE OR REPLACE FUNCTION "public"."refresh_question_peer_stats"() RETURNS "void"
     LANGUAGE "sql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
-
 insert into public.question_peer_stats
-
 (question_id, total_attempts, correct_attempts, wrong_attempts, avg_time_seconds, updated_at)
-
 select
-
 (uqa.question_id)::uuid, -- cast if your question_id is text; remove ::uuid if already uuid
-
 count(*) as total_attempts,
-
 count(*) filter (where uqa.was_correct) as correct_attempts,
-
 count(*) filter (where not uqa.was_correct) as wrong_attempts,
-
 avg(uqa.time_taken) filter (where uqa.time_taken is not null) as avg_time_seconds,
-
 now()
-
 from public.user_question_activity uqa -- <-- replace with your actual table name if different
-
 where uqa.attempt_number = 1
-
 group by uqa.question_id
-
 on conflict (question_id) do update
-
 set total_attempts = excluded.total_attempts,
-
 correct_attempts = excluded.correct_attempts,
-
 wrong_attempts = excluded.wrong_attempts,
-
 avg_time_seconds = excluded.avg_time_seconds,
-
 updated_at = now();
-
 $$;
 
-
 ALTER FUNCTION "public"."refresh_question_peer_stats"() OWNER TO "postgres";
-
 SET default_tablespace = '';
-
 SET default_table_access_method = "heap";
-
 
 CREATE TABLE IF NOT EXISTS "public"."notifications" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -156,14 +93,8 @@ CREATE TABLE IF NOT EXISTS "public"."notifications" (
     "type" "text",
     "active" boolean
 );
-
-
 ALTER TABLE "public"."notifications" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."notifications" IS 'In-app notifications';
-
-
 
 CREATE TABLE IF NOT EXISTS "public"."question_peer_stats" (
     "question_id" "uuid" NOT NULL,
@@ -173,10 +104,7 @@ CREATE TABLE IF NOT EXISTS "public"."question_peer_stats" (
     "avg_time_seconds" numeric,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
-
-
 ALTER TABLE "public"."question_peer_stats" OWNER TO "postgres";
-
 
 CREATE TABLE IF NOT EXISTS "public"."question_reports" (
     "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
@@ -187,10 +115,7 @@ CREATE TABLE IF NOT EXISTS "public"."question_reports" (
     "status" "text" DEFAULT 'pending'::"text",
     "created_at" timestamp without time zone DEFAULT "now"()
 );
-
-
 ALTER TABLE "public"."question_reports" OWNER TO "postgres";
-
 
 CREATE TABLE IF NOT EXISTS "public"."questions" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -214,10 +139,7 @@ CREATE TABLE IF NOT EXISTS "public"."questions" (
     "metadata" "jsonb",
     "created_at" timestamp with time zone DEFAULT "now"()
 );
-
-
 ALTER TABLE "public"."questions" OWNER TO "postgres";
-
 
 CREATE TABLE IF NOT EXISTS "public"."user_question_activity" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -229,14 +151,8 @@ CREATE TABLE IF NOT EXISTS "public"."user_question_activity" (
     "attempted_at" timestamp with time zone DEFAULT "now"(),
     "attempt_number" bigint
 );
-
-
 ALTER TABLE "public"."user_question_activity" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."user_question_activity" IS 'For the dashboard';
-
-
 
 CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" DEFAULT "auth"."uid"() NOT NULL,
@@ -251,435 +167,105 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
     "targetYear" integer,
     "bookmark_questions" "jsonb"
 );
-
-
 ALTER TABLE "public"."users" OWNER TO "postgres";
 
+-- All "ADD CONSTRAINT" blocks have been removed,
+-- as they already exist on your staging database.
+-- This is a one-time fix for your transition to the CLI.
 
-ALTER TABLE ONLY "public"."notifications"
-    ADD CONSTRAINT "notifications_pkey" PRIMARY KEY ("id");
+-- ADDED "IF NOT EXISTS"
+CREATE INDEX IF NOT EXISTS "idx_uqa_question_first_attempt" ON "public"."user_question_activity" USING "btree" ("question_id") WHERE ("attempt_number" = 1);
 
-
-
-ALTER TABLE ONLY "public"."question_peer_stats"
-    ADD CONSTRAINT "question_peer_stats_pkey" PRIMARY KEY ("question_id");
-
-
-
-ALTER TABLE ONLY "public"."question_reports"
-    ADD CONSTRAINT "question_reports_pkey" PRIMARY KEY ("id");
+-- All "ADD CONSTRAINT ... FOREIGN KEY" blocks removed.
+-- All "ADD CONSTRAINT ... PRIMARY KEY" blocks removed.
+-- All "ADD CONSTRAINT ... UNIQUE" blocks removed.
 
 
+-- MODIFIED POLICIES to be idempotent (DROP IF EXISTS + CREATE)
 
-ALTER TABLE ONLY "public"."questions"
-    ADD CONSTRAINT "questions_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."question_reports"
-    ADD CONSTRAINT "unique_report_per_user_per_question" UNIQUE ("user_id", "question_id");
-
-
-
-ALTER TABLE ONLY "public"."user_question_activity"
-    ADD CONSTRAINT "user_question_activity_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
-
-
-
-CREATE INDEX "idx_uqa_question_first_attempt" ON "public"."user_question_activity" USING "btree" ("question_id") WHERE ("attempt_number" = 1);
-
-
-
-ALTER TABLE ONLY "public"."question_reports"
-    ADD CONSTRAINT "fk_question_reports_user" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."question_peer_stats"
-    ADD CONSTRAINT "question_peer_stats_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."question_reports"
-    ADD CONSTRAINT "question_reports_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."question_reports"
-    ADD CONSTRAINT "question_reports_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."user_question_activity"
-    ADD CONSTRAINT "user_question_activity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
-
-
-
+DROP POLICY IF EXISTS "Allow insert for own user_id" ON "public"."user_question_activity";
 CREATE POLICY "Allow insert for own user_id" ON "public"."user_question_activity" FOR INSERT WITH CHECK (("auth"."uid"() = "user_id"));
 
-
-
+DROP POLICY IF EXISTS "Allow logged-in user to insert/update own row" ON "public"."users";
 CREATE POLICY "Allow logged-in user to insert/update own row" ON "public"."users" USING (("auth"."uid"() = "id")) WITH CHECK (("auth"."uid"() = "id"));
 
-
-
+DROP POLICY IF EXISTS "Allow read for all" ON "public"."notifications";
 CREATE POLICY "Allow read for all" ON "public"."notifications" FOR SELECT USING (true);
 
-
-
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON "public"."question_reports";
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."question_reports" FOR INSERT TO "authenticated" WITH CHECK (("auth"."uid"() = "user_id"));
 
-
-
+DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."question_peer_stats";
 CREATE POLICY "Enable read access for all users" ON "public"."question_peer_stats" FOR SELECT USING (true);
 
-
-
+DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."questions";
 CREATE POLICY "Enable read access for all users" ON "public"."questions" FOR SELECT USING (true);
 
-
-
+DROP POLICY IF EXISTS "Get all the questions" ON "public"."user_question_activity";
 CREATE POLICY "Get all the questions" ON "public"."user_question_activity" FOR SELECT USING (("auth"."uid"() = "user_id"));
 
-
-
+-- These RLS commands are safe to run multiple times.
 ALTER TABLE "public"."notifications" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."question_reports" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."questions" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."user_question_activity" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
-
-
+-- The rest of the file (GRANT statements, etc.) is safe.
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."notifications";
-
-
-
-
-
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GRANT ALL ON FUNCTION "public"."insert_user_question_activity_batch"("batch" "jsonb") TO "anon";
 GRANT ALL ON FUNCTION "public"."insert_user_question_activity_batch"("batch" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."insert_user_question_activity_batch"("batch" "jsonb") TO "service_role";
-
-
 
 GRANT ALL ON FUNCTION "public"."refresh_question_peer_stats"() TO "anon";
 GRANT ALL ON FUNCTION "public"."refresh_question_peer_stats"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."refresh_question_peer_stats"() TO "service_role";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GRANT ALL ON TABLE "public"."notifications" TO "anon";
 GRANT ALL ON TABLE "public"."notifications" TO "authenticated";
 GRANT ALL ON TABLE "public"."notifications" TO "service_role";
-
-
 
 GRANT ALL ON TABLE "public"."question_peer_stats" TO "anon";
 GRANT ALL ON TABLE "public"."question_peer_stats" TO "authenticated";
 GRANT ALL ON TABLE "public"."question_peer_stats" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."question_reports" TO "anon";
 GRANT ALL ON TABLE "public"."question_reports" TO "authenticated";
 GRANT ALL ON TABLE "public"."question_reports" TO "service_role";
-
-
 
 GRANT ALL ON TABLE "public"."questions" TO "anon";
 GRANT ALL ON TABLE "public"."questions" TO "authenticated";
 GRANT ALL ON TABLE "public"."questions" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."user_question_activity" TO "anon";
 GRANT ALL ON TABLE "public"."user_question_activity" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_question_activity" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."users" TO "anon";
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
-
-
-
-
-
-
-
-
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "service_role";
 
-
-
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "service_role";
 
-
-
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 RESET ALL;

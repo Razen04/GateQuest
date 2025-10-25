@@ -110,10 +110,6 @@ INSERT INTO public.question_peer_stats (question_id, correct_attempts, wrong_att
 SELECT DISTINCT question_id::uuid, 0, 0, 0 from public.user_question_activity
 ON CONFLICT (question_id) DO NOTHING;
 
--- Now, call the function to calculate and update the stats.
--- This is the recommended way to keep aggregate data fresh.
-SELECT refresh_question_peer_stats();
-
 
 -- Restore the original replication role
 SET session_replication_role = origin;
