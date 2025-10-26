@@ -23,94 +23,86 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const isLogin = !!user && user.id !== '1';
 
     useEffect(() => {
-        // This flag prevents the session handler from running multiple times on initialization.
-        let initialized = false;
+        setLoading(true);
 
-        // Processes a Supabase session to set the user state and sync their profile.
-        const handleSession = async (session: Session | null) => {
-            if (initialized) return;
-            initialized = true;
-
+        // onAuthStateChange has _events
+        // 1. INITIAL_SESSION (on page load)
+        // 2. SIGNED_IN (on new login)
+        // 3. SIGNED_OUT (on logout)
+        const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             const supaUser = session?.user || null;
+            setUser(supaUser);
 
             if (supaUser) {
-                // If a user session exists, we 'upsert' their profile.
-                // This creates a profile if it doesn't exist or updates it if it does.
-                const { data, error } = await supabase
-                    .from('users')
-                    .upsert({
-                        id: supaUser.id,
-                        email: supaUser.email,
-                        name: supaUser.user_metadata.full_name,
-                        avatar: supaUser.user_metadata.avatar_url,
-                        // Sensible defaults for a new user profile.
-                        show_name: true,
-                        total_xp: 0,
-                        settings: {
-                            sound: true,
-                            autoTimer: true,
-                            darkMode: true,
-                        },
-                    })
-                    .select(); // .select() returns the created/updated profile data.
+                let profile = null;
 
-                if (!error && data) {
-                    // Ensure profile fields have default values to prevent runtime errors.
-                    const profile = {
-                        ...data[0],
-                        bookmark_questions: data[0].bookmark_questions || [],
-                        college: data[0].college || '',
-                        targetYear: data[0].targetYear || 2026,
+                // Upsert runs only on New User Login
+                if (_event === 'SIGNED_IN') {
+                    const { data, error } = await supabase
+                        .from('users')
+                        .upsert({
+                            id: supaUser.id,
+                            email: supaUser.email,
+                            name: supaUser.user_metadata.full_name,
+                            avatar: supaUser.user_metadata.avatar_url,
+                        })
+                        .select()
+                        .single();
+
+                    if (error) {
+                        console.error('An error occurred while logging in: ', error);
+                        return;
+                    }
+
+                    // Set profile with the new data received
+                    profile = data;
+                } else if (_event === 'INITIAL_SESSION') {
+                    // A select for a normal page load
+                    const { data, error } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', supaUser.id)
+                        .single();
+
+                    if (error) {
+                        console.error('An error occurred while loading session: ', error);
+                        return;
+                    }
+
+                    // Set profile of the existing user
+                    profile = data;
+                }
+                // Note: Nothing is done on TOKEN_REFRESHED
+
+                if (profile) {
+                    const normalizedProfile = {
+                        ...profile,
+                        bookmark_questions: profile.bookmark_questions || [],
+                        college: profile.college || '',
+                        target_year: profile.target_year || 2026,
                         settings: {
                             ...{
                                 sound: true,
                                 autoTimer: true,
-                                darkMode: false,
-                                shareProgress: false,
-                                dataCollection: false,
+                                darkMode: true,
+                                shareProgress: true,
+                                dataCollection: true,
                             },
-                            ...data[0].settings,
+                            ...profile.settings,
                         },
                     };
-                    // Store the user profile in localStorage for quick access elsewhere in the app.
-                    localStorage.setItem('gate_user_profile', JSON.stringify(profile));
-                    // Trigger a stats update now that we have a logged-in user.
-                    updateStats(supaUser);
-                    setUser(supaUser);
+
+                    localStorage.setItem('gate_user_profile', JSON.stringify(normalizedProfile));
+                    updateStats(supaUser); // This now only runs ONCE per load.
                 }
             } else {
-                // If there's no session, clear the user state and local storage.
-                setUser(null);
-                localStorage.removeItem('gate_user_profile');
-            }
-
-            setLoading(false);
-        };
-
-        // This function attempts to get the initial session, retrying a few times.
-        // This can help with race conditions where the app initializes before the Supabase client.
-        const initSession = async () => {
-            for (let i = 0; i < 5; i++) {
-                const {
-                    data: { session },
-                } = await supabase.auth.getSession();
-                if (session) {
-                    await handleSession(session);
-                    return; // Exit once the session is handled.
+                if (_event === 'SIGNED_OUT') {
+                    // Clear local storage on logout
+                    localStorage.removeItem('gate_user_profile');
                 }
-                await new Promise((r) => setTimeout(r, 500)); // Wait before retrying.
             }
-            // If no session is found after retries, stop the loading state.
+
             setLoading(false);
-        };
-
-        initSession();
-
-        // Listen for changes in the authentication state (e.g., login, logout).
-        const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            // Reset the initialized flag to allow the handler to process the new session state.
-            initialized = false;
-            handleSession(session);
         });
 
         // Cleanup the listener when the component unmounts to prevent memory leaks.
