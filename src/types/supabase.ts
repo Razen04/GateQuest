@@ -236,7 +236,7 @@ export type Database = {
                     name: string | null;
                     settings: Json | null;
                     show_name: boolean | null;
-                    targetYear: number | null;
+                    target_year: number | null;
                     total_xp: number | null;
                 };
                 Insert: {
@@ -249,7 +249,7 @@ export type Database = {
                     name?: string | null;
                     settings?: Json | null;
                     show_name?: boolean | null;
-                    targetYear?: number | null;
+                    target_year?: number | null;
                     total_xp?: number | null;
                 };
                 Update: {
@@ -262,7 +262,7 @@ export type Database = {
                     name?: string | null;
                     settings?: Json | null;
                     show_name?: boolean | null;
-                    targetYear?: number | null;
+                    target_year?: number | null;
                     total_xp?: number | null;
                 };
                 Relationships: [];
