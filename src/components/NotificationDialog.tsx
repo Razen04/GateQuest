@@ -33,8 +33,6 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
         setReadNotifications(updatedRead);
         localStorage.setItem('read_notifications', JSON.stringify(updatedRead));
-        const time = new Date();
-        localStorage.setItem('last_checked_notification', JSON.stringify(time));
 
         setNotifications([]);
         setUnreadNotifications(false);
@@ -52,7 +50,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                 ? (now.getTime() - lastChecked.getTime()) / (1000 * 60 * 60)
                 : Infinity;
 
-            if (diffInHours <= 6) return;
+            if (diffInHours <= 12) return;
 
             const readIds = JSON.parse(
                 localStorage.getItem('read_notifications') || '[]',
@@ -69,6 +67,8 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                 toast.message("Couldn't fetch notifications");
             } else {
                 setNotifications((data || []).filter((n) => !readIds.includes(n.id)));
+                const time = new Date();
+                localStorage.setItem('last_checked_notification', JSON.stringify(time));
             }
         };
 
