@@ -34,7 +34,7 @@ const AccountSettings = () => {
 
     const [name, setName] = useState(user?.name || '');
     const [college, setCollege] = useState(user?.college || '');
-    const [targetYear, setTargetYear] = useState(user?.targetYear ?? 2026);
+    const [targetYear, setTargetYear] = useState(user?.target_year ?? 2026);
 
     const handleSaveButton = () => {
         const updated = { ...user, name, college, targetYear };
@@ -59,7 +59,7 @@ const AccountSettings = () => {
                     </div>
                     <div>
                         <h3 className="font-medium">{user?.name ? user.name : 'Anonymous User'}</h3>
-                        <p className="text-sm text-gray-500">GATE {user?.targetYear} Aspirant</p>
+                        <p className="text-sm text-gray-500">GATE {user?.target_year} Aspirant</p>
                         <p className="text-sm text-gray-500">{user?.college}</p>
                     </div>
                 </div>
