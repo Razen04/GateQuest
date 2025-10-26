@@ -30,79 +30,84 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         // 2. SIGNED_IN (on new login)
         // 3. SIGNED_OUT (on logout)
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            const supaUser = session?.user || null;
-            setUser(supaUser);
+            try {
+                const supaUser = session?.user || null;
+                setUser(supaUser);
 
-            if (supaUser) {
-                let profile = null;
+                if (supaUser) {
+                    let profile = null;
 
-                // Upsert runs only on New User Login
-                if (_event === 'SIGNED_IN') {
-                    const { data, error } = await supabase
-                        .from('users')
-                        .upsert({
-                            id: supaUser.id,
-                            email: supaUser.email,
-                            name: supaUser.user_metadata.full_name,
-                            avatar: supaUser.user_metadata.avatar_url,
-                        })
-                        .select()
-                        .single();
+                    // Upsert runs only on New User Login
+                    if (_event === 'SIGNED_IN') {
+                        const { data, error } = await supabase
+                            .from('users')
+                            .upsert({
+                                id: supaUser.id,
+                                email: supaUser.email,
+                                name: supaUser.user_metadata.full_name,
+                                avatar: supaUser.user_metadata.avatar_url,
+                            })
+                            .select()
+                            .single();
 
-                    if (error) {
-                        console.error('An error occurred while logging in: ', error);
-                        return;
+                        if (error) {
+                            console.error('An error occurred while logging in: ', error);
+                        }
+
+                        // Set profile with the new data received
+                        profile = data;
+                    } else if (_event === 'INITIAL_SESSION') {
+                        // A select for a normal page load
+                        const { data, error } = await supabase
+                            .from('users')
+                            .select('*')
+                            .eq('id', supaUser.id)
+                            .single();
+
+                        if (error) {
+                            console.error('An error occurred while loading session: ', error);
+                        }
+
+                        // Set profile of the existing user
+                        profile = data;
                     }
+                    // Note: Nothing is done on TOKEN_REFRESHED
 
-                    // Set profile with the new data received
-                    profile = data;
-                } else if (_event === 'INITIAL_SESSION') {
-                    // A select for a normal page load
-                    const { data, error } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', supaUser.id)
-                        .single();
-
-                    if (error) {
-                        console.error('An error occurred while loading session: ', error);
-                        return;
-                    }
-
-                    // Set profile of the existing user
-                    profile = data;
-                }
-                // Note: Nothing is done on TOKEN_REFRESHED
-
-                if (profile) {
-                    const normalizedProfile = {
-                        ...profile,
-                        bookmark_questions: profile.bookmark_questions || [],
-                        college: profile.college || '',
-                        target_year: profile.target_year || 2026,
-                        settings: {
-                            ...{
-                                sound: true,
-                                autoTimer: true,
-                                darkMode: true,
-                                shareProgress: true,
-                                dataCollection: true,
+                    if (profile) {
+                        const normalizedProfile = {
+                            ...profile,
+                            bookmark_questions: profile.bookmark_questions || [],
+                            college: profile.college || '',
+                            target_year: profile.target_year || 2026,
+                            settings: {
+                                ...{
+                                    sound: true,
+                                    autoTimer: true,
+                                    darkMode: true,
+                                    shareProgress: true,
+                                    dataCollection: true,
+                                },
+                                ...profile.settings,
                             },
-                            ...profile.settings,
-                        },
-                    };
+                        };
 
-                    localStorage.setItem('gate_user_profile', JSON.stringify(normalizedProfile));
-                    updateStats(supaUser); // This now only runs ONCE per load.
+                        localStorage.setItem(
+                            'gate_user_profile',
+                            JSON.stringify(normalizedProfile),
+                        );
+                        updateStats(supaUser); // This now only runs ONCE per load.
+                    }
+                } else {
+                    if (_event === 'SIGNED_OUT') {
+                        // Clear local storage on logout
+                        localStorage.removeItem('gate_user_profile');
+                    }
                 }
-            } else {
-                if (_event === 'SIGNED_OUT') {
-                    // Clear local storage on logout
-                    localStorage.removeItem('gate_user_profile');
-                }
+            } catch (e) {
+                console.error('Error occurred: ', e);
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         });
 
         // Cleanup the listener when the component unmounts to prevent memory leaks.
