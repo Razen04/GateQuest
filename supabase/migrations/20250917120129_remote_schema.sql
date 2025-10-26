@@ -86,7 +86,7 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 CREATE TABLE IF NOT EXISTS "public"."notifications" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL PRIMARY KEY,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "title" "text",
     "message" "text",
@@ -97,7 +97,7 @@ ALTER TABLE "public"."notifications" OWNER TO "postgres";
 COMMENT ON TABLE "public"."notifications" IS 'In-app notifications';
 
 CREATE TABLE IF NOT EXISTS "public"."question_peer_stats" (
-    "question_id" "uuid" NOT NULL,
+    "question_id" "uuid" NOT NULL PRIMARY KEY,
     "total_attempts" integer DEFAULT 0 NOT NULL,
     "correct_attempts" integer DEFAULT 0 NOT NULL,
     "wrong_attempts" integer DEFAULT 0 NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS "public"."question_peer_stats" (
 ALTER TABLE "public"."question_peer_stats" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."question_reports" (
-    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL,
+    "id" "uuid" DEFAULT "extensions"."uuid_generate_v4"() NOT NULL PRIMARY KEY,
     "user_id" "uuid" NOT NULL,
     "question_id" "uuid",
     "report_type" "text",
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS "public"."question_reports" (
 ALTER TABLE "public"."question_reports" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."questions" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL PRIMARY KEY,
     "year" integer NOT NULL,
     "question_number" integer,
     "subject" "text" NOT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS "public"."questions" (
 ALTER TABLE "public"."questions" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."user_question_activity" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL PRIMARY KEY,
     "user_id" "uuid",
     "question_id" "text",
     "subject" "text",
@@ -155,7 +155,7 @@ ALTER TABLE "public"."user_question_activity" OWNER TO "postgres";
 COMMENT ON TABLE "public"."user_question_activity" IS 'For the dashboard';
 
 CREATE TABLE IF NOT EXISTS "public"."users" (
-    "id" "uuid" DEFAULT "auth"."uid"() NOT NULL,
+    "id" "uuid" DEFAULT "auth"."uid"() NOT NULL PRIMARY KEY,
     "joined_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "email" "text",
     "name" "text",
@@ -176,9 +176,35 @@ ALTER TABLE "public"."users" OWNER TO "postgres";
 -- ADDED "IF NOT EXISTS"
 CREATE INDEX IF NOT EXISTS "idx_uqa_question_first_attempt" ON "public"."user_question_activity" USING "btree" ("question_id") WHERE ("attempt_number" = 1);
 
--- All "ADD CONSTRAINT ... FOREIGN KEY" blocks removed.
--- All "ADD CONSTRAINT ... PRIMARY KEY" blocks removed.
--- All "ADD CONSTRAINT ... UNIQUE" blocks removed.
+
+ALTER TABLE ONLY "public"."question_reports"
+    ADD CONSTRAINT "unique_report_per_user_per_question" UNIQUE ("user_id", "question_id");
+
+
+
+ALTER TABLE ONLY "public"."question_reports"
+    ADD CONSTRAINT "fk_question_reports_user" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."question_peer_stats"
+    ADD CONSTRAINT "question_peer_stats_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."question_reports"
+    ADD CONSTRAINT "question_reports_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."question_reports"
+    ADD CONSTRAINT "question_reports_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."user_question_activity"
+    ADD CONSTRAINT "user_question_activity_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
+
 
 
 -- MODIFIED POLICIES to be idempotent (DROP IF EXISTS + CREATE)

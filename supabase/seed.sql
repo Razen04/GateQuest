@@ -53,7 +53,7 @@ VALUES (
 );
 
 -- Create a corresponding user profile in the public schema
-INSERT INTO public.users (id, name, email, college, "targetYear")
+INSERT INTO public.users (id, name, email, college, target_year)
 VALUES
 ('00000000-0000-0000-0000-000000000001'::uuid, 'Test User', 'test@example.com', 'GATEQuest University', 2026);
 
