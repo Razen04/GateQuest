@@ -219,7 +219,7 @@ const QuestionCard = () => {
 
     return (
         // The main container div
-        <div className="mx-auto max-w-4xl mt-4 p-6">
+        <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
             <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
                 <button
                     onClick={handleBack}
@@ -230,7 +230,7 @@ const QuestionCard = () => {
                 </button>
             </div>
             {/* The main card container with scrolling behavior. */}
-            <div className="max-w-4xl mx-auto h-screen pb-60 mt-6 rounded-xl shadow-sm overflow-y-scroll dark:text-white border-border-primary dark:border-border-primary-dark">
+            <div className="max-w-5xl 2xl:max-w-7xl mx-auto h-screen pb-60 mt-6 rounded-xl shadow-sm overflow-y-scroll dark:text-white border-border-primary dark:border-border-primary-dark">
                 {/* Pass all the necessary data down to the header component. */}
                 <QuestionHeader
                     subject={subject}
