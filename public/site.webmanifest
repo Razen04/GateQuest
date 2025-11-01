@@ -58,6 +58,12 @@
             "label": "Multiple Choice Mode"
         },
         {
+            "src": "/screenshots/Settings.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "Settings for your need"
+        },
+        {
             "src": "/screenshots/About.png",
             "sizes": "1080x1920",
             "type": "image/png",
