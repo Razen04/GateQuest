@@ -15,7 +15,7 @@ export default function ModernLoader() {
 
     return (
         <div
-            className="w-full h-[70vh] flex flex-col items-center justify-center bg-transparent"
+            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-900"
             role="status"
             aria-busy="true"
         >
