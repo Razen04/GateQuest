@@ -138,6 +138,8 @@ Commit the new migration file along with any other code changes. The migration f
 
 ## 🧑‍💻 Maintainer Workflow (Deploying Migrations)
 
+> Never delete any migration as it acts as a history. If done any mistake then revert previous migration using a new migration but never delete that old migration.
+
 This section is for project maintainers.
 
 1.  Review and merge the contributor's Pull Request containing the new migration file.

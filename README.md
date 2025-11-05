@@ -44,6 +44,9 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
     <td><img src="public/screenshots/MCQ.png" alt="MCQ Page" width="400"></td>
     <td><img src="public/screenshots/About.png" alt="About Page" width="400"></td>
   </tr>
+  <tr>
+      <td><img src="public/screenshots/Settings.png" alt="Settings Page" width="400"></td>
+  </tr>
 </table>
 </details>
 
@@ -82,13 +85,18 @@ GateQuest/
 │   ├── hooks/             # Custom React hooks
 │   ├── pages/             # Top-level page components
 │   ├── routes/            # Route definitions
+│   ├── types/             # TypeScript types and interfaces
 │   ├── utils/             # Utility functions
-│   ├── App.jsx            # Main application component
-│   ├── main.jsx           # Application entry point
+│   ├── App.tsx            # Main application component
+│   ├── main.tsx           # Application entry point
 │   └── index.css          # Global and Tailwind CSS styles
-├── .github/               # GitHub-specific files
-├── supabaseClient.js      # Supabase client initialization
-├── vite.config.js         # Vite configuration
+│   └── helper.ts          # Helper functions which are used throughout app
+├── supabase/              # Supabase local development configuration
+├── .github/               # GitHub-specific files (workflows, templates)
+├── .husky/                # Husky pre-commit hooks
+├── eslint.config.ts       # ESLint configuration
+├── tsconfig.json          # TypeScript configuration
+├── vite.config.ts         # Vite configuration
 ├── package.json           # Project dependencies and scripts
 └── README.md              # This file
 ```
@@ -101,6 +109,7 @@ To get a local copy up and running, follow these simple steps.
 
 - [Node.js](https://nodejs.org/en/) (v18.x or later)
 - [npm](https://www.npmjs.com/)
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
 
 ### Installation
 
@@ -113,21 +122,39 @@ To get a local copy up and running, follow these simple steps.
     ```sh
     npm install
     ```
-3.  **Set up environment variables:**
+3.  **Set up local Supabase instance:**
+    - Start the Supabase services:
+        ```sh
+        supabase start
+        ```
+    - The CLI will output your local Supabase URL, anon key, and service role key.
+    - Read more about the Supabase Setup in [SUPABASE_GUIDE](SUPABASE_GUIDE.md)
+    - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](SUPABASE_DOCUMENTATION.md)
+4.  **Set up environment variables:**
     - Create a `.env` file in the root directory.
     - Add your Supabase project URL and anon key:
         ```env
         VITE_SUPABASE_PROJECT_URL=your_supabase_url
         VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
         ```
-4.  **Run the development server:**
+5.  **Run the development server:**
     ```sh
     npm run dev
     ```
-5.  **Build for production:**
+6.  **Build for production:**
     ```sh
     npm run build
     ```
+
+### Available Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the app for production.
+- `npm run lint`: Lints the codebase using ESLint.
+- `npm run format`: Formats the code using Prettier.
+- `npm test`: Runs tests using Vitest.
+- `npm run supabase:start`: Starts the local Supabase Docker container.
+- `npm run supabase:stop`: Stops the local Supabase Docker container.
 
 ## 🤝 Contributing
 
@@ -137,7 +164,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 1.  Fork the Project
 2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+3.  Commit your Changes (`git commit -m 'Added some AmazingFeature'`)
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 

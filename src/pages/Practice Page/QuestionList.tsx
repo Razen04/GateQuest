@@ -149,7 +149,7 @@ const QuestionsList = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="p-6 mt-4 dark:text-white max-w-4xl mx-auto"
+                className="p-6  dark:text-white max-w-4xl mx-auto"
             >
                 {/* The header component gets the back handler and some data to display stats. */}
                 <Header
