@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CaretDown, Funnel, MagnifyingGlass } from '@phosphor-icons/react';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '../../Dropdown.tsx';
 
 type SearchAndFiltersProps = {
     searchQuery: string;
@@ -72,61 +73,132 @@ const SearchAndFilters = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
                             <div>
                                 <label className="block font-medium mb-2">Difficulty</label>
-                                <select
-                                    className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+
+                                <Select
+                                    onValueChange={(value) => setDifficultyFilter(value)}
                                     value={difficultyFilter}
-                                    onChange={(e) => setDifficultyFilter(e.target.value)}
                                 >
-                                    <option value="all">All Difficulties</option>
-                                    <option value="Easy">Easy</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Hard">Hard</option>
-                                </select>
+                                    <SelectTrigger
+                                        className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {
+                                                [
+                                                    { label: "All Difficulties", value: "all" },
+                                                    { label: "Easy", value: "Easy" },
+                                                    { label: "Medium", value: "Medium" },
+                                                    { label: "Hard", value: "Hard" },
+                                                ].map((option, index) => (
+                                                    <SelectItem
+                                                        key={index}
+                                                        value={option.value}
+                                                    >{option.label}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
                             </div>
 
                             <div>
                                 <label className="block font-medium mb-2">Year</label>
-                                <select
-                                    className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+
+                                <Select
+                                    onValueChange={(value) => setYearFilter(value)}
                                     value={yearFilter}
-                                    onChange={(e) => setYearFilter(e.target.value)}
                                 >
-                                    <option value="all">All Years</option>
-                                    {years.map((year) => (
-                                        <option key={year} value={year}>
-                                            {year}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem
+                                                value={"all"}
+                                            >All Years</SelectItem>
+
+                                            {
+                                                years.map((year) => (
+                                                    <SelectItem
+                                                        key={year}
+                                                        value={year.toString()}
+                                                    >{year}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
                             </div>
 
                             <div>
                                 <label className="block font-medium mb-2">Topic</label>
-                                <select
-                                    className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+
+                                <Select
+                                    onValueChange={(value) => setTopicFilter(value)}
                                     value={topicFilter}
-                                    onChange={(e) => setTopicFilter(e.target.value)}
                                 >
-                                    <option value="all">All Topics</option>
-                                    {topics.map((topic) => (
-                                        <option key={topic} value={topic}>
-                                            {topic}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <SelectTrigger
+                                        className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem
+                                                value={"all"}
+                                            >All Topics</SelectItem>
+
+                                            {
+                                                topics.map((topic) => (
+                                                    <SelectItem
+                                                        key={topic}
+                                                        value={topic || ""}
+                                                    >{topic}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
                             </div>
 
                             <div>
                                 <label className="block font-medium mb-2">Attempts</label>
-                                <select
-                                    className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+
+                                <Select
+                                    onValueChange={(value) => setAttemptFilter(value)}
                                     value={attemptFilter}
-                                    onChange={(e) => setAttemptFilter(e.target.value)}
                                 >
-                                    <option value="all">All</option>
-                                    <option value="attempted">Attempted Questions</option>
-                                    <option value="unattempted">Unattempted Questions</option>
-                                </select>
+                                    <SelectTrigger
+                                        className="w-full p-2 border border-gray-200 dark:border-zinc-800 rounded-lg"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+
+                                            {
+                                                [
+                                                    {label: "All", value: "all"},
+                                                    {label: "Attempted Questions", value: "attempted"},
+                                                    {label: "Unattempted Questions", value: "unattempted"},
+                                                ].map((attempt) => (
+                                                    <SelectItem
+                                                        key={attempt.value}
+                                                        value={attempt.value}
+                                                    >{attempt.label}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
                             </div>
                         </div>
                     </motion.div>

@@ -28,6 +28,7 @@
     "dependencies": {
         "@nivo/calendar": "^0.99.0",
         "@phosphor-icons/react": "^2.1.10",
+        "@radix-ui/react-select": "^2.2.6",
         "@supabase/auth-ui-react": "^0.4.7",
         "@supabase/auth-ui-shared": "^0.1.8",
         "@supabase/supabase-js": "^2.50.4",
@@ -38,13 +39,15 @@
         "date-fns": "^4.1.0",
         "framer-motion": "^12.11.0",
         "katex": "^0.16.22",
+        "lucide-react": "^0.545.0",
         "lz-string": "^1.5.0",
         "prismjs": "^1.30.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "react-katex": "^3.1.0",
         "react-router-dom": "^7.6.0",
-        "sonner": "^2.0.6"
+        "sonner": "^2.0.6",
+        "tailwind-merge": "^3.3.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.25.0",
