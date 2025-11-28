@@ -15,6 +15,7 @@ import SettingsRoutes from './SettingsRoutes.js';
 import About from '../pages/About.jsx';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.ts';
+import DonationPage from '../pages/Donations.tsx';
 
 /**
  * @function AppRoutes
@@ -57,6 +58,7 @@ export default function AppRoutes() {
                         <Route path="settings/*" element={<SettingsRoutes />} />
                         {/* A static 'About' page. */}
                         <Route path="about" element={<About landing={false} />} />
+                        <Route path="donate" element={<DonationPage />} />
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />

@@ -40,6 +40,7 @@
         "katex": "^0.16.22",
         "lz-string": "^1.5.0",
         "prismjs": "^1.30.0",
+        "qrcode.react": "^4.2.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "react-katex": "^3.1.0",

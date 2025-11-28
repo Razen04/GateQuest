@@ -4,6 +4,7 @@ import { Notification } from '@phosphor-icons/react';
 import NotificationDialog from './NotificationDialog.js';
 import useWindowSize from '../hooks/useWindowSize.ts';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -11,6 +12,8 @@ const Navbar = () => {
     const notificationRef = useRef<HTMLDivElement | null>(null);
 
     const { width } = useWindowSize();
+
+    const navigate = useNavigate();
 
     // Handle click outside notification panel to close it
     const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -96,14 +99,9 @@ const Navbar = () => {
                             className="cursor-pointer"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/donate')}
                         >
-                            <a
-                                href="https://buymeachai.ezee.li/Razen"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                <Coffee size={20} />
-                            </a>
+                            <Coffee size={20} />
                         </motion.button>
                     )}
                     <motion.button

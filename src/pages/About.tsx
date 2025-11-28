@@ -4,6 +4,7 @@ import { faqs } from '../data/faqs.js';
 import AccordionItem from '../components/About/AccordionItem.js';
 import { Book, DiscordLogo, GithubLogo, Heart, Coffee } from '@phosphor-icons/react';
 import { fadeInUp, stagger } from '../utils/motionVariants.js';
+import { useNavigate } from 'react-router-dom';
 
 type Answer =
     | {
@@ -42,6 +43,8 @@ type AboutProps = {
 };
 
 const About = ({ landing = false }: AboutProps) => {
+    const navigate = useNavigate();
+
     return (
         <div
             className={`mx-auto p-4 sm:p-8 pb-40 dark:text-white ${landing ? '' : 'overflow-scroll max-h-screen'}`}
@@ -128,16 +131,15 @@ const About = ({ landing = false }: AboutProps) => {
                                 <DiscordLogo className="mr-2" /> Discord
                             </motion.a>
                         </div>
-                        <motion.a
+                        <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            href="https://buymeachai.ezee.li/Razen"
-                            target="_blank"
+                            onClick={() => navigate('/donate')}
                             rel="noopener noreferrer"
-                            className="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
+                            className="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg cursor-pointer"
                         >
                             <Coffee className="mr-2" /> Buy Me A Chai
-                        </motion.a>
+                        </motion.button>
                     </div>
                 </motion.div>
             </motion.section>
