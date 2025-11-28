@@ -115,5 +115,28 @@ ON CONFLICT (question_id) DO NOTHING;
 SELECT refresh_question_peer_stats();
 
 
+------------------------------
+-- 5. DOANTIONS --
+------------------------------
+INSERT INTO donations (user_id, anonymous, message, suggested_amount, actual_amount, utr, verified)
+VALUES
+('00000000-0000-0000-0000-000000000001'::uuid, FALSE, 'Keep up the great work!', 50.00, 50.00, 'UTR12345', TRUE);
+
+INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
+VALUES
+(TRUE, NULL, 100.00, 100.00, 'UTR12346', FALSE);
+
+INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
+VALUES
+(FALSE, 'Happy to support!', 75.50, 75.50, 'UTR12347', TRUE);
+
+INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
+VALUES
+(FALSE, 'Love this project ❤️', 200.00, 200.00, 'UTR12348', TRUE);
+
+INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
+VALUES
+(TRUE, NULL, 150.00, 150.00, 'UTR12349', FALSE);
+
 -- Restore the original replication role
 SET session_replication_role = origin;
