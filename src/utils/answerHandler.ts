@@ -33,9 +33,9 @@ export const submitAndRecordAnswer = async ({
 
     if (wasAttempted) {
         if (isNumericalQuestion(currentQuestion)) {
-            const correctAnswer = currentQuestion.correct_answer;
-            const answerToCheck = numericalAnswer;
-            isCorrect = typeof answerToCheck === 'number' && answerToCheck === correctAnswer;
+            const correctAnswer = currentQuestion.correct_answer.toString();
+            const answerToCheck = numericalAnswer?.toString();
+            isCorrect = answerToCheck === correctAnswer;
         } else {
             // This logic works for both MCQ and MSQ.
             function arraysMatch(a: number[], b: number[]) {
