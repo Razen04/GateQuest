@@ -278,16 +278,11 @@ const Sidebar = ({ showSidebar, setShowSidebar }: SidebarProp) => {
                                 </a>
                             </button>
                             <button
-                                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
+                                className="p-2 cursor-pointer rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white border-b border-green-500"
                                 aria-label="Support Me"
+                                onClick={() => navigate('/donate')}
                             >
-                                <a
-                                    href="https://buymeachai.ezee.li/Razen"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Coffee size={20} />
-                                </a>
+                                <Coffee size={20} />
                             </button>
                         </div>
 

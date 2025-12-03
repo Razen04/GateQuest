@@ -1,9 +1,14 @@
 node_modules
 dist
+dev_dist
 build
 package-lock.json
 package.json
 README.md
+SUPABASE_GUIDE.md
+SUPABASE_DOCUMENTATION.md
+CONTRIBUTION.md
+CODE_OF_CONDUCT.md
 eslint.config.js
 .gitignore
 vite.config.js

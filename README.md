@@ -6,8 +6,6 @@
   <p align="center">
     A modern, open-source GATE exam practice and preparation app designed to help you ace your exams.
     <br />
-    <a href="https://gatequest.vercel.app/">View Demo</a>
-    ·
     <a href="https://github.com/Razen04/GateQuest/issues">Report Bug</a>
     ·
     <a href="https://github.com/Razen04/GateQuest/issues">Request Feature</a>

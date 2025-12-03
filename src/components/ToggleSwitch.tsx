@@ -10,7 +10,7 @@ type ToggleSwitchProp = {
 const ToggleSwitch = ({ label, onToggle, isOn }: ToggleSwitchProp) => {
     return (
         <div className="flex items-center justify-between py-3">
-            <span>{label}</span>
+            <span className="text-black dark:text-gray-100">{label}</span>
             <button
                 onClick={onToggle}
                 className={`w-12 h-6 flex cursor-pointer items-center rounded-full p-1 transition-all duration-300 ${
