@@ -4,26 +4,29 @@ import type { DonationData, newDonation } from '../types/Donation.ts';
 
 export function useDonations() {
     const [donations, setDonations] = useState<DonationData[] | []>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState(false);
 
     // Fetching verified donations (joined with users)
     const loadDonations = useCallback(async () => {
         setLoading(true);
-        const { data, error } = await supabase.rpc('get_verified_donations');
+        const { data, error: SupabaseError } = await supabase.rpc('get_verified_donations');
 
-        console.log('Data: ', data);
-        if (error) {
-            console.error('Error loading donations:', error);
+        if (SupabaseError) {
+            console.error('Error loading donations:', SupabaseError);
+
+            setError(true);
+
             setLoading(false);
             return;
         }
 
         // Now this part will work again
-        const rawData = data;
+        const rawData = data || [];
 
         const formatted: DonationData[] = rawData.map((d: DonationData) => ({
             ...d,
-            user_name: d.anonymous ? 'Anonymous' : d.user_name || 'Unknown',
+            user_name: d.anonymous ? 'Anonymous' : d.user_name || 'Anonymous',
         }));
 
         setDonations(formatted);
@@ -33,7 +36,6 @@ export function useDonations() {
     // Add new donation
     const addDonation = useCallback(
         async ({ userId, amount, message, anonymous, utr }: newDonation) => {
-            console.log('User ID: ', userId);
             const { data, error } = await supabase.from('donations').insert([
                 {
                     user_id: userId,
@@ -55,5 +57,5 @@ export function useDonations() {
         [],
     );
 
-    return { donations, loading, addDonation, loadDonations };
+    return { donations, loading, error, addDonation, loadDonations };
 }

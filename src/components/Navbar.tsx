@@ -96,7 +96,7 @@ const Navbar = () => {
                     {isMobile && (
                         <motion.button
                             aria-label="Support Me"
-                            className="cursor-pointer"
+                            className="relative cursor-pointer border-b border-green-500"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate('/donate')}
