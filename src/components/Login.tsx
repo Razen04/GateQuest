@@ -1,7 +1,8 @@
 import { GoogleLogo, X } from '@phosphor-icons/react';
-import Buttons from './Buttons.js';
+
 import useAuth from '../hooks/useAuth.ts';
 import { supabase } from '../utils/supabaseClient.ts';
+import Buttons from './ui/Buttons.tsx';
 
 type LoginProp = {
     canClose?: boolean;

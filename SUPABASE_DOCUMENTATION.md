@@ -180,11 +180,35 @@ Stores in-app notifications to be displayed to users.
 
 Custom SQL functions to handle complex logic directly in the database.
 
-### Function: `insert_user_question_activity_batch(batch jsonb)`
+### Function: `user_question_activity_batch(batch jsonb)`
 
-- **Purpose:** To efficiently insert multiple user activity records at once. This is more performant than making many individual API calls from the client.
-- **Arguments:** Takes a single `jsonb` argument named `batch`, which should be a JSON array of activity objects.
-- **Logic:** It loops through each object in the `batch` array and performs an `INSERT` into the `user_question_activity` table. It automatically calculates the `attempt_number` for each user on each question.
+- **Purpose:**
+    - This function processes a batch of user question attempts and records each attempt in the `user_question_activity` table. It also updates the `user_incorrect_queue` table based on whether the user answered correctly or incorrectly. The function supports batch processing for efficiency and ensures atomicity via transactions.
+
+- **Arguments:**
+    - **batch (jsonb):** A JSON array containing multiple question attempt records. Each record should include the following fields:
+        - `user_id` (uuid): The ID of the user attempting the questions.
+        - `question_id` (uuid): The ID of the question.
+        - `subject` (string): The subject of the question.
+        - `is_correct` (boolean): Whether the user answered correctly.
+        - `time_taken` (int): The time (in seconds) taken to answer the question.
+        - `attempted_at` (timestamptz): The timestamp of when the question was attempted.
+
+- **Logic:**
+    - **Transaction Handling:** The entire process runs within a transaction to ensure that either all inserts/updates succeed or none of them are applied in case of failure.
+    - **Batch Processing:** The function processes each question attempt in the provided `batch` and inserts records into the `user_question_activity` table, calculating the `attempt_number` for each attempt.
+    - **Updating the Queue:** Based on whether the answer was correct or incorrect, the function updates the `user_incorrect_queue` table. Correct answers move questions up in the queue, and incorrect answers move them back to box 1.
+    - **New Questions:** If the question is not already in the queue, it is inserted into box 1.
+    - **Error Handling:** If anything goes wrong during the process, the transaction is rolled back, ensuring no partial data changes.
+
+- **Return Value:**
+    - **None.**
+
+- **Example:**
+  Given a batch of questions attempted, this function processes them and updates the database accordingly. If the question is answered correctly, the question's box is updated or removed if it reaches box 3. If answered incorrectly, it moves back to box 1.
+
+- **Exceptions:**
+    - If an error occurs at any point in the function (e.g., issue with database insert/update), the transaction is rolled back, and no changes are persisted.
 
 ### Function: `refresh_question_peer_stats()`
 
@@ -192,3 +216,180 @@ Custom SQL functions to handle complex logic directly in the database.
 - **Arguments:** None.
 - **Logic:** It queries the `user_question_activity` table, grouping by `question_id` to calculate the total attempts, correct/wrong counts, and average time taken for first attempts (`attempt_number = 1`). It then uses `ON CONFLICT DO UPDATE` to either insert a new stats row or update an existing one for each question.
 - **Security:** This function is `SECURITY DEFINER`, meaning it runs with the permissions of the user who defined it (the database owner), allowing it to safely read all activity data to generate accurate stats.
+
+### Function: `generate_weekly_revision_set()`
+
+- **Purpose**: To generate a weekly revision set for a user based on their progress in the `user_incorrect_queue` table. This function selects questions for revision, prioritizing based on the Leitner lite system (3-box system) and ranks them to ensure the most relevant questions are reviewed first. It creates a new revision set for the week if one doesn't already exist.
+- **Arguments**: None: This function does not accept any external parameters. It derives the user ID (v_user_id) from the current authenticated user using `auth.uid()`.
+- **Logic**:
+    - **Authentication Check**: The function first checks if the user is authenticated. If not, it raises an exception.
+    - **Start of the Week Calculation**: It calculates the start of the current week (Sunday) to prevent generating multiple revision sets for the same week.
+    - **Existing Set Check**: It checks if a revision set has already been created for the user for the current week. If found, it returns the existing set ID and a message.
+    - **Creating New Revision Set**: If no set exists, it inserts a new entry in the `weekly_revision_set` table with a status of pending.
+    - **Populating Revision Set**:
+        - The function selects questions from the `user_incorrect_queue` table that are due for review (i.e., next_review_at is less than or equal to the current date).
+        - It then ranks the questions within each box using `ROW_NUMBER()`, ensuring that the questions from _box 3_ are given priority, followed by _box 2_, and then _box 1_.
+        - A maximum of 30 questions are selected to populate the revision set.
+    - **Return**: The function returns a JSON object with the `set_id`, `status`, the count of questions added to the set, and a success message.
+- **Return Value**:
+    - A `json` object containing:
+        - **set_id**: The ID of the generated or existing weekly revision set.
+        - **status**: Either existing (if the set already exists) or created (if a new set is generated).
+        - **questions_count**: The number of questions added to the revision set.
+        - **message**: A message indicating whether the set was newly created or already exists.
+- **Example**:
+    ```json
+    {
+        "set_id": "uuid",
+        "status": "created",
+        "questions_count": 30,
+        "message": "Generated new smart revision set."
+    }
+    ```
+- **Exceptions**:
+    - If the user is not authenticated, an exception is raised with the message Not authenticated.
+    - If an error occurs during the function execution, a general error message is raised.
+
+### Function: `update_status_of_weekly_set(v_set_id uuid)`
+
+- **Purpose:**
+    - To update the status of a weekly revision set to `expired` after 24 hours have passed from the `started_at` time. This function is invoked from the client-side to ensure that the set cannot be used after the expiration period has passed. It provides feedback on whether the set was updated successfully or if there was an issue (e.g., set not found or already expired).
+
+- **Arguments:**
+    - **v_set_id (uuid):** The unique identifier of the weekly revision set to be updated.
+
+- **Logic:**
+    - **Authentication Check:**
+        - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+    - **Set Status Update:**
+        - The function attempts to update the status of the revision set with the given `v_set_id` to `'expired'`. The update happens only if the `generated_for` matches the authenticated user’s ID (`v_user_id`).
+    - **Rows Affected Check:**
+        - If no rows are affected by the `UPDATE` (i.e., the set was not found or has already been expired), the function returns a message indicating that the set was not found or is already expired.
+    - **Return Success or Failure:**
+        - If the status is successfully updated, a success message is returned indicating the revision set is now marked as expired.
+        - If the set could not be found, a failure message is returned.
+
+- **Return Value:**
+    - A `json` object with the following keys:
+        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+        - **message (string):** A message providing additional information about the outcome. It can either confirm the successful update or explain why the update was not performed (e.g., "No such weekly set found or already expired").
+
+- **Example:**
+    - **Success:**
+        ```json
+        {
+            "success": true,
+            "message": "Weekly set status updated to expired."
+        }
+        ```
+    - **Failure:**
+        ```json
+        {
+            "success": false,
+            "message": "No such weekly set found or already expired."
+        }
+        ```
+- **Exceptions**:
+    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+    - If no matching revision set is found or it is already expired, the function returns a failure message instead of an exception.
+
+### Function: `start_weekly_revision_set(v_set_id uuid)`
+
+- **Purpose:**
+    - To mark the weekly revision set as "started" by setting the `started_at` and `expires_at` timestamps. This function is invoked when the user starts revising a weekly set. It ensures that the set's status changes from `pending` to `started` and calculates an expiration time of 24 hours from the start time.
+
+- **Arguments:**
+    - **v_set_id (uuid):** The unique identifier of the weekly revision set that is being started.
+
+- **Logic:**
+    - **Authentication Check:**
+        - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+    - **Update Status:**
+        - The function attempts to update the `status` of the weekly revision set with the given `v_set_id` to `'started'` and sets the `started_at` and `expires_at` timestamps.
+        - The update occurs only if the set is currently in the `pending` state.
+    - **Check if Update Was Successful:**
+        - The function checks whether any rows were affected by the update (i.e., if the set was in `pending` status). If no rows were updated, it returns a failure message indicating that the set could not be started.
+    - **Return Success or Failure:**
+        - If the status is successfully updated, a success message is returned indicating the revision set has been started along with the `set_id`, `started_at`, and `expires_at` timestamps.
+        - If no matching set was found (i.e., it was not in `pending` status), a failure message is returned.
+
+- **Return Value:**
+    - A `json` object with the following keys:
+        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+        - **set_id (uuid):** The ID of the set that was updated.
+        - **started_at (timestamp):** The timestamp when the revision set was started.
+        - **expires_at (timestamp):** The timestamp when the revision set expires (24 hours from the start).
+        - **message (string):** A message providing additional information about the outcome.
+
+- **Example:**
+    - **Success:**
+        ```json
+        {
+            "success": true,
+            "set_id": "some-uuid",
+            "started_at": "2025-12-08T10:00:00Z",
+            "expires_at": "2025-12-09T10:00:00Z",
+            "message": "Weekly set started."
+        }
+        ```
+    - **Failure:**
+        ```json
+        {
+            "success": false,
+            "message": "Could not start the weekly set. It may not be in pending status or does not exist."
+        }
+        ```
+- **Exception**
+    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+    - If no matching revision set is found or if the set is not in the pending status, the function returns a failure message.
+
+### Function: `get_weekly_set()`
+
+- **Purpose:**
+    - To retrieve the currently available weekly revision set for the user. The function checks if the user has an active (pending or started) weekly revision set, and returns the set's details. If the set has expired, it is updated to an `expired` status before returning the set.
+
+- **Arguments:**
+    - **None.**
+
+- **Logic:**
+    - **Authentication Check:**
+        - The function retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+    - **Status Update:**
+        - The function calls the `update_status_of_weekly_set()` function to update any `pending` or `started` weekly revision set to `expired` if the time window has passed (24 hours from the `started_at` time).
+    - **Fetch Weekly Set:**
+        - After ensuring expired sets are updated, the function fetches the user's `weekly_revision_set` that is either `pending` or `started`.
+    - **Return Success or Failure:**
+        - If no matching revision set is found, the function returns a failure message (`No weekly set available for the user`).
+        - If a valid revision set is found, the function returns the set's details in JSON format, including the `success` status and the revision set details (`set_info`).
+
+- **Return Value:**
+    - A `json` object with the following keys:
+        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+        - **set_info (jsonb):** The details of the found weekly revision set (if available).
+        - **message (string):** A message providing additional information about the outcome.
+
+- **Example:**
+    - **Success:**
+        ```json
+        {
+            "success": true,
+            "set_info": {
+                "id": "some-uuid",
+                "generated_for": "some-uuid",
+                "start_of_week": "2025-12-07",
+                "status": "pending",
+                "created_at": "2025-12-07T00:00:00Z"
+            },
+            "message": "Weekly set available"
+        }
+        ```
+    - **Failure:**
+        ```json
+        {
+            "success": false,
+            "message": "No weekly set available for the user"
+        }
+        ```
+- **Exception**
+    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+    - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.

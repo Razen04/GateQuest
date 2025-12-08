@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import subjects from '../../data/subjects.ts';
 import { getBackgroundColor } from '../../helper.ts';
 import { useNavigate } from 'react-router-dom';
-import Buttons from '../../components/Buttons.tsx';
+
 import {
     containerVariants,
     fadeInUp,
@@ -11,6 +11,7 @@ import {
     stagger,
 } from '../../utils/motionVariants.ts';
 import type { SubjectStat } from '../../types/Stats.ts';
+import Buttons from '../../components/ui/Buttons.tsx';
 
 type FilterTabsType = {
     label: string;

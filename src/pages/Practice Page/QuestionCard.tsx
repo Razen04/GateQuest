@@ -24,7 +24,7 @@ import QuestionContent from '../../components/Practice/QuestionCard/QuestionCont
 import QuestionBadge from '../../components/Practice/QuestionCard/QuestionBadge.js';
 import ActionButtons from '../../components/Practice/QuestionCard/ActionButtons.js';
 import ResultMessage from '../../components/Practice/QuestionCard/ResultMessage.js';
-import ModernLoader from '../../components/ModernLoader.js';
+import ModernLoader from '../../components/ui/ModernLoader.tsx';
 import { ArrowLeft } from '@phosphor-icons/react';
 import useStats from '../../hooks/useStats.js';
 import useAuth from '../../hooks/useAuth.js';

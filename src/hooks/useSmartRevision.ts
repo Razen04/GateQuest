@@ -1,0 +1,177 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../utils/supabaseClient.ts';
+import type { AppUser } from '../types/AppUser.ts';
+import type { Question } from '../types/question.ts';
+import { getUserProfile } from '../helper.ts';
+import { useNavigate } from 'react-router-dom';
+import { stringify } from 'postcss';
+import { compress } from 'lz-string';
+
+export type RevisionQuestion = {
+    question: Question;
+    is_correct: boolean | null;
+    time_spent_seconds: number | null;
+};
+
+export type WeeklySet = {
+    success: boolean;
+    set_id: string; // UUID
+    start_of_week: string; // date string
+    status: 'pending' | 'started' | 'expired';
+    created_at: string; // timestamptz
+    started_at: string | null; // timestamptz
+    expires_at: string | null; // timestamptz
+    total_questions: number;
+    correct_count: number;
+    accuracy: number; // numeric(5,2)
+    questions: Array<{
+        question: Question;
+        is_correct: boolean | null;
+        time_spent_seconds: number | null;
+    }>;
+    message: string;
+};
+
+export type StartWeeklySetResponse = {
+    success: boolean;
+    set_id: string;
+    started_at: string | null;
+    expires_at: string | null;
+    message: string;
+};
+
+const useSmartRevision = () => {
+    // Getting the user
+    const user = getUserProfile();
+    const userId = user?.id;
+    const [loading, setLoading] = useState<boolean>(true);
+    const [currentSet, setCurrentSet] = useState<WeeklySet | null>(null);
+    const [questions, setQuestions] = useState<RevisionQuestion[]>([]);
+    const [criticalQuestionsCount, setCriticalQuestionsCount] = useState(0);
+
+    const navigate = useNavigate();
+
+    // Fetch current user and weekly set
+    const fetchCurrentSet = useCallback(async () => {
+        setLoading(true);
+        console.log('fetchCurrentSet ran');
+        try {
+            // Call RPC to get weekly set
+            const { data, error } = await supabase
+                .rpc('get_weekly_set')
+                .single()
+                .overrideTypes<WeeklySet>();
+
+            if (error) throw error;
+
+            if (data?.success) {
+                setCurrentSet(data);
+                console.log('Data: ', data);
+                setQuestions(data.questions || []);
+                // storing the questions in the localStorage
+                localStorage.setItem(
+                    'revision_set_questions',
+                    compress(JSON.stringify(data.questions)),
+                );
+            } else {
+                console.log('Message: ', data?.message);
+                setCurrentSet(null);
+                setQuestions([]);
+            }
+        } catch (err) {
+            console.error('Error fetching weekly set:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Generate a set
+    const generateSet = useCallback(async () => {
+        console.log('generateSet Ran');
+        setLoading(true);
+
+        try {
+            const { data, error } = await supabase.rpc('generate_weekly_revision_set');
+
+            if (error) throw error;
+            console.log('generateSet data: ', data);
+            if (data?.success) {
+                fetchCurrentSet();
+            }
+        } catch (err) {
+            console.error('Error generating set', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [fetchCurrentSet]);
+
+    // Start the set
+    const startSet = useCallback(async () => {
+        if (!currentSet) return;
+
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .rpc('start_weekly_revision_set', { v_set_id: currentSet.set_id })
+                .single()
+                .overrideTypes<StartWeeklySetResponse>();
+
+            if (error) throw error;
+
+            if (data?.success) {
+                // Update local state with started info
+                setCurrentSet({
+                    ...currentSet,
+                    started_at: data.started_at,
+                    expires_at: data.expires_at,
+                    status: 'started',
+                });
+            }
+
+            navigate(`/revision/${currentSet.set_id}`);
+        } catch (err) {
+            console.error('Error starting set:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [currentSet]);
+
+    // Find number of critical questions present in the user_incorrect_queue for the user
+    const getCriticalQuestionCount = useCallback(async () => {
+        if (!userId) return;
+
+        try {
+            // Use count() method to get the row count
+            const { error, count } = await supabase
+                .from('user_incorrect_queue')
+                .select('user_id', { count: 'exact' })
+                .eq('user_id', userId)
+                .eq('box', 1);
+
+            if (error) throw error;
+
+            setCriticalQuestionsCount(count ?? 0);
+        } catch (err) {
+            console.error('Error fetching critical question count:', err);
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        fetchCurrentSet();
+        getCriticalQuestionCount();
+    }, [fetchCurrentSet, getCriticalQuestionCount]);
+
+    return {
+        loading,
+        user,
+        currentSet,
+        questions,
+        generateSet,
+        fetchCurrentSet,
+        startSet,
+        criticalQuestionsCount,
+        getCriticalQuestionCount,
+    };
+};
+
+export default useSmartRevision;

@@ -1,8 +1,9 @@
 import React from 'react';
-import ToggleSwitch from '../../components/ToggleSwitch.tsx';
+
 import { ShieldCheck } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 import useSettings from '../../hooks/useSettings.ts';
+import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
 
 type PrivacyButtonsProps = {
     label: string;

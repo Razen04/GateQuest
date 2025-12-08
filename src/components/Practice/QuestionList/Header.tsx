@@ -22,7 +22,7 @@ const Header = ({ handleBack, filteredQuestions, attemptFilter }: HeaderProps) =
             <div className="flex">
                 <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 rounded-lg text-xs md:text-sm">
                     {filteredQuestions.length}{' '}
-                    {attemptFilter.charAt(0).toUpperCase() + attemptFilter.slice(1)} Questions
+                    {attemptFilter?.charAt(0).toUpperCase() + attemptFilter.slice(1)} Questions
                 </span>
             </div>
         </div>

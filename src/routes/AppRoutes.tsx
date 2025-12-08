@@ -4,7 +4,7 @@
  * It handles route protection based on authentication status, ensuring that users are directed appropriately based on whether they are logged in or not. It also orchestrates the overall page layout.
  */
 
-import ModernLoader from '../components/ModernLoader.js';
+import ModernLoader from '../components/ui/ModernLoader.tsx';
 import LandingPage from '../pages/LandingPage.jsx';
 import Layout from '../components/Layout.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
@@ -16,6 +16,8 @@ import About from '../pages/About.jsx';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.ts';
 import DonationPage from '../pages/Donations.tsx';
+import SmartRevision from '../pages/SmartRevision.tsx';
+import SmartRevisionQuestionList from '../components/SmartRevision/SmartRevisionQuestionList.tsx';
 
 /**
  * @function AppRoutes
@@ -59,6 +61,8 @@ export default function AppRoutes() {
                         {/* A static 'About' page. */}
                         <Route path="about" element={<About landing={false} />} />
                         <Route path="donate" element={<DonationPage />} />
+                        <Route path="revision" element={<SmartRevision />} />
+                        <Route path="revision/:rid" element={<SmartRevisionQuestionList />} />
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />

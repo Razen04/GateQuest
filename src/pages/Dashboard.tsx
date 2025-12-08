@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import Login from '../components/Login.tsx';
 import { getUserProfile } from '../helper.ts';
-import ModernLoader from '../components/ModernLoader.tsx';
+import ModernLoader from '../components/ui/ModernLoader.tsx';
 import StudyPlan from '../components/Dashboard/StudyPlan.jsx';
 import StreakMap from '../components/Dashboard/StreakMap.jsx';
 import StatCard from '../components/Dashboard/StatCard.jsx';
@@ -10,12 +10,14 @@ import { ChartLine, Info, Medal } from '@phosphor-icons/react';
 import { containerVariants } from '../utils/motionVariants.ts';
 import useAuth from '../hooks/useAuth.ts';
 import useStats from '../hooks/useStats.ts';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
     const { stats, loading: statsLoading } = useStats();
     const user = getUserProfile();
     const subjectStats = stats?.subjectStats;
+    const navigate = useNavigate();
 
     if (subjectStats) {
         localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
@@ -68,6 +70,13 @@ const Dashboard = () => {
                     </p>
                 </div>
             </motion.div>
+
+            <button
+                onClick={() => navigate('/revision')}
+                className="text-black dark:text-white p-4 border border-blue-500"
+            >
+                Smart Revision
+            </button>
 
             {/* Stats */}
             <motion.div

@@ -10,7 +10,7 @@ import useUrlFilters from '../../hooks/useUrlFilters.ts'; // Syncs filter state 
 import usePagination from '../../hooks/usePagination.ts'; // Handles the pagination logic.
 
 // 3. Component imports - Breaking the UI into smaller, manageable pieces.
-import ModernLoader from '../../components/ModernLoader.js';
+import ModernLoader from '../../components/ui/ModernLoader.tsx';
 import SearchAndFilters from '../../components/Practice/QuestionList/SearchAndFilters.js';
 import Header from '../../components/Practice/QuestionList/Header.js';
 import List from '../../components/Practice/QuestionList/List.js';

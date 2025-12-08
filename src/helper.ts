@@ -164,7 +164,7 @@ export const recordAttempt = async ({ buffer, user, updateStats }: recordAttempt
         }
     }
     // After syncing, immediately update the user's stats to reflect the new data.
-    await updateStats(user);
+    updateStats(user);
 
     toast.success('Attempt synced successfully!');
 };

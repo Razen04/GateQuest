@@ -1,5 +1,5 @@
 import React, { useState, type ChangeEvent } from 'react';
-import Buttons from '../../components/Buttons.tsx';
+import Buttons from '../../components/ui/Buttons.tsx';
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper.ts';
 import { User, UserCircle } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';

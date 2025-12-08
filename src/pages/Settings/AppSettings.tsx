@@ -1,4 +1,4 @@
-import ToggleSwitch from '../../components/ToggleSwitch.tsx';
+import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
 import { Faders } from '@phosphor-icons/react';
 import useSettings from '../../hooks/useSettings.ts';
 

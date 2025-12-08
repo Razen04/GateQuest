@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 import instructions from '../../data/donationInstructions.ts';
-import ToggleSwitch from '../ToggleSwitch.tsx';
+import ToggleSwitch from '../ui/ToggleSwitch.tsx';
 
 type DonationBoxProps = {
     setStep: React.Dispatch<React.SetStateAction<'form' | 'generateQR' | 'utr' | 'thankYou'>>;
