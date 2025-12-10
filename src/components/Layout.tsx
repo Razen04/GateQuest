@@ -44,7 +44,7 @@ function SyncOnUnload({ user, updateStats }: SyncOnUnloadProps) {
 
 const Layout = () => {
     const { updateStats } = useStats();
-    const [showSidebar, setShowSidebar] = useState(false);
+    const [showSidebar, setShowSidebar] = useState(true);
     const user = getUserProfile();
 
     return (

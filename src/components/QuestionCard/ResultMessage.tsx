@@ -1,9 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import MathRenderer from '../MathRenderer.js';
-import { useEffect, useRef } from 'react';
-import useSettings from '../../../hooks/useSettings.ts';
-import type { Question } from '../../../types/question.ts';
-import { getCorrectAnswerText } from '../../../utils/questionUtils.ts';
+import type { Question } from '../../types/question.ts';
+import { getCorrectAnswerText } from '../../utils/questionUtils.ts';
+import MathRenderer from '@/components/Renderers/MathRenderer.tsx';
 
 type ResultMessageProps = {
     showAnswer: boolean;
@@ -12,45 +10,13 @@ type ResultMessageProps = {
 };
 
 const ResultMessage = ({ showAnswer, result, currentQuestion }: ResultMessageProps) => {
-    const { settings } = useSettings();
-    // Use settings.sound value
-
-    const correctSoundRef = useRef<HTMLAudioElement | null>(null);
-    const wrongSoundRef = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        if (settings.sound) {
-            correctSoundRef.current = new Audio('/correct.wav');
-            correctSoundRef.current.preload = 'auto';
-
-            wrongSoundRef.current = new Audio('/wrong.wav');
-            wrongSoundRef.current.preload = 'auto';
-        }
-    }, [settings.sound]);
-
-    useEffect(() => {
-        if (!showAnswer || !settings.sound) return;
-
-        let soundToPlay = null;
-
-        if (result === 'correct') {
-            soundToPlay = correctSoundRef.current?.cloneNode() as HTMLAudioElement;
-        } else if (result === 'incorrect') {
-            soundToPlay = wrongSoundRef.current?.cloneNode() as HTMLAudioElement;
-        }
-
-        soundToPlay?.play().catch((e) => {
-            console.warn('Sound failed to play: ', e);
-        });
-    }, [showAnswer, result, settings.sound]);
-
     const correctAnswer = getCorrectAnswerText(currentQuestion);
 
     return (
         <AnimatePresence>
             {showAnswer && (
                 <motion.div
-                    className={`p-4 mb-6 rounded-lg ${
+                    className={`p-4 mb-6 ${
                         result === 'correct'
                             ? 'bg-green-50 text-green-700'
                             : result === 'incorrect'

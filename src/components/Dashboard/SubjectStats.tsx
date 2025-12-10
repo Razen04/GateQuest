@@ -29,7 +29,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
             initial="initial"
             animate="animate"
         >
-            <motion.div className="p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark">
+            <motion.div className="p-6 shadow-sm border border-border-primary dark:border-border-primary-dark">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
                         Subject Stats
@@ -56,13 +56,11 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                 return (
                                     <motion.div
                                         key={index}
-                                        className="min-w-[250px] sm:min-w-[280px] md:min-w-[300px] shadow-md rounded-xl border border-gray-100 dark:border-zinc-800 p-5 flex flex-col justify-between hover:shadow-lg hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                                        className="min-w-[250px] sm:min-w-[280px] md:min-w-[300px] shadow-md border border-gray-100 dark:border-zinc-800 p-5 flex flex-col justify-between hover:shadow-lg hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                                         whileHover={{ scale: 1.03 }}
                                     >
                                         <div className="flex items-center mb-4">
-                                            <div
-                                                className={`p-3 ${bgClass} rounded-lg text-white mr-3`}
-                                            >
+                                            <div className={`p-3 ${bgClass} text-white mr-3`}>
                                                 <Icon className={`h-6 w-6 ${bgClass}`} />
                                             </div>
                                             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">

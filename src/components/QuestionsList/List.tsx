@@ -1,14 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { getDifficultyClassNames, getQuestionDisplayText } from '../../../utils/questionUtils.ts';
+import { getDifficultyClassNames, getQuestionDisplayText } from '../../utils/questionUtils.ts';
 import Pagination from './Pagination.tsx';
-import MathRenderer from '../MathRenderer.tsx';
-import { fadeInUp, stagger } from '../../../utils/motionVariants.ts';
-import type { Question } from '../../../types/question.ts';
+import MathRenderer from '../Renderers/MathRenderer.tsx';
+import { fadeInUp, stagger } from '../../utils/motionVariants.ts';
+import type { Question } from '@/types/question.ts';
 
 type ListProps = {
     listRef: React.RefObject<HTMLDivElement | null>;
-    pageItems: Question[];
+    questions: Question[];
     handleQuestionClick: (id: string) => void;
     currentPage: number;
     totalPages: number;
@@ -17,7 +17,7 @@ type ListProps = {
 
 const List = ({
     listRef,
-    pageItems,
+    questions,
     handleQuestionClick,
     currentPage,
     totalPages,
@@ -30,21 +30,21 @@ const List = ({
             variants={stagger}
             viewport={{ once: true, amount: 0.2 }}
             ref={listRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-1 overflow-x-hidden overflow-y-scroll rounded-lg pb-32 max-h-[59vh]"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:grid-cols-1 overflow-x-hidden overflow-y-scroll pb-32 max-h-[59vh]"
         >
-            {pageItems.map((question: Question, index: number) => (
+            {questions.map((question: Question, index: number) => (
                 <motion.div
                     key={index}
                     variants={fadeInUp}
                     onClick={() => handleQuestionClick(question.id)}
-                    className="cursor-pointer border border-border-primary dark:border-border-primary-dark rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
+                    className="cursor-pointer border border-border-primary dark:border-border-primary-dark p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
                 >
                     <h3 className="font-medium mb-3 text-sm md:text-base">
                         <MathRenderer text={getQuestionDisplayText(question)} />
                     </h3>
                     <div className="flex justify-between items-center text-xs">
                         <span
-                            className={`font-bold md:font-normal px-2 py-1 md:rounded-xl rounded-full ${getDifficultyClassNames(
+                            className={`font-bold md:font-normal px-2 py-1 ${getDifficultyClassNames(
                                 question.difficulty,
                             )}`}
                         >

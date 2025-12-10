@@ -37,13 +37,13 @@ const Navbar = () => {
 
     return (
         <motion.div
-            className="py-4 px-6 flex justify-between items-center border-b bg-primary dark:bg-primary-dark border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark"
+            className="py-4 px-6 flex justify-between items-center border-b border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
         >
             <div className="flex lg:block w-full">
-                <h1 className="text-center text-lg md:text-2xl font-bold">
+                <h1 className="text-center text-md md:text-2xl">
                     <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
                         GATE
                     </span>

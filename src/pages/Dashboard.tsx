@@ -83,7 +83,7 @@ const Dashboard = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4"
+                className="grid grid-cols-1 md:grid-cols-2 mb-4"
             >
                 <StatCard
                     icon={ChartLine}

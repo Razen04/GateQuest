@@ -62,19 +62,124 @@ VALUES
 -- 2. QUESTIONS  --
 -------------------
 
--- Insert 10 sample aptitude questions
-INSERT INTO public.questions (id, question, options, correct_answer, difficulty, marks, subject, topic, year, question_type, source, verified, added_by)
+-- Insert 14 sample aptitude questions
+INSERT INTO public.questions (id, question, options, correct_answer, difficulty, marks, subject, topic, year, question_type, source, verified, added_by, tags)
 VALUES
-  ('a0000000-0000-0000-0000-000000000001'::uuid, 'Choose the most appropriate word from the options given below to complete the following sentence. If you are trying to make a strong impression on your audience, you cannot do so by being understated, tentative or ________.', ARRAY['hyperbolic', 'restrained', 'argumentative', 'indifferent'], '[1]'::jsonb, 'Medium', 2, 'Aptitude', 'Most Appropriate Word', 2011, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000002'::uuid, 'Choose the word from the options given below that is most nearly opposite in the meaning to the given word: Amalgamate', ARRAY['merge', 'split', 'collect', 'separate'], '[3]'::jsonb, 'Medium', 2, 'Aptitude', 'Opposite', 2011, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000003'::uuid, 'If $\log (\text{P}) = (1/2)\log (\text{Q}) = (1/3)\log (\text{R})$, then which of the following options is TRUE?', ARRAY['$\text{P}^2 = \text{Q}^3\text{R}^2$','$\text{Q}^2=\text{P}\text{R}$','$\text{Q}^2 = \text{R}^3\text{P}$','$\text{R}=\text{P}^2\text{Q}^2$'], '[1]'::jsonb, 'Medium', 2, 'Aptitude', 'Logarithms', 2011, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000004'::uuid, 'Which number does not belong in the series below? $2, 5, 10, 17, 26, 37, 50, 64$', ARRAY['17', '37', '64', '26'], '[2]'::jsonb, 'Easy', 1, 'Aptitude', 'Number Series', 2014, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000005'::uuid, 'If she _______________ how to calibrate the instrument, she _______________ done the experiment.', ARRAY['knows, will have', 'knew, had', 'had known, could have', 'should have known, would have'], '[2]'::jsonb, 'Easy', 1, 'Aptitude', 'Grammar', 2014, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000006'::uuid, 'A tourist covers half of his journey by train at $60\text{km/h}$, half of the remainder by bus at $30\text{km/h}$ and the rest by cycle at $10\text{km/h}$. The average speed of the tourist in $\text{km/h}$ during his entire journey is', ARRAY['36', '30', '24', '18'], '[2]'::jsonb, 'Easy', 1, 'Aptitude', 'Speed Time and Distance', 2013, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000007'::uuid, 'What will be the maximum sum of $44, 42, 40, \dots$ ?', ARRAY['502', '504', '506', '500'], '[2]'::jsonb, 'Easy', 1, 'Aptitude', 'Number Series', 2013, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000008'::uuid, 'Which one of the following options is the closest in meaning to the word given below? Nadir', ARRAY['Highest', 'Lowest', 'Medium', 'Integration'], '[1]'::jsonb, 'Medium', 2, 'Aptitude', 'Synonyms', 2013, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000009'::uuid, 'The value of $\sqrt{12+\sqrt{12+\sqrt{12+\dots}}} $is', ARRAY['3.464', '3.932', '4.000', '4.444'], '[2]'::jsonb, 'Easy', 1, 'Aptitude', 'Number Series', 2014, 'multiple-choice', 'gateoverflow', true, 'seed_script'),
-  ('a0000000-0000-0000-0000-000000000010'::uuid, 'Choose the grammatically INCORRECT sentence:', ARRAY['He is of Asian origin.','They belonged to Africa.','She is an European.','They migrated from India to Australia.'], '[2]'::jsonb, 'Medium', 2, 'Aptitude', 'Grammar', 2013, 'multiple-choice', 'gateoverflow', true, 'seed_script');
+  ('a0000000-0000-0000-0000-000000000001'::uuid,
+   'Choose the most appropriate word from the options given below to complete the following sentence. If you are trying to make a strong impression on your audience, you cannot do so by being understated, tentative or ________.',
+   ARRAY['hyperbolic', 'restrained', 'argumentative', 'indifferent'],
+   '[1]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Most Appropriate Word', 2011,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000002'::uuid,
+   'Choose the word from the options given below that is most nearly opposite in the meaning to the given word: Amalgamate',
+   ARRAY['merge', 'split', 'collect', 'separate'],
+   '[3]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Opposite', 2011,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000003'::uuid,
+   'If $\log (\text{P}) = (1/2)\log (\text{Q}) = (1/3)\log (\text{R})$, then which of the following options is TRUE?',
+   ARRAY['$\text{P}^2 = \text{Q}^3\text{R}^2$','$\text{Q}^2=\text{P}\text{R}$','$\text{Q}^2 = \text{R}^3\text{P}$','$\text{R}=\text{P}^2\text{Q}^2$'],
+   '[1]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Logarithms', 2011,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000004'::uuid,
+   'Which number does not belong in the series below? $2, 5, 10, 17, 26, 37, 50, 64$',
+   ARRAY['17', '37', '64', '26'],
+   '[2]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Number Series', 2014,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000005'::uuid,
+   'If she _______________ how to calibrate the instrument, she _______________ done the experiment.',
+   ARRAY['knows, will have', 'knew, had', 'had known, could have', 'should have known, would have'],
+   '[2]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Grammar', 2014,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000006'::uuid,
+   'A tourist covers half of his journey by train at $60\text{km/h}$, half of the remainder by bus at $30\text{km/h}$ and the rest by cycle at $10\text{km/h}$. The average speed of the tourist in $\text{km/h}$ during his entire journey is',
+   ARRAY['36', '30', '24', '18'],
+   '[2]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Speed Time and Distance', 2013,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000007'::uuid,
+   'What will be the maximum sum of $44, 42, 40, \dots$ ?',
+   ARRAY['502', '504', '506', '500'],
+   '[2]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Number Series', 2013,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000008'::uuid,
+   'Which one of the following options is the closest in meaning to the word given below? Nadir',
+   ARRAY['Highest', 'Lowest', 'Medium', 'Integration'],
+   '[1]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Synonyms', 2013,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000009'::uuid,
+   'The value of $\sqrt{12+\sqrt{12+\sqrt{12+\dots}}} $is',
+   ARRAY['3.464', '3.932', '4.000', '4.444'],
+   '[2]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Number Series', 2014,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000010'::uuid,
+   'Choose the grammatically INCORRECT sentence:',
+   ARRAY['He is of Asian origin.','They belonged to Africa.','She is an European.','They migrated from India to Australia.'],
+   '[2]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Grammar', 2013,
+   'multiple-choice', 'gateoverflow', true, 'seed_script',
+   ARRAY['aptitude']),
+
+  ('a0000000-0000-0000-0000-000000000011'::uuid,
+   'If a cylinder has radius 3 cm and height 7 cm, what is its volume in cm³? (Use π = 22/7)',
+   NULL,
+   '198'::jsonb,
+   'Medium', 2, 'Aptitude', 'Mensuration', 2016,
+   'numerical-answer', 'gateoverflow', true, 'seed_script',
+   ARRAY['numerical']),
+
+  ('a0000000-0000-0000-0000-000000000012'::uuid,
+   'If $5^x = 125$, what is the value of $x$?',
+   NULL,
+   '3'::jsonb,
+   'Easy', 1, 'Aptitude', 'Exponents', 2015,
+   'numerical-answer', 'gateoverflow', true, 'seed_script',
+   ARRAY['numerical']),
+
+  ('a0000000-0000-0000-0000-000000000013'::uuid,
+   'Which of the following are prime numbers?',
+   ARRAY['21','29','31','51'],
+   '[2,3]'::jsonb,
+   'Easy', 1, 'Aptitude', 'Number Theory', 2014,
+   'multiple-select', 'gateoverflow', true, 'seed_script',
+   ARRAY['multiple-select']),
+
+  ('a0000000-0000-0000-0000-000000000014'::uuid,
+   'Which of the following statements about matrices are TRUE?',
+   ARRAY['Every square matrix is invertible.',
+         'The transpose of a symmetric matrix is the matrix itself.',
+         'Determinant of a product equals product of determinants.',
+         'All diagonal matrices are symmetric.'],
+   '[2,3,4]'::jsonb,
+   'Medium', 2, 'Aptitude', 'Matrices', 2017,
+   'multiple-select', 'gateoverflow', true, 'seed_script',
+   ARRAY['multiple-select']);
+
 
 
 --------------------------------

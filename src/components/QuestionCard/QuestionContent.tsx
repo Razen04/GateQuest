@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import MathRenderer from '../MathRenderer.js';
-import { isMultipleSelection } from '../../../utils/questionUtils.js';
+import MathRenderer from '../Renderers/MathRenderer.js';
+import { isMultipleSelection } from '../../utils/questionUtils.js';
 import { CheckCircle } from '@phosphor-icons/react';
-import type { Question } from '../../../types/question.ts';
+import type { Question } from '../../types/question.ts';
 
 type QuestionContentProps = {
     currentQuestion: Question;
@@ -74,7 +74,7 @@ const QuestionContent = ({
                                     key={index}
                                     whileHover={{ scale: showAnswer ? 1 : 1.01 }}
                                     whileTap={{ scale: showAnswer ? 1 : 0.99 }}
-                                    className={`p-4 border rounded-lg transition-all ${showAnswer ? 'cursor-default' : 'cursor-pointer'} ${optionStyle}`}
+                                    className={`p-4 border transition-all ${showAnswer ? 'cursor-default' : 'cursor-pointer'} ${optionStyle}`}
                                     onClick={() => !showAnswer && onOptionSelect(index)}
                                 >
                                     <div className="flex items-center">
@@ -90,10 +90,10 @@ const QuestionContent = ({
                                         ) : (
                                             // Radio button for single selection
                                             <div
-                                                className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 ${userAnswerIndex === index ? 'border-blue-500' : 'border-gray-300 dark:border-gray-700'}`}
+                                                className={`w-5 h-5 border flex items-center justify-center mr-3 ${userAnswerIndex === index ? 'border-blue-500' : 'border-gray-300 dark:border-gray-700'}`}
                                             >
                                                 {userAnswerIndex === index && (
-                                                    <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                                                    <div className="w-2.5 h-2.5 bg-blue-500"></div>
                                                 )}
                                             </div>
                                         )}
