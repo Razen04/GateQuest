@@ -1,26 +1,24 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { handleBookmark } from '../../../utils/questionUtils.js';
 import { Bookmark } from '@phosphor-icons/react';
-import useAuth from '../../../hooks/useAuth.ts';
 
 type QuestionBookmarkProps = {
-    questionId: string | number;
-    subject: string | undefined;
+    onClick: () => void;
+    isBookmarked?: boolean; // Optional: If you want to style it differently when active later
 };
 
-const QuestionBookmark = ({ questionId, subject }: QuestionBookmarkProps) => {
+const QuestionBookmark = ({ onClick }: QuestionBookmarkProps) => {
     const [hovered, setHovered] = useState(false);
-    const { isLogin } = useAuth();
+
     return (
         <div>
             <button
-                className="flex items-center justify-center bg-blue-400 px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 relative text-xs sm:text-sm"
+                className="flex items-center justify-center bg-blue-400 px-3 py-2 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 relative text-base"
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                onClick={() => handleBookmark(isLogin, questionId, subject)}
+                onClick={onClick}
             >
-                <Bookmark className="h-3.5" />
+                <Bookmark />
                 <AnimatePresence>
                     {hovered && (
                         <motion.span

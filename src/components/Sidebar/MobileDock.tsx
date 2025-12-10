@@ -12,7 +12,7 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
     const location = useLocation();
 
     return (
-        <nav className="fixed h-16 bottom-0 left-0 right-0 z-20 bg-white dark:bg-primary-dark border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
+        <nav className="fixed h-16 bottom-0 left-0 right-0 bg-white dark:bg-black z-20 border-t border-border-primary dark:border-border-primary-dark flex justify-around items-center py-2 shadow-lg lg:hidden">
             {tabs.map((tab: Tab) => {
                 const isActive = location.pathname.startsWith(tab.path);
                 const IconComponent = isActive ? tab.activeIcon : tab.icon;
@@ -34,7 +34,7 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
                             {isActive && (
                                 <motion.div
                                     layoutId="active-sidebar-tab"
-                                    className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl -z-10"
+                                    className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 -z-10"
                                     transition={{
                                         type: 'spring',
                                         stiffness: 300,

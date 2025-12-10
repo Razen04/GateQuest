@@ -1,6 +1,6 @@
-import ToggleSwitch from '../../components/ToggleSwitch.tsx';
 import { Faders } from '@phosphor-icons/react';
 import useSettings from '../../hooks/useSettings.ts';
+import ToggleSwitch from '@/components/ui/ToggleSwitch.tsx';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle } = useSettings();

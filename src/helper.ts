@@ -69,7 +69,9 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     if (error) {
         console.error('Sync failed', error);
         toast.error('Profile update failed, try again later.');
+        return;
     }
+    toast.success('Profile updated successfully.');
 };
 
 // Buffers user question attempts in localStorage before sending them to the database.

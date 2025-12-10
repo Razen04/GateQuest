@@ -24,7 +24,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="p-6 border mb-4 shadow-sm rounded-xl border-border-primary dark:border-border-primary-dark"
+            className="p-6 border mb-4 shadow-sm border-border-primary dark:border-border-primary-dark"
         >
             <div className="mb-4 text-black dark:text-white">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Streak Map</h2>
@@ -42,9 +42,9 @@ const StreakMap = ({ stats }: StreakMapType) => {
                     </h2>
                 </div>
             </div>
-            <div className="w-full overflow-x-auto sm:overflow-x-visible">
+            <div className="w-full py-8 overflow-x-auto sm:overflow-x-visible">
                 <div className="min-w-[860px] sm:min-w-0">
-                    <div className="h-[200px] sm:h-[200px] md:h-[210px] lg:h-[230px] xl:h-[250px] pr-2">
+                    <div className="h-[100px] sm:h-[200px] md:h-[110px] lg:h-[100px] xl:h-[150px] pr-2">
                         <ResponsiveTimeRange
                             data={stats.heatmapData.map((d) => ({
                                 day: d.date,
@@ -95,12 +95,6 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                         boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                                     },
                                 },
-                            }}
-                            margin={{
-                                top: 30,
-                                right: 20,
-                                bottom: 10,
-                                left: 20,
                             }}
                             dayBorderWidth={2}
                             dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}

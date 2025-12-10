@@ -1,32 +1,19 @@
-import React, { useState, type ChangeEvent } from 'react';
-import Buttons from '../../components/Buttons.tsx';
+import React, { useState } from 'react';
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper.ts';
 import { User, UserCircle } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
-
-type InputSectionProps = {
-    type: string;
-    label: string;
-    placeholder?: string;
-    value?: string;
-    onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-};
-
-const InputSection = ({ type, label, placeholder, value, onChange }: InputSectionProps) => {
-    return (
-        <div>
-            <label className="block text-sm font-medium mb-1">{label}</label>
-            <input
-                type={type}
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange}
-                disabled={value ? true : false}
-                className="w-full p-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            />
-        </div>
-    );
-};
+import { Button } from '@/components/ui/button.tsx';
+import { Input } from '@/components/ui/input.tsx';
+import { Label } from '@/components/ui/label.tsx';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select.tsx';
 
 const AccountSettings = () => {
     const user = getUserProfile();
@@ -50,9 +37,9 @@ const AccountSettings = () => {
 
             <div className="space-y-6">
                 <div className="flex items-center">
-                    <div className="h-20 w-20 flex items-center justify-center rounded-full p-1 mr-5 bg-gray-100 dark:bg-gray-800">
+                    <div className="h-12 w-12 flex items-center justify-center p-1 mr-5 bg-gray-100 dark:bg-gray-800">
                         {user?.avatar ? (
-                            <img src={user?.avatar} className="rounded-full w-full" />
+                            <img src={user?.avatar} className="w-full" />
                         ) : (
                             <User className="text-gray-600 dark:text-gray-300" />
                         )}
@@ -65,42 +52,63 @@ const AccountSettings = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputSection
-                        type="text"
-                        label="Your Name"
-                        placeholder="Your name"
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                    {user?.email ? (
-                        <InputSection type="email" label="Email Address" value={user.email} />
-                    ) : (
-                        <InputSection
-                            type="email"
-                            label="Email Address"
-                            placeholder="your.email@example.com"
+                    <div className="flex flex-col gap-2">
+                        <Label>Your Name</Label>
+                        <Input
+                            type="text"
+                            placeholder="Your name"
+                            onChange={(e) => setName(e.target.value)}
+                            className="rounded-none"
                         />
+                    </div>
+
+                    {user?.email ? (
+                        <div className="flex flex-col gap-2">
+                            <Label>Email Address</Label>
+                            <Input type="email" value={user.email} className="rounded-none" />
+                        </div>
+                    ) : (
+                        <div className="flex flex-col gap-2">
+                            <Label>Email Address</Label>
+                            <Input
+                                type="email"
+                                placeholder="your.email@example.com"
+                                className="rounded-none"
+                            />
+                        </div>
                     )}
-                    <InputSection
-                        type="text"
-                        label="College/University"
-                        placeholder="Your Institution"
-                        onChange={(e) => setCollege(e.target.value)}
-                    />
+                    <div className="flex flex-col gap-2">
+                        <Label>College/University</Label>
+                        <Input
+                            type="text"
+                            placeholder="Your Institution"
+                            onChange={(e) => setCollege(e.target.value)}
+                            className="rounded-none"
+                        />
+                    </div>
+
                     <div>
-                        <label className="block text-sm font-medium mb-1">Target Year</label>
-                        <select
-                            className="w-full p-2 border border-border-primary dark:border-border-primary-dark rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            onChange={(e) => setTargetYear(Number(e.target.value))}
+                        <Label className="block text-sm font-medium mb-1">Target Year</Label>
+                        <Select
+                            onValueChange={(e) => setTargetYear(Number(e))}
                             value={String(targetYear)}
                         >
-                            <option value="2026">GATE 2026</option>
-                            <option value="2027">GATE 2027</option>
-                            <option value="2028">GATE 2028</option>
-                        </select>
+                            <SelectTrigger className="rounded-none w-full">
+                                <SelectValue placeholder="Select a year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Years</SelectLabel>
+                                    <SelectItem value="2026">GATE 2026</SelectItem>
+                                    <SelectItem value="2027">GATE 2027</SelectItem>
+                                    <SelectItem value="2028">GATE 2028</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
-                <Buttons children="Save Changes" active={true} onClick={handleSaveButton} />
+                <Button onClick={handleSaveButton}>Save changes</Button>
             </div>
         </div>
     );

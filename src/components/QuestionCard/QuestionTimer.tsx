@@ -1,30 +1,22 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useQuestionTimer } from '../../../hooks/useQuestionTimer.js';
 import { Pause, Timer } from '@phosphor-icons/react';
-import type { Question } from '../../../types/question.ts';
-import useSettings from '../../../hooks/useSettings.ts';
 
 type QuestionTimerProps = {
-    currentQuestion: Question;
-    isTimerActive: boolean;
+    minutes: string;
+    seconds: string;
+    isActive: boolean;
+    onToggle: () => void;
 };
 
-const QuestionTimer = ({ currentQuestion, isTimerActive }: QuestionTimerProps) => {
-    const { settings } = useSettings();
-    const {
-        minutes,
-        seconds,
-        toggle: toggleTimer,
-    } = useQuestionTimer(settings?.autoTimer, currentQuestion);
-
+const QuestionTimer = ({ minutes, seconds, isActive, onToggle }: QuestionTimerProps) => {
     return (
         <div>
             <button
-                className="flex text-xs w-18 items-center justify-center space-x-2 bg-blue-400 px-1.5 py-1 rounded-full text-text-primary-dark cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                onClick={toggleTimer}
+                className="flex text-base items-center justify-center space-x-2 bg-blue-400 px-3 py-1 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                onClick={onToggle}
             >
                 <AnimatePresence mode="wait" initial={false}>
-                    {isTimerActive ? (
+                    {isActive ? (
                         <motion.div
                             key="pause"
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -32,22 +24,23 @@ const QuestionTimer = ({ currentQuestion, isTimerActive }: QuestionTimerProps) =
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <Pause className={`${isTimerActive ? 'animate-pulse' : ''}`} />
+                            <Pause className={`${isActive ? 'animate-pulse' : ''}`} />
                         </motion.div>
                     ) : (
                         <motion.div
                             key="stopwatch"
+                            className="py-1"
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
                             transition={{ duration: 0.2 }}
                         >
-                            <Timer className="h-4" />
+                            <Timer />
                         </motion.div>
                     )}
                 </AnimatePresence>
                 <AnimatePresence>
-                    {isTimerActive && (
+                    {isActive && (
                         <motion.label
                             key="timer-label"
                             initial={{ opacity: 0, width: 0 }}

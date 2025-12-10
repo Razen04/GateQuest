@@ -21,6 +21,9 @@ import {
 import appLogo from '/logo.png';
 import useSettings from '../hooks/useSettings.ts';
 import About from './About.tsx';
+import { Button } from '@/components/ui/button.tsx';
+import { Badge } from '@/components/ui/badge.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 
 // --- DATA: Features list ---
 const features = [
@@ -80,7 +83,7 @@ const AppMockup = () => {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="w-full max-w-md sm:max-w-2xl lg:max-w-3xl mx-auto mt-12 z-10 pb-20"
         >
-            <div className="relative aspect-[9/10] lg:aspect-[16/10] rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/50 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 backdrop-blur-xl min-h-[400px]">
+            <div className="relative aspect-[9/10] lg:aspect-[16/10] border border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/50 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 backdrop-blur-xl min-h-[400px]">
                 {/* Browser Header */}
                 <div className="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-700/50">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -94,22 +97,37 @@ const AppMockup = () => {
                         <p className="text-sm sm:text-base font-medium text-blue-500 dark:text-blue-400">
                             Question 1 of 162
                         </p>
-                        <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
-                            <div className="text-white dark:text-blue-100 bg-blue-500 dark:bg-blue-600 p-2 rounded-full">
-                                <Bookmark size={16} />
-                            </div>
-                            <div className="text-white dark:text-blue-100 bg-blue-500 dark:bg-blue-600 p-2 rounded-full">
-                                <Timer size={16} />
-                            </div>
-                            <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-600 bg-green-100 dark:bg-green-200 rounded-full px-3 py-1">
+                        <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
+                            <Button
+                                size="icon"
+                                className="h-5 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                            >
+                                <Bookmark size={16} classname="text-white" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                className="h-5 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                            >
+                                <Timer size={4} classname="text-white" />
+                            </Button>
+                            <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"
+                            >
                                 Easy
-                            </p>
-                            <p className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-600 bg-blue-100 dark:bg-blue-200 rounded-full px-3 py-1">
+                            </Badge>
+                            <Badge
+                                variant="secondary"
+                                className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
                                 GATE 2024
-                            </p>
-                            <p className="text-xs sm:text-sm font-medium text-teal-700 dark:text-teal-600 bg-teal-100 dark:bg-teal-200 rounded-full px-3 py-1">
+                            </Badge>
+                            <Badge
+                                variant="secondary"
+                                className="bg-teal-100 text-teal-700 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400"
+                            >
                                 MCQ
-                            </p>
+                            </Badge>
                         </div>
                     </div>
 
@@ -121,7 +139,7 @@ const AppMockup = () => {
                         {['254', '256', '65,534'].map((option, i) => (
                             <div
                                 key={i}
-                                className={`flex items-center gap-3 p-2 rounded-lg 
+                                className={`flex items-center gap-3 p-2 rounded-lg
                                 ${
                                     option === '256'
                                         ? 'bg-blue-500/10 dark:bg-blue-600/20 border border-blue-500/30 dark:border-blue-500/50 ring-2 ring-blue-500/20 dark:ring-blue-500/30'
@@ -129,7 +147,7 @@ const AppMockup = () => {
                                 }`}
                             >
                                 <div
-                                    className={`w-5 h-5 rounded-full border-2 
+                                    className={`w-5 h-5 rounded-full border-2
                                     ${option === '256' ? 'border-blue-500 dark:border-blue-400 bg-blue-500 flex items-center justify-center' : 'border-slate-400 dark:border-slate-500'}`}
                                 >
                                     {option === '256' && (
@@ -170,15 +188,10 @@ const AppMockup = () => {
                             bg: 'bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-white',
                         },
                     ].map((btn, i) => (
-                        <motion.button
-                            key={i}
-                            whileHover={{ scale: 1.03, boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }}
-                            whileTap={{ scale: 0.97 }}
-                            className={`flex-1 flex items-center justify-center gap-2 p-2 sm:p-4 rounded-lg cursor-pointer font-semibold ${btn.bg}`}
-                        >
+                        <Button className={`${btn.bg} flex-1`} size="lg" key={i}>
                             {btn.icon && <btn.icon />}
                             {btn.label}
-                        </motion.button>
+                        </Button>
                     ))}
                 </div>
             </div>
@@ -210,25 +223,29 @@ export default function LandingPage() {
                         <img src={appLogo} alt="GATEQuest Logo" className="w-9 h-9" />
                     </div>
                     <nav className="hidden md:flex gap-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
-                        <a
-                            href="#features"
-                            className="hover:text-slate-900 dark:hover:text-white transition-colors"
+                        <Button
+                            variant="ghost"
+                            asChild
+                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                         >
-                            Features
-                        </a>
-                        <a
-                            href="#about"
-                            className="hover:text-slate-900 dark:hover:text-white transition-colors"
+                            <a href="#features">Features</a>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            asChild
+                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                         >
-                            About
-                        </a>
+                            <a href="#about">About</a>
+                        </Button>
                     </nav>
-                    <button
-                        className="p-2 text-slate-500 hover:bg-slate-200 dark:hover:bg-gray-800 transition-all rounded-full cursor-pointer"
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full text-slate-500 hover:bg-slate-200 dark:hover:bg-gray-800"
                         onClick={() => handleSettingToggle('darkMode')}
                     >
-                        {isDark ? <Moon /> : <Sun />}
-                    </button>
+                        {isDark ? <Moon size={20} /> : <Sun size={20} />}
+                    </Button>
                 </header>
 
                 <main className="h-screen flex-grow flex flex-col items-center justify-start text-center px-4 pt-24 pb-20 sm:pt-32 sm:pb-28">
@@ -248,18 +265,10 @@ export default function LandingPage() {
                             real-time analytics, and a modern, distraction-free interface. Engineer
                             your success.
                         </p>
-                        <motion.button
-                            whileHover={{
-                                scale: 1.05,
-                                boxShadow: '0 15px 40px rgba(37,99,235,0.2)',
-                            }}
-                            whileTap={{ scale: 0.97 }}
-                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                            className="flex items-center mx-auto justify-center gap-3 px-8 py-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold text-lg shadow-lg shadow-blue-500/30 dark:shadow-[0px_0px_25px_rgba(37,99,235,0.5)] cursor-pointer"
-                            onClick={() => navigate('/practice')}
-                        >
+
+                        <Button size="lg" onClick={() => navigate('/practice')}>
                             Start Practicing Now <ArrowRight weight="bold" />
-                        </motion.button>
+                        </Button>
                     </motion.div>
                 </main>
                 <AppMockup />
@@ -274,7 +283,7 @@ export default function LandingPage() {
                                 your GATE preparation.
                             </p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {features.map((f, i) => (
                                 <motion.div
                                     key={i}
@@ -282,26 +291,29 @@ export default function LandingPage() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                     viewport={{ once: true, amount: 0.7 }}
-                                    className="group relative p-8 rounded-2xl bg-white/5 dark:bg-slate-500/5 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-shadow"
                                 >
-                                    <div
-                                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden dark:block"
-                                        style={{
-                                            background:
-                                                'radial-gradient(300px circle at center, rgba(37, 99, 235, 0.2), transparent)',
-                                        }}
-                                    />
-                                    <div className="relative z-10">
-                                        <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                                            <f.icon size={28} weight="bold" />
-                                        </div>
-                                        <h3 className="mt-6 font-semibold text-xl text-slate-800 dark:text-slate-100">
-                                            {f.title}
-                                        </h3>
-                                        <p className="mt-2 text-slate-600 dark:text-slate-400">
-                                            {f.desc}
-                                        </p>
-                                    </div>
+                                    <Card className="group relative h-full bg-white/5 dark:bg-slate-500/5 border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 rounded-none">
+                                        <div
+                                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden dark:block"
+                                            style={{
+                                                background:
+                                                    'radial-gradient(300px circle at center, rgba(37, 99, 235, 0.1), transparent)',
+                                            }}
+                                        />
+                                        <CardHeader>
+                                            <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 text-white mb-4">
+                                                <f.icon size={28} weight="bold" />
+                                            </div>
+                                            <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
+                                                {f.title}
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                                                {f.desc}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
                                 </motion.div>
                             ))}
                         </div>

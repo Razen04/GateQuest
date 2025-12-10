@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { Button } from '../ui/button';
 
 type PaginationProps = {
     currentPage: number;
@@ -10,23 +11,27 @@ type PaginationProps = {
 const Pagination = ({ currentPage, setCurrentPage, totalPages }: PaginationProps) => {
     return (
         <div className="flex justify-between items-center w-full py-2 mt-2">
-            <button
+            <Button
+                variant="ghost"
+                size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-8 py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50 cursor-pointer"
+                className="rounded-none disabled:opacity-50 w-20"
             >
                 <ArrowLeft />
-            </button>
+            </Button>
             <span className="text-sm">
                 Page {currentPage} of {totalPages}
             </span>
-            <button
+            <Button
+                variant="ghost"
+                size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-8 cursor-pointer py-2 bg-gray-100 dark:bg-zinc-700 rounded disabled:opacity-50"
+                className=" rounded-none disabled:opacity-50 w-20"
             >
                 <ArrowRight />
-            </button>
+            </Button>
         </div>
     );
 };

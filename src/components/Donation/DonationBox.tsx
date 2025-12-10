@@ -1,7 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 import instructions from '../../data/donationInstructions.ts';
-import ToggleSwitch from '../ToggleSwitch.tsx';
+import ToggleSwitch from '../ui/ToggleSwitch.tsx';
+import { Button } from '../ui/button.tsx';
+import { Textarea } from '../ui/textarea.tsx';
+import { Input } from '../ui/input.tsx';
 
 type DonationBoxProps = {
     setStep: React.Dispatch<React.SetStateAction<'form' | 'generateQR' | 'utr' | 'thankYou'>>;
@@ -50,18 +53,19 @@ const DonationBox: React.FC<DonationBoxProps> = ({
             </h2>
 
             {/* How to donate */}
-            <div className="bg-gray-100 dark:bg-zinc-700 mt-2 p-4 rounded-xl">
+            <div className="bg-gray-100 dark:bg-zinc-700 mt-2 p-4">
                 <div className="flex justify-between items-center">
                     {/* REFINED: Changed from text-red-500 to a theme color */}
                     <h3 className="text-red-600 dark:text-red-400 font-semibold">
                         How to Donate? Please read this carefully.
                     </h3>
-                    <button
+                    <Button
                         onClick={() => setInstructionOpen(!instructionOpen)}
-                        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded-full cursor-pointer hover:text-red-500 transition-colors"
+                        variant="ghost"
+                        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer hover:text-red-500 transition-colors"
                     >
                         {instructionOpen ? <CaretUp size={20} /> : <CaretDown size={20} />}
-                    </button>
+                    </Button>
                 </div>
 
                 {instructionOpen && (
@@ -90,50 +94,50 @@ const DonationBox: React.FC<DonationBoxProps> = ({
             />
 
             {/* Optional Message */}
-            <textarea
+            <Textarea
                 placeholder="Optional message (max 100 chars)"
                 maxLength={100}
                 value={message ? message : ''}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full p-3 rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="rounded-none"
             />
 
             {/* Donation Amount */}
-            <div className="space-y-2">
+            <div className="mt-2 space-y-2">
                 <span className="font-medium text-gray-700 dark:text-gray-300">Choose Amount</span>
                 <div className="flex gap-3">
                     {presetAmounts.map((amt) => (
-                        <button
+                        <Button
                             key={amt}
                             type="button"
                             onClick={() => setAmount(amt)}
-                            className={`flex-1 py-2 rounded-xl border font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-800 ${
+                            className={`flex-1 py-2 border font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-800 ${
                                 amount === amt
                                     ? 'bg-gradient-to-tr from-blue-400 to-blue-500 text-white border-transparent'
                                     : 'bg-white dark:bg-zinc-800 border-gray-300 dark:border-zinc-700 text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-zinc-700'
                             }`}
                         >
                             ₹{amt}
-                        </button>
+                        </Button>
                     ))}
                 </div>
-                <input
+                <Input
                     type="number"
                     placeholder="Custom amount"
                     value={amount || ''}
                     onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                    className="w-full p-3 rounded-xl border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="rounded-none"
                 />
             </div>
 
             {/* Generate QR */}
-            <button
+            <Button
                 onClick={handleGenerateQR}
                 // REFINED: Added accessibility focus-visible ring
-                className="w-full py-3 mt-4 rounded-xl bg-gradient-to-tr from-blue-400 to-blue-500 text-white font-semibold hover:from-blue-500 hover:to-blue-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+                className="mt-4 w-full"
             >
                 Generate QR + Link
-            </button>
+            </Button>
         </div>
     );
 };

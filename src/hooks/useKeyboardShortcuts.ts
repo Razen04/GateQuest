@@ -15,7 +15,7 @@ type useKeyboardShortcutsProps = {
     onPrev: () => void;
     onNext: () => void;
     onShowAnswer: () => void;
-    onExplain: () => void;
+    onExplain?: () => void;
 };
 export default function useKeyboardShortcuts(
     { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,

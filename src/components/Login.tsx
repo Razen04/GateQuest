@@ -1,7 +1,7 @@
 import { GoogleLogo, X } from '@phosphor-icons/react';
-import Buttons from './Buttons.js';
 import useAuth from '../hooks/useAuth.ts';
 import { supabase } from '../utils/supabaseClient.ts';
+import { Button } from './ui/button.tsx';
 
 type LoginProp = {
     canClose?: boolean;
@@ -27,8 +27,8 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
     };
     const { handleLogin } = useAuth();
     return (
-        <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 rounded-2xl">
-            <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-border-primary dark:border-border-primary-dark p-8 flex flex-col items-center animate-fade-in">
+        <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
+            <div className="w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl border border-border-primary dark:border-border-primary-dark p-8 flex flex-col items-center animate-fade-in">
                 {canClose && (
                     <button
                         aria-label="Close"
@@ -54,14 +54,10 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                         You can try out the Practice page without sign up.
                     </p>
                 </div>
-                <Buttons
-                    active={true}
-                    onClick={handleLogin}
-                    className="flex items-center justify-center"
-                >
+                <Button onClick={handleLogin} className="flex items-center justify-center">
                     <GoogleLogo className="mr-3 text-xl" />
                     <span>Continue with Google</span>
-                </Buttons>
+                </Button>
                 {/* --- Dev Login for working with Supabase Locally --- */}
                 {import.meta.env.DEV && (
                     <div style={{ marginTop: '20px', border: '1px solid red', padding: '10px' }}>

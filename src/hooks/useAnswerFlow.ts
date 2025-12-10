@@ -9,7 +9,7 @@ type useAnswerFlowProps = {
     selectedOptionIndices: number[] | null;
     numericalAnswer: number | null;
     timeTaken: number;
-    user: AppUser;
+    user: AppUser | null;
     isLogin: boolean;
     updateStats: (user: AppUser) => void;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;

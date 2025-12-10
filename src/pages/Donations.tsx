@@ -7,6 +7,7 @@ import DonationBox from '../components/Donation/DonationBox.tsx';
 import DonorList from '../components/Donation/DonorList.tsx';
 import UpiQRCode from '../components/Donation/UpiQRCode.tsx';
 import { getUserProfile } from '../helper.ts';
+import { Text, Title } from '@/components/ui/typography.tsx';
 
 // Component
 const Donations: React.FC = () => {
@@ -61,19 +62,19 @@ const Donations: React.FC = () => {
                 initial="initial"
                 animate="animate"
                 className="flex flex-col items-center mb-8 bg-gradient-to-tr from-blue-50 to-white dark:from-zinc-800 dark:to-zinc-900
-                         p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg transition-all duration-300"
+                         p-4 sm:p-6 md:p-8 shadow-lg transition-all duration-300"
             >
                 <img
                     src={razenImg}
                     alt="Razen"
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full mb-3 sm:mb-4 shadow-md"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mb-3 sm:mb-4 shadow-md"
                 />
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-purple-500 mb-1 sm:mb-2 tracking-wide">
+                <Title className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-purple-500 mb-1 sm:mb-2 tracking-wide">
                     Razen
-                </h1>
-                <p className="text-center text-gray-700 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-sm sm:max-w-md">
+                </Title>
+                <Text className="text-center text-gray-700 dark:text-gray-400 text-sm sm:text-base md:text-lg max-w-sm sm:max-w-md">
                     Thank you so much for thinking of supporting me, it means a lot to me!
-                </p>
+                </Text>
             </motion.div>
 
             {/* Main Content */}
@@ -84,7 +85,7 @@ const Donations: React.FC = () => {
                 className="flex flex-col md:flex-row gap-8 max-w-7xl mx-auto"
             >
                 {/* Left: Donation Form */}
-                <div className="flex-1 bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-6 sm:p-8 space-y-6 h-fit">
+                <div className="flex-1 bg-white dark:bg-zinc-800 shadow-xl p-6 sm:p-8 space-y-6 h-fit">
                     {/* Form Step */}
                     {step === 'form' && (
                         <DonationBox
@@ -111,14 +112,14 @@ const Donations: React.FC = () => {
                             <img
                                 src="/tidscreenshot.jpeg"
                                 alt="UTR Guide"
-                                className="w-full max-w-xs mx-auto rounded-xl"
+                                className="w-full max-w-xs mx-auto"
                             />
                             <input
                                 type="text"
                                 placeholder="Enter UTR number"
                                 value={utr}
                                 onChange={(e) => setUtr(e.target.value)}
-                                className="w-full p-3 rounded-xl border border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className="w-full p-3 border border-gray-300 dark:border-zinc-700 dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             />
                             <button
                                 onClick={handleUTRSubmit}
@@ -141,7 +142,7 @@ const Donations: React.FC = () => {
                             <button
                                 onClick={() => setStep('form')}
                                 // REFINED: Added accessibility focus-visible ring
-                                className="py-2 px-6 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+                                className="py-2 px-6 bg-blue-500 text-white hover:bg-blue-600 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
                             >
                                 Donate Again
                             </button>
@@ -169,7 +170,7 @@ const Donations: React.FC = () => {
                             <DonorList donations={donations} />
                         </>
                     ) : (
-                        <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-md p-6 sm:p-8 text-center text-gray-500 dark:text-gray-400 italic">
+                        <div className="bg-white dark:bg-zinc-800 shadow-md p-6 sm:p-8 text-center text-gray-500 dark:text-gray-400 italic">
                             No supporters yet — be the first to donate! 💫
                         </div>
                     )}

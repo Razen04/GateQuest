@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import Login from '../components/Login.tsx';
 import { getUserProfile } from '../helper.ts';
-import ModernLoader from '../components/ModernLoader.tsx';
+import ModernLoader from '../components/ui/ModernLoader.tsx';
 import StudyPlan from '../components/Dashboard/StudyPlan.jsx';
 import StreakMap from '../components/Dashboard/StreakMap.jsx';
 import StatCard from '../components/Dashboard/StatCard.jsx';
@@ -74,7 +74,7 @@ const Dashboard = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4"
+                className="grid grid-cols-1 md:grid-cols-2 mb-4"
             >
                 <StatCard
                     icon={ChartLine}

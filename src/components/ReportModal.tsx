@@ -1,11 +1,23 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from '@phosphor-icons/react';
+import { Button } from './ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from './ui/select';
+import { Textarea } from './ui/textarea';
 
 const ReportModal = ({
     onClose,
     onSubmit,
 }: {
+    show: boolean;
     onClose: () => void;
     onSubmit: (type: string, reason: string) => void;
 }) => {
@@ -32,7 +44,7 @@ const ReportModal = ({
             exit={{ opacity: 0 }}
         >
             <motion.div
-                className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl w-full max-w-md p-6 relative"
+                className="bg-white dark:bg-neutral-900 shadow-xl w-full max-w-md p-6 relative"
                 initial={{ y: 40, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 40, opacity: 0 }}
@@ -48,52 +60,54 @@ const ReportModal = ({
                             <p>I follow the answers as they appear there.</p>
                         </div>
                     </div>
-                    <button
+                    <Button
                         onClick={onClose}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-full"
+                        variant="ghost"
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-800"
                     >
                         <X className="w-5 h-5" />
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Dropdown */}
-                <select
-                    className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 bg-transparent p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none mb-4"
-                    value={reportType}
-                    onChange={(e) => setReportType(e.target.value)}
-                >
-                    <option value="" disabled>
-                        Select a reason
-                    </option>
-                    {reasons.map((r, i) => (
-                        <option key={i} value={r}>
-                            {r}
-                        </option>
-                    ))}
-                </select>
+                <Select value={reportType} onValueChange={(value) => setReportType(value)}>
+                    <SelectTrigger className="w-full mb-2 rounded-none">
+                        <SelectValue placeholder="Report Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Select a reason</SelectLabel>
+                            {reasons.map((r, i) => (
+                                <SelectItem key={i} value={r}>
+                                    {r}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
 
-                <textarea
-                    className="w-full rounded-xl border border-gray-300 dark:border-neutral-700 bg-transparent p-2 text-sm focus:ring-2 focus:ring-red-500 outline-none mb-4"
+                <Textarea
+                    className="w-full rounded-none"
                     placeholder="Please describe the issue..."
                     value={reportText}
                     onChange={(e) => setReportText(e.target.value)}
                     rows={3}
                 />
 
-                <div className="flex justify-end gap-2">
-                    <button
+                <div className="mt-4 flex justify-end gap-2">
+                    <Button
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
+                        className="rounded-none text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={handleSubmit}
                         disabled={!reportType || !reportText.trim()}
-                        className="px-4 py-2 rounded-xl text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                        className="rounded-none text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                     >
                         Submit
-                    </button>
+                    </Button>
                 </div>
             </motion.div>
         </motion.div>

@@ -5,6 +5,9 @@ import AccordionItem from '../components/About/AccordionItem.js';
 import { Book, DiscordLogo, GithubLogo, Heart, Coffee } from '@phosphor-icons/react';
 import { fadeInUp, stagger } from '../utils/motionVariants.js';
 import { useNavigate } from 'react-router-dom';
+import { Text, Title } from '@/components/ui/typography.js';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.js';
+import { Button } from '@/components/ui/button.js';
 
 type Answer =
     | {
@@ -56,22 +59,20 @@ const About = ({ landing = false }: AboutProps) => {
                 variants={stagger}
                 className="text-center my-8 sm:my-24"
             >
-                <motion.h1
-                    variants={fadeInUp}
-                    className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400"
-                >
-                    About{' '}
-                    <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text">
-                        GATE
-                    </span>
-                    Quest
-                </motion.h1>
-                <motion.p
-                    variants={fadeInUp}
-                    className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto"
-                >
-                    My Mission: Have a community of great people within my reach.
-                </motion.p>
+                <motion.div variants={fadeInUp}>
+                    <Title className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+                        About{' '}
+                        <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text">
+                            GATE
+                        </span>
+                        Quest
+                    </Title>
+                </motion.div>
+                <motion.div variants={fadeInUp}>
+                    <Text className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mt-[-15px]">
+                        My Mission: Have a community of great people within my reach.
+                    </Text>
+                </motion.div>
             </motion.header>
 
             {/* Grid Section with Scroll-Triggered Stagger Animation */}
@@ -80,67 +81,78 @@ const About = ({ landing = false }: AboutProps) => {
                 whileInView="animate"
                 variants={stagger}
                 viewport={{ once: true, amount: 0.4 }}
-                className="max-w-5xl  mx-auto grid md:grid-cols-2 gap-8 my-20"
+                className="max-w-5xl mx-auto grid md:grid-cols-2 gap-5 my-20"
             >
-                <motion.div
-                    variants={fadeInUp}
-                    className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800"
-                >
-                    <h2 className="text-3xl font-bold mb-4 flex items-center">
-                        <Book className="mr-3 text-blue-500" />
-                        Why GATEQuest?
-                    </h2>
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                        There are many websites great for GATE prep out there like GO or Examside
-                        but the UI felt less modern to me. I wanted to provided a clean,
-                        distraction-free UI so here it is.
-                    </p>
+                <motion.div variants={fadeInUp}>
+                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-none border border-transparent dark:border-zinc-800 h-[281px]">
+                        <CardHeader className="flex items-center">
+                            <Book size={30} className="mr-3 text-blue-500" />
+                            <CardTitle className="text-3xl font-bold">Why GATEQuest?</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Text className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                There are many websites great for GATE prep out there like GO or
+                                Examside but the UI felt less modern to me. I wanted to provided a
+                                clean, distraction-free UI so here it is.
+                            </Text>
+                        </CardContent>
+                    </Card>
                 </motion.div>
-                <motion.div
-                    variants={fadeInUp}
-                    className="bg-gray-100 dark:bg-zinc-800/50 p-8 rounded-2xl border border-transparent dark:border-zinc-800"
-                >
-                    <h2 className="text-3xl font-bold mb-4 flex items-center">
-                        <Heart className="mr-3 text-red-500" />
-                        Join Me
-                    </h2>
-                    <p className="text-gray-700 dark:text-gray-300 mb-6">
-                        I want this to become everyone's goto website for GATE prep so contributions
-                        are highly appreciated.
-                    </p>
-                    <div className="flex flex-col space-y-2">
-                        <div className="flex flex-col lg:flex-row lg:space-x-2 space-y-2 lg:space-y-0">
-                            <motion.a
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                href="https://github.com/Razen04/GATEQuest"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-1 text-center bg-gray-900 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
-                            >
-                                <GithubLogo className="mr-2 w-5" /> GitHub
-                            </motion.a>
-                            <motion.a
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                href="https://discord.gg/dFmg3g52c5"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-1 text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg"
-                            >
-                                <DiscordLogo className="mr-2" /> Discord
-                            </motion.a>
-                        </div>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => navigate('/donate')}
-                            rel="noopener noreferrer"
-                            className="flex-1 text-center bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-lg cursor-pointer"
-                        >
-                            <Coffee className="mr-2" /> Buy Me A Chai
-                        </motion.button>
-                    </div>
+                <motion.div variants={fadeInUp}>
+                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-none border border-transparent dark:border-zinc-800">
+                        <CardHeader className="flex items-center">
+                            <Heart size={30} className="mr-3 text-red-500" />
+                            <Title className="text-3xl font-bold">Join Me</Title>
+                        </CardHeader>
+                        <CardContent>
+                            <Text className="text-gray-700 dark:text-gray-300 mb-6">
+                                I want this to become everyone's goto website for GATE prep so
+                                contributions are highly appreciated.
+                            </Text>
+                            <div className="flex flex-col space-y-2">
+                                <div className="flex flex-col lg:flex-row lg:space-x-2 space-y-2 lg:space-y-0">
+                                    <Button
+                                        asChild
+                                        className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
+                                    >
+                                        <motion.a
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            href="https://github.com/Razen04/GATEQuest"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <GithubLogo className="mr-2 w-5" /> GitHub
+                                        </motion.a>
+                                    </Button>
+                                    <Button
+                                        asChild
+                                        className="flex-1 bg-blue-600 hover:bg-blue-500 text-white"
+                                    >
+                                        <motion.a
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            href="https://discord.gg/dFmg3g52c5"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <DiscordLogo className="mr-2" /> Discord
+                                        </motion.a>
+                                    </Button>
+                                </div>
+                                <Button asChild className=" bg-green-500 hover:bg-green-400 flex-1">
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => navigate('/donate')}
+                                        rel="noopener noreferrer"
+                                    >
+                                        <Coffee className="mr-2" /> Buy Me A Chai
+                                    </motion.button>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </motion.div>
             </motion.section>
 

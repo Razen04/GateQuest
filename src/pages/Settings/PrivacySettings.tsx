@@ -1,5 +1,5 @@
 import React from 'react';
-import ToggleSwitch from '../../components/ToggleSwitch.tsx';
+import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
 import { ShieldCheck } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 import useSettings from '../../hooks/useSettings.ts';
@@ -15,7 +15,7 @@ const PrivacyButtons = ({ label, format = '', type, onClick }: PrivacyButtonsPro
     return (
         <button
             onClick={onClick}
-            className={`w-full text-left cursor-pointer px-4 py-3 border border-border-primary dark:border-border-primary-dark rounded-lg ${type !== 'delete' ? (type === 'login' ? 'dark:bg-primary-dark hover:bg-green-500 dark:hover:text-text-primary' : 'hover:bg-gray-50 dark:hover:bg-text-primary') : 'hover:bg-red-400 dark:hover:bg-red-500'} flex justify-between items-center`}
+            className={`w-full text-left cursor-pointer px-4 py-3 border border-border-primary dark:border-border-primary-dark ${type !== 'delete' ? (type === 'login' ? ' hover:bg-green-500 hover:text-white dark:hover:text-text-primary' : 'hover:bg-gray-50 dark:hover:bg-text-primary') : 'hover:bg-red-400 dark:hover:bg-red-500'} flex justify-between items-center`}
         >
             <span>{label}</span>
             <span className="text-blue-500">{format}</span>
