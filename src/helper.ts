@@ -71,7 +71,6 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
         toast.error('Profile update failed, try again later.');
         return;
     }
-    toast.success('Profile updated successfully.');
 };
 
 // Buffers user question attempts in localStorage before sending them to the database.
@@ -122,10 +121,11 @@ export const recordAttemptLocally = async ({
     });
 
     localStorage.setItem(LOCAL_KEY, JSON.stringify(buffer));
-    toast.success('Attempt recorded successfully.');
+    // toast.success('Attempt recorded successfully.');
 
-    // When the buffer reaches a size of 5, sync it to the database.
-    if (buffer.length >= 5) {
+    // When the buffer reaches a size of 1, sync it to the database.
+    // Chainging this to 1 for now, let's observe how to API calls are made for a week
+    if (buffer.length >= 1) {
         const error = await recordAttempt({ buffer, user, updateStats });
         if (error) {
             toast.error('Failed to record attempt: ' + error.message);
@@ -156,6 +156,7 @@ export const recordAttempt = async ({ buffer, user, updateStats }: recordAttempt
 
     // Insert the entire buffer as new rows in the activity table.
     if (buffer.length !== 0) {
+        console.log('buffer: ', buffer);
         const { error } = await supabase.rpc('insert_user_question_activity_batch', {
             batch: buffer,
         });
