@@ -13,10 +13,10 @@ type BoxCardProps = {
 };
 
 const BoxCard = ({ icon, title, badge, desc, bgColor, borderColor }: BoxCardProps) => (
-    <div className={`p-5 rounded-xl border ${bgColor} ${borderColor} transition-all`}>
+    <div className={`p-5 border ${bgColor} ${borderColor} transition-all`}>
         <div className="flex justify-between items-start mb-3">
-            <div className="p-2 bg-white dark:bg-zinc-800 rounded-lg shadow-sm">{icon}</div>
-            <span className="px-2 py-1 bg-white/50 dark:bg-black/20 rounded text-xs font-bold text-gray-600 dark:text-gray-300">
+            <div className="p-2 bg-white dark:bg-zinc-800 shadow-sm">{icon}</div>
+            <span className="px-2 py-1 bg-white/50 dark:bg-black/20 text-xs font-bold text-gray-600 dark:text-gray-300">
                 {badge}
             </span>
         </div>
@@ -72,9 +72,9 @@ const InfoTab = () => {
                 </div>
 
                 {/* Safety Rules Footer */}
-                <div className="mt-8 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-xl p-6">
+                <div className="mt-8 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 p-6">
                     <h3 className="text-blue-800 dark:text-blue-300 font-bold flex items-center gap-2 mb-4">
-                        <ShieldCheck size={20} weight="fill" /> The "No Burnout" Guarantee
+                        <ShieldCheck size={20} weight="fill" /> The "No Burnout" Mechanism
                     </h3>
                     <div className="grid md:grid-cols-2 gap-6 text-sm text-blue-900/70 dark:text-blue-200/70">
                         <p>

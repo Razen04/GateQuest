@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import useFilters from '@/hooks/useFilters';
-import type { Question } from '@/types/question';
+import type { Question, RevisionQuestion } from '@/types/question';
 import usePagination from '@/hooks/usePagination';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from './Header';
@@ -8,10 +8,14 @@ import SearchAndFilters from './SearchAndFilters';
 import List from './List';
 import useUrlFilters from '@/hooks/useUrlFilters';
 
+type OnQuestionClick =
+    | ((id: string, filteredList: Question[]) => void)
+    | ((id: string, filteredList: RevisionQuestion[]) => void);
+
 interface QuestionsListProps {
     questions: Question[]; // The list of questions from any source
     title?: string; // Optional title (e.g., "Revision Questions")
-    onQuestionClick?: (id: string, filteredList: Question[]) => void; // Callback when a question is clicked
+    onQuestionClick?: OnQuestionClick; // Callback when a question is clicked
     onBack: () => void;
     subject?: string;
 }
@@ -26,6 +30,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
+    console.log('Questions=: ', questions);
+
     // Filters
     const {
         filteredQuestions,
@@ -39,7 +45,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setTopicFilter,
         attemptFilter,
         setAttemptFilter,
-    } = useFilters(questions, subject, selectedQuestion);
+    } = useFilters(questions, subject ?? null, selectedQuestion);
 
     // This ensures that when filters change, the URL updates
     useUrlFilters({

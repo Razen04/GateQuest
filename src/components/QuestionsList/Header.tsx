@@ -8,6 +8,7 @@ type HeaderProps = {
 };
 
 const Header = ({ handleBack, questions, attemptFilter }: HeaderProps) => {
+    console.log('Header questions: ', questions);
     return (
         <div className="flex justify-between items-center w-full  mb-4 sm:mb-6">
             <button

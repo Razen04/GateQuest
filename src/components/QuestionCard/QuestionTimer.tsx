@@ -12,7 +12,7 @@ const QuestionTimer = ({ minutes, seconds, isActive, onToggle }: QuestionTimerPr
     return (
         <div>
             <button
-                className="flex text-base items-center justify-center space-x-2 bg-blue-400 px-3 py-1 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="flex text-base items-center justify-center space-x-2 bg-blue-400 px-3 py-0.5 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 onClick={onToggle}
             >
                 <AnimatePresence mode="wait" initial={false}>
@@ -29,7 +29,7 @@ const QuestionTimer = ({ minutes, seconds, isActive, onToggle }: QuestionTimerPr
                     ) : (
                         <motion.div
                             key="stopwatch"
-                            className="py-1"
+                            className="py-0.5"
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
