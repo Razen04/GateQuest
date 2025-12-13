@@ -14,6 +14,7 @@ declare
     v_attempt_number int;
     v_box int;
     v_new_box int;
+    v_box_deleted boolean;
 begin
     -- loop through each object in the batch array
     for item in
@@ -22,7 +23,7 @@ begin
         -- extracting fields from the each object in the batch
         v_user_id := (item ->> 'user_id')::uuid;
         v_question_id := (item ->> 'question_id')::uuid;
-        v_is_correct := (item ->> 'is_correct')::boolean;
+        v_is_correct := (item ->> 'was_correct')::boolean;
         v_time_taken := (item ->> 'time_taken')::int;
         v_attempted_at := (item ->> 'attempted_at')::timestamptz;
 
@@ -30,11 +31,11 @@ begin
         select coalesce(max(uqa.attempt_number) + 1, 1)
         into v_attempt_number
         from user_question_activity uqa
-        where uqa.user_id = v_user_id and uqa.question_id = v_question_id;
+        where uqa.user_id = v_user_id and uqa.question_id = (item ->> 'question_id');
 
         -- insert into user_question_activity
         insert into user_question_activity ( user_id, question_id, subject, was_correct, time_taken, attempt_number, attempted_at )
-        values ( v_user_id, v_question_id, (item->>'subject'), v_is_correct, v_time_taken, v_attempt_number, v_attempted_at );
+        values ( v_user_id, (item ->> 'question_id'), (item->>'subject'), v_is_correct, v_time_taken, v_attempt_number, v_attempted_at );
 
         -- update or insert into user_incorrect_queue
         -- first, check if the question exists in the user's queue
@@ -55,7 +56,7 @@ begin
                     -- remove from queue if it's in the box 3
                     delete from user_incorrect_queue
                     where user_id = v_user_id and question_id = v_question_id;
-                    continue; -- skipping the update logic for this question
+                    v_new_box := null;
                 end if;
             else
                 -- incorrect answer: move back to box 1 if it's in box 2 or 3
@@ -95,8 +96,6 @@ begin
     end loop;
 
 exception when others then
-    -- rolling back the transaction if aything fails
-    rollback;
     raise;
 end;
 $$
