@@ -1,17 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient.ts';
-import type { AppUser } from '../types/AppUser.ts';
-import type { Question } from '../types/question.ts';
+import type { RevisionQuestion } from '../types/question.ts';
 import { getUserProfile } from '../helper.ts';
 import { useNavigate } from 'react-router-dom';
-import { stringify } from 'postcss';
 import { compress } from 'lz-string';
-
-export type RevisionQuestion = {
-    question: Question;
-    is_correct: boolean | null;
-    time_spent_seconds: number | null;
-};
 
 export type WeeklySet = {
     success: boolean;
@@ -24,11 +16,7 @@ export type WeeklySet = {
     total_questions: number;
     correct_count: number;
     accuracy: number; // numeric(5,2)
-    questions: Array<{
-        question: Question;
-        is_correct: boolean | null;
-        time_spent_seconds: number | null;
-    }>;
+    questions: RevisionQuestion[];
     message: string;
 };
 
@@ -68,11 +56,9 @@ const useSmartRevision = () => {
                 setCurrentSet(data);
                 console.log('Data: ', data);
                 setQuestions(data.questions || []);
-                // storing the questions in the localStorage
-                localStorage.setItem(
-                    'revision_set_questions',
-                    compress(JSON.stringify(data.questions)),
-                );
+
+                // storing the weekly set info
+                localStorage.setItem('weekly_set_info', compress(JSON.stringify(data)));
             } else {
                 console.log('Message: ', data?.message);
                 setCurrentSet(null);
@@ -134,7 +120,7 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentSet]);
+    }, [currentSet, navigate]);
 
     // Find number of critical questions present in the user_incorrect_queue for the user
     const getCriticalQuestionCount = useCallback(async () => {

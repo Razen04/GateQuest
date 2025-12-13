@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 type useQuestionNavProps = {
     filteredQuestions: Question[];
-    subject: string | undefined;
+    subject?: string | undefined;
     qs: string;
     currentIndex: string | number;
     setCurrentIndex: React.Dispatch<React.SetStateAction<string | number>>;

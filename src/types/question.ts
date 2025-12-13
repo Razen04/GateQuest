@@ -80,3 +80,9 @@ export type MSQQuestion = {
 };
 
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;
+
+export type RevisionQuestion = Question & {
+    // Extra fields specific to revision
+    is_correct?: boolean | null; // from backend
+    time_spent_seconds?: number | null; // from backend
+};

@@ -60,12 +60,15 @@ const PracticeList = () => {
         return <div>Failed to load questions, try again later.</div>;
     }
 
+    if (!subject) return;
+
     return (
         <QuestionsList
             questions={questions}
             title={`${subject} Questions`}
             onBack={() => navigate('/practice')}
             onQuestionClick={handleQuestionClick}
+            subject={subject}
         />
     );
 };

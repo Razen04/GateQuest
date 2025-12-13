@@ -1,52 +1,43 @@
-// 1. Core and external library imports
-// React and router stuff first, pretty standard.
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import QuestionCard from '@/components/QuestionCard/QuestionCard';
+import ReportModal from '@/components/ReportModal';
+import ModernLoader from '@/components/ui/ModernLoader';
+import useAnswerFlow from '@/hooks/useAnswerFlow';
+import useAuth from '@/hooks/useAuth';
+import useKeyboardShortcuts from '@/hooks/useKeyboardShortcuts';
+import { usePeerBenchmark } from '@/hooks/usePeerBenchmark';
+import useQuestionNav from '@/hooks/useQuestionNav';
+import { useQuestionState } from '@/hooks/useQuestionState';
+import { useQuestionTimer } from '@/hooks/useQuestionTimer';
+import useSettings from '@/hooks/useSettings';
+import useStats from '@/hooks/useStats';
+import type { Question } from '@/types/question';
+import { handleBookmark } from '@/utils/questionUtils';
+import { supabase } from '@/utils/supabaseClient';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-// 2. Custom hook imports (application logic)
-// All the complex logic is abstracted into these hooks.
-// Makes this component way cleaner.
-import { useQuestionTimer } from '../../hooks/useQuestionTimer.js';
-import { useQuestionState } from '../../hooks/useQuestionState.js';
-import useQuestionNav from '../../hooks/useQuestionNav.js';
-import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts.js';
-import useAnswerFlow from '../../hooks/useAnswerFlow.js';
-
-// 3. Utility and helper function imports
-import { handleBookmark } from '../../utils/questionUtils.js';
-
-// 4. Component imports (UI pieces)
-// Breaking the UI down into smaller, dumber components.
-import ModernLoader from '../../components/ui/ModernLoader.js';
-import useStats from '../../hooks/useStats.js';
-import useAuth from '../../hooks/useAuth.js';
-import useSettings from '../../hooks/useSettings.js';
-import useQuestions from '../../hooks/useQuestions.ts';
-import type { Question } from '@/types/question.ts';
-import { usePeerBenchmark } from '@/hooks/usePeerBenchmark.ts';
 import { toast } from 'sonner';
-import ReportModal from '@/components/ReportModal.tsx';
-import QuestionCard from '@/components/QuestionCard/QuestionCard.tsx';
-import { supabase } from '@/utils/supabaseClient.ts';
 
-// This component is the main event for the practice session. It's a "controller" component
-// that pulls together a bunch of hooks and smaller UI components to create the full question view.
-const PracticeCard = () => {
+const SmartRevisionQuestionCard = () => {
     // Router and Base Navigation Data
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
-    const { subject, qid } = useParams();
+    const { rid, subject, qid } = useParams();
     const qs = searchParams.toString();
 
-    // Fetching questions using useQuestions hook in-case the of shareable-link. For more details visit Issue #6 (https://github.com/Razen04/GateQuest/issues/6)
-    const { questions: fetchedQuestions, isLoading: isQuestionsLoading } = useQuestions(
-        subject,
-        false,
-    );
+    const [questions, setQuestions] = useState<Question[]>([]);
 
-    const passed = location.state?.questions;
-    let questions = Array.isArray(passed) && passed.length ? passed : fetchedQuestions;
+    useEffect(() => {
+        const passedState = location.state?.questions;
+        if (Array.isArray(passedState) && passedState.length > 0) {
+            setQuestions(passedState);
+            return;
+        }
+
+        navigate(`/practice/${subject}/${qid}?${qs}`, {
+            replace: true,
+        });
+    }, [location.state, qs, navigate, qid, subject]);
 
     const [currentIndex, setCurrentIndex] = useState<string | number>(qid || 0);
 
@@ -106,8 +97,7 @@ const PracticeCard = () => {
 
     // Navigation Logic
     const { isFirst, isLast, handleNext, handlePrevious } = useQuestionNav({
-        filteredQuestions: questions,
-        subject,
+        filteredQuestions: questions, // TODO: Fix this
         qs,
         currentIndex, // Pass the ID here
         setCurrentIndex,
@@ -166,7 +156,7 @@ const PracticeCard = () => {
     const handleReportSubmit = async (reportType: string, reportText: string) => {
         const report = {
             user_id: user?.id,
-            question_id: currentQuestion.id,
+            question_id: currentQuestion?.id,
             report_type: reportType,
             report_text: reportText,
         };
@@ -215,20 +205,19 @@ const PracticeCard = () => {
     };
 
     const handleBack = () => {
-        navigate(`/practice/${subject}?${qs}`);
+        navigate(`/revision/${rid}?${qs}`);
     };
 
-    // 9. Render Loading
-    if (isQuestionsLoading || !currentQuestion) {
+    // 9. Render Loading or Dumb Component
+    if (!questions || !currentQuestion) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <ModernLoader />
             </div>
         );
     }
-
     return (
-        <>
+        <div>
             <QuestionCard
                 // Data Props
                 question={currentQuestion}
@@ -281,8 +270,8 @@ const PracticeCard = () => {
                     onSubmit={handleReportSubmit}
                 />
             )}
-        </>
+        </div>
     );
 };
 
-export default PracticeCard;
+export default SmartRevisionQuestionCard;

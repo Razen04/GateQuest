@@ -14,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select.tsx';
+import { toast } from 'sonner';
 
 const AccountSettings = () => {
     const user = getUserProfile();
@@ -23,10 +24,16 @@ const AccountSettings = () => {
     const [college, setCollege] = useState(user?.college || '');
     const [targetYear, setTargetYear] = useState(user?.targetYear ?? 2026);
 
-    const handleSaveButton = () => {
+    const handleSaveButton = async () => {
         const updated = { ...user, name, college, targetYear };
         updateUserProfile(updated);
-        syncUserToSupabase(isLogin);
+        try {
+            await syncUserToSupabase(isLogin);
+            toast.success('Profile updated successfully.');
+        } catch (err) {
+            console.error('Unable to save profile: ', err);
+            toast.error('Unable to save profile.');
+        }
     };
 
     return (
@@ -65,7 +72,11 @@ const AccountSettings = () => {
                     {user?.email ? (
                         <div className="flex flex-col gap-2">
                             <Label>Email Address</Label>
-                            <Input type="email" value={user.email} className="rounded-none" />
+                            <Input
+                                type="email"
+                                defaultValue={user.email}
+                                className="rounded-none"
+                            />
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2">

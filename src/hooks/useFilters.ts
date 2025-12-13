@@ -4,12 +4,12 @@
 import { useContext, useMemo, useState } from 'react';
 import StatsContext from '../context/StatsContext.js';
 import { sortQuestionsByYear } from '../helper.ts';
-import type { Question } from '../types/question.ts';
+import type { Question, RevisionQuestion } from '../types/question.ts';
 
 // The main hook function that encapsulates all filtering logic.
 const useFilters = (
-    sourceQuestions: Question[],
-    subject: string | undefined,
+    sourceQuestions: Question[] | RevisionQuestion[],
+    subject: string | null,
     selectedQuestion: string | null,
 ) => {
     // State for each available filter option.
@@ -23,23 +23,34 @@ const useFilters = (
     const { stats } = useContext(StatsContext)!;
     const subjectStats = stats?.subjectStats;
 
+    console.log('subjectStats: ', subjectStats);
+    console.log('subjects: ', subject);
+
     // Memoize the set of attempted question IDs for the current subject.
     // This prevents recalculating this set on every render, only when stats or the subject changes.
     const attemptedIds = useMemo(() => {
         if (!subjectStats) return new Set();
 
         const merged = new Set();
-        // Find the stats for the current subject and add all attempted question IDs to the set.
-        subjectStats
-            .filter((s) => s.subject === subject)
-            .forEach((s) => {
-                for (const id of s.attemptedQuestionIds) {
-                    merged.add(id);
-                }
+
+        if (!subject) {
+            // Revision mode → subject-agnostic
+            subjectStats.forEach((s) => {
+                s.attemptedQuestionIds.forEach((id) => merged.add(id));
             });
+        } else {
+            // Practice mode → subject-specific
+            subjectStats
+                .filter((s) => s.subject === subject)
+                .forEach((s) => {
+                    s.attemptedQuestionIds.forEach((id) => merged.add(id));
+                });
+        }
 
         return merged;
     }, [subjectStats, subject]);
+
+    console.log('attempted ids: ', attemptedIds);
 
     // This is the core of the hook. useMemo ensures that the filtering logic only re-runs when the source data or any of the filter dependencies change. This is crucial for performance.
     const filteredQuestions = useMemo(() => {

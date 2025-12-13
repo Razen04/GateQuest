@@ -10,15 +10,16 @@ import Layout from '../components/Layout.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import Practice from '../pages/Practice/Practice.js';
 
-import QuestionCard from '../pages/Practice/PracticeCard.js';
 import SettingsRoutes from './SettingsRoutes.js';
 import About from '../pages/About.jsx';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.ts';
 import DonationPage from '../pages/Donations.tsx';
 import PracticeList from '@/pages/Practice/PracticeList.tsx';
-import SmartRevision from '@/pages/SmartRevision.tsx';
-import SmartRevisionQuestionList from '@/components/SmartRevision/SmartRevisionQuestionList.tsx';
+import SmartRevision from '@/pages/SmartRevision/SmartRevision.tsx';
+import SmartRevisionQuestionList from '@/pages/SmartRevision/SmartRevisionQuestionList.tsx';
+import PracticeCard from '../pages/Practice/PracticeCard.js';
+import SmartRevisionQuestionCard from '@/pages/SmartRevision/SmartRevisionQuestionCard.tsx';
 
 /**
  * @function AppRoutes
@@ -56,14 +57,19 @@ export default function AppRoutes() {
                         {/* The practice section has nested routes for subjects and individual questions. */}
                         <Route path="practice" element={<Practice />} />
                         <Route path="practice/:subject" element={<PracticeList />} />
-                        <Route path="practice/:subject/:qid" element={<QuestionCard />} />
+                        <Route path="practice/:subject/:qid" element={<PracticeCard />} />
                         {/* Settings routes are modularized into their own component for clarity. */}
                         <Route path="settings/*" element={<SettingsRoutes />} />
                         {/* A static 'About' page. */}
                         <Route path="about" element={<About landing={false} />} />
                         <Route path="donate" element={<DonationPage />} />
+                        {/* The revision section has nested routes for revision list and individual questions. */}
                         <Route path="revision" element={<SmartRevision />} />
                         <Route path="revision/:rid" element={<SmartRevisionQuestionList />} />
+                        <Route
+                            path="revision/:rid/:subject/:qid"
+                            element={<SmartRevisionQuestionCard />}
+                        />
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />
