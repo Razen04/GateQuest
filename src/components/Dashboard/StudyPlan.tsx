@@ -29,7 +29,7 @@ const StudyPlan = () => {
     // Status message logic
     const statusMessage = isTargetMetToday
         ? "Great job! You've met today's target."
-        : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more questions today to stay on track.`;
+        : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more unique questions today to stay on track.`;
 
     return (
         <motion.div
