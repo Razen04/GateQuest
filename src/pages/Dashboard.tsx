@@ -73,7 +73,6 @@ const Dashboard = () => {
             </motion.div>
 
             <div className="w-full mx-auto my-3 p-6 bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-                {/* Text Section */}
                 <div className="flex-1 text-center md:text-left">
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
                         Boost Your Learning!

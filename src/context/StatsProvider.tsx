@@ -72,7 +72,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             .from('user_question_activity')
             .select('*')
             .eq('user_id', user.id)
-            .eq('attempt_number', 1)
             .order('attempted_at', { ascending: true })
             .overrideTypes<UserQuestionActivity[]>();
 
@@ -172,22 +171,27 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 total: number;
                 correct: number;
                 attemptedQuestions: Set<string>;
+                revisionAttemptedQuestionIds: Set<string>;
             }
         >;
         const grouped: GroupedType = {};
-        data.forEach(({ subject, was_correct, question_id }) => {
+        data.forEach(({ subject, was_correct, question_id, attempt_number }) => {
             if (subject) {
                 if (!grouped[subject]) {
                     grouped[subject] = {
                         total: 0,
                         correct: 0,
                         attemptedQuestions: new Set(),
+                        revisionAttemptedQuestionIds: new Set(),
                     };
                 }
-                grouped[subject].total++;
-                if (was_correct) grouped[subject].correct++;
-                // A Set is used here again to count unique questions per subject.
-                if (question_id) grouped[subject].attemptedQuestions.add(question_id);
+                if (attempt_number === 1) {
+                    if (question_id) grouped[subject].attemptedQuestions.add(question_id);
+                    grouped[subject].total++;
+                    if (was_correct) grouped[subject].correct++;
+                } else {
+                    if (question_id) grouped[subject].revisionAttemptedQuestionIds.add(question_id);
+                }
             }
         });
 
@@ -200,6 +204,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 accuracy: Math.round((stats.correct / stats.total) * 100),
                 progress: Math.round((attemptedCount / totalAvailable) * 100),
                 attemptedQuestionIds: stats.attemptedQuestions,
+                revisionAttemptedQuestionIds: stats.revisionAttemptedQuestionIds,
                 attempted: attemptedCount,
                 totalAvailable,
             };

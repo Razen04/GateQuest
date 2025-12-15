@@ -98,11 +98,13 @@ const SmartRevisionQuestionCard = () => {
     // Navigation Logic
     const { isFirst, isLast, handleNext, handlePrevious } = useQuestionNav({
         filteredQuestions: questions, // TODO: Fix this
+        subject: subject,
         qs,
         currentIndex, // Pass the ID here
         setCurrentIndex,
         resetQuestionState,
-        toggleTimer,
+        questionMode: 'revision',
+        revisionId: rid,
     });
 
     // Peer Stats

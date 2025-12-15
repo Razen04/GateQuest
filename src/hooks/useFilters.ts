@@ -6,11 +6,15 @@ import StatsContext from '../context/StatsContext.js';
 import { sortQuestionsByYear } from '../helper.ts';
 import type { Question, RevisionQuestion } from '../types/question.ts';
 
+// Type of filter mode for smart-Revision
+type FilterMode = 'practice' | 'revision';
+
 // The main hook function that encapsulates all filtering logic.
 const useFilters = (
     sourceQuestions: Question[] | RevisionQuestion[],
     subject: string | null,
     selectedQuestion: string | null,
+    mode: FilterMode,
 ) => {
     // State for each available filter option.
     const [searchQuery, setSearchQuery] = useState('');
@@ -29,26 +33,33 @@ const useFilters = (
     // Memoize the set of attempted question IDs for the current subject.
     // This prevents recalculating this set on every render, only when stats or the subject changes.
     const attemptedIds = useMemo(() => {
-        if (!subjectStats) return new Set();
+        console.log('subjectStats: ', subjectStats);
+        if (!subjectStats) return new Set<string>();
 
-        const merged = new Set();
+        const ids = new Set<string>();
 
-        if (!subject) {
-            // Revision mode → subject-agnostic
-            subjectStats.forEach((s) => {
-                s.attemptedQuestionIds.forEach((id) => merged.add(id));
-            });
-        } else {
-            // Practice mode → subject-specific
-            subjectStats
-                .filter((s) => s.subject === subject)
-                .forEach((s) => {
-                    s.attemptedQuestionIds.forEach((id) => merged.add(id));
+        switch (mode) {
+            case 'practice': {
+                if (!subject) break;
+
+                subjectStats
+                    .filter((s) => s.subject === subject)
+                    .forEach((s) => {
+                        s.attemptedQuestionIds.forEach((id) => ids.add(id));
+                    });
+                break;
+            }
+
+            case 'revision': {
+                subjectStats.forEach((s) => {
+                    if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
                 });
+                break;
+            }
         }
 
-        return merged;
-    }, [subjectStats, subject]);
+        return ids;
+    }, [subjectStats, subject, mode]);
 
     console.log('attempted ids: ', attemptedIds);
 

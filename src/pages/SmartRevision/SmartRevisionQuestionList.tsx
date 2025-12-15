@@ -1,12 +1,20 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { decompress } from 'lz-string';
 import QuestionsList from '../../components/QuestionsList/QuestionsList.tsx';
-import type { Question } from '@/types/question.ts';
+import type { Question, RevisionQuestion } from '@/types/question.ts';
+import { toast } from 'sonner';
 
 const SmartRevisionQuestionList = () => {
-    const stored = localStorage.getItem('weekly_set_info');
+    let stored;
+    let questions: RevisionQuestion[] = [];
 
-    const questions = stored ? JSON.parse(decompress(stored)).questions : null;
+    try {
+        stored = localStorage.getItem('weekly_set_info');
+        questions = stored ? JSON.parse(decompress(stored)).questions : [];
+    } catch (err) {
+        console.error('Error loading questions from localStorage.', err);
+        toast.error('No questions, clear cache and restart app.');
+    }
 
     const navigate = useNavigate();
     // Get the revision id from the url
@@ -36,6 +44,7 @@ const SmartRevisionQuestionList = () => {
             title="Revision Questions"
             onQuestionClick={handleQuestionClick}
             onBack={handleBack}
+            mode="revision"
         />
     );
 };

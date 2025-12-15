@@ -4,6 +4,7 @@ import type { RevisionQuestion } from '../types/question.ts';
 import { getUserProfile } from '../helper.ts';
 import { useNavigate } from 'react-router-dom';
 import { compress } from 'lz-string';
+import { toast } from 'sonner';
 
 export type WeeklySet = {
     success: boolean;
@@ -81,11 +82,17 @@ const useSmartRevision = () => {
 
             if (error) throw error;
             console.log('generateSet data: ', data);
+            if (data?.success && data?.status === 'existing') {
+                toast.message('Already attempted a set this week');
+            } else if (data?.success && data?.status === 'created') {
+                toast.success(data?.message);
+            }
             if (data?.success) {
                 fetchCurrentSet();
             }
         } catch (err) {
             console.error('Error generating set', err);
+            toast.error('Error generating set.');
         } finally {
             setLoading(false);
         }
@@ -127,12 +134,14 @@ const useSmartRevision = () => {
         if (!userId) return;
 
         try {
-            // Use count() method to get the row count
+            // Get present week's Sunday (end of week)
+            const now = new Date();
+
             const { error, count } = await supabase
                 .from('user_incorrect_queue')
                 .select('user_id', { count: 'exact' })
                 .eq('user_id', userId)
-                .eq('box', 1);
+                .lte('next_review_at', now.toISOString());
 
             if (error) throw error;
 

@@ -112,7 +112,7 @@ const PracticeCard = () => {
         currentIndex, // Pass the ID here
         setCurrentIndex,
         resetQuestionState,
-        toggleTimer,
+        questionMode: 'practice',
     });
 
     // Peer Stats

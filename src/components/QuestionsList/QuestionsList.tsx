@@ -12,12 +12,16 @@ type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
     | ((id: string, filteredList: RevisionQuestion[]) => void);
 
+// Type of filter mode for smart-Revision
+type FilterMode = 'practice' | 'revision';
+
 interface QuestionsListProps {
-    questions: Question[]; // The list of questions from any source
+    questions: RevisionQuestion[]; // The list of questions from any source
     title?: string; // Optional title (e.g., "Revision Questions")
     onQuestionClick?: OnQuestionClick; // Callback when a question is clicked
     onBack: () => void;
     subject?: string;
+    mode: FilterMode;
 }
 
 const QuestionsList: React.FC<QuestionsListProps> = ({
@@ -26,6 +30,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     onQuestionClick,
     onBack,
     subject,
+    mode,
 }) => {
     const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
@@ -45,7 +50,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setTopicFilter,
         attemptFilter,
         setAttemptFilter,
-    } = useFilters(questions, subject ?? null, selectedQuestion);
+    } = useFilters(questions, subject ?? null, selectedQuestion, mode);
 
     // This ensures that when filters change, the URL updates
     useUrlFilters({

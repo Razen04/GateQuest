@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import type { Question } from '../types/question.ts';
 import { useNavigate } from 'react-router-dom';
 
+type questionMode = 'practice' | 'revision';
+
 type useQuestionNavProps = {
     filteredQuestions: Question[];
     subject?: string | undefined;
@@ -14,7 +16,8 @@ type useQuestionNavProps = {
     currentIndex: string | number;
     setCurrentIndex: React.Dispatch<React.SetStateAction<string | number>>;
     resetQuestionState: () => void;
-    toggleTimer?: () => void;
+    questionMode: questionMode;
+    revisionId?: string | undefined;
 };
 
 export default function useQuestionNav({
@@ -24,7 +27,8 @@ export default function useQuestionNav({
     currentIndex, // The ID of the currently displayed question.
     setCurrentIndex, // State setter for the current question ID.
     resetQuestionState, // A function to reset the state of the question card (e.g., selected answer).
-    toggleTimer, // A function to restart the timer for the new question.
+    questionMode,
+    revisionId,
 }: useQuestionNavProps) {
     const navigate = useNavigate();
     // Find the numerical index of the current question in the filtered array.
@@ -49,14 +53,18 @@ export default function useQuestionNav({
 
         // Programmatically navigate to the new question's URL.
         // The filtered list is passed in the route state to avoid re-fetching on the next page.
-        navigate(`/practice/${subject}/${nextId}?${qs}`, {
-            state: { questions: filteredQuestions },
-        });
+        if (questionMode === 'practice') {
+            navigate(`/practice/${subject}/${nextId}?${qs}`, {
+                state: { questions: filteredQuestions },
+            });
+        } else if (questionMode === 'revision') {
+            navigate(`/revision/${revisionId}/${subject}/${nextId}?${qs}`, {
+                state: { questions: filteredQuestions },
+            });
+        }
 
         // Reset the state of the question card (e.g., clear selected options, hide answer).
         resetQuestionState?.();
-        // Restart the timer for the new question.
-        toggleTimer?.();
     };
 
     // Handler for the 'next' button. Navigates to the next question if not on the last one.

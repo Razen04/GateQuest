@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import MathRenderer from '../Renderers/MathRenderer.js';
 import { isMultipleSelection } from '../../utils/questionUtils.js';

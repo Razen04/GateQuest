@@ -104,7 +104,7 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                     } else {
                         const loadedQuestions = await getQuestionsBySubject(subject);
                         // After fetching, we compress and cache the questions in localStorage for future use.
-                        if (loadedQuestions) {
+                        if (loadedQuestions && loadedQuestions.length > 0) {
                             const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
                             localStorage.setItem(subject, dataToCache);
                             setQuestions(loadedQuestions);

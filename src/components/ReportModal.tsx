@@ -52,7 +52,7 @@ const ReportModal = ({
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h1 className="text-lg font-bold">Report This Question</h1>
-                        <div className="italic text-xs mt-4 text-center text-red-400">
+                        <div className="italic text-xs mt-4  text-red-400">
                             <p>
                                 Only report if there is a genuine discrepancy, and always refer to
                                 GateOverflow as the authoritative source.

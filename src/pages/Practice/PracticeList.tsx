@@ -69,6 +69,7 @@ const PracticeList = () => {
             onBack={() => navigate('/practice')}
             onQuestionClick={handleQuestionClick}
             subject={subject}
+            mode="practice"
         />
     );
 };
