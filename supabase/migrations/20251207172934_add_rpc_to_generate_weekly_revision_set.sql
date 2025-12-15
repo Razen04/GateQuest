@@ -49,7 +49,7 @@ BEGIN
                 ROW_NUMBER() OVER (PARTITION BY box ORDER BY added_at ASC) as rn
             FROM user_incorrect_queue
             WHERE user_id = v_user_id
-              AND next_review_at <= CURRENT_DATE -- The Gatekeeper: Must be due today or earlier
+              AND next_review_at <= NOW() -- The Gatekeeper: Must be due today or earlier
         )
         INSERT INTO revision_set_questions (set_id, question_id)
         SELECT v_set_id, question_id

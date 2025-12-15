@@ -20,7 +20,7 @@ begin
     -- try updating the status column to 'expired'
     update weekly_revision_set 
     set status = 'expired'
-    where generated_for = v_user_id and id = v_set_id and expires_at <= now()
+    where generated_for = v_user_id and id = v_set_id
     returning 1 into v_rows_affected;
 
     -- if no rows were affected, the set may not exist or has already been expired

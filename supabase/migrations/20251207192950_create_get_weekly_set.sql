@@ -28,7 +28,7 @@ begin
     -- First, update the status of the set that has expired
     perform update_status_of_weekly_set(v_set_id => (
         select id from weekly_revision_set 
-        where generated_for = v_user_id and status in ('pending', 'started') 
+        where generated_for = v_user_id and status in ('pending', 'started') and expires_at <= now()
         limit 1
     ));
     
