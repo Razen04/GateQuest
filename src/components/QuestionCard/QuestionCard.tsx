@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 
 // Types
@@ -94,6 +94,7 @@ const QuestionCard = ({
     isLast,
 }: QuestionCardProps) => {
     const numInputRef = useRef<HTMLInputElement>(null);
+    const pageRef = useRef<HTMLDivElement>(null);
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -104,6 +105,11 @@ const QuestionCard = ({
 
     // Derived: Get correct answer text for the numerical display
     const correctAnswerText = getCorrectAnswerText(question);
+
+    // effect to scroll to top when user go to next or previous question
+    useEffect(() => {
+        if (pageRef.current) pageRef.current.scrollTop = 0;
+    }, [questionNumber]);
 
     return (
         <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
@@ -119,7 +125,10 @@ const QuestionCard = ({
             </div>
 
             {/* Main Card Container */}
-            <div className="max-w-5xl 2xl:max-w-7xl mx-auto h-screen pb-60 mt-6 shadow-sm overflow-y-scroll dark:text-white border border-border-primary dark:border-border-primary-dark bg-white dark:bg-zinc-900">
+            <div
+                ref={pageRef}
+                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto h-dvh pb-60 mt-6 shadow-sm  dark:text-white overflow-y-scroll border border-border-primary dark:border-border-primary-dark bg-white dark:bg-zinc-900"
+            >
                 {/* 1. Header Section */}
                 <QuestionHeader
                     questionNumber={questionNumber}
