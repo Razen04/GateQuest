@@ -156,7 +156,6 @@ export const recordAttempt = async ({ buffer, user, updateStats }: recordAttempt
 
     // Insert the entire buffer as new rows in the activity table.
     if (buffer.length !== 0) {
-        console.log('buffer: ', buffer);
         const { error } = await supabase.rpc('insert_user_question_activity_batch', {
             batch: buffer,
         });

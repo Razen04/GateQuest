@@ -171,7 +171,7 @@ const PracticeCard = () => {
             report_text: reportText,
         };
 
-        const { data, error } = await supabase.from('question_reports').insert([report]);
+        const { error } = await supabase.from('question_reports').insert([report]);
 
         if (error) {
             if (error.code === '23505') {
@@ -182,7 +182,6 @@ const PracticeCard = () => {
             console.error('Error reporting question:', error);
         } else {
             toast.success('Thank you for making the platform great. ❤️');
-            console.log('Report submitted:', data);
         }
 
         setShowReportModal(false);

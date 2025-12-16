@@ -35,8 +35,6 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
-    console.log('Questions=: ', questions);
-
     // Filters
     const {
         filteredQuestions,

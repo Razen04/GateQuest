@@ -27,13 +27,9 @@ const useFilters = (
     const { stats } = useContext(StatsContext)!;
     const subjectStats = stats?.subjectStats;
 
-    console.log('subjectStats: ', subjectStats);
-    console.log('subjects: ', subject);
-
     // Memoize the set of attempted question IDs for the current subject.
     // This prevents recalculating this set on every render, only when stats or the subject changes.
     const attemptedIds = useMemo(() => {
-        console.log('subjectStats: ', subjectStats);
         if (!subjectStats) return new Set<string>();
 
         const ids = new Set<string>();
@@ -60,8 +56,6 @@ const useFilters = (
 
         return ids;
     }, [subjectStats, subject, mode]);
-
-    console.log('attempted ids: ', attemptedIds);
 
     // This is the core of the hook. useMemo ensures that the filtering logic only re-runs when the source data or any of the filter dependencies change. This is crucial for performance.
     const filteredQuestions = useMemo(() => {

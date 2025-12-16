@@ -23,7 +23,6 @@ export function usePeerBenchmark(questionId: string | number) {
         const fetchData = async (existingRows: Benchmark[]) => {
             setLoading(true);
 
-            console.log('questionId: ', questionId);
             const { data, error } = await supabase
                 .from('question_peer_stats')
                 .select('*')

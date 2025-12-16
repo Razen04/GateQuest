@@ -11,7 +11,7 @@ type LoginProp = {
 const Login = ({ canClose = true, onClose }: LoginProp) => {
     // Function for dev login to work with supabase locally
     const handleDevLogin = async () => {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
             email: 'test@example.com',
             // The password can be anything when using the local dev environment
             password: 'password',
@@ -20,7 +20,6 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
         if (error) {
             console.error('Error logging in:', error.message);
         } else {
-            console.log('Logged in successfully:', data.user);
             // You might need to refresh the page or redirect
             window.location.reload();
         }

@@ -43,7 +43,6 @@ const useSmartRevision = () => {
     // Fetch current user and weekly set
     const fetchCurrentSet = useCallback(async () => {
         setLoading(true);
-        console.log('fetchCurrentSet ran');
         try {
             // Call RPC to get weekly set
             const { data, error } = await supabase
@@ -55,13 +54,11 @@ const useSmartRevision = () => {
 
             if (data?.success) {
                 setCurrentSet(data);
-                console.log('Data: ', data);
                 setQuestions(data.questions || []);
 
                 // storing the weekly set info
                 localStorage.setItem('weekly_set_info', compress(JSON.stringify(data)));
             } else {
-                console.log('Message: ', data?.message);
                 setCurrentSet(null);
                 setQuestions([]);
             }
@@ -74,14 +71,12 @@ const useSmartRevision = () => {
 
     // Generate a set
     const generateSet = useCallback(async () => {
-        console.log('generateSet Ran');
         setLoading(true);
 
         try {
             const { data, error } = await supabase.rpc('generate_weekly_revision_set');
 
             if (error) throw error;
-            console.log('generateSet data: ', data);
             if (data?.success && data?.status === 'existing') {
                 toast.message('Already attempted a set this week');
             } else if (data?.success && data?.status === 'created') {
