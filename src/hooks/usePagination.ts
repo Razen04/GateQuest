@@ -2,10 +2,10 @@
 // It calculates the total number of pages and returns the items for the current page.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Question } from '../types/question.ts';
+import type { Question, RevisionQuestion } from '../types/question.ts';
 
 // Manages the state and calculations for paginating an array of items.
-export default function usePagination(items: Question[], perPage = 20) {
+export default function usePagination(items: Question[] | RevisionQuestion[], perPage = 20) {
     // State to keep track of the current page number.
     const [currentPage, setCurrentPage] = useState(1);
     // A ref to attach to the list container, used for scrolling to the top on page change.

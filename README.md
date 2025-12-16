@@ -50,16 +50,17 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 
 ## ✨ Features
 
-- 📝 **Practice Questions**: Access a vast library of GATE questions, neatly organized by subject, year, and difficulty.
-- 🔖 **Bookmarking**: Save challenging questions for later review and focused practice.
-- 📊 **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and study time.
-- ⏱️ **Built-in Timer**: Simulate exam conditions with an automatic timer for each question.
-- 🎨 **Light & Dark Modes**: Switch between themes for a comfortable viewing experience.
-- 🔊 **Audio Feedback**: Get instant sound cues for correct and incorrect answers.
-- 🔐 **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.
-- ☁️ **Cloud Sync**: Your progress and profile are securely synced across devices.
-- 📱 **PWA Support**: Install GATEQuest as a Progressive Web App for offline access.
-- ↔️ **Collapsible Sidebar**: Minimize distractions and focus on what matters most.
+- **Practice Questions**: Access a vast library of GATE questions, neatly organized by subject, year, and difficulty.
+- **Bookmarking**: Save challenging questions for later review and focused practice.
+- **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and study time.
+- **Smart Revision**: Use Leitner System to effectively revise your topics.
+- **Built-in Timer**: Simulate exam conditions with an automatic timer for each question.
+- **Light & Dark Modes**: Switch between themes for a comfortable viewing experience.
+- **Audio Feedback**: Get instant sound cues for correct and incorrect answers.
+- **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.
+- **Cloud Sync**: Your progress and profile are securely synced across devices.
+- **PWA Support**: Install GATEQuest as a Progressive Web App for offline access.
+- **Collapsible Sidebar**: Minimize distractions and focus on what matters most.
 
 ## 🛠️ Tech Stack
 

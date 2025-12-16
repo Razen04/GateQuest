@@ -1,21 +1,24 @@
 import { motion } from 'framer-motion';
 import Login from '../components/Login.tsx';
 import { getUserProfile } from '../helper.ts';
-import ModernLoader from '../components/ModernLoader.tsx';
+import ModernLoader from '../components/ui/ModernLoader.tsx';
 import StudyPlan from '../components/Dashboard/StudyPlan.jsx';
 import StreakMap from '../components/Dashboard/StreakMap.jsx';
 import StatCard from '../components/Dashboard/StatCard.jsx';
 import SubjectStats from '../components/Dashboard/SubjectStats.jsx';
-import { ChartLine, Info, Medal } from '@phosphor-icons/react';
+import { ChartLine, Medal } from '@phosphor-icons/react';
 import { containerVariants } from '../utils/motionVariants.ts';
 import useAuth from '../hooks/useAuth.ts';
 import useStats from '../hooks/useStats.ts';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button.tsx';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
     const { stats, loading: statsLoading } = useStats();
     const user = getUserProfile();
     const subjectStats = stats?.subjectStats;
+    const navigate = useNavigate();
 
     if (subjectStats) {
         localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
@@ -60,21 +63,43 @@ const Dashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                     Your preparation journey is {stats?.progress}% complete. Keep going!
                 </p>
-
-                <div className="flex items-center mt-[12px] mb-[-30px]">
+                {/* Removing 5 questions limit for now will observe how many calls it is taking and adjust it again */}
+                {/* <div className="flex items-center mt-[12px] mb-[-30px]">
                     <Info className="text-sm text-red-500 mr-2" />
                     <p className="text-base text-red-500">
                         Attempt 5 questions for Dashboard to refresh.
                     </p>
-                </div>
+                </div>*/}
             </motion.div>
+
+            <div className="w-full mx-auto my-3 p-6 bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1 text-center md:text-left">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                        Boost Your Learning!
+                    </h2>
+                    <p className="text-white text-sm md:text-base">
+                        Try the new <span className="font-semibold">Smart Revision</span> feature –
+                        your personalized weekly recovery plan to master questions faster!
+                    </p>
+                </div>
+
+                {/* Button */}
+                <div>
+                    <Button
+                        onClick={() => navigate('/revision')}
+                        className="w-full bg-white text-blue-600 font-semibold px-6 py-3 shadow-md hover:bg-blue-50 transition-colors duration-200"
+                    >
+                        Smart Revision
+                    </Button>
+                </div>
+            </div>
 
             {/* Stats */}
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4"
+                className="grid grid-cols-1 md:grid-cols-2 mb-4"
             >
                 <StatCard
                     icon={ChartLine}

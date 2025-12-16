@@ -35,7 +35,6 @@ const clearStaleData = async () => {
 
     try {
         const cacheNames = await caches.keys();
-        console.log('Cache names before delete:', cacheNames);
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
     } catch (e) {
         console.warn('⚠️ Cache Storage clearing error:', e);

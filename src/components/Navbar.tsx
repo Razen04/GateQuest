@@ -15,6 +15,51 @@ const Navbar = () => {
 
     const navigate = useNavigate();
 
+    const [starCount, setStarCount] = useState<number | null>(null);
+
+    useEffect(() => {
+        const CACHE_KEY = 'repo_stars';
+        const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        const fetchStars = () => {
+            fetch('https://api.github.com/repos/Razen04/GateQuest')
+                .then((res) => res.json())
+                .then((data) => {
+                    const count = data.stargazers_count;
+                    const formatted = count > 999 ? (count / 1000).toFixed(1) + 'k' : count;
+
+                    // Save to state
+                    setStarCount(formatted);
+
+                    // Save to local storage with timestamp
+                    localStorage.setItem(
+                        CACHE_KEY,
+                        JSON.stringify({
+                            count: formatted,
+                            timestamp: Date.now(),
+                        }),
+                    );
+                })
+                .catch(() => setStarCount(0));
+        };
+
+        // 1. Check Local Storage first
+        const cached = localStorage.getItem(CACHE_KEY);
+
+        if (cached) {
+            const { count, timestamp } = JSON.parse(cached);
+            const isExpired = Date.now() - timestamp > CACHE_EXPIRY;
+
+            if (!isExpired) {
+                setStarCount(count); // Use cached value
+            } else {
+                fetchStars(); // Cache expired, fetch new
+            }
+        } else {
+            fetchStars(); // No cache, fetch new
+        }
+    }, []);
+
     // Handle click outside notification panel to close it
     const handleClickOutside = useCallback((event: MouseEvent) => {
         if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
@@ -37,13 +82,13 @@ const Navbar = () => {
 
     return (
         <motion.div
-            className="py-4 px-6 flex justify-between items-center border-b bg-primary dark:bg-primary-dark border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark"
+            className="py-4 px-6 flex justify-between items-center border-b border-border-primary dark:border-border-primary-dark text-text-primary dark:text-text-primary-dark"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
         >
             <div className="flex lg:block w-full">
-                <h1 className="text-center text-lg md:text-2xl font-bold">
+                <h1 className="text-center text-md md:text-2xl">
                     <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
                         GATE
                     </span>
@@ -79,7 +124,7 @@ const Navbar = () => {
                     {isMobile && (
                         <motion.button
                             aria-label="Github"
-                            className="cursor-pointer"
+                            className="cursor-pointer border-b border-blue-500"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                         >
@@ -87,8 +132,12 @@ const Navbar = () => {
                                 href="https://github.com/Razen04/GateQuest"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="flex items-center gap-0.5"
                             >
                                 <GithubLogo size={20} />
+                                {starCount !== null && (
+                                    <span className="font-extralight text-sm">{starCount}</span>
+                                )}
                             </a>
                         </motion.button>
                     )}
@@ -96,7 +145,7 @@ const Navbar = () => {
                     {isMobile && (
                         <motion.button
                             aria-label="Support Me"
-                            className="relative cursor-pointer border-b border-green-500"
+                            className="cursor-pointer border-b border-green-500"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate('/donate')}
@@ -117,7 +166,7 @@ const Navbar = () => {
                             <Notification size={20} weight="duotone" />
                         )}
                         {unreadNotifications && (
-                            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            <span className="absolute top-1 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                         )}
                     </motion.button>
                     {/* Notifications Panel */}

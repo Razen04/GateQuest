@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import useStudyPlan from '../../hooks/useStudyPlan.ts';
 import { itemVariants } from '../../utils/motionVariants.ts';
+import ModernLoader from '../ui/ModernLoader.tsx';
 
 interface StudyPlanData {
     loading: boolean;
@@ -22,24 +23,20 @@ const StudyPlan = () => {
     }: StudyPlanData = useStudyPlan();
 
     if (loading) {
-        return (
-            <div className="p-6 bg-primary dark:bg-primary-dark rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mt-8">
-                <p className="text-center text-gray-500">Loading study plan...</p>
-            </div>
-        );
+        return <ModernLoader />;
     }
 
     // Status message logic
     const statusMessage = isTargetMetToday
         ? "Great job! You've met today's target."
-        : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more questions today to stay on track.`;
+        : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more unique questions today to stay on track.`;
 
     return (
         <motion.div
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="mx-auto p-6 rounded-xl shadow-sm border border-border-primary dark:border-border-primary-dark mb-4"
+            className="mx-auto p-6 shadow-sm border border-border-primary dark:border-border-primary-dark mb-4"
         >
             <div className="flex justify-between items-start mb-4">
                 <div>
@@ -63,7 +60,7 @@ const StudyPlan = () => {
                             {todayUniqueAttemptCount} / {dailyQuestionTarget}
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-gray-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-gray-200 dark:bg-zinc-800 overflow-hidden">
                         <div
                             className="h-full"
                             style={{
@@ -93,7 +90,7 @@ const StudyPlan = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className={`mt-6 p-4 rounded-lg text-center font-medium ${
+                className={`mt-6 p-4 text-center font-medium ${
                     isTargetMetToday
                         ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300'
                         : 'bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300'

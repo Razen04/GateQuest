@@ -50,7 +50,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                 ? (now.getTime() - lastChecked.getTime()) / (1000 * 60 * 60)
                 : Infinity;
 
-            if (diffInHours <= 12) return;
+            if (diffInHours <= 1) return;
 
             const readIds = JSON.parse(
                 localStorage.getItem('read_notifications') || '[]',
@@ -94,7 +94,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="absolute right-0 top-5 mt-3 w-80 bg-white dark:bg-zinc-900 rounded-lg shadow-lg border border-border-primary dark:border-border-primary-dark overflow-hidden z-50"
+                    className="absolute right-0 top-5 mt-3 w-80 bg-white dark:bg-zinc-900 shadow-lg border border-border-primary dark:border-border-primary-dark overflow-hidden z-50"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}

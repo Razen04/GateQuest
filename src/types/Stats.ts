@@ -3,6 +3,7 @@ export interface SubjectStat {
     accuracy: number;
     progress: number;
     attemptedQuestionIds: Set<string>;
+    revisionAttemptedQuestionIds: Set<string>;
     attempted: number;
     totalAvailable: number;
 }

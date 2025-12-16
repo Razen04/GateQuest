@@ -4,10 +4,14 @@
         // File Layout
         "rootDir": "./src",
         // "outDir": "./dist",
-
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
         // Environment Settings
         // See also https://aka.ms/tsconfig/module
-        "module": "nodenext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "target": "esnext",
         "types": [],
         // For nodejs:
@@ -45,6 +49,6 @@
         "moduleDetection": "force",
         "skipLibCheck": true
     },
-    "include": ["src/**/*"],
+    "include": ["./src/**/*"],
     "exclude": ["dist", "node_modules", "vite.config.js", "package.json", "eslint.config.js"]
 }
