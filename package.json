@@ -43,6 +43,7 @@
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "framer-motion": "^12.11.0",
+        "html-react-parser": "^5.2.10",
         "katex": "^0.16.22",
         "lucide-react": "^0.556.0",
         "lz-string": "^1.5.0",

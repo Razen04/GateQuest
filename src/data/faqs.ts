@@ -18,7 +18,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Yes, GATEQuest is and always will be free to use. It is a community-driven project built by volunteers.',
+                    'Yes, GATEQuest is and always will be free to use, provided as long as I can keep it free.',
             },
         ],
     },
@@ -28,7 +28,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Nope, that will defeat the purpose of being distraction-free. If money ever becomes a problem, I will ask for donations upfront.',
+                    'Nope, that will defeat the purpose of being distraction-free. If money ever becomes a problem, I will ask for donations upfront or close the project.',
             },
         ],
     },
@@ -67,7 +67,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Except for descriptive and out-of-syllabus questions, all are present in the app. I may add descriptive questions in the future. I am manually adding questions so not all subjects are added yet but rest assurred they will be added soon.',
+                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS branch as of now). I may add descriptive questions in the future.',
             },
         ],
     },
@@ -77,17 +77,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Most probably you will because everything is done manually so would like you to let me know about it either via  ',
-            },
-            {
-                type: 'link',
-                text: 'Discord server',
-                href: 'https://discord.gg/dFmg3g52c5',
-            },
-            {
-                type: 'text',
-                content:
-                    ' or by opening an issue on GitHub. I will fix it as soon as possible and notify via in-app notification.',
+                    'Most probably you will because everything is done manually so would like you to let me know about it via reporting question through the app itself.',
             },
         ],
     },
@@ -99,7 +89,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'I welcome all contributions! Whether you are a developer or a designer (I really need one), the best place to start is our ',
+                    'I welcome all contributions! Whether you are a developer or a designer, the best place to start is our ',
             },
             {
                 type: 'link',
@@ -130,8 +120,7 @@ export const faqs: Faq[] = [
             },
             {
                 type: 'text',
-                content:
-                    '. This helps us track all feedback in one place. Since the repository is not public yet, you can also join our ',
+                content: '. This helps us track all feedback in one place. You can also join our ',
             },
             {
                 type: 'link',
