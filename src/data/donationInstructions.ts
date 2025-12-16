@@ -17,6 +17,9 @@ const instructions = [
         text: 'Click "Generate QR + Link" to get your payment details.',
     },
     {
+        text: 'You will need 2 devices, one for scanning the QR code.',
+    },
+    {
         text: 'After completing the payment, enter the reference number exactly as shown in your payment confirmation. The screenshot will guide you on how to find the reference number.',
     },
     {
