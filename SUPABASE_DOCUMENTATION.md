@@ -12,6 +12,9 @@ The database is designed around a few core concepts. Understanding their relatio
 - **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question, calculated from the `user_question_activity` data.
 - **`question_reports`**: Allows users to report issues with specific questions.
 - **`notifications`**: A simple table for storing in-app notifications for users.
+- **`user_incorrect_queue`**: Table to store the incorrect attemtps of the user and then helps in Smart Revision
+- **`weekly_revision_set`**: Table to store the weekly set of each user.
+- **`revision_set_questions`**: Table to store the revision questions corresponding to each set.
 
 ---
 
@@ -174,41 +177,216 @@ Stores in-app notifications to be displayed to users.
 - **Policy:** Anyone can read active notifications.
 - **SQL Logic:** `FOR SELECT USING (true)`
 
+### Table: `public.user_incorrect_queue`
+
+Tracks questions a user has answered incorrectly and schedules them for future review (e.g., spaced repetition).
+
+| Column Name      | Data Type     | Constraints & Defaults                                | Description                                           |
+| :--------------- | :------------ | :---------------------------------------------------- | :---------------------------------------------------- |
+| `user_id`        | `uuid`        | `PRIMARY KEY (composite)`, `REFERENCES users(id)`     | The user who answered the question incorrectly.       |
+| `question_id`    | `uuid`        | `PRIMARY KEY (composite)`, `REFERENCES questions(id)` | The incorrectly answered question.                    |
+| `box`            | `int`         | `DEFAULT 1`                                           | Review box or level used for spaced repetition logic. |
+| `added_at`       | `timestamptz` | `DEFAULT now()`                                       | When the question was added to the incorrect queue.   |
+| `next_review_at` | `timestamptz` | `DEFAULT current_date`                                | The next scheduled review date for the question.      |
+
+**Indexes:**
+
+- `idx_users_added (user_id, added_at)` – Speeds up lookups by user and insertion time.
+- `idx_next_reviewed (user_id, added_at, next_review_at)` – Optimizes review scheduling queries.
+
+**Row Level Security (RLS) Policies:**
+
+- **Select:** Users can only read their own incorrect questions.
+    - `FOR SELECT USING (user_id = auth.uid())`
+- **Insert:** Users can only insert rows for themselves.
+    - `FOR INSERT WITH CHECK (user_id = auth.uid())`
+- **Update:** Users can only update their own rows.
+    - `FOR UPDATE USING (user_id = auth.uid())`
+- **Delete:** Users can only delete their own rows.
+    - `FOR DELETE USING (user_id = auth.uid())`
+
+---
+
+### Enum: `public.revision_status`
+
+Defines the lifecycle state of a weekly revision set.
+
+| Value     | Description                                          |
+| :-------- | :--------------------------------------------------- |
+| `pending` | The revision set has been generated but not started. |
+| `started` | The user has started the revision set.               |
+| `expired` | The revision set is no longer active or valid.       |
+
+---
+
+### Table: `public.weekly_revision_set`
+
+Represents a weekly revision session generated for a user.
+
+| Column Name       | Data Type         | Constraints & Defaults                     | Description                                              |
+| :---------------- | :---------------- | :----------------------------------------- | :------------------------------------------------------- |
+| `id`              | `uuid`            | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the revision set.                  |
+| `generated_for`   | `uuid`            | `REFERENCES users(id)`                     | The user for whom the revision set was generated.        |
+| `start_of_week`   | `date`            | `NOT NULL`                                 | The start date of the week this revision set applies to. |
+| `status`          | `revision_status` | `DEFAULT 'pending'`                        | Current status of the revision set.                      |
+| `created_at`      | `timestamptz`     | `DEFAULT now()`                            | When the revision set was created.                       |
+| `started_at`      | `timestamptz`     | `NULL` allowed                             | When the user started the revision set.                  |
+| `expires_at`      | `timestamptz`     | `NULL` allowed                             | When the revision set expires.                           |
+| `total_questions` | `int`             | `DEFAULT 0`                                | Total number of questions in the revision set.           |
+| `correct_count`   | `int`             | `DEFAULT 0`                                | Number of correctly answered questions.                  |
+| `accuracy`        | `numeric(5,2)`    | `NULL` allowed                             | Accuracy percentage for the revision set.                |
+
+**Row Level Security (RLS) Policies:**
+
+- **Select:** Users can only read their own revision sets.
+    - `FOR SELECT USING (generated_for = auth.uid())`
+- **Insert:** Users can only create revision sets for themselves.
+    - `FOR INSERT WITH CHECK (generated_for = auth.uid())`
+- **Update:** Users can only update their own revision sets.
+    - `FOR UPDATE USING (generated_for = auth.uid())`
+- **Delete:** Users can only delete their own revision sets.
+    - `FOR DELETE USING (generated_for = auth.uid())`
+
+---
+
+### Table: `public.revision_set_questions`
+
+Stores the questions included in a weekly revision set along with user performance data.
+
+| Column Name          | Data Type | Constraints & Defaults                                                               | Description                                       |
+| :------------------- | :-------- | :----------------------------------------------------------------------------------- | :------------------------------------------------ |
+| `set_id`             | `uuid`    | `PRIMARY KEY (composite)`, `REFERENCES weekly_revision_set(id)`, `ON DELETE CASCADE` | The revision set this question belongs to.        |
+| `question_id`        | `uuid`    | `PRIMARY KEY (composite)`, `REFERENCES questions(id)`                                | The question included in the revision set.        |
+| `is_correct`         | `boolean` | `NULL` allowed                                                                       | Whether the user answered the question correctly. |
+| `time_spent_seconds` | `int`     | `NULL` allowed                                                                       | Time spent answering the question, in seconds.    |
+
+**Notes:**
+
+- Uses a composite primary key (`set_id`, `question_id`) to ensure each question appears only once per revision set.
+- Rows are automatically removed when the parent revision set is deleted due to `ON DELETE CASCADE`.
+
 ---
 
 ## 🚀 Database Functions
 
 Custom SQL functions to handle complex logic directly in the database.
 
-### Function: `user_question_activity_batch(batch jsonb)`
+### Function: `insert_user_question_activity_batch(batch jsonb)`
 
 - **Purpose:**
-    - This function processes a batch of user question attempts and records each attempt in the `user_question_activity` table. It also updates the `user_incorrect_queue` table based on whether the user answered correctly or incorrectly. The function supports batch processing for efficiency and ensures atomicity via transactions.
+    - Processes a batch of user question attempts and applies different behaviors depending on whether the attempt occurs during **practice mode** or an **active weekly revision set**.
+    - Records practice attempts in `user_question_activity`.
+    - Updates the spaced-repetition queue in `user_incorrect_queue` **only for official revision attempts**.
+    - Updates progress, accuracy, and completion state for an active `weekly_revision_set`.
+
+---
 
 - **Arguments:**
-    - **batch (jsonb):** A JSON array containing multiple question attempt records. Each record should include the following fields:
-        - `user_id` (uuid): The ID of the user attempting the questions.
-        - `question_id` (uuid): The ID of the question.
-        - `subject` (string): The subject of the question.
-        - `is_correct` (boolean): Whether the user answered correctly.
-        - `time_taken` (int): The time (in seconds) taken to answer the question.
-        - `attempted_at` (timestamptz): The timestamp of when the question was attempted.
+    - **batch (jsonb):**  
+      A JSON array of question attempt objects. Each object must include:
 
-- **Logic:**
-    - **Transaction Handling:** The entire process runs within a transaction to ensure that either all inserts/updates succeed or none of them are applied in case of failure.
-    - **Batch Processing:** The function processes each question attempt in the provided `batch` and inserts records into the `user_question_activity` table, calculating the `attempt_number` for each attempt.
-    - **Updating the Queue:** Based on whether the answer was correct or incorrect, the function updates the `user_incorrect_queue` table. Correct answers move questions up in the queue, and incorrect answers move them back to box 1.
-    - **New Questions:** If the question is not already in the queue, it is inserted into box 1.
-    - **Error Handling:** If anything goes wrong during the process, the transaction is rolled back, ensuring no partial data changes.
+        | Field Name     | Type          | Description                                          |
+        | -------------- | ------------- | ---------------------------------------------------- |
+        | `user_id`      | `uuid`        | The user attempting the question.                    |
+        | `question_id`  | `uuid`        | The question being attempted.                        |
+        | `subject`      | `text`        | Question subject (used for practice history).        |
+        | `was_correct`  | `boolean`     | Whether the answer was correct. Defaults to `false`. |
+        | `time_taken`   | `int`         | Time spent answering, in seconds.                    |
+        | `attempted_at` | `timestamptz` | When the attempt occurred.                           |
+
+---
+
+- **Core Concepts:**
+    - **Revision States:**
+        - `none` – Practice attempt (not part of a revision set).
+        - `first` – First attempt of a question within an active revision set.
+        - `done` – Question already attempted in the active revision set (ignored).
+
+    - **Active Revision Set:**
+        - The function automatically resolves the user’s currently **started** `weekly_revision_set`.
+        - Only one active set is considered at a time.
+
+---
+
+- **Logic Flow:**
+    1. **Batch Iteration**
+        - Iterates through each item in the input JSON array.
+
+    2. **Revision State Resolution**
+        - Checks if the question belongs to the user’s active revision set.
+        - Determines whether the attempt is:
+            - A practice attempt
+            - The first revision attempt
+            - A duplicate revision attempt (skipped)
+
+    3. **Hard Stop for Duplicate Revision Attempts**
+        - If the question has already been answered in the revision set (`done`), the attempt is ignored.
+
+    4. **Practice Mode Handling (`revision_state = 'none'`)**
+        - Inserts a new record into `user_question_activity`.
+        - Automatically increments `attempt_number` per user/question pair.
+        - Practice attempts **do not** affect spaced-repetition boxes except for wrong attempts.
+        - If it is an incorrect attempt then that question is inserted into `user_incorrect_queue` with `box=1`.
+
+    5. **Spaced Repetition Queue (`user_incorrect_queue`)**
+        - Applied only for:
+            - Practice attempts (`none`) **when inserting new incorrect questions**
+            - First revision attempts (`first`) **when updating existing entries**
+        - **Insert Rules:**
+            - A question is added to the queue **only if answered incorrectly**.
+        - **Update Rules (revision only):**
+            - Correct answers move questions forward:
+                - Box 1 → Box 2 → Box 3 → Removed
+            - Incorrect answers reset the question to Box 1.
+        - **Review Scheduling:**
+            - Box 1 → +1 week
+            - Box 2 → +2 weeks
+            - Box 3 → +4 weeks
+
+    6. **Revision Set Question Update (`first` attempt only)**
+        - Updates `revision_set_questions` with correctness and time spent.
+        - Recalculates:
+            - Total questions
+            - Correct count
+            - Accuracy percentage
+
+    7. **Revision Set Completion**
+        - If all questions have been attempted, the function triggers
+          `update_status_of_weekly_set(...)` to expire or finalize the set.
+
+---
+
+- **Key Behaviors & Guarantees:**
+    - Revision questions can only be answered **once** per weekly set.
+    - Practice attempts never affect revision accuracy.
+    - Spaced-repetition box movement happens **only during official revision attempts**.
+    - Incorrect questions are the only ones added to the repetition queue.
+    - Weekly accuracy is computed as:
+        ```
+        (correct_questions / attempted_questions) * 100
+        ```
+
+---
 
 - **Return Value:**
-    - **None.**
+    - **void**
+
+---
 
 - **Example:**
-  Given a batch of questions attempted, this function processes them and updates the database accordingly. If the question is answered correctly, the question's box is updated or removed if it reaches box 3. If answered incorrectly, it moves back to box 1.
+    - If a user practices a question outside a revision set:
+        - The attempt is logged.
+        - The spaced-repetition queue is unchanged unless the answer is incorrect.
+    - If the same question is attempted during an active revision set:
+        - The first attempt updates revision progress and the queue.
+        - Any subsequent attempts are ignored.
 
-- **Exceptions:**
-    - If an error occurs at any point in the function (e.g., issue with database insert/update), the transaction is rolled back, and no changes are persisted.
+---
+
+- **Exceptions & Safety:**
+    - Duplicate revision attempts are safely skipped.
+    - Partial revision updates are prevented by hard checks on attempt state.
+    - Batch processing ensures consistent handling of multiple attempts in one call.
 
 ### Function: `refresh_question_peer_stats()`
 
