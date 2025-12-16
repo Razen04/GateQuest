@@ -28,6 +28,7 @@ const ReportModal = ({
         'Error in question',
         'Error in options',
         'Error in answer',
+        'Error in explanation',
         'Error in tags',
         'Other',
     ];

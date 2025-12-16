@@ -13,6 +13,7 @@ import ResultMessage from '@/components/QuestionCard/ResultMessage';
 import QuestionPeerStats from '@/components/QuestionCard/QuestionPeerStats';
 import ActionButtons from '@/components/QuestionCard/ActionButtons';
 import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
+import QuestionExplanation from './QuestionExplanation';
 
 // Child Components
 
@@ -129,7 +130,7 @@ const QuestionCard = ({
                 ref={pageRef}
                 className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto h-dvh pb-60 mt-6 shadow-sm  dark:text-white overflow-y-scroll border border-border-primary dark:border-border-primary-dark bg-white dark:bg-zinc-900"
             >
-                {/* 1. Header Section */}
+                {/* Header Section */}
                 <QuestionHeader
                     questionNumber={questionNumber}
                     totalQuestions={totalQuestions}
@@ -141,7 +142,7 @@ const QuestionCard = ({
                 />
 
                 <div className="p-4 sm:p-6">
-                    {/* 2. Content Section (Text & Options) */}
+                    {/* Content Section (Text & Options) */}
                     <QuestionContent
                         currentQuestion={question}
                         hasOptions={hasOptions}
@@ -151,7 +152,7 @@ const QuestionCard = ({
                         onOptionSelect={onOptionSelect}
                     />
 
-                    {/* 3. Numerical Input Section (Conditional) */}
+                    {/* Numerical Input Section (Conditional) */}
                     {isNumericalQuestion(question) && (
                         <div className="mb-6">
                             <label className="block text-sm font-medium mb-2 dark:text-gray-200">
@@ -180,7 +181,7 @@ const QuestionCard = ({
                         </div>
                     )}
 
-                    {/* 4. Result Message */}
+                    {/* Result Message */}
                     {showAnswer && (
                         <ResultMessage
                             showAnswer={showAnswer}
@@ -189,7 +190,7 @@ const QuestionCard = ({
                         />
                     )}
 
-                    {/* 5. Peer Statistics */}
+                    {/* Peer Statistics */}
                     {showAnswer && (
                         <QuestionPeerStats
                             loading={peerStats.loading}
@@ -198,7 +199,10 @@ const QuestionCard = ({
                         />
                     )}
 
-                    {/* 6. Action Buttons */}
+                    {/* Question Explanation */}
+                    {showAnswer && <QuestionExplanation question={question} />}
+
+                    {/* Action Buttons */}
                     <ActionButtons
                         isFirstQuestion={isFirst}
                         isLastQuestion={isLast}

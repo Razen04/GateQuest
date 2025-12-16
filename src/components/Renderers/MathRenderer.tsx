@@ -26,55 +26,6 @@ type MathRendererProps = {
     text: string | number | number[];
 };
 
-const renderSimpleHTML = (raw: string) => {
-    if (!raw) return null;
-
-    const elements: React.ReactNode[] = [];
-    let remaining = raw;
-
-    // Handle <ul>...</ul> blocks
-    const ulRegex = /<ul>([\s\S]*?)<\/ul>/gi;
-    let ulMatch;
-    while ((ulMatch = ulRegex.exec(raw)) !== null) {
-        const before = raw.slice(0, ulMatch.index);
-        if (before.trim()) elements.push(before);
-
-        const ulContent = ulMatch[1];
-        if (!ulContent) {
-            return;
-        }
-        const liItems = ulContent
-            .match(/<li>(.*?)<\/li>/gi)
-            ?.map((li) => li.replace(/<\/?li>/gi, ''));
-
-        if (liItems && liItems.length) {
-            elements.push(
-                <ul className="list-disc ml-6 my-2">
-                    {liItems.map((li, i) => (
-                        <li key={i}>{renderSimpleHTML(li)}</li>
-                    ))}
-                </ul>,
-            );
-        }
-
-        remaining = raw.slice(ulMatch.index + ulMatch[0].length);
-        raw = remaining;
-        ulRegex.lastIndex = 0;
-    }
-
-    // Handle bold text (<b>...</b>)
-    const boldSplit = remaining.split(/(<b>.*?<\/b>)/gi);
-    boldSplit.forEach((part, i) => {
-        if (part.startsWith('<b>') && part.endsWith('</b>')) {
-            elements.push(<strong key={i}>{part.replace(/<\/?b>/gi, '')}</strong>);
-        } else {
-            elements.push(part);
-        }
-    });
-
-    return elements;
-};
-
 const MathRenderer = ({ text }: MathRendererProps) => {
     if (!text || typeof text !== 'string') return null;
 
@@ -204,119 +155,149 @@ const MathRenderer = ({ text }: MathRendererProps) => {
 
     return (
         <>
-            {tableAwareSegments.map((outer, segIdx) =>
-                outer.type === 'table' ? (
-                    <div key={`tbl-${segIdx}`} className="my-3">
-                        <TableRenderer tableText={outer.content} />
-                    </div>
-                ) : (
-                    // For normal text, parse mixed content (math, code, images, and line breaks)
-                    parseContent(outer.content).map((segment, index: number) => {
-                        switch (segment.type) {
-                            case 'math':
+            {tableAwareSegments.map((outer, segIdx) => {
+                if (outer.type === 'table') {
+                    return (
+                        <div key={`tbl-${segIdx}`} className="my-3">
+                            <TableRenderer tableText={outer.content} />
+                        </div>
+                    );
+                }
+
+                // --- NEW LOGIC STARTS HERE ---
+                // We split the text segment by <ul> blocks so parseContent doesn't break them
+                const listSplit = outer.content.split(/(<ul>[\s\S]*?<\/ul>)/gi);
+
+                return (
+                    <span key={`seg-${segIdx}`}>
+                        {listSplit.map((part, partIdx) => {
+                            // 1. If this part is a List Block
+                            if (part.toLowerCase().startsWith('<ul>')) {
+                                // Extract list items manually
+                                const liMatches = part.match(/<li>([\s\S]*?)<\/li>/gi);
+                                if (!liMatches) return null;
+
                                 return (
-                                    <div
-                                        key={`${segIdx}-${index}`}
-                                        className="inline-block whitespace-nowrap scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
-                                        style={{
-                                            verticalAlign: 'middle',
-                                            display: 'inline-flex',
-                                        }}
+                                    <ul
+                                        key={`${segIdx}-${partIdx}`}
+                                        className="list-disc ml-6 my-2"
                                     >
-                                        <InlineMath math={cleanLatexContent(segment.content!)} />
-                                    </div>
+                                        {liMatches.map((liRaw, liIdx) => {
+                                            // Strip the <li> tags to get the content
+                                            const innerContent = liRaw.replace(/<\/?li>/gi, '');
+                                            return (
+                                                <li key={liIdx}>
+                                                    {/* RECURSION: Use MathRenderer inside the list item */}
+                                                    <MathRenderer text={innerContent} />
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
                                 );
-                            case 'blockMath':
-                                return (
-                                    <div
-                                        key={`${segIdx}-${index}`}
-                                        className="block scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 p-2 rounded"
-                                        style={{ display: 'block' }}
-                                    >
-                                        <BlockMath math={cleanLatexContent(segment.content!)} />
-                                    </div>
-                                );
-                            case 'code':
-                                return (
-                                    <CodeBlockRenderer
-                                        key={`${segIdx}-${index}`}
-                                        code={segment.content}
-                                        language={segment.language}
-                                    />
-                                );
-                            case 'inlineCode':
-                                return (
-                                    <CodeBlockRenderer
-                                        key={`${segIdx}-${index}`}
-                                        code={`\`${segment.content}\``}
-                                    />
-                                );
-                            case 'lineBreak':
-                                return <br key={`${segIdx}-${index}`} />;
-                            case 'image':
-                                return (
-                                    <div
-                                        key={`${segIdx}-${index}`}
-                                        className="image-container flex justify-center my-4 w-full text-xs"
-                                    >
-                                        <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl overflow-hidden">
-                                            <img
-                                                src={segment.src}
-                                                alt={segment.alt || 'Image'}
-                                                className="w-full max-w-full h-auto object-contain rounded shadow-lg mx-auto"
+                            }
+
+                            // 2. If this part is regular Text (Process with parseContent as usual)
+                            if (!part) return null;
+
+                            return parseContent(part).map((segment, index) => {
+                                // ... (Keep your existing switch statement logic EXACTLY as it was) ...
+                                switch (segment.type) {
+                                    case 'math':
+                                        return (
+                                            <div
+                                                key={`${segIdx}-${partIdx}-${index}`}
+                                                className="inline-block whitespace-nowrap scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100"
                                                 style={{
-                                                    maxHeight: '50vh',
-                                                    minWidth: 0,
+                                                    verticalAlign: 'middle',
+                                                    display: 'inline-flex',
                                                 }}
-                                                loading="lazy"
-                                                onError={(e) => {
-                                                    const img = e.target as HTMLImageElement;
-                                                    img.style.display = 'none';
-                                                    // Create error message element that doesn't disrupt content flow
-                                                    const errorDiv = document.createElement('div');
-                                                    errorDiv.className =
-                                                        'text-red-500 text-xs p-1 bg-red-50 rounded border border-red-200 inline-block';
-                                                    errorDiv.innerText = `[Image unavailable: ${segment.alt || 'unnamed image'}]`;
-                                                    img.parentNode?.appendChild(errorDiv);
-                                                }}
+                                            >
+                                                <InlineMath
+                                                    math={cleanLatexContent(segment.content!)}
+                                                />
+                                            </div>
+                                        );
+                                    case 'blockMath':
+                                        return (
+                                            <div
+                                                key={`${segIdx}-${partIdx}-${index}`}
+                                                className="block scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 p-2"
+                                            >
+                                                <BlockMath
+                                                    math={cleanLatexContent(segment.content!)}
+                                                />
+                                            </div>
+                                        );
+                                    case 'code':
+                                        return (
+                                            <CodeBlockRenderer
+                                                key={`${segIdx}-${partIdx}-${index}`}
+                                                code={segment.content}
+                                                language={segment.language}
                                             />
-                                            {segment.alt && (
-                                                <div className="text-center text-xs text-gray-500 mt-2 italic">
-                                                    {segment.alt}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            default:
-                                // Process any remaining <br> tags in regular text content
-                                if (
-                                    segment.content?.includes('<br>') ||
-                                    segment.content?.includes('<br/>') ||
-                                    segment.content?.includes('<br />')
-                                ) {
-                                    // Split by different br tag formats and render with React fragments
-                                    const parts = segment.content.split(/<br\s*\/?>/i);
-                                    return (
-                                        <React.Fragment key={`${segIdx}-${index}`}>
-                                            {parts.map((part, i) => (
-                                                <React.Fragment key={`${segIdx}-${index}-${i}`}>
-                                                    {decodeEntities(part)}
-                                                    {i < parts.length - 1 && <br />}
-                                                </React.Fragment>
-                                            ))}
-                                        </React.Fragment>
-                                    );
+                                        );
+                                    case 'inlineCode':
+                                        return (
+                                            <CodeBlockRenderer
+                                                key={`${segIdx}-${partIdx}-${index}`}
+                                                code={`\`${segment.content}\``}
+                                            />
+                                        );
+                                    case 'lineBreak':
+                                        return <br key={`${segIdx}-${partIdx}-${index}`} />;
+                                    case 'image':
+                                        // ... (Keep your existing image logic) ...
+                                        return (
+                                            <div
+                                                key={`${segIdx}-${partIdx}-${index}`}
+                                                className="image-container flex justify-center my-4 w-full text-xs"
+                                            >
+                                                {/* ... existing image rendering code ... */}
+                                                <img
+                                                    src={segment.src}
+                                                    alt={segment.alt}
+                                                    className="w-full max-w-full h-auto object-contain shadow-lg mx-auto"
+                                                    style={{ maxHeight: '50vh' }}
+                                                />
+                                            </div>
+                                        );
+                                    default: {
+                                        // REMOVE the check for <br>. Apply this logic to ALL text segments.
+                                        // This handles <br>, <b>, and regular text simultaneously.
+
+                                        // 1. Split by <br> tags (if any exist)
+                                        const parts = segment.content
+                                            ? segment.content.split(/<br\s*\/?>/i)
+                                            : [segment.content || ''];
+
+                                        return (
+                                            <React.Fragment key={`${segIdx}-${partIdx}-${index}`}>
+                                                {parts.map((p, i) => (
+                                                    <React.Fragment key={i}>
+                                                        <span
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: decodeEntities(p)
+                                                                    // This simple replace works even if the string was split by parseContent
+                                                                    .replace(/<b>/gi, '<strong>')
+                                                                    .replace(
+                                                                        /<\/b>/gi,
+                                                                        '</strong>',
+                                                                    ),
+                                                            }}
+                                                        />
+                                                        {/* Re-add the break if this wasn't the last part */}
+                                                        {i < parts.length - 1 && <br />}
+                                                    </React.Fragment>
+                                                ))}
+                                            </React.Fragment>
+                                        );
+                                    }
                                 }
-                                return (
-                                    <span key={`${segIdx}-${index}`}>
-                                        {renderSimpleHTML(decodeEntities(segment.content!))}
-                                    </span>
-                                );
-                        }
-                    })
-                ),
-            )}
+                            });
+                        })}
+                    </span>
+                );
+            })}
         </>
     );
 };

@@ -50,7 +50,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                 ? (now.getTime() - lastChecked.getTime()) / (1000 * 60 * 60)
                 : Infinity;
 
-            if (diffInHours <= 12) return;
+            if (diffInHours <= 1) return;
 
             const readIds = JSON.parse(
                 localStorage.getItem('read_notifications') || '[]',

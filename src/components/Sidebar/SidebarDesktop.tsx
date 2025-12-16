@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SidebarItem } from './SidebarItem';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,51 @@ export const SidebarDesktop = ({
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const handleCollapse = () => setIsCollapsed(!isCollapsed);
+
+    const [starCount, setStarCount] = useState<number | null>(null);
+
+    useEffect(() => {
+        const CACHE_KEY = 'repo_stars';
+        const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        const fetchStars = () => {
+            fetch('https://api.github.com/repos/Razen04/GateQuest')
+                .then((res) => res.json())
+                .then((data) => {
+                    const count = data.stargazers_count;
+                    const formatted = count > 999 ? (count / 1000).toFixed(1) + 'k' : count;
+
+                    // Save to state
+                    setStarCount(formatted);
+
+                    // Save to local storage with timestamp
+                    localStorage.setItem(
+                        CACHE_KEY,
+                        JSON.stringify({
+                            count: formatted,
+                            timestamp: Date.now(),
+                        }),
+                    );
+                })
+                .catch(() => setStarCount(0));
+        };
+
+        // 1. Check Local Storage first
+        const cached = localStorage.getItem(CACHE_KEY);
+
+        if (cached) {
+            const { count, timestamp } = JSON.parse(cached);
+            const isExpired = Date.now() - timestamp > CACHE_EXPIRY;
+
+            if (!isExpired) {
+                setStarCount(count); // Use cached value
+            } else {
+                fetchStars(); // Cache expired, fetch new
+            }
+        } else {
+            fetchStars(); // No cache, fetch new
+        }
+    }, []);
 
     return (
         <motion.div
@@ -100,7 +145,6 @@ export const SidebarDesktop = ({
                         </Button>
                         <Button
                             variant="ghost"
-                            size="icon-lg"
                             className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                             aria-label="Github"
                         >
@@ -108,8 +152,12 @@ export const SidebarDesktop = ({
                                 href="https://github.com/Razen04/GateQuest"
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="flex items-center gap-2"
                             >
                                 <GithubLogo size={20} />
+                                {starCount !== null && (
+                                    <span className="text-base font-extralight">{starCount}</span>
+                                )}
                             </a>
                         </Button>
                         <Button
