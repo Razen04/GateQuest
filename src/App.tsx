@@ -22,23 +22,23 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
  */
 function App() {
     return (
-        // StatsProvider manages user's practice statistics.
-        <StatsProvider>
-            {/* AuthProvider handles user authentication state and logic. */}
-            <AuthProvider>
-                {/* AppProvider manages general application settings, like sound effects. */}
-                <AppProvider>
-                    {/* Router provides the client-side routing functionality. */}
-                    <Router>
+        // 1. Router must be at the very top so hooks like useNavigate() work inside Providers
+        <Router>
+            {/* StatsProvider manages user's practice statistics. */}
+            <StatsProvider>
+                {/* AuthProvider handles user authentication state and logic. */}
+                <AuthProvider>
+                    {/* AppProvider manages general application settings, like sound effects. */}
+                    <AppProvider>
                         {/* AppRoutes contains all the defined application routes. */}
                         <AppRoutes />
 
                         {/* Vercel Speed Insights */}
                         <SpeedInsights />
-                    </Router>
-                </AppProvider>
-            </AuthProvider>
-        </StatsProvider>
+                    </AppProvider>
+                </AuthProvider>
+            </StatsProvider>
+        </Router>
     );
 }
 
