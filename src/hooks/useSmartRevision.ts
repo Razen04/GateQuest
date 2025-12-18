@@ -84,6 +84,9 @@ const useSmartRevision = () => {
             }
             if (data?.success) {
                 fetchCurrentSet();
+
+                // Letting the event to know the whole app that the app has generated revision set
+                window.dispatchEvent(new Event('REVISION_UPDATED'));
             }
         } catch (err) {
             console.error('Error generating set', err);

@@ -1,7 +1,7 @@
 // This file provides a context for managing and calculating all user-related statistics.
 // It fetches user activity from Supabase and computes metrics like progress, accuracy, study streaks for heatmap, and a personalized study plan.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StatsContext from './StatsContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
 import subjects from '../data/subjects.ts';
@@ -16,6 +16,8 @@ import {
 import type { AppUser } from '../types/AppUser.ts';
 import type { Stats } from '../types/Stats.ts';
 import type { Database } from '../types/supabase.ts';
+import useSmartRevision from '@/hooks/useSmartRevision.ts';
+import { getUserProfile } from '@/helper.ts';
 
 type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'];
 
@@ -44,6 +46,32 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     });
 
     const [loading, setLoading] = useState(true);
+    const { currentSet, fetchCurrentSet } = useSmartRevision();
+
+    // 1. Listener Effect: Waits for the "Signal" from Dashboard
+    useEffect(() => {
+        const handleRevisionUpdate = () => {
+            fetchCurrentSet();
+        };
+
+        // Add listener
+        window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
+
+        // Cleanup on unmount
+        return () => {
+            window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
+        };
+    }, [fetchCurrentSet]);
+
+    useEffect(() => {
+        let u = getUserProfile();
+        if (!u || u.id === '1') {
+            setLoading(false);
+            return;
+        }
+
+        updateStats(u);
+    }, [currentSet]);
 
     // Fetches and processes all user activity data to build the stats object.
     const updateStats = async (user: AppUser | null) => {
@@ -72,6 +100,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             .from('user_question_activity')
             .select('*')
             .eq('user_id', user.id)
+            .eq('attempt_number', 1)
             .order('attempted_at', { ascending: true })
             .overrideTypes<UserQuestionActivity[]>();
 
@@ -105,7 +134,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         const attempted = data.length;
         const correctAttempts = data.filter((q) => q.was_correct).length;
         // A Set is used to count unique questions attempted for progress calculation.
-        const uniqueQuestionSet = new Set(data.map((a) => a.question_id));
+        const uniqueQuestionSet = new Set(data.map((d) => d.question_id));
         const uniqueAttemptCount = uniqueQuestionSet.size;
 
         // --- Study Plan ---
@@ -164,6 +193,21 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             }
         });
 
+        let revisedQuestionIds = new Set<string>();
+        if (currentSet) {
+            console.log('Fetching revision data for set:', currentSet.set_id);
+            const { data: revisionData, error: revisionError } = await supabase
+                .from('revision_set_questions')
+                .select('question_id')
+                .eq('set_id', currentSet.set_id)
+                .not('is_correct', 'is', null);
+
+            if (!revisionError && revisionData) {
+                // Populate the Set immediately
+                revisedQuestionIds = new Set(revisionData.map((r) => r.question_id));
+            }
+        }
+
         // Group all attempts by subject to calculate accuracy and progress for each.
         type GroupedType = Record<
             string,
@@ -175,8 +219,9 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             }
         >;
         const grouped: GroupedType = {};
-        data.forEach(({ subject, was_correct, question_id, attempt_number }) => {
-            if (subject) {
+        console.log('data: ', revisedQuestionIds);
+        data.forEach(({ subject, was_correct, question_id }) => {
+            if (subject && question_id) {
                 if (!grouped[subject]) {
                     grouped[subject] = {
                         total: 0,
@@ -185,13 +230,14 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         revisionAttemptedQuestionIds: new Set(),
                     };
                 }
-                if (attempt_number === 1) {
-                    if (question_id) grouped[subject].attemptedQuestions.add(question_id);
-                    grouped[subject].total++;
-                    if (was_correct) grouped[subject].correct++;
-                } else {
-                    if (question_id) grouped[subject].revisionAttemptedQuestionIds.add(question_id);
+
+                if (revisedQuestionIds?.has(question_id)) {
+                    grouped[subject].revisionAttemptedQuestionIds.add(question_id);
                 }
+
+                if (question_id) grouped[subject].attemptedQuestions.add(question_id);
+                grouped[subject].total++;
+                if (was_correct) grouped[subject].correct++;
             }
         });
 
