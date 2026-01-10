@@ -169,6 +169,14 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         [reviewList],
     );
 
+    const isAnswered = useCallback(
+        (questionId: string) => {
+            const answer = answers.get(questionId);
+            return answer?.user_answer != null && answer?.user_answer !== undefined;
+        },
+        [answers],
+    );
+
     return {
         answers,
         reviewList,
@@ -179,6 +187,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         answeredCount,
         markedForReviewCount,
         isMarkedForReview,
+        isAnswered,
     };
 };
 

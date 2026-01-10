@@ -74,7 +74,7 @@ const useTestGrading = () => {
                             correctCount++;
                         } else {
                             status = 'incorrect';
-                            score = -question.marks / 3;
+                            score = -(question.marks || 1) / 3;
                             incorrectCount++;
                         }
                     } else {
@@ -121,8 +121,9 @@ const useTestGrading = () => {
 
                     await appStorage.sessions.update(testId, {
                         score: totalScore,
-                        accuracy: attempted > 0 ? correctCount / attempted : 0,
+                        accuracy: attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0,
                         correct_count: correctCount,
+                        attempted_count: attempted,
                         status: 'completed',
                         completed_at: new Date().toString(),
                         is_synced: 0,
