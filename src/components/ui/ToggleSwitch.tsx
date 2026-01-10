@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Check } from '@phosphor-icons/react';
 
 type ToggleSwitchProp = {
-    label: string;
+    label?: string;
     onToggle: () => void;
     isOn: boolean;
 };
