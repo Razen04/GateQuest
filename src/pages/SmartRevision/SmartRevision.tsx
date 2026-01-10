@@ -120,7 +120,7 @@ const SmartRevision = () => {
                         ) : hasCriticalQuestions ? (
                             // STATE: Ready to Generate
                             <div className="max-w-md">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-sm font-medium mb-6">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 text-xs font-medium mb-6">
                                     <Fire size={16} weight="fill" />
                                     {criticalQuestionsCount} critical mistakes pending review
                                 </div>
