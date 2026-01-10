@@ -5,6 +5,7 @@ import NotificationDialog from './NotificationDialog.js';
 import useWindowSize from '../hooks/useWindowSize.ts';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
+import animatedLogo from '/animated_logo.svg';
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -42,7 +43,8 @@ const Navbar = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-            <div className="flex lg:block w-full">
+            <div className="flex lg:block w-full items-center gap-2">
+                <img src={animatedLogo} className="w-5 h-5 md:hidden" />
                 <h1 className="text-center text-md md:text-2xl">
                     <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
                         GATE

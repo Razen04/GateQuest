@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SidebarItem } from './SidebarItem';
 import { Button } from '@/components/ui/button';
-import appLogo from '/logo.png';
+import animatedLogo from '/animated_logo.svg';
 import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/react';
 import { Text, Title } from '../ui/typography';
 import type { Tab } from './Sidebar';
@@ -73,7 +73,10 @@ export const SidebarDesktop = ({
         <motion.div
             className="h-full z-10 flex justify-between flex-col border-r border-border-primary dark:border-border-primary-dark shadow-sm overflow-x-hidden"
             initial={{ x: '-100%' }}
-            animate={{ x: showSidebar ? 0 : '-100%', width: isCollapsed ? '5rem' : '16rem' }}
+            animate={{
+                x: showSidebar ? 0 : '-100%',
+                width: isCollapsed ? '5rem' : '16rem',
+            }}
             transition={{ type: 'spring', stiffness: 200, damping: 30 }}
         >
             <div>
@@ -86,7 +89,7 @@ export const SidebarDesktop = ({
                         transition={{ delay: 0.2, duration: 0.6 }}
                     >
                         <img
-                            src={appLogo}
+                            src={animatedLogo}
                             alt="App logo"
                             className={`w-8 ${isCollapsed ? 'mr-0' : 'mr-3'} flex-shrink-0`}
                         />

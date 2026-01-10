@@ -1,0 +1,95 @@
+<svg width="400" height="400" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    /* --- COLORS --- */
+    .brand-fill, .brand-stroke {
+      fill: #3b82f6;  /* Tailwind bg-blue-500 */
+      stroke: #3b82f6;
+    }
+
+    /* --- CIRCLES --- */
+    .circle-ring {
+      fill: none;
+      stroke-width: 20px; 
+      stroke-linecap: round;
+      transform-origin: 100px 100px;
+      stroke-dasharray: 500; 
+      stroke-dashoffset: 500;
+      animation: formAndSpin 4s ease-in-out forwards;
+    }
+    
+    .inner-ring {
+      stroke-width: 18px; 
+      stroke-dasharray: 300;
+      stroke-dashoffset: 300;
+      animation: formAndSpin 4s ease-in-out forwards;
+    }
+
+    /* --- ARROW ANIMATION --- */
+    .arrow-group-anim {
+      animation: arrowStrike 4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* --- BULLSEYE ANIMATION --- */
+    .bullseye-anim {
+      transform-origin: 100px 100px;
+      animation: bullseyePulse 4s ease-in-out forwards;
+    }
+
+    /* --- KEYFRAMES --- */
+    @keyframes formAndSpin {
+      0% { stroke-dashoffset: 500; transform: rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      40% { stroke-dashoffset: 0; transform: rotate(360deg); }
+      100% { stroke-dashoffset: 0; transform: rotate(360deg); opacity: 1; } /* Hold final state */
+    }
+
+    @keyframes arrowStrike {
+      0%, 35% { transform: rotate(45deg) translate(0, -250px); opacity: 0; }
+      40% { opacity: 1; }
+      45% { transform: rotate(45deg) translate(0, 0); }
+      48% { transform: rotate(45deg) translate(0, -4px); }
+      50% { transform: rotate(45deg) translate(0, 0); }
+      100% { transform: rotate(45deg) translate(0, 0); opacity: 1; } /* Hold final */
+    }
+
+    @keyframes bullseyePulse {
+      0% { transform: scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      45% { transform: scale(0.85); opacity: 1; } 
+      48% { transform: scale(1.1); opacity: 1; }  
+      55% { transform: scale(1); opacity: 1; }    
+      100% { transform: scale(1); opacity: 1; } /* Hold final */
+    }
+  </style>
+
+  <defs>
+    <path id="shape-body" d="M 0,0 L -4,-15 L -4,-90 L -15,-115 L -15,-135 L -4,-125 L -4,-140 L 4,-140 L 4,-125 L 15,-135 L 15,-115 L 4,-90 L 4,-15 Z" />
+    
+    <!-- Adjusted mask to fully contain arrow -->
+    <mask id="cut-mask">
+      <rect x="-300" y="-300" width="800" height="800" fill="white" />
+      <g transform="translate(100, 100)">
+        <g class="arrow-group-anim">
+          <rect x="-12" y="-250" width="24" height="260" fill="black" />
+        </g>
+      </g>
+    </mask>
+  </defs>
+
+  <!-- Circle rings -->
+  <g mask="url(#cut-mask)">
+    <circle cx="100" cy="100" r="70" class="brand-stroke circle-ring" />
+    <circle cx="100" cy="100" r="40" class="brand-stroke circle-ring inner-ring" />
+  </g>
+
+  <!-- Bullseye -->
+  <circle cx="100" cy="100" r="14" class="brand-fill bullseye-anim" />
+
+  <!-- Arrow -->
+  <g transform="translate(100, 100)">
+    <g class="arrow-group-anim">
+       <use href="#shape-body" class="brand-fill" />
+    </g>
+  </g>
+</svg>
+
