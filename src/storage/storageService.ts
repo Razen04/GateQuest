@@ -23,9 +23,10 @@ export class StorageService extends Dexie {
 
     // Write Methods
     // Initialize test
-    async initializeTestSession(session: TestSession, questions: Question[]) {
-        await this.transaction('rw', this.sessions, this.questions, async () => {
+    async initializeTestSession(session: TestSession, attempts: Attempt[], questions: Question[]) {
+        await this.transaction('rw', this.sessions, this.attempts, this.questions, async () => {
             await this.sessions.put(session);
+            await this.attempts.bulkPut(attempts);
             await this.questions.bulkPut(questions);
         });
     }
