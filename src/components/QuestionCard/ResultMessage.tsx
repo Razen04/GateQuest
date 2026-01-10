@@ -11,7 +11,6 @@ type ResultMessageProps = {
 
 const ResultMessage = ({ showAnswer, result, currentQuestion }: ResultMessageProps) => {
     const correctAnswer = getCorrectAnswerText(currentQuestion);
-
     return (
         <AnimatePresence>
             {showAnswer && (
@@ -43,7 +42,8 @@ const ResultMessage = ({ showAnswer, result, currentQuestion }: ResultMessagePro
                     ) : (
                         <div className="flex items-center">
                             <div>
-                                The correct answer is: <MathRenderer text={correctAnswer} />
+                                Skipped. The correct answer is:{' '}
+                                <MathRenderer text={correctAnswer} />
                             </div>
                         </div>
                     )}

@@ -10,7 +10,7 @@ type QuestionContentProps = {
     showAnswer: boolean;
     selectedOptionIndices: number[] | null;
     userAnswerIndex: number | number[] | null;
-    onOptionSelect: (index: number) => void;
+    onOptionSelect?: ((index: number) => void) | undefined;
 };
 
 // This component now only receives props. It has NO hooks.
@@ -34,7 +34,7 @@ const QuestionContent = ({
                 </div>
             </div>
 
-            {hasOptions && (
+            {hasOptions && onOptionSelect && (
                 <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                     {currentQuestion.options &&
                         currentQuestion.options.map((option, index) => {
