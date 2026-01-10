@@ -10,6 +10,7 @@ import ModernLoader from '../ui/ModernLoader.js';
 type SidebarProp = {
     showSidebar: boolean;
     setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    hideMobileNavigation: boolean;
 };
 
 export type Tab = {
@@ -21,7 +22,7 @@ export type Tab = {
     animation: Variants;
 };
 
-const Sidebar = ({ showSidebar, setShowSidebar }: SidebarProp) => {
+const Sidebar = ({ showSidebar, setShowSidebar, hideMobileNavigation }: SidebarProp) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -112,6 +113,8 @@ const Sidebar = ({ showSidebar, setShowSidebar }: SidebarProp) => {
     const isMobile: boolean = width < 768;
 
     if (isMobile) {
+        if (hideMobileNavigation) return null;
+
         // Bottom dock for mobile
         return <MobileDock tabs={tabs} handleTabClick={handleTabClick} />;
     }
