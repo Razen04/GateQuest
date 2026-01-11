@@ -54,6 +54,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 - **Bookmarking**: Save challenging questions for later review and focused practice.
 - **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and study time.
 - **Smart Revision**: Use Leitner System to effectively revise your topics.
+- **Topic Test**: Use the topic test feature to attempt questions in a timed environemnt.
 - **Built-in Timer**: Simulate exam conditions with an automatic timer for each question.
 - **Light & Dark Modes**: Switch between themes for a comfortable viewing experience.
 - **Audio Feedback**: Get instant sound cues for correct and incorrect answers.
@@ -71,6 +72,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 | **State Mgmt** | ![React Context API](https://img.shields.io/badge/react-context-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                              |
 | **Animations** | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer)                                                                                                                                                                                                                                              |
 | **Icons**      | ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                                                                                                                         |
+| **IndexedDB**  | ![Dexie](https://img.shields.io/badge/Dexie.js-DataStore-blue?style=for-the-badge)                                                                                                                                                                                                                                                                |
 
 ## Project Structure
 
