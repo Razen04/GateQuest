@@ -6,7 +6,7 @@ import { Text, Title } from './typography';
 interface PageHeaderProps {
     primaryTitle: string;
     secondaryTitle: string;
-    caption: string;
+    caption?: string;
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ primaryTitle, secondaryTitle, caption }) => {
