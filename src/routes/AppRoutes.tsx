@@ -20,6 +20,13 @@ import SmartRevision from '@/pages/SmartRevision/SmartRevision.tsx';
 import SmartRevisionQuestionList from '@/pages/SmartRevision/SmartRevisionQuestionList.tsx';
 import PracticeCard from '../pages/Practice/PracticeCard.js';
 import SmartRevisionQuestionCard from '@/pages/SmartRevision/SmartRevisionQuestionCard.tsx';
+import TopicTest from '@/pages/TopicTest/TopicTest.tsx';
+import TopicTestGeneratePage from '@/pages/TopicTest/topic-test-generator/TopicTestGenerate.tsx';
+import TopicTestLobby from '@/pages/TopicTest/TopicTestLobby.tsx';
+import TopicTestSessionPage from '@/pages/TopicTest/TopicTestSession.tsx';
+import TopicTestResult from '@/pages/TopicTest/TopicTestResult.tsx';
+import TestSolutionView from '@/pages/TopicTest/TestSolutionView.tsx';
+import TopicReviewLayout from '@/pages/TopicTest/TopicReviewLayout.tsx';
 
 /**
  * @function AppRoutes
@@ -70,6 +77,22 @@ export default function AppRoutes() {
                             path="revision/:rid/:subject/:qid"
                             element={<SmartRevisionQuestionCard />}
                         />
+
+                        {/* Topic Test */}
+                        <Route path="topic-test" element={<TopicTest />} />
+                        <Route path="topic-test-generate" element={<TopicTestGeneratePage />} />
+                        <Route path="topic-test/:testId" element={<TopicTestLobby />} />
+                        <Route
+                            path="topic-test/:testId/attempt"
+                            element={<TopicTestSessionPage />}
+                        />
+                        <Route element={<TopicReviewLayout />}>
+                            <Route path="topic-test-result/:testId" element={<TopicTestResult />} />
+                            <Route
+                                path="topic-test-review/:testId/:questionIndex"
+                                element={<TestSolutionView />}
+                            />
+                        </Route>
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />

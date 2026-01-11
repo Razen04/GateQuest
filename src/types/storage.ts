@@ -52,8 +52,10 @@ export interface TestSession {
     remaining_time_seconds: number;
     total_questions: number;
     score?: number;
+    total_marks: number;
     accuracy?: number;
     correct_count: number;
+    attempted_count: number;
     is_synced: number;
 }
 
@@ -65,6 +67,7 @@ export interface Attempt {
     marked_for_review: boolean;
     status: string;
     is_correct: boolean;
+    score: number;
     time_spent_seconds: number;
     is_synced: number;
 }

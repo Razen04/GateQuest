@@ -37,6 +37,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
     const grading = useTestGrading();
 
     const timerRef = useRef<number>(timer.secondsRemaining);
+    const statusRef = useRef(status);
 
     // helper to commit time spent on current question
     const commitCurrentTime = useCallback(() => {
@@ -114,13 +115,10 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
         // sync the final attempts a last time
         if (attempts.length > 0) {
-            // In handleSubmit AND in the Heartbeat useEffect:
-
             const payload = attempts.map((a) => {
-                // 1. Find the REAL index from the master list (Static & Safe)
+                // Find the REAL index from the master list (Static & Safe)
                 const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
 
-                // 2. Calculate the order (1-based)
                 // Fallback to a.attempt_order only if not found (safety net)
                 const finalOrder = realIndex !== -1 ? realIndex + 1 : a.attempt_order;
 
@@ -151,7 +149,12 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
     // Heartbeat: Sync timer + unsynced attempts every 30 seconds
     useEffect(() => {
-        if (status !== 'ready' && status !== 'submitting') return;
+        if (
+            statusRef.current !== 'ready' &&
+            statusRef.current !== 'submitting' &&
+            statusRef.current === 'completed'
+        )
+            return;
 
         let cancelled = false;
 
@@ -216,7 +219,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
         // run immediately once
         heartbeat();
 
-        // then every 30 seconds
+        // then every 60 seconds
         const interval = setInterval(() => {
             if (!cancelled) heartbeat();
         }, 60000);
