@@ -2,7 +2,7 @@
 
 Welcome to the GATEQuest database documentation. This document provides a detailed overview of the PostgreSQL schema, custom functions, and security policies that power the application, all managed by Supabase.
 
-## 🏛️ Core Entities & Relationships
+## Core Entities & Relationships
 
 The database is designed around a few core concepts. Understanding their relationships is key to understanding the application.
 
@@ -18,7 +18,7 @@ The database is designed around a few core concepts. Understanding their relatio
 
 ---
 
-## 📖 Table Reference
+## Table Reference
 
 This section provides a detailed breakdown of each table in the `public` schema.
 
@@ -267,7 +267,7 @@ Stores the questions included in a weekly revision set along with user performan
 
 ---
 
-## 🚀 Database Functions
+## Database Functions
 
 Custom SQL functions to handle complex logic directly in the database.
 

@@ -28,6 +28,7 @@
     "dependencies": {
         "@nivo/calendar": "^0.99.0",
         "@phosphor-icons/react": "^2.1.10",
+        "@radix-ui/react-alert-dialog": "^1.1.15",
         "@radix-ui/react-label": "^2.1.8",
         "@radix-ui/react-progress": "^1.1.8",
         "@radix-ui/react-select": "^2.2.6",
@@ -42,6 +43,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
+        "dexie": "^4.2.1",
         "framer-motion": "^12.11.0",
         "html-react-parser": "^5.2.10",
         "katex": "^0.16.22",
