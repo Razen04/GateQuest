@@ -110,7 +110,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         // Listen for changes in the authentication state (e.g., login, logout).
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             // Reset the initialized flag to allow the handler to process the new session state.
-            initialized = false;
             handleSession(session);
         });
 

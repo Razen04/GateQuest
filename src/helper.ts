@@ -71,6 +71,20 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
         toast.error('Profile update failed, try again later.');
         return;
     }
+
+    // We only sync the identity fields (name/avatar) to keep the JWT small.
+    // This stops the "Stale Session Overwrite" bug on page reload.
+    const { error: authError } = await supabase.auth.updateUser({
+        data: {
+            full_name: user.name,
+            avatar_url: user.avatar,
+        },
+    });
+
+    if (authError) {
+        // Warning only, because the DB sync succeeded which is the critical part
+        console.warn('Session metadata sync failed:', authError.message);
+    }
 };
 
 // Buffers user question attempts in localStorage before sending them to the database.
