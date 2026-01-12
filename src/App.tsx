@@ -6,7 +6,6 @@
  * contexts like authentication, application settings, stats, and theme.
  */
 
-import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppProvider from './context/AppProvider.tsx';
 import AuthProvider from './context/AuthProvider.tsx';

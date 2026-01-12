@@ -137,17 +137,18 @@ export const recordAttemptLocally = async ({
     });
 
     localStorage.setItem(LOCAL_KEY, JSON.stringify(buffer));
-    // toast.success('Attempt recorded successfully.');
 
-    // When the buffer reaches a size of 1, sync it to the database.
-    // Chainging this to 1 for now, let's observe how to API calls are made for a week
-    if (buffer.length >= 1) {
+    // When the buffer reaches a size of 3, sync it to the database.
+    // Chainging this to 3 for now, let's observe how to API calls are made for a week
+    if (buffer.length >= 3) {
         const error = await recordAttempt({ buffer, user, updateStats });
         if (error) {
             toast.error('Failed to record attempt: ' + error.message);
             return;
         }
         localStorage.removeItem(LOCAL_KEY); // Clear the buffer after a successful sync.
+    } else {
+        toast.success('Attempt recorded successfully.');
     }
 };
 
