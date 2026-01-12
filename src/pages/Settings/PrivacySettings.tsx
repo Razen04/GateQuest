@@ -6,19 +6,17 @@ import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
 
 type PrivacyButtonsProps = {
     label: string;
-    format?: string;
     type: 'login' | 'delete';
     onClick: () => void;
 };
 
-const PrivacyButtons = ({ label, format = '', type, onClick }: PrivacyButtonsProps) => {
+const PrivacyButtons = ({ label, type, onClick }: PrivacyButtonsProps) => {
     return (
         <button
             onClick={onClick}
-            className={`w-full text-left cursor-pointer px-4 py-3 border border-border-primary dark:border-border-primary-dark ${type !== 'delete' ? (type === 'login' ? ' hover:bg-green-500 hover:text-white dark:hover:text-text-primary' : 'hover:bg-gray-50 dark:hover:bg-text-primary') : 'hover:bg-red-400 dark:hover:bg-red-500'} flex justify-between items-center`}
+            className={`w-full text-left cursor-pointer px-4 py-3 border border-border-primary dark:border-border-primary-dark ${type !== 'delete' ? (type === 'login' ? ' hover:bg-green-500 hover:text-white dark:hover:text-text-primary' : 'hover:bg-gray-50 dark:hover:bg-text-primary') : 'hover:bg-red-400 hover:text-white dark:hover:bg-red-500'} flex justify-between items-center`}
         >
             <span>{label}</span>
-            <span className="text-blue-500">{format}</span>
         </button>
     );
 };

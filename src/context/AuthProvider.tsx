@@ -66,7 +66,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                             ...{
                                 sound: true,
                                 autoTimer: true,
-                                darkMode: false,
+                                darkMode: true,
                                 shareProgress: false,
                                 dataCollection: false,
                             },

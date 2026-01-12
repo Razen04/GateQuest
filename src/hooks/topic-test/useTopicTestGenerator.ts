@@ -126,8 +126,6 @@ export const useTopicTestGenerator = ({
         setWarnings(w);
     }, [poolSize, requestedQuestionCount]);
 
-    /* ---------------------- PUBLIC API ---------------------- */
-
     return {
         availableTopics,
         selectedTopics,

@@ -85,6 +85,8 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
         // Warning only, because the DB sync succeeded which is the critical part
         console.warn('Session metadata sync failed:', authError.message);
     }
+
+    toast.success('Profile updated successfully');
 };
 
 // Buffers user question attempts in localStorage before sending them to the database.
