@@ -42,20 +42,21 @@ type QuestionCardProps = {
     userAnswerIndex: number | null;
     selectedOptionIndices: number[];
     numericalAnswer: number | null;
+    marked?: boolean;
 
     // Flow State
     showAnswer: boolean;
     result: 'correct' | 'incorrect' | 'unattempted';
 
     // Complex Sub-props
-    timer: TimerProps;
-    peerStats: PeerStatsProps;
+    timer?: TimerProps;
+    peerStats?: PeerStatsProps;
 
     // Handlers
-    onOptionSelect: (index: number) => void;
-    onNumericalChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onShowAnswer: () => void;
-    handleSubmit: () => void;
+    onOptionSelect?: (index: number) => void;
+    onNumericalChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onShowAnswer?: () => void;
+    handleSubmit?: () => void;
     onNext: () => void;
     onPrev: () => void;
     onReport: () => void;
@@ -76,6 +77,7 @@ const QuestionCard = ({
     userAnswerIndex,
     selectedOptionIndices,
     numericalAnswer,
+    marked,
     showAnswer,
     result,
     timer,
@@ -139,6 +141,7 @@ const QuestionCard = ({
                     onReport={onReport}
                     onShare={onShare}
                     onBookmark={onBookmark}
+                    marked={marked}
                 />
 
                 <div className="p-4 sm:p-6">
@@ -150,10 +153,11 @@ const QuestionCard = ({
                         selectedOptionIndices={selectedOptionIndices}
                         userAnswerIndex={userAnswerIndex}
                         onOptionSelect={onOptionSelect}
+                        marked={marked}
                     />
 
                     {/* Numerical Input Section (Conditional) */}
-                    {isNumericalQuestion(question) && (
+                    {isNumericalQuestion(question) && onShowAnswer && (
                         <div className="mb-6">
                             <label className="block text-sm font-medium mb-2 dark:text-gray-200">
                                 Enter your numerical answer:

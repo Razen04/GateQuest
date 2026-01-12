@@ -71,7 +71,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         }
 
         updateStats(u);
-    }, [currentSet]);
+    }, [currentSet?.set_id]);
 
     // Fetches and processes all user activity data to build the stats object.
     const updateStats = async (user: AppUser | null) => {
@@ -195,7 +195,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         let revisedQuestionIds = new Set<string>();
         if (currentSet) {
-            console.log('Fetching revision data for set:', currentSet.set_id);
             const { data: revisionData, error: revisionError } = await supabase
                 .from('revision_set_questions')
                 .select('question_id')
@@ -219,7 +218,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             }
         >;
         const grouped: GroupedType = {};
-        console.log('data: ', revisedQuestionIds);
         data.forEach(({ subject, was_correct, question_id }) => {
             if (subject && question_id) {
                 if (!grouped[subject]) {

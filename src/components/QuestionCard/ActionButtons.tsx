@@ -8,8 +8,8 @@ type ActionButtonsProps = {
     handleNext: () => void;
     handlePrevious: () => void;
     showAnswer: boolean;
-    handleShowAnswer: () => void;
-    handleSubmit: () => void;
+    handleShowAnswer?: (() => void) | undefined;
+    handleSubmit?: (() => void) | undefined;
     handleExplainationClick: (id: string) => void;
     currentQuestion: Question;
 };
@@ -45,7 +45,7 @@ const ActionButtons = ({
             </Button>
 
             {/* Show/Submit or Show Explanation */}
-            {!showAnswer ? (
+            {!showAnswer && handleSubmit && handleShowAnswer ? (
                 <>
                     <Button
                         className="flex-1 px-2 py-3 bg-blue-100 text-blue-700 text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"

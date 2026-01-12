@@ -2,7 +2,7 @@
 
 This document explains how contributors should work with the **Supabase backend** for GATEQuest. Our workflow is **local-first**, meaning you will run a complete and private Supabase environment on your own machine using Docker.
 
-## 🌳 Environments
+## Environments
 
 We use **two shared cloud environments**:
 
@@ -11,14 +11,14 @@ We use **two shared cloud environments**:
 
 Contributors **never** access these directly.
 
-## 🔧 Prerequisites
+## Prerequisites
 
 - Git and a code editor.
 - Node.js & npm/pnpm installed.
 - **Docker Desktop**: Must be installed and **running** in the background.
 - **Supabase CLI**: Must be installed and up-to-date. See the [official installation guide](https://supabase.com/docs/guides/cli/getting-started).
 
-## 💻 Local Setup for Contributors
+## Local Setup for Contributors
 
 This process creates a complete, private copy of the Supabase backend on your machine, including pre-filled test data.
 
@@ -71,7 +71,7 @@ Your app will be running on `localhost`. To log in:
 
 ---
 
-## 🌱 Making Schema Changes
+## Making Schema Changes
 
 Follow this process if your contribution requires changing the database (e.g., adding a table, column, or RLS policy). **Do not** use the local Supabase Studio UI to make schema changes.
 
@@ -122,7 +122,7 @@ Commit the new migration file along with any other code changes. The migration f
 
 ---
 
-## 🚑 Troubleshooting
+## Troubleshooting
 
 - **If you get a `500 Internal Server Error` or your local services act strangely:** The most reliable fix is to completely reset the Docker containers.
     ```bash
@@ -136,7 +136,7 @@ Commit the new migration file along with any other code changes. The migration f
 
 ---
 
-## 🧑‍💻 Maintainer Workflow (Deploying Migrations)
+## Maintainer Workflow (Deploying Migrations)
 
 > Never delete any migration as it acts as a history. If done any mistake then revert previous migration using a new migration but never delete that old migration.
 

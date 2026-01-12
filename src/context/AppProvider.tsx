@@ -10,7 +10,7 @@ import useAuth from '../hooks/useAuth.ts';
 const defaultSettings: Settings = {
     sound: true,
     autoTimer: true,
-    darkMode: false,
+    darkMode: true,
     shareProgress: true,
     dataCollection: true,
 };

@@ -20,10 +20,11 @@ type QuestionHeaderProps = {
     questionNumber: number;
     totalQuestions: number;
     question: Question;
-    timer: TimerProps;
+    timer?: TimerProps | undefined;
     onReport: () => void;
     onShare: () => void;
     onBookmark: () => void;
+    marked?: boolean | undefined;
 };
 
 const QuestionHeader = ({
@@ -34,6 +35,7 @@ const QuestionHeader = ({
     onReport,
     onShare,
     onBookmark,
+    marked,
 }: QuestionHeaderProps) => {
     // Helper: Normalize difficulty text for display
     const getDifficultyDisplayText = () => {
@@ -57,13 +59,15 @@ const QuestionHeader = ({
                     {/* Bookmark (Pure Component) */}
                     <QuestionBookmark onClick={onBookmark} />
 
-                    {/* Timer (Pure Component) */}
-                    <QuestionTimer
-                        minutes={timer.minutes}
-                        seconds={timer.seconds}
-                        isActive={timer.isActive}
-                        onToggle={timer.onToggle}
-                    />
+                    {/* Timer props shown conditionally for test review mode */}
+                    {timer && (
+                        <QuestionTimer
+                            minutes={timer.minutes}
+                            seconds={timer.seconds}
+                            isActive={timer.isActive}
+                            onToggle={timer.onToggle}
+                        />
+                    )}
 
                     {/* Difficulty Badge */}
                     <span
@@ -76,6 +80,12 @@ const QuestionHeader = ({
                     {question.year && (
                         <span className="text-sm px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
                             GATE {question.year}
+                        </span>
+                    )}
+
+                    {marked && (
+                        <span className="px-2 py-1 text-sm text-violet-100 dark:bg-violet-900 dark:text-violet-100">
+                            Marked For Review
                         </span>
                     )}
 

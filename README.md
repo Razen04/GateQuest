@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/Razen04/GateQuest">
-    <img src="public/logo.png" alt="GATEQuest Logo" width="120" />
+    <img src="public/animated_logo.svg" alt="GATEQuest Logo" width="120" />
   </a>
   <h1 align="center">GATEQuest</h1>
   <p align="center">
@@ -27,7 +27,7 @@
 GATEQuest is a feature-rich, user-friendly application built to provide a comprehensive and engaging platform for GATE exam aspirants. It offers a clean, modern interface with a focus on usability and performance.
 
 <details>
-<summary>📸 Screenshots</summary>
+<summary>Screenshots</summary>
 <br>
 <table>
   <tr>
@@ -48,21 +48,22 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 </table>
 </details>
 
-## ✨ Features
+## Features
 
-- **Practice Questions**: Access a vast library of GATE questions, neatly organized by subject, year, and difficulty.
+- **Practice Questions**: Access a vast library of GATE PYQ questions (currently only CS), neatly organized by subject, year, and difficulty.
 - **Bookmarking**: Save challenging questions for later review and focused practice.
 - **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and study time.
 - **Smart Revision**: Use Leitner System to effectively revise your topics.
+- **Topic Test**: Use the topic test feature to attempt questions in a timed environemnt.
 - **Built-in Timer**: Simulate exam conditions with an automatic timer for each question.
 - **Light & Dark Modes**: Switch between themes for a comfortable viewing experience.
 - **Audio Feedback**: Get instant sound cues for correct and incorrect answers.
 - **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.
 - **Cloud Sync**: Your progress and profile are securely synced across devices.
-- **PWA Support**: Install GATEQuest as a Progressive Web App for offline access.
+- **PWA Support**: Install GATEQuest as a Progressive Web App to get the feel of a native app in your system.
 - **Collapsible Sidebar**: Minimize distractions and focus on what matters most.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category       | Technology                                                                                                                                                                                                                                                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -71,8 +72,9 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 | **State Mgmt** | ![React Context API](https://img.shields.io/badge/react-context-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                              |
 | **Animations** | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer)                                                                                                                                                                                                                                              |
 | **Icons**      | ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                                                                                                                         |
+| **IndexedDB**  | ![Dexie](https://img.shields.io/badge/Dexie.js-DataStore-blue?style=for-the-badge)                                                                                                                                                                                                                                                                |
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 GateQuest/
@@ -100,7 +102,7 @@ GateQuest/
 └── README.md              # This file
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 To get a local copy up and running, follow these simple steps.
 
@@ -155,7 +157,7 @@ To get a local copy up and running, follow these simple steps.
 - `npm run supabase:start`: Starts the local Supabase Docker container.
 - `npm run supabase:stop`: Stops the local Supabase Docker container.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -169,6 +171,6 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) for more information.
 
-## 📜 License
+## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.

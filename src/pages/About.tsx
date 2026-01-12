@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { faqs } from '../data/faqs.js';
 import AccordionItem from '../components/About/AccordionItem.js';
@@ -8,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Text, Title } from '@/components/ui/typography.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.js';
 import { Button } from '@/components/ui/button.js';
-
+import animatedLogo from '/animated_logo.svg';
 type Answer =
     | {
           type: 'text';
@@ -59,7 +58,8 @@ const About = ({ landing = false }: AboutProps) => {
                 variants={stagger}
                 className="text-center my-8 sm:my-24"
             >
-                <motion.div variants={fadeInUp}>
+                <motion.div variants={fadeInUp} className="w-full flex flex-col items-center">
+                    <img src={animatedLogo} className="w-36 h-36" />
                     <Title className="text-5xl sm:text-7xl font-bold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
                         About{' '}
                         <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text">

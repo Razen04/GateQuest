@@ -1,7 +1,7 @@
 // This file provides authentication context for the application.
 // It manages user state, handles login/logout with Supabase, and synchronizes the user's profile with the database upon authentication.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
 import { toast } from 'sonner';
@@ -18,22 +18,23 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const [showLogin, setShowLogin] = useState(false);
     // We need the updateStats function from StatsContext to refresh stats after login.
     const { updateStats } = useStats();
+    const userIdRef = useRef<string | null>(null);
 
     // True if a user object exists (includes guests, not just logged-in users).
     const isLogin = !!user && user.id !== '1';
 
     useEffect(() => {
-        // This flag prevents the session handler from running multiple times on initialization.
-        let initialized = false;
-
         // Processes a Supabase session to set the user state and sync their profile.
         const handleSession = async (session: Session | null) => {
-            if (initialized) return;
-            initialized = true;
-
             const supaUser = session?.user || null;
 
+            if (supaUser && userIdRef.current === supaUser.id) {
+                setLoading(false);
+                return;
+            }
+
             if (supaUser) {
+                userIdRef.current = supaUser.id;
                 // If a user session exists, we 'upsert' their profile.
                 // This creates a profile if it doesn't exist or updates it if it does.
                 const { data, error } = await supabase
@@ -65,7 +66,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                             ...{
                                 sound: true,
                                 autoTimer: true,
-                                darkMode: false,
+                                darkMode: true,
                                 shareProgress: false,
                                 dataCollection: false,
                             },
@@ -109,7 +110,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         // Listen for changes in the authentication state (e.g., login, logout).
         const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             // Reset the initialized flag to allow the handler to process the new session state.
-            initialized = false;
             handleSession(session);
         });
 

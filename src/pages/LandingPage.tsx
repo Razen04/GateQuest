@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -18,7 +17,7 @@ import {
     Timer,
     Trophy,
 } from '@phosphor-icons/react';
-import appLogo from '/logo.png';
+import appLogo from '/animated_logo.svg';
 import useSettings from '../hooks/useSettings.ts';
 import About from './About.tsx';
 import { Button } from '@/components/ui/button.tsx';
@@ -266,7 +265,11 @@ export default function LandingPage() {
                             your success.
                         </p>
 
-                        <Button size="lg" onClick={() => navigate('/practice')}>
+                        <Button
+                            size="lg"
+                            onClick={() => navigate('/practice')}
+                            className="rounded-none"
+                        >
                             Start Practicing Now <ArrowRight weight="bold" />
                         </Button>
                     </motion.div>

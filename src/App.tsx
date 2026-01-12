@@ -6,7 +6,6 @@
  * contexts like authentication, application settings, stats, and theme.
  */
 
-import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppProvider from './context/AppProvider.tsx';
 import AuthProvider from './context/AuthProvider.tsx';
@@ -22,7 +21,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
  */
 function App() {
     return (
-        // 1. Router must be at the very top so hooks like useNavigate() work inside Providers
+        // Router must be at the very top so hooks like useNavigate() work inside Providers
         <Router>
             {/* StatsProvider manages user's practice statistics. */}
             <StatsProvider>

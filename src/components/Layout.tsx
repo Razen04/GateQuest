@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar/Sidebar.tsx';
 import Navbar from './Navbar.tsx';
 import { getUserProfile } from '../helper.ts';
@@ -47,12 +47,22 @@ const Layout = () => {
     const [showSidebar, setShowSidebar] = useState(true);
     const user = getUserProfile();
 
+    // to get location for focus mode to remove mobile dock
+    const location = useLocation();
+    const FOCUS_PATHS = ['/topic-test'];
+
+    const hideMobileNavigation = FOCUS_PATHS.some((path) => location.pathname.startsWith(path));
+
     return (
         <div className={`flex h-dvh transition-colors duration-500`}>
-            <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+            <Sidebar
+                showSidebar={showSidebar}
+                setShowSidebar={setShowSidebar}
+                hideMobileNavigation={hideMobileNavigation}
+            />
             <div className="flex-1 flex flex-grow flex-col overflow-hidden">
                 <Navbar />
-                <main className="flex-1 dark:bg-zinc-900">
+                <main className="max-h-screen overflow-y-auto flex-1 dark:bg-zinc-900">
                     <SyncOnUnload user={user} updateStats={updateStats} />
                     <Outlet />
                 </main>

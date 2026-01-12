@@ -12,6 +12,9 @@ import useAuth from '../hooks/useAuth.ts';
 import useStats from '../hooks/useStats.ts';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button.tsx';
+import { LightningIcon } from '@phosphor-icons/react';
+import { ArrowClockwiseIcon } from '@phosphor-icons/react';
+import { InfoIcon } from '@phosphor-icons/react';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -63,60 +66,74 @@ const Dashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                     Your preparation journey is {stats?.progress}% complete. Keep going!
                 </p>
-                {/* Removing 5 questions limit for now will observe how many calls it is taking and adjust it again */}
-                {/* <div className="flex items-center mt-[12px] mb-[-30px]">
-                    <Info className="text-sm text-red-500 mr-2" />
+                <div className="flex items-center mt-[12px] mb-[-30px]">
+                    <InfoIcon className="text-sm text-red-500 mr-2" />
                     <p className="text-base text-red-500">
-                        Attempt 5 questions for Dashboard to refresh.
-                    </p>
-                </div>*/}
-            </motion.div>
-
-            <div className="w-full mx-auto my-3 p-6 bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                        Boost Your Learning!
-                    </h2>
-                    <p className="text-white text-sm md:text-base">
-                        Try the new <span className="font-semibold">Smart Revision</span> feature –
-                        your personalized weekly recovery plan to master questions faster!
+                        Attempt 3 questions for Dashboard to refresh.
                     </p>
                 </div>
+            </motion.div>
 
-                {/* Button */}
-                <div>
+            <section className="w-full mb-4">
+                {/* Section header */}
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wide">Smart Actions</h2>
+                </div>
+
+                {/* Action buttons */}
+                <div className="grid grid-cols-2 gap-4">
+                    <Button
+                        onClick={() => navigate('/topic-test')}
+                        aria-label="Start topic test"
+                        className="flex items-center gap-3 font-semibold px-6 py-6 shadow-md
+                       hover:bg-blue-50 hover:shadow-lg
+                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+                       transition-all duration-200"
+                    >
+                        <LightningIcon size={22} weight="bold" />
+                        <span>Topic Test (New)</span>
+                    </Button>
+
                     <Button
                         onClick={() => navigate('/revision')}
-                        className="w-full bg-white text-blue-600 font-semibold px-6 py-3 shadow-md hover:bg-blue-50 transition-colors duration-200"
+                        aria-label="Start smart revision"
+                        className="flex items-center gap-3 font-semibold px-6 py-6 shadow-md
+                       hover:bg-blue-50 hover:shadow-lg
+                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
+                       transition-all duration-200"
                     >
-                        Smart Revision
+                        <ArrowClockwiseIcon size={22} weight="bold" />
+                        <span>Smart Revision</span>
                     </Button>
                 </div>
-            </div>
+            </section>
 
             {/* Stats */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 mb-4"
-            >
-                <StatCard
-                    icon={ChartLine}
-                    title="Overall Progress"
-                    value={`${stats?.progress}%`}
-                    iconColor="text-blue-500"
-                    bgColor="bg-blue-50"
-                />
+            <div>
+                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide">Overview</h2>
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-1 md:grid-cols-2 mb-4"
+                >
+                    <StatCard
+                        icon={ChartLine}
+                        title="Overall Progress"
+                        value={`${stats?.progress}%`}
+                        iconColor="text-blue-500"
+                        bgColor="bg-blue-50"
+                    />
 
-                <StatCard
-                    icon={Medal}
-                    title="Overall Accuracy"
-                    value={`${stats?.accuracy}%`}
-                    iconColor="text-purple-500"
-                    bgColor="bg-purple-50"
-                />
-            </motion.div>
+                    <StatCard
+                        icon={Medal}
+                        title="Overall Accuracy"
+                        value={`${stats?.accuracy}%`}
+                        iconColor="text-purple-500"
+                        bgColor="bg-purple-50"
+                    />
+                </motion.div>
+            </div>
 
             <StudyPlan />
 
