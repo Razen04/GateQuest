@@ -139,8 +139,8 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         // --- Study Plan ---
         // These are key dates for calculating the study plan timeline.
-        const GATE_EXAM_DATE = '2026-02-07';
-        const QUESTIONS_COMPLETION_DATE = '2026-01-15';
+        const GATE_EXAM_DATE = '2026-02-08';
+        const QUESTIONS_COMPLETION_DATE = '2026-02-07';
         const now = new Date();
 
         // Calculate days left until the exam and until the target completion date.
