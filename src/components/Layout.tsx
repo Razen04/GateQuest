@@ -54,15 +54,15 @@ const Layout = () => {
     const hideMobileNavigation = FOCUS_PATHS.some((path) => location.pathname.startsWith(path));
 
     return (
-        <div className={`flex h-dvh transition-colors duration-500`}>
+        <div className="flex h-dvh transition-colors duration-500">
             <Sidebar
                 showSidebar={showSidebar}
                 setShowSidebar={setShowSidebar}
                 hideMobileNavigation={hideMobileNavigation}
             />
-            <div className="flex-1 flex flex-grow flex-col overflow-hidden">
+            <div className="flex-1 flex flex-grow flex-col overflow-x-hidden">
                 <Navbar />
-                <main className="max-h-screen overflow-y-auto flex-1 dark:bg-zinc-900">
+                <main className="overflow-y-auto flex-1 dark:bg-zinc-900">
                     <SyncOnUnload user={user} updateStats={updateStats} />
                     <Outlet />
                 </main>

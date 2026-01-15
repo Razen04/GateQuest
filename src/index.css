@@ -2,8 +2,11 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+html,
 body {
-    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

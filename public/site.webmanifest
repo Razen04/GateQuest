@@ -55,7 +55,31 @@
             "src": "/screenshots/MCQ.png",
             "sizes": "1080x1920",
             "type": "image/png",
-            "label": "Multiple Choice Mode"
+            "label": "Practice Mode"
+        },
+        {
+            "src": "/screenshots/TopicTest.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "Topic Test"
+        },
+        {
+            "src": "/screenshots/TestGenerate.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "Generate Custom Topic Test"
+        },
+        {
+            "src": "/screenshots/Test Session.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "Live Topic Test Session"
+        },
+        {
+            "src": "/screenshots/TestPallete.png",
+            "sizes": "1080x1920",
+            "type": "image/png",
+            "label": "Question Pallete for convenience"
         },
         {
             "src": "/screenshots/Settings.png",

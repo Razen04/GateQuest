@@ -1,3 +1,12 @@
+# v0.9.2 - 2026-01-14
+
+- Updated mobile dock to make it more clean and modern.
+- Updated site.webanifest with new screenshots.
+
+# v0.9.1 - 2026-01-14
+
+- Updated the GATE exam date and completion date.
+
 # v0.9.0 - 2026-01-12
 
 - Added **Topic Test** feature, will add documentation for Supabase in next minor version.
