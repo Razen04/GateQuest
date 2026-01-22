@@ -4,13 +4,13 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import LZString from 'lz-string';
 import { getUserProfile, sortQuestionsByYear } from '../helper.ts';
 import type { Question } from '../types/question.ts';
 import { supabase } from '../utils/supabaseClient.ts';
+import { bulkUpsertQuestions, getQuestionsBySubject } from '@/storage/QuestionRepository.ts';
 
 // Questions fetch using supabase
-const getQuestionsBySubject = async (subject: string | undefined) => {
+const fetchQuestionsBySubject = async (subject: string | undefined) => {
     if (subject) {
         const { data, error } = await supabase.from('questions').select('*').eq('subject', subject);
 
@@ -46,20 +46,8 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                 // If the 'bookmarked' flag is true, we fetch bookmarked questions.
                 if (bookmarked) {
                     const profile = getUserProfile();
-                    // All questions for the subject are loaded from localStorage.
-                    const compressedData = localStorage.getItem(subject);
-                    let subjectQuestions = [];
-
-                    if (compressedData) {
-                        try {
-                            // Attempt to parse directly for backward compatibility with uncompressed data.
-                            subjectQuestions = JSON.parse(compressedData);
-                        } catch {
-                            // If parsing fails, assume it's compressed and decompress it.
-                            const decompressedData = LZString.decompress(compressedData);
-                            subjectQuestions = JSON.parse(decompressedData || '[]');
-                        }
-                    }
+                    // All questions for the subject are loaded from indexedDb
+                    const localQuestions = await getQuestionsBySubject(subject);
 
                     // The user's bookmarked questions are retrieved from their profile.
                     const bookmarkedQuestions: Question[] = Array.isArray(
@@ -74,7 +62,13 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                         // We create a Set of bookmarked IDs for efficient lookup.
                         const ids = new Set(bookmarkedQuestions.map((q) => q.id));
                         // Then, we filter the full list of subject questions to get the bookmarked ones.
-                        const questions = subjectQuestions.filter((q: Question) => ids.has(q.id));
+                        let questions: Question[];
+                        if (localQuestions && localQuestions.length > 0)
+                            questions = localQuestions.filter((q: Question) => ids.has(q.id));
+                        else {
+                            const loadedQuestions = await fetchQuestionsBySubject(subject);
+                            questions = loadedQuestions.filter((q: Question) => ids.has(q.id));
+                        }
 
                         setQuestions(sortQuestionsByYear(questions));
                     } else {
@@ -82,31 +76,13 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                         toast.message('No questions bookmarked yet.');
                     }
                 } else {
-                    // For regular (non-bookmarked) questions, we first check localStorage for a cached version.
-                    const compressedData = localStorage.getItem(subject);
-
-                    if (compressedData) {
-                        let localQuestions;
-                        try {
-                            // Try parsing directly to handle old, uncompressed data.
-                            localQuestions = JSON.parse(compressedData);
-                            // If successful, it was uncompressed. We perform a graceful migration by re-compressing and saving it.
-                            const newlyCompressedData = LZString.compress(
-                                JSON.stringify(localQuestions),
-                            );
-                            localStorage.setItem(subject, newlyCompressedData);
-                        } catch {
-                            // If parsing fails, assume it's new, compressed data.
-                            const decompressedData = LZString.decompress(compressedData);
-                            localQuestions = JSON.parse(decompressedData);
-                        }
+                    const localQuestions = await getQuestionsBySubject(subject);
+                    if (localQuestions && localQuestions.length > 0) {
                         setQuestions(localQuestions);
                     } else {
-                        const loadedQuestions = await getQuestionsBySubject(subject);
-                        // After fetching, we compress and cache the questions in localStorage for future use.
+                        const loadedQuestions = await fetchQuestionsBySubject(subject);
                         if (loadedQuestions && loadedQuestions.length > 0) {
-                            const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
-                            localStorage.setItem(subject, dataToCache);
+                            await bulkUpsertQuestions(loadedQuestions);
                             setQuestions(loadedQuestions);
                         }
                     }
