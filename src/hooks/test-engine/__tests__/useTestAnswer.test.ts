@@ -1,14 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Attempt } from '@/types/storage';
-import { appStorage } from '@/storage/storageService';
 import useTestAnswer from '../useTestAnswer';
+import { saveAttempt } from '@/storage/testSession';
 
-// mock appStorage
-vi.mock('@/storage/storageService', () => ({
-    appStorage: {
-        saveAttempt: vi.fn(() => Promise.resolve()),
-    },
+// mock saveAttempt
+vi.mock('@/storage/testSession', () => ({
+    saveAttempt: vi.fn(() => Promise.resolve()),
 }));
 
 describe('useTestAnswer hook', () => {
@@ -77,7 +75,7 @@ describe('useTestAnswer hook', () => {
             expect(updated?.status).toBe('answered');
             expect(updated?.marked_for_review).toBe(false);
             expect(updated?.attempt_order).toBe(1);
-            expect(appStorage.saveAttempt).toHaveBeenCalledTimes(1);
+            expect(saveAttempt).toHaveBeenCalledTimes(1);
         });
 
         it('preserves marked_for_review when updating answer', async () => {
@@ -118,7 +116,7 @@ describe('useTestAnswer hook', () => {
             const updated = result.current.answers.get('q1');
             expect(updated?.marked_for_review).toBe(true);
             expect(updated?.status).toBe('visited');
-            expect(appStorage.saveAttempt).toHaveBeenCalledTimes(1);
+            expect(saveAttempt).toHaveBeenCalledTimes(1);
         });
 
         it('toggles review correctly for existing attempt', async () => {
@@ -184,7 +182,7 @@ describe('useTestAnswer hook', () => {
             expect(updated.user_answer).toEqual([0]);
             expect(updated.marked_for_review).toBe(true);
 
-            expect(appStorage.saveAttempt).toHaveBeenCalledWith(updated);
+            expect(saveAttempt).toHaveBeenCalledWith(updated);
             expect(result.current.isSaving).toBe(false);
         });
 

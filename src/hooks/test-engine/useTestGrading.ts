@@ -1,4 +1,4 @@
-import { appStorage } from '@/storage/storageService';
+import { getTestSession, updateAttempts } from '@/storage/testSession';
 import type { Attempt, Question } from '@/types/storage';
 import { isMultipleSelection, isNumericalQuestion } from '@/utils/questionUtils';
 import { useCallback, useState } from 'react';
@@ -10,18 +10,15 @@ const useTestGrading = () => {
         setIsSubmitting(true);
 
         try {
-            const attempts: Attempt[] = await appStorage.attempts
-                .where('session_id')
-                .equals(testId)
-                .toArray();
+            const testSession = await getTestSession(testId);
+
+            if (!testSession) {
+                throw new Error('No test session present');
+            }
+            const attempts: Attempt[] = testSession?.attempts;
 
             // fetch full questions from Dexie(indexedDB)
-            const questionIds = attempts.map((a) => a.question_id);
-            const questions: Question[] = await appStorage.questions
-                .where('id')
-                .anyOf(questionIds)
-                .toArray();
-
+            const questions: Question[] = testSession.questions;
             // variables to track all the things
             let totalScore = 0;
             let correctCount = 0;
@@ -110,26 +107,8 @@ const useTestGrading = () => {
             });
 
             // updating attempts to indexedDB
-            await appStorage.transaction(
-                'rw',
-                appStorage.attempts,
-                appStorage.sessions,
-                async () => {
-                    await appStorage.attempts.bulkPut(updatedAttempts);
-
-                    const attempted = correctCount + incorrectCount;
-
-                    await appStorage.sessions.update(testId, {
-                        score: totalScore,
-                        accuracy: attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0,
-                        correct_count: correctCount,
-                        attempted_count: attempted,
-                        status: 'completed',
-                        completed_at: new Date().toString(),
-                        is_synced: 0,
-                    });
-                },
-            );
+            const attempted = incorrectCount + correctCount;
+            await updateAttempts(testId, updatedAttempts, attempted, totalScore, correctCount);
 
             return {
                 totalScore,

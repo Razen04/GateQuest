@@ -4,10 +4,15 @@ import useTestNavigation from './useTestNavigation';
 import useTestTimer from './useTestTimer';
 import useTestGrading from './useTestGrading';
 import type { TestData } from './useTestLoader';
-import type { Question } from '@/types/storage';
-import { appStorage } from '@/storage/storageService';
+import type { Attempt, Question } from '@/types/storage';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/utils/supabaseClient';
+import {
+    getPendingAttempts,
+    getTestSession,
+    markAttemptsSynced,
+    updateSessionTimeAndStatus,
+} from '@/storage/testSession';
 
 export interface UseTestSessionReturn {
     status: 'ready' | 'error' | 'submitting' | 'completed';
@@ -79,20 +84,20 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
         setStatus('submitting');
 
         // already submitted
-        const existingSession = await appStorage.sessions.get(testId);
-        if (existingSession?.status === 'completed') {
+        const testSession = await getTestSession(testId);
+        if (!testSession) {
+            throw new Error('Session not found after grading');
+        }
+
+        let session = testSession.session;
+
+        if (session?.status === 'completed') {
             navigate(`/topic-test-result/${testId}`, { replace: true });
             return;
         }
 
         // grade locally
         await grading.submitTest(testId);
-
-        // get the graded session
-        const session = await appStorage.sessions.get(testId);
-        if (!session) {
-            throw new Error('Session not found after grading');
-        }
 
         // update topic_tests table in supabase with the graded session
         await supabase
@@ -111,11 +116,11 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
             .eq('id', testId);
 
         // get the final attempts
-        const attempts = await appStorage.attempts.where('session_id').equals(testId).toArray();
+        const attempts = testSession.attempts;
 
         // sync the final attempts a last time
         if (attempts.length > 0) {
-            const payload = attempts.map((a) => {
+            const payload = attempts.map((a: Attempt) => {
                 // Find the REAL index from the master list (Static & Safe)
                 const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
 
@@ -139,7 +144,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                 .upsert(payload, { onConflict: 'session_id, question_id' });
 
             // mark locally synced
-            await appStorage.attempts.bulkPut(attempts.map((a) => ({ ...a, is_synced: 1 })));
+            await markAttemptsSynced(attempts);
         }
 
         setStatus('completed');
@@ -169,12 +174,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                     .eq('id', testId);
 
                 // Fetch unsynced attempts from Dexie
-                const dirtyAttempts = await appStorage.attempts
-                    .where('session_id')
-                    .equals(testId)
-                    .filter((a) => a.is_synced === 0)
-                    .toArray();
-
+                const dirtyAttempts = await getPendingAttempts();
                 if (dirtyAttempts.length > 0) {
                     // In handleSubmit AND in the Heartbeat useEffect:
 
@@ -204,9 +204,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
                     if (!error) {
                         // mark attempts as synced locally
-                        await appStorage.attempts.bulkPut(
-                            dirtyAttempts.map((a) => ({ ...a, is_synced: 1 })),
-                        );
+                        await markAttemptsSynced(dirtyAttempts);
                     } else {
                         console.error('Heartbeat upsert error:', error);
                     }
@@ -235,24 +233,29 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
     }, [timer.isExpired, status, handleSubmit]);
 
     // to save the timer value to appStorage every 5s
+
     useEffect(() => {
         if (status !== 'ready' && status !== 'submitting') return;
 
         timerRef.current = timer.secondsRemaining;
+        const saveTimer = async () => {
+            await updateSessionTimeAndStatus(testId, timer.secondsRemaining, status);
+        };
+
         if (timer.secondsRemaining % 5 === 0) {
-            appStorage.sessions.update(testId, {
-                remaining_time_seconds: timer.secondsRemaining,
-            });
+            saveTimer();
         }
     }, [timer.secondsRemaining, testId, status]);
 
     // save timer on unmount
     useEffect(() => {
+        const saveTimer = async (time: number) => {
+            await updateSessionTimeAndStatus(testId, time, status);
+        };
+
         return () => {
             const time = timerRef.current;
-            appStorage.sessions.update(testId, {
-                remaining_time_seconds: time,
-            });
+            saveTimer(time);
         };
     }, []);
 
