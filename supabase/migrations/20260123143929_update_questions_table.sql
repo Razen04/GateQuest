@@ -9,5 +9,5 @@ add column if not exists updated_at timestamptz default now();
 create trigger handle_questions_updated_at
 before update on public.questions
 for each row 
-execute procedure moddatetime (updated_at);
+execute procedure extensions.moddatetime (updated_at);
 
