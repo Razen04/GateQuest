@@ -1,8 +1,8 @@
-import { appStorage } from '@/storage/storageService';
 import type { TestSession } from '@/types/storage';
 import { supabase } from '@/utils/supabaseClient';
 import { useEffect, useState } from 'react';
 import { syncTestFromSupabaseToDexie } from './service/testSyncService';
+import { getOngoingTestSession } from '@/storage/testSession';
 
 const useTopicTestHubData = (userId: string | undefined) => {
     const [activeTest, setActiveTest] = useState<TestSession | null>(null);
@@ -12,17 +12,11 @@ const useTopicTestHubData = (userId: string | undefined) => {
     useEffect(() => {
         const loadData = async () => {
             // first check in dexie for an activeTest
-            let localSession = await appStorage.sessions
-                .where('status')
-                .anyOf(['ongoing', 'paused', 'created'])
-                .toArray();
+            let localSession = await getOngoingTestSession();
 
             if (!localSession.length) {
                 await syncTestFromSupabaseToDexie(userId);
-                localSession = await appStorage.sessions
-                    .where('status')
-                    .anyOf(['ongoing', 'paused', 'created'])
-                    .toArray();
+                localSession = await getOngoingTestSession();
             }
 
             setActiveTest(localSession[0] || null);

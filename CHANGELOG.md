@@ -1,3 +1,8 @@
+# v0.9.3 - 2026-01-24
+
+- Removed ugly scrollbars in chrome browsers (need to be tested).
+- Auto-refresh logic for questions added, now no more clear cache and re-login.
+
 # v0.9.2 - 2026-01-14
 
 - Updated mobile dock to make it more clean and modern.

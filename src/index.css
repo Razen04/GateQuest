@@ -9,6 +9,10 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
+::-webkit-scrollbar {
+    width: 0px;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {

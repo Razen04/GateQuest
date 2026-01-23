@@ -1,4 +1,4 @@
-import { appStorage } from '@/storage/storageService';
+import { getTestSession } from '@/storage/testSession';
 import type { Attempt, Question, TestSession } from '@/types/storage';
 import { useEffect, useState } from 'react';
 
@@ -15,12 +15,12 @@ const useTestLoader = (testId: string) => {
     useEffect(() => {
         let mounted = true;
         (async () => {
-            const session = await appStorage.sessions.get(testId);
-            if (!session) return;
+            const testSession = await getTestSession(testId);
+            if (!testSession) return;
+            const session = testSession.session;
 
-            const attempts = await appStorage.attempts.where('session_id').equals(testId).toArray();
-            const questionIds = attempts.map((a) => a.question_id);
-            const questions = await appStorage.questions.where('id').anyOf(questionIds).toArray();
+            const attempts = testSession.attempts;
+            const questions = testSession.questions;
 
             if (mounted) {
                 setData({ session, attempts, questions });

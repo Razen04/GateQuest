@@ -1,4 +1,4 @@
-import { appStorage } from '@/storage/storageService';
+import { saveAttempt } from '@/storage/testSession';
 import type { Attempt } from '@/types/storage';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -51,7 +51,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 next.set(questionId, updatedAttempt);
 
                 setIsSaving(true);
-                appStorage.saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
+                saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
 
                 return next;
             });
@@ -87,7 +87,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 next.set(questionId, updatedAttempt);
 
                 setIsSaving(true);
-                appStorage.saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
+                saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
 
                 return next;
             });
@@ -138,7 +138,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 next.set(questionId, updatedAttempt);
 
                 setIsSaving(true);
-                appStorage.saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
+                saveAttempt(updatedAttempt).finally(() => setIsSaving(false));
 
                 return next;
             });

@@ -23,6 +23,7 @@ export type NumericalQuestion = {
         language: string;
     };
     created_at: string;
+    updated_at: string;
 };
 
 export type MCQQuestion = {
@@ -50,6 +51,7 @@ export type MCQQuestion = {
         language: string;
     };
     created_at: string;
+    updated_at: string;
 };
 
 export type MSQQuestion = {
@@ -77,6 +79,7 @@ export type MSQQuestion = {
         language: string;
     };
     created_at: string;
+    updated_at: string;
 };
 
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;

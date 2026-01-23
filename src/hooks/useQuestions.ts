@@ -4,16 +4,43 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import LZString from 'lz-string';
 import { getUserProfile, sortQuestionsByYear } from '../helper.ts';
 import type { Question } from '../types/question.ts';
 import { supabase } from '../utils/supabaseClient.ts';
+import {
+    bulkUpsertQuestions,
+    getQuestionByIds,
+    getQuestionsBySubject,
+    getSubjectSyncMetadata,
+    updateSubjectSyncMetadata,
+} from '@/storage/questionRepository.ts';
+
+const getLatestTimestamp = (questions: Question[], currentMax: string | undefined) => {
+    if (!questions.length) return currentMax;
+
+    let max = currentMax || '';
+    questions.forEach((q) => {
+        if (q.updated_at && q.updated_at > max) {
+            max = q.updated_at;
+        }
+    });
+    return max;
+};
 
 // Questions fetch using supabase
-const getQuestionsBySubject = async (subject: string | undefined) => {
-    if (subject) {
-        const { data, error } = await supabase.from('questions').select('*').eq('subject', subject);
+const fetchQuestionsBySubject = async (
+    subject: string | undefined,
+    last_fetched_at: string | undefined,
+) => {
+    console.log('Fetching');
 
+    let query = supabase.from('questions').select('*').eq('subject', subject);
+
+    if (last_fetched_at) {
+        query = query.gt('updated_at', last_fetched_at);
+    }
+    if (subject) {
+        const { data, error } = await query;
         if (error) {
             console.error('Error fetching questions: ', error.message);
             return [];
@@ -38,78 +65,72 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
             return;
         }
 
+        let isMounted = true;
+
         const fetchData = async () => {
             setIsLoading(true);
             setError('');
 
             try {
+                let localData: Question[] = [];
                 // If the 'bookmarked' flag is true, we fetch bookmarked questions.
                 if (bookmarked) {
                     const profile = getUserProfile();
-                    // All questions for the subject are loaded from localStorage.
-                    const compressedData = localStorage.getItem(subject);
-                    let subjectQuestions = [];
-
-                    if (compressedData) {
-                        try {
-                            // Attempt to parse directly for backward compatibility with uncompressed data.
-                            subjectQuestions = JSON.parse(compressedData);
-                        } catch {
-                            // If parsing fails, assume it's compressed and decompress it.
-                            const decompressedData = LZString.decompress(compressedData);
-                            subjectQuestions = JSON.parse(decompressedData || '[]');
-                        }
-                    }
-
                     // The user's bookmarked questions are retrieved from their profile.
-                    const bookmarkedQuestions: Question[] = Array.isArray(
-                        profile?.bookmark_questions,
-                    )
-                        ? (profile.bookmark_questions as unknown as Question[]).filter(
-                              (q) => q.subject === subject,
-                          )
-                        : [];
-
-                    if (bookmarkedQuestions.length > 0) {
-                        // We create a Set of bookmarked IDs for efficient lookup.
-                        const ids = new Set(bookmarkedQuestions.map((q) => q.id));
-                        // Then, we filter the full list of subject questions to get the bookmarked ones.
-                        const questions = subjectQuestions.filter((q: Question) => ids.has(q.id));
-
-                        setQuestions(sortQuestionsByYear(questions));
-                    } else {
-                        setQuestions([]); // If no bookmarks, return an empty array.
-                        toast.message('No questions bookmarked yet.');
+                    const bookmarkIds =
+                        (profile?.bookmark_questions as unknown as Question[])?.map((q) => q.id) ||
+                        [];
+                    if (bookmarkIds.length > 0) {
+                        localData = await getQuestionByIds(bookmarkIds);
+                        localData = localData.filter((q) => q.subject === subject);
                     }
                 } else {
-                    // For regular (non-bookmarked) questions, we first check localStorage for a cached version.
-                    const compressedData = localStorage.getItem(subject);
+                    localData = await getQuestionsBySubject(subject);
+                }
 
-                    if (compressedData) {
-                        let localQuestions;
-                        try {
-                            // Try parsing directly to handle old, uncompressed data.
-                            localQuestions = JSON.parse(compressedData);
-                            // If successful, it was uncompressed. We perform a graceful migration by re-compressing and saving it.
-                            const newlyCompressedData = LZString.compress(
-                                JSON.stringify(localQuestions),
-                            );
-                            localStorage.setItem(subject, newlyCompressedData);
-                        } catch {
-                            // If parsing fails, assume it's new, compressed data.
-                            const decompressedData = LZString.decompress(compressedData);
-                            localQuestions = JSON.parse(decompressedData);
-                        }
-                        setQuestions(localQuestions);
-                    } else {
-                        const loadedQuestions = await getQuestionsBySubject(subject);
-                        // After fetching, we compress and cache the questions in localStorage for future use.
-                        if (loadedQuestions && loadedQuestions.length > 0) {
-                            const dataToCache = LZString.compress(JSON.stringify(loadedQuestions));
-                            localStorage.setItem(subject, dataToCache);
-                            setQuestions(loadedQuestions);
-                        }
+                if (isMounted) {
+                    setQuestions(sortQuestionsByYear(localData));
+                    if (localData.length > 0) setIsLoading(false);
+                }
+
+                // Background Sync
+                const syncMeta = await getSubjectSyncMetadata(subject);
+                const lastFetched = syncMeta?.last_fetched_at;
+                const lastSynced = syncMeta?.last_sync;
+
+                let remoteUpdates: Question[] = [];
+                let remotedFetched = false;
+                if (!lastSynced || Date.now() - Number(lastSynced) >= 1 * 60 * 60 * 1000) {
+                    remoteUpdates = await fetchQuestionsBySubject(subject, lastFetched);
+                    await updateSubjectSyncMetadata(subject);
+                    remotedFetched = true;
+                }
+
+                if (remoteUpdates.length > 0) {
+                    await bulkUpsertQuestions(remoteUpdates);
+                    const newMaxTime = getLatestTimestamp(remoteUpdates, lastFetched);
+                    if (newMaxTime) {
+                        await updateSubjectSyncMetadata(subject, newMaxTime);
                     }
+
+                    // refresh UI
+                    if (bookmarked) {
+                        const profile = getUserProfile();
+                        const bookmarkIds =
+                            (profile?.bookmark_questions as unknown as Question[])?.map(
+                                (q) => q.id,
+                            ) || [];
+                        if (bookmarkIds.length > 0) {
+                            const updatedLocal = await getQuestionByIds(bookmarkIds);
+                            const filtered = updatedLocal.filter((q) => q.subject === subject);
+                            if (isMounted) setQuestions(sortQuestionsByYear(filtered));
+                        }
+                    } else {
+                        const updatedLocal = await getQuestionsBySubject(subject);
+                        if (isMounted) setQuestions(sortQuestionsByYear(updatedLocal));
+                    }
+
+                    if (isMounted && remotedFetched) toast.success('Questions updated.');
                 }
             } catch (err) {
                 if (err instanceof Error) {
@@ -120,11 +141,15 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                 toast.error('Could not load questions.');
             } finally {
                 // Ensure the loading state is set to false in all cases (success or error).
-                setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         };
 
         fetchData();
+
+        return () => {
+            isMounted = false;
+        };
     }, [subject, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
 
     // Expose the questions, loading state, and error state to the component.

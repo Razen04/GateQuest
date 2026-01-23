@@ -1,4 +1,4 @@
-import { appStorage } from '@/storage/storageService';
+import { initializeTestSession } from '@/storage/testSession';
 import { supabase } from '@/utils/supabaseClient';
 
 export const syncTestFromSupabaseToDexie = async (userId: string | undefined) => {
@@ -46,5 +46,5 @@ export const syncTestFromSupabaseToDexie = async (userId: string | undefined) =>
     }
 
     // initializing things into Dexie
-    await appStorage.initializeTestSession(testSession, attempts, questions);
+    await initializeTestSession(testSession, attempts, questions);
 };
