@@ -19,6 +19,7 @@ interface BaseQuestion {
         language: string;
     };
     created_at: string;
+    updated_at: string;
 }
 
 export interface NumericalQuestion extends BaseQuestion {
@@ -40,6 +41,12 @@ export interface MSQQuestion extends BaseQuestion {
 }
 
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;
+
+export interface QuestionSyncMetadata {
+    subject: string;
+    last_fetched_at?: string;
+    last_sync: string;
+}
 
 export interface TestSession {
     id: string;
