@@ -135,7 +135,7 @@ export const SidebarDesktop = ({
                         <Button
                             variant="ghost"
                             size="icon-lg"
-                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
+                            className="p-2 rounded-none hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                             aria-label="Join our Discord"
                         >
                             <a
@@ -148,7 +148,7 @@ export const SidebarDesktop = ({
                         </Button>
                         <Button
                             variant="ghost"
-                            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
+                            className="p-2 rounded-none hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                             aria-label="Github"
                         >
                             <a
@@ -166,7 +166,7 @@ export const SidebarDesktop = ({
                         <Button
                             variant="ghost"
                             size="icon-lg"
-                            className="p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white border-b border-green-500"
+                            className="p-2 rounded-none cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white border-b border-green-500"
                             aria-label="Support Me"
                             onClick={() => navigate('/donate')}
                         >
