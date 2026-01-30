@@ -99,7 +99,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                 maxLength={100}
                 value={message ? message : ''}
                 onChange={(e) => setMessage(e.target.value)}
-                className="rounded-none"
+                className="rounded-md"
             />
 
             {/* Donation Amount */}
@@ -126,7 +126,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                     placeholder="Custom amount"
                     value={amount || ''}
                     onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                    className="rounded-none"
+                    className="rounded-md"
                 />
             </div>
 

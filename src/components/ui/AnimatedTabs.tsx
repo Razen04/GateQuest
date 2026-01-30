@@ -61,7 +61,7 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({ tabs, activeTab, onChange }
                             {isActive && (
                                 <motion.div
                                     layoutId="animated-tab-highlight"
-                                    className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 -z-10"
+                                    className="absolute rounded-lg inset-0 bg-gradient-to-br from-blue-500 to-blue-600 -z-10"
                                     transition={{
                                         type: 'spring',
                                         stiffness: 300,

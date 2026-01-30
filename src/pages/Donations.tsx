@@ -67,7 +67,7 @@ const Donations: React.FC = () => {
                 <img
                     src={razenImg}
                     alt="Razen"
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mb-3 sm:mb-4 shadow-md"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mb-3 sm:mb-4 shadow-md rounded-full"
                 />
                 <Title className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-purple-500 mb-1 sm:mb-2 tracking-wide">
                     Razen

@@ -65,18 +65,14 @@ const AccountSettings = () => {
                             type="text"
                             placeholder="Your name"
                             onChange={(e) => setName(e.target.value)}
-                            className="rounded-none"
+                            className="rounded-md"
                         />
                     </div>
 
                     {user?.email ? (
                         <div className="flex flex-col gap-2">
                             <Label>Email Address</Label>
-                            <Input
-                                type="email"
-                                defaultValue={user.email}
-                                className="rounded-none"
-                            />
+                            <Input type="email" defaultValue={user.email} className="rounded-md" />
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2">
@@ -84,7 +80,7 @@ const AccountSettings = () => {
                             <Input
                                 type="email"
                                 placeholder="your.email@example.com"
-                                className="rounded-none"
+                                className="rounded-md"
                             />
                         </div>
                     )}
@@ -94,7 +90,7 @@ const AccountSettings = () => {
                             type="text"
                             placeholder="Your Institution"
                             onChange={(e) => setCollege(e.target.value)}
-                            className="rounded-none"
+                            className="rounded-md"
                         />
                     </div>
 
@@ -104,7 +100,7 @@ const AccountSettings = () => {
                             onValueChange={(e) => setTargetYear(Number(e))}
                             value={String(targetYear)}
                         >
-                            <SelectTrigger className="rounded-none w-full">
+                            <SelectTrigger className="rounded-md w-full">
                                 <SelectValue placeholder="Select a year" />
                             </SelectTrigger>
                             <SelectContent>

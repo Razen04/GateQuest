@@ -130,7 +130,7 @@ const QuestionCard = ({
             {/* Main Card Container */}
             <div
                 ref={pageRef}
-                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto h-dvh pb-60 mt-6 shadow-sm  dark:text-white overflow-y-scroll border border-border-primary dark:border-border-primary-dark bg-white dark:bg-zinc-900"
+                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto pb-20 mt-6 shadow-sm  dark:text-white overflow-y-scroll border border-border-primary dark:border-border-primary-dark bg-white dark:bg-zinc-900"
             >
                 {/* Header Section */}
                 <QuestionHeader
@@ -197,9 +197,9 @@ const QuestionCard = ({
                     {/* Peer Statistics */}
                     {showAnswer && (
                         <QuestionPeerStats
-                            loading={peerStats.loading}
-                            message={peerStats.message}
-                            data={peerStats.data}
+                            loading={peerStats?.loading}
+                            message={peerStats?.message}
+                            data={peerStats?.data}
                         />
                     )}
 

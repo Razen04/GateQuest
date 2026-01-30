@@ -56,7 +56,7 @@ const SearchAndFilters = ({
                     <Input
                         type="text"
                         placeholder="Search questions..."
-                        className="w-full pl-10 rounded-none pr-2 sm:pr-4 py-2 border border-border-primary dark:border-border-primary-dark focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 rounded-md pr-2 sm:pr-4 py-2 border border-border-primary dark:border-border-primary-dark focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -90,7 +90,7 @@ const SearchAndFilters = ({
                                     value={difficultyFilter}
                                     onValueChange={(e) => setDifficultyFilter(e)}
                                 >
-                                    <SelectTrigger className="w-full rounded-none">
+                                    <SelectTrigger className="w-full rounded-md">
                                         <SelectValue placeholder="Select a difficulty" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -108,7 +108,7 @@ const SearchAndFilters = ({
                             <div>
                                 <Label className="mb-2">Years</Label>
                                 <Select value={yearFilter} onValueChange={(e) => setYearFilter(e)}>
-                                    <SelectTrigger className="w-full rounded-none">
+                                    <SelectTrigger className="w-full rounded-md">
                                         <SelectValue placeholder="Select a year" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -131,7 +131,7 @@ const SearchAndFilters = ({
                                     value={topicFilter}
                                     onValueChange={(e) => setTopicFilter(e)}
                                 >
-                                    <SelectTrigger className="w-full rounded-none">
+                                    <SelectTrigger className="w-full rounded-md">
                                         <SelectValue placeholder="Select a topic" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -154,7 +154,7 @@ const SearchAndFilters = ({
                                     value={attemptFilter}
                                     onValueChange={(e) => setAttemptFilter(e)}
                                 >
-                                    <SelectTrigger className="w-full rounded-none">
+                                    <SelectTrigger className="w-full rounded-md">
                                         <SelectValue placeholder="Select a type" />
                                     </SelectTrigger>
                                     <SelectContent>

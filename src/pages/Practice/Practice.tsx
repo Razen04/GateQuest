@@ -81,7 +81,7 @@ const Practice = () => {
     };
 
     return (
-        <div className="flex flex-col h-[100dvh]">
+        <div className="flex flex-col">
             <div className="p-6 shrink-0">
                 <div className="max-w-6xl">
                     {/* Header */}
@@ -104,7 +104,7 @@ const Practice = () => {
                 animate="animate"
                 variants={stagger}
                 viewport={{ once: true, amount: 0.2 }}
-                className="flex-1 overflow-y-auto px-6 mb-[env(safe-area-inset-bottom)]"
+                className="flex-1 px-6"
             >
                 {/* Subject Grid - Simplified */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
@@ -116,9 +116,9 @@ const Practice = () => {
                             <motion.div variants={fadeInUp} key={subject.id}>
                                 <Card
                                     onClick={() => handleSubjectSelect(subject.id)}
-                                    className="rounded-none flex flex-col h-full"
+                                    className="rounded-md flex flex-col h-full"
                                 >
-                                    <CardHeader className="flex items-start rounded-none">
+                                    <CardHeader className="flex items-start rounded-md">
                                         <div
                                             className={`p-3 shadow-sm ${getBackgroundColor(subject.color)} mr-3`}
                                         >
@@ -130,7 +130,7 @@ const Practice = () => {
                                                     {subject.name}
                                                 </CardTitle>
                                                 <Badge
-                                                    className={` rounded-none ${
+                                                    className={`rounded-sm ${
                                                         subject.difficulty === 'Easy'
                                                             ? 'bg-green-500 dark:text-white'
                                                             : subject.difficulty === 'Medium'
@@ -146,7 +146,7 @@ const Practice = () => {
                                             <div className="mt-2">
                                                 <Progress
                                                     value={progress}
-                                                    className="h-2 rounded-none"
+                                                    className="h-2 rounded-sm"
                                                 />
 
                                                 <h4 className="text-xs text-gray-500 mt-1">

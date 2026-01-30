@@ -26,10 +26,10 @@ const ActionButtons = ({
     currentQuestion,
 }: ActionButtonsProps) => {
     return (
-        <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 flex-row justify-between items-center gap-2 py-3 sm:pt-4 bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
+        <div className="flex fixed bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
             {/* Previous */}
             <Button
-                className={`flex-1 px-2 py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
+                className={`flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
                     ${
                         isFirstQuestion
                             ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'

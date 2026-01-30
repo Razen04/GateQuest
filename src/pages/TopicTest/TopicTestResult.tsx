@@ -15,6 +15,12 @@ import {
 import PageHeader from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { containerVariants, itemVariants } from '@/utils/motionVariants';
+import type { Attempt, TestSession } from '@/types/storage';
+
+type OutletContext = {
+    session: TestSession;
+    attempts: Attempt[];
+};
 
 const StatCard = ({
     label,
@@ -43,7 +49,7 @@ const StatCard = ({
 export default function TopicTestResult() {
     const { testId } = useParams<{ testId: string }>();
     const navigate = useNavigate();
-    const { session, attempts } = useOutletContext();
+    const { session, attempts } = useOutletContext<OutletContext>();
 
     const stats = useMemo(() => {
         const correct = attempts.filter((a) => a.status === 'answered' && a.is_correct).length;
@@ -178,11 +184,7 @@ export default function TopicTestResult() {
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="flex justify-center gap-4">
-                    <Button
-                        variant="outline"
-                        onClick={() => navigate('/topic-test')}
-                        className="rounded-none"
-                    >
+                    <Button variant="outline" onClick={() => navigate('/topic-test')}>
                         <House size={18} />
                         Back to TestHub
                     </Button>
