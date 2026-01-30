@@ -131,10 +131,10 @@ const TopicTestGeneratePage = () => {
                         onValueChange={(value) => setSelectedSubjectId(Number(value))}
                         value={selectedSubjectId?.toString() || ''}
                     >
-                        <SelectTrigger className="w-full md:w-2xl rounded-none">
+                        <SelectTrigger className="w-full md:w-2xl rounded-md">
                             <SelectValue placeholder="Select a subject" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-none">
+                        <SelectContent className="rounded-md">
                             <SelectGroup>
                                 <SelectLabel>Subjects</SelectLabel>
                                 {subjects.map((s) => {

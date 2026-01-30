@@ -80,77 +80,90 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
     // wrapper for submit button which will also sync with supabase
     const handleSubmit = useCallback(async () => {
-        commitCurrentTime();
         setStatus('submitting');
 
-        // already submitted
-        const testSession = await getTestSession(testId);
-        if (!testSession) {
-            throw new Error('Session not found after grading');
-        }
+        try {
+            commitCurrentTime();
 
-        let session = testSession.session;
+            // already submitted
+            let testSession = await getTestSession(testId);
+            if (!testSession) {
+                throw new Error('Session not found after grading');
+            }
 
-        if (session?.status === 'completed') {
+            let session = testSession.session;
+
+            if (session?.status === 'completed') {
+                navigate(`/topic-test-result/${testId}`, { replace: true });
+                return;
+            }
+
+            await grading.submitTest(testId);
+
+            testSession = await getTestSession(testId);
+            if (!testSession || testSession.session?.status !== 'completed') {
+                throw new Error('Session not found after grading');
+            }
+
+            session = testSession.session;
+            let attempts = testSession.attempts ?? [];
+
+            // update topic_tests table in supabase with the graded session
+            const { error: sessionError } = await supabase
+                .from('topic_tests')
+                .update({
+                    status: 'completed',
+                    completed_at: session.completed_at
+                        ? new Date(session.completed_at).toISOString()
+                        : null,
+                    score: session.score,
+                    accuracy: session.accuracy,
+                    correct_count: session.correct_count,
+                    attempted_count: session.attempted_count,
+                    remaining_time_seconds: session.remaining_time_seconds,
+                })
+                .eq('id', testId);
+
+            if (sessionError) {
+                throw sessionError;
+            }
+
+            // sync the final attempts a last time
+            if (attempts.length > 0) {
+                const questionIndexMap = new Map(data.questions.map((q, i) => [q.id, i + 1]));
+                const payload = attempts.map((a: Attempt) => {
+                    return {
+                        session_id: a.session_id,
+                        question_id: a.question_id,
+                        attempt_order: questionIndexMap.get(a.question_id ?? a.attempt_order),
+                        user_answer: a.user_answer ?? null,
+                        marked_for_review: a.marked_for_review ?? false,
+                        status: a.status ?? 'unvisited',
+                        is_correct: a.is_correct ?? null,
+                        score: a.score ?? 0,
+                        time_spent_seconds: a.time_spent_seconds,
+                    };
+                });
+
+                const { error: attemptError } = await supabase
+                    .from('topic_tests_attempts')
+                    .upsert(payload, { onConflict: 'session_id, question_id' });
+
+                if (attemptError) {
+                    throw attemptError;
+                }
+
+                // mark locally synced
+                await markAttemptsSynced(attempts);
+            }
+
+            setStatus('completed');
             navigate(`/topic-test-result/${testId}`, { replace: true });
-            return;
+        } catch (err) {
+            console.error('Error in handleSubmit: ', err);
+            setStatus('error');
         }
-
-        // grade locally
-        await grading.submitTest(testId);
-
-        // update topic_tests table in supabase with the graded session
-        await supabase
-            .from('topic_tests')
-            .update({
-                status: 'completed',
-                completed_at: session.completed_at
-                    ? new Date(session.completed_at).toISOString()
-                    : null,
-                score: session.score,
-                accuracy: session.accuracy,
-                correct_count: session.correct_count,
-                attempted_count: session.attempted_count,
-                remaining_time_seconds: session.remaining_time_seconds,
-            })
-            .eq('id', testId);
-
-        // get the final attempts
-        const attempts = testSession.attempts;
-
-        // sync the final attempts a last time
-        if (attempts.length > 0) {
-            const payload = attempts.map((a: Attempt) => {
-                // Find the REAL index from the master list (Static & Safe)
-                const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
-
-                // Fallback to a.attempt_order only if not found (safety net)
-                const finalOrder = realIndex !== -1 ? realIndex + 1 : a.attempt_order;
-
-                return {
-                    session_id: a.session_id,
-                    question_id: a.question_id,
-                    attempt_order: finalOrder, // <--- RE-ADDED safely
-                    user_answer: a.user_answer ?? null,
-                    marked_for_review: a.marked_for_review ?? false,
-                    status: a.status ?? 'unvisited',
-                    is_correct: a.is_correct ?? null,
-                    score: a.score ?? 0,
-                    time_spent_seconds: a.time_spent_seconds,
-                };
-            });
-            await supabase
-                .from('topic_tests_attempts')
-                .upsert(payload, { onConflict: 'session_id, question_id' });
-
-            // mark locally synced
-            await markAttemptsSynced(attempts);
-        }
-
-        setStatus('completed');
-
-        navigate(`/topic-test-result/${testId}`, { replace: true });
-    }, [commitCurrentTime, grading, testId]);
+    }, [commitCurrentTime, grading, testId, data.questions, navigate, setStatus]);
 
     // Heartbeat: Sync timer + unsynced attempts every 30 seconds
     useEffect(() => {
@@ -226,7 +239,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
             cancelled = true;
             clearInterval(interval);
         };
-    }, [testId, status]);
+    }, [testId, status, data.questions]);
 
     useEffect(() => {
         if (timer.isExpired && status !== 'completed' && status !== 'submitting') handleSubmit();

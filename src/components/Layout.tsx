@@ -44,14 +44,17 @@ function SyncOnUnload({ user, updateStats }: SyncOnUnloadProps) {
 
 const Layout = () => {
     const { updateStats } = useStats();
-    const [showSidebar, setShowSidebar] = useState(true);
+    const [showSidebar, setShowSidebar] = useState(window.innerWidth > 1024);
     const user = getUserProfile();
 
     // to get location for focus mode to remove mobile dock
     const location = useLocation();
     const FOCUS_PATHS = ['/topic-test'];
+    const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
-    const hideMobileNavigation = FOCUS_PATHS.some((path) => location.pathname.startsWith(path));
+    const hideMobileNavigation = FOCUS_PATHS.some(
+        (path) => location.pathname.startsWith(path) || isPracticeCard,
+    );
 
     return (
         <div className="flex h-dvh transition-colors duration-500">
@@ -62,7 +65,7 @@ const Layout = () => {
             />
             <div className="flex-1 flex flex-grow flex-col overflow-x-hidden">
                 <Navbar />
-                <main className="overflow-y-auto flex-1 dark:bg-zinc-900">
+                <main className="h-full overflow-y-auto overflow-x-hidden flex-1 dark:bg-zinc-900">
                     <SyncOnUnload user={user} updateStats={updateStats} />
                     <Outlet />
                 </main>

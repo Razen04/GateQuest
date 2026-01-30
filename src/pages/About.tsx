@@ -84,7 +84,7 @@ const About = ({ landing = false }: AboutProps) => {
                 className="max-w-5xl mx-auto grid md:grid-cols-2 gap-5 my-20"
             >
                 <motion.div variants={fadeInUp}>
-                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-none border border-transparent dark:border-zinc-800 h-[265px]">
+                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-md border border-transparent dark:border-zinc-800 h-[265px]">
                         <CardHeader className="flex items-center">
                             <Book size={30} className="mr-3 text-blue-500" />
                             <CardTitle className="text-3xl font-bold">Why GATEQuest?</CardTitle>
@@ -99,7 +99,7 @@ const About = ({ landing = false }: AboutProps) => {
                     </Card>
                 </motion.div>
                 <motion.div variants={fadeInUp}>
-                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-none border border-transparent dark:border-zinc-800">
+                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-md border border-transparent dark:border-zinc-800">
                         <CardHeader className="flex items-center">
                             <Heart size={30} className="mr-3 text-red-500" />
                             <Title className="text-3xl font-bold">Join Me</Title>

@@ -208,7 +208,8 @@ const TopicTest = () => {
                                 );
                                 const testName = getTestName(test.completed_at);
                                 const timeTookForTest = Math.round(
-                                    test.total_questions * 2.76 * 60 - test.remaining_time_seconds,
+                                    Math.ceil(test.total_questions * 2.77) * 60 -
+                                        test.remaining_time_seconds,
                                 );
                                 return (
                                     <div
@@ -229,6 +230,7 @@ const TopicTest = () => {
                                                 </h3>
 
                                                 <h4 className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                                                    Time taken:{' '}
                                                     {test.total_questions &&
                                                     test.remaining_time_seconds
                                                         ? formatTime(timeTookForTest)

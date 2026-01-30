@@ -85,7 +85,7 @@ const TestReviewLayout = () => {
         return () => {
             isMounted = false;
         };
-    }, [testId]);
+    }, [testId, navigate]);
 
     if (loading) return <ModernLoader />;
 

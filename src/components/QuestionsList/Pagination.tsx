@@ -16,7 +16,7 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }: PaginationProps
                 size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="rounded-none disabled:opacity-50 w-20"
+                className="rounded-md disabled:opacity-50 w-20"
             >
                 <ArrowLeft />
             </Button>
@@ -28,7 +28,7 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }: PaginationProps
                 size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className=" rounded-none disabled:opacity-50 w-20"
+                className=" rounded-md disabled:opacity-50 w-20"
             >
                 <ArrowRight />
             </Button>

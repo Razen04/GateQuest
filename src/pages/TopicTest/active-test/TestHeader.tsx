@@ -38,12 +38,12 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                 <div className="flex items-center">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="outline" className="rounded-none">
+                            <Button variant="outline">
                                 <ArrowLeftIcon />
                                 <span>Back</span>
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-none">
+                        <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -52,9 +52,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-none">
-                                    Cancel
-                                </AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={onBack}>Leave Test</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -79,9 +77,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button className="rounded-none bg-red-500">Finish</Button>
+                            <Button className="bg-red-500">Finish</Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-none">
+                        <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -89,9 +87,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-none">
-                                    Cancel
-                                </AlertDialogCancel>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={onEndTest}>
                                     Finish Test
                                 </AlertDialogAction>

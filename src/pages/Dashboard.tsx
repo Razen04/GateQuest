@@ -81,7 +81,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Action buttons */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-2">
                     <Button
                         onClick={() => navigate('/topic-test')}
                         aria-label="Start topic test"

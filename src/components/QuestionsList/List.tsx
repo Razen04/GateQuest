@@ -30,7 +30,7 @@ const List = ({
             variants={stagger}
             viewport={{ once: true, amount: 0.2 }}
             ref={listRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:grid-cols-1 overflow-x-hidden overflow-y-scroll pb-32 max-h-[59vh]"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:grid-cols-1 pb-20 box-border overscroll-none"
         >
             {questions.map((question: Question, index: number) => (
                 <motion.div
@@ -50,7 +50,9 @@ const List = ({
                         >
                             {question.difficulty}
                         </span>
-                        <span>{question.year ? `GATE ${question.year}` : 'Year Unknown'}</span>
+                        <span className="font-semibold">
+                            {question.year ? `GATE ${question.year}` : 'Year Unknown'}
+                        </span>
                     </div>
                 </motion.div>
             ))}

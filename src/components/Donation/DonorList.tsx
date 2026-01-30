@@ -18,7 +18,7 @@ const DonorList: React.FC<DonorListProps> = ({ donations }: DonorListProps) => {
                             key={donation.donation_id}
                             className="flex items-start gap-4 p-4 bg-gradient-to-tr from-blue-50 to-white dark:from-zinc-700/70 dark:to-zinc-800 border border-blue-100 dark:border-zinc-700 hover:scale-[1.02] hover:shadow-lg transition-transform duration-200"
                         >
-                            <div className="w-12 h-12 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                            <div className="w-12 h-12 flex items-center justify-center text-white font-bold text-lg shadow-md rounded-full">
                                 {donation.anonymous || !donation.user_avatar ? (
                                     <UserCircle size={32} color="blue" />
                                 ) : (
