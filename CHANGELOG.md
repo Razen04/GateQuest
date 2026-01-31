@@ -1,6 +1,13 @@
 # v0.9.4-hotfix - 2026-02-01
 
 - Fixed the ActionButtons in the QuestionCard bug for desktop screen.
+- Added last version changelog.
+
+# v0.9.4 - 2026-01-30
+
+- Re-embracing rounded corners.
+- Fixed issue [#37](https://github.com/Razen04/GateQuest/issues/34).
+- Fixed [#36](https://github.com/Razen04/GateQuest/issues/36).
 
 # v0.9.3 - 2026-01-24
 
