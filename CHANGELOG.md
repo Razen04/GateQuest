@@ -1,3 +1,7 @@
+# v0.9.4-hotfix - 2026-02-01
+
+- Fixed the ActionButtons in the QuestionCard bug for desktop screen.
+
 # v0.9.3 - 2026-01-24
 
 - Removed ugly scrollbars in chrome browsers (need to be tested).
