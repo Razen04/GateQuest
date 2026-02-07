@@ -7,7 +7,8 @@ import { supabase } from '../utils/supabaseClient.ts';
 import { toast } from 'sonner';
 import type { AppUser } from '../types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
-import useStats from '../hooks/useStats.ts';
+import useStudyPlan from '@/hooks/useStudyPlan.ts';
+import { appStorage } from '@/storage/storageService.ts';
 
 // The AuthProvider component handles all authentication logic.
 // It exposes the user object, login/logout functions, and loading state to its children.
@@ -17,7 +18,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     // This state controls the visibility of a login modal/dialog.
     const [showLogin, setShowLogin] = useState(false);
     // We need the updateStats function from StatsContext to refresh stats after login.
-    const { updateStats } = useStats();
+    const { refresh } = useStudyPlan();
     const userIdRef = useRef<string | null>(null);
 
     // True if a user object exists (includes guests, not just logged-in users).
@@ -62,6 +63,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         bookmark_questions: data[0].bookmark_questions || [],
                         college: data[0].college || '',
                         targetYear: data[0].targetYear || 2026,
+                        version_number: data[0].version_number || 1,
                         settings: {
                             ...{
                                 sound: true,
@@ -76,7 +78,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     // Store the user profile in localStorage for quick access elsewhere in the app.
                     localStorage.setItem('gate_user_profile', JSON.stringify(profile));
                     // Trigger a stats update now that we have a logged-in user.
-                    updateStats(supaUser);
+                    refresh();
                     setUser(supaUser);
                 }
             } else {
@@ -134,9 +136,38 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         }
     };
 
+    const clearStaleData = async () => {
+        const staleKeys = [
+            'last_checked_notification',
+            'peer_benchmark_details',
+            'subjectStats',
+            'repo_stars',
+            'weekly_set_info',
+        ];
+
+        try {
+            staleKeys.forEach((k) => {
+                if (k) {
+                    localStorage.removeItem(k);
+                }
+            });
+        } catch (e) {
+            console.warn('⚠️ localStorage clearing error:', e);
+        }
+
+        try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map((name) => caches.delete(name)));
+        } catch (e) {
+            console.warn('⚠️ Cache Storage clearing error:', e);
+        }
+    };
+
     // Signs the user out and reloads the page to ensure a clean state.
     const logout = async () => {
         await supabase.auth.signOut();
+        await clearStaleData();
+        await appStorage.nuke();
         window.location.reload();
     };
 
