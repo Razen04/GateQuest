@@ -52,7 +52,10 @@ const AccountSettings = () => {
                         )}
                     </div>
                     <div>
-                        <h3 className="font-medium">{user?.name ? user.name : 'Anonymous User'}</h3>
+                        <h3 className="font-medium">
+                            {user?.name ? user.name : 'Anonymous User'}{' '}
+                            <span className="text-gray-500">• v{user?.version_number}</span>
+                        </h3>
                         <p className="text-sm text-gray-500">GATE {user?.targetYear} Aspirant</p>
                         <p className="text-sm text-gray-500">{user?.college}</p>
                     </div>

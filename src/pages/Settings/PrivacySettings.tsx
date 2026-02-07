@@ -1,29 +1,46 @@
-import React from 'react';
 import { ShieldCheck } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 import useSettings from '../../hooks/useSettings.ts';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
-
-type PrivacyButtonsProps = {
-    label: string;
-    type: 'login' | 'delete';
-    onClick: () => void;
-};
-
-const PrivacyButtons = ({ label, type, onClick }: PrivacyButtonsProps) => {
-    return (
-        <button
-            onClick={onClick}
-            className={`w-full text-left cursor-pointer px-4 py-3 border border-border-primary dark:border-border-primary-dark ${type !== 'delete' ? (type === 'login' ? ' hover:bg-green-500 hover:text-white dark:hover:text-text-primary' : 'hover:bg-gray-50 dark:hover:bg-text-primary') : 'hover:bg-red-400 hover:text-white dark:hover:bg-red-500'} flex justify-between items-center`}
-        >
-            <span>{label}</span>
-        </button>
-    );
-};
+import { Button } from '@/components/ui/button.tsx';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { SignOutIcon } from '@phosphor-icons/react';
+import { SignInIcon } from '@phosphor-icons/react';
+import { BroomIcon } from '@phosphor-icons/react';
+import { getUserProfile } from '@/helper.ts';
+import { toast } from 'sonner';
+import { supabase } from '@/utils/supabaseClient.ts';
 
 const PrivacySettings = () => {
-    const { user, logout, showLogin, setShowLogin } = useAuth();
+    const { logout, showLogin, setShowLogin } = useAuth();
     const { settings, handleSettingToggle } = useSettings();
+    const user = getUserProfile();
+
+    const handleClearData = async () => {
+        try {
+            const { data, error } = await supabase.rpc('clear_user_data');
+
+            if (error) throw error;
+            toast.success(`Data cleared. Starting Profile Version ${data.version}.`);
+        } catch (error) {
+            console.error('Unable to clear data: ', error);
+            toast.error('Unable to clear data.');
+            return;
+        } finally {
+            // perform logout
+            logout();
+        }
+    };
 
     return (
         <div className="pb-20 px-4">
@@ -32,7 +49,7 @@ const PrivacySettings = () => {
                     <ShieldCheck className="mr-2" /> Privacy & Data
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-2">
                     <h1 className="text-lg text-red-500 italic">
                         Placeholder Settings: Does not work as of now, except Logout/Login.
                     </h1>
@@ -50,20 +67,52 @@ const PrivacySettings = () => {
 
                     <div className="py-3 border-t border-gray-100 mt-3 pt-3">
                         <h3 className="text-base font-medium mb-4">Data Management</h3>
-
-                        <div className="space-y-3">
+                        <div className="flex gap-2">
+                            {user && user.version_number && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="outline">
+                                            <BroomIcon />
+                                            Clear Data
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently
+                                                clear your data and this can only be performed at
+                                                max 5 times. You have used {user.version_number}/5
+                                                already. You will be logout after this.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => handleClearData()}
+                                                disabled={user?.version_number >= 5}
+                                            >
+                                                Continue
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
                             {user ? (
-                                <PrivacyButtons
-                                    label="Logout"
-                                    type="delete"
+                                <Button
+                                    className="bg-red-600 hover:bg-red-800"
                                     onClick={() => logout()}
-                                />
+                                >
+                                    <SignOutIcon />
+                                    Logout
+                                </Button>
                             ) : (
-                                <PrivacyButtons
-                                    label="Sign up/Login"
-                                    type="login"
-                                    onClick={() => setShowLogin(true)}
-                                />
+                                <Button onClick={() => setShowLogin(true)}>
+                                    <SignInIcon />
+                                    Login
+                                </Button>
                             )}
                         </div>
                     </div>

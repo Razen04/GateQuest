@@ -23,6 +23,18 @@ export class StorageService extends Dexie {
             attempts: '[session_id+question_id], session_id, is_synced', // composite primary key
         });
     }
+
+    // nuke the entire Db when doing logout.
+    async nuke() {
+        try {
+            this.close();
+            await Dexie.delete(DB_NAME);
+            console.log('IndexedDB deleted successfully');
+        } catch (error) {
+            console.error('Error nuking IndexedDB:', error);
+            throw error;
+        }
+    }
 }
 
 export const appStorage = new StorageService();

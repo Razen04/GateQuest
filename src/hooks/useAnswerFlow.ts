@@ -3,6 +3,7 @@ import React from 'react';
 import type { AppUser } from '../types/AppUser.ts';
 import type { Question } from '../types/question.ts';
 import { submitAndRecordAnswer } from '../utils/answerHandler.ts';
+import useStudyPlan from './useStudyPlan.ts';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;
@@ -11,7 +12,6 @@ type useAnswerFlowProps = {
     timeTaken: number;
     user: AppUser | null;
     isLogin: boolean;
-    updateStats: (user: AppUser) => void;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
     setResult: React.Dispatch<React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>>;
     resetTimer: () => void;
@@ -26,12 +26,12 @@ export default function useAnswerFlow({
     timeTaken,
     user,
     isLogin,
-    updateStats,
     setShowAnswer,
     setResult,
     resetTimer,
     showAnswer,
 }: useAnswerFlowProps) {
+    const { refresh } = useStudyPlan();
     // This function is triggered when the user wants to see the correct answer.
     // It orchestrates stopping the timer, showing the result, and recording the attempt.
     const handleShowAnswer = async () => {
@@ -52,7 +52,7 @@ export default function useAnswerFlow({
             timeTaken,
             user,
             isLogin,
-            updateStats,
+            refresh,
         });
 
         // Update the UI with the result (e.g., 'Correct' or 'Incorrect').
