@@ -6,6 +6,7 @@ import useWindowSize from '../hooks/useWindowSize.ts';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import animatedLogo from '/animated_logo.svg';
+import Changelog from './Sidebar/Changelog.tsx';
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -43,7 +44,10 @@ const Navbar = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-            <div className="flex lg:block w-full items-center gap-2">
+            <div
+                className="flex lg:block w-full items-center gap-2"
+                onClick={() => navigate('/dashboard')}
+            >
                 <img src={animatedLogo} className="w-5 h-5 md:hidden" />
                 <h1 className="text-center text-md md:text-2xl">
                     <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
@@ -94,7 +98,7 @@ const Navbar = () => {
                             </a>
                         </motion.button>
                     )}
-
+                    {isMobile && <Changelog />}
                     {isMobile && (
                         <motion.button
                             aria-label="Support Me"

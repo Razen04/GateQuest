@@ -18,7 +18,6 @@ import { handleBookmark } from '../../utils/questionUtils.js';
 // 4. Component imports (UI pieces)
 // Breaking the UI down into smaller, dumber components.
 import ModernLoader from '../../components/ui/ModernLoader.js';
-import useStats from '../../hooks/useStats.js';
 import useAuth from '../../hooks/useAuth.js';
 import useSettings from '../../hooks/useSettings.js';
 import useQuestions from '../../hooks/useQuestions.ts';
@@ -63,8 +62,6 @@ const PracticeCard = () => {
     // Global contexts
     const { user, isLogin } = useAuth();
     const { settings } = useSettings();
-    const { updateStats } = useStats();
-
     // Timer Logic
     const {
         time: timeTaken,
@@ -97,7 +94,6 @@ const PracticeCard = () => {
         timeTaken,
         user,
         isLogin,
-        updateStats,
         setShowAnswer,
         setResult,
         resetTimer,

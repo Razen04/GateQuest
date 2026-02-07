@@ -13,7 +13,6 @@ import {
     format,
     isAfter,
 } from 'date-fns';
-import type { AppUser } from '../types/AppUser.ts';
 import type { Stats } from '../types/Stats.ts';
 import type { Database } from '../types/supabase.ts';
 import useSmartRevision from '@/hooks/useSmartRevision.ts';
@@ -70,13 +69,15 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             return;
         }
 
-        updateStats(u);
+        updateStats();
     }, [currentSet?.set_id]);
 
     // Fetches and processes all user activity data to build the stats object.
-    const updateStats = async (user: AppUser | null) => {
+    const updateStats = async () => {
+        const user = getUserProfile();
+
         // If there's no user or it's a guest user, we don't need to fetch stats.
-        if (!user || user.id === '1') {
+        if (!user || user.id === '1' || user.version_number === undefined) {
             setLoading(false);
             return;
         }
@@ -84,8 +85,8 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         setLoading(true);
 
         // Define the fixed date range for the activity heatmap (one full year).
-        const startDate = parseISO('2025-02-07');
-        const endDate = parseISO('2026-02-07');
+        const startDate = parseISO('2026-02-07');
+        const endDate = parseISO('2027-04-07');
 
         // A sanity check to prevent errors if the date range is invalid.
         if (isAfter(startDate, endDate)) {
@@ -94,13 +95,12 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             setLoading(false);
             return;
         }
-
         // Fetch all question activity for the given user, ordered by time.
         const { data, error } = await supabase
-            .from('user_question_activity')
+            .from('v_user_cycle_stats')
             .select('*')
             .eq('user_id', user.id)
-            .eq('attempt_number', 1)
+            .eq('user_version_number', user.version_number)
             .order('attempted_at', { ascending: true })
             .overrideTypes<UserQuestionActivity[]>();
 
@@ -140,7 +140,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         // --- Study Plan ---
         // These are key dates for calculating the study plan timeline.
         const GATE_EXAM_DATE = '2026-02-08';
-        const QUESTIONS_COMPLETION_DATE = '2026-02-07';
+        const QUESTIONS_COMPLETION_DATE = '2027-02-07';
         const now = new Date();
 
         // Calculate days left until the exam and until the target completion date.

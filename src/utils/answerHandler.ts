@@ -9,9 +9,9 @@ type submitAndRecordAnswerProp = {
     selectedOptionIndices: number[] | null;
     numericalAnswer: number | null;
     timeTaken: number;
-    user: AppUser;
+    user: AppUser | null;
     isLogin: boolean;
-    updateStats: (user: AppUser) => void;
+    refresh: () => void;
 };
 
 export const submitAndRecordAnswer = async ({
@@ -21,7 +21,7 @@ export const submitAndRecordAnswer = async ({
     timeTaken,
     user,
     isLogin,
-    updateStats,
+    refresh,
 }: submitAndRecordAnswerProp) => {
     // 1. Determine Correctness
     let isCorrect = null; // Default to null (unattempted)
@@ -54,7 +54,7 @@ export const submitAndRecordAnswer = async ({
 
     // 2. Record the Attempt
     (async () => {
-        if (isLogin && user?.id !== '1') {
+        if (isLogin && user && user?.id !== '1') {
             try {
                 await recordAttemptLocally({
                     params: {
@@ -64,9 +64,10 @@ export const submitAndRecordAnswer = async ({
                         was_correct: isCorrect, // This can now be true, false, or null
                         time_taken: timeTaken,
                         attempt_number: 1,
+                        user_version_number: user.version_number,
                     },
                     user,
-                    updateStats,
+                    refresh,
                 });
             } catch (error) {
                 console.error('Failed to record attempt:', error);

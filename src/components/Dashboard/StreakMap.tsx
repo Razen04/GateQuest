@@ -14,8 +14,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
         settings: { darkMode: isDark },
     } = useContext(AppSettingContext)!;
 
-    const toDate = new Date();
-    toDate.setMonth(toDate.getMonth() + 1);
+    const toDate = new Date('2027-02-08');
     const toIso = toDate.toISOString().slice(0, 10);
     const toLabel = toDate.toLocaleDateString();
 
@@ -29,7 +28,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
             <div className="mb-4 text-black dark:text-white">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Streak Map</h2>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Feb 7, 2025 → {toLabel}
+                    Feb 8, 2026 → {toLabel}
                 </span>
                 <div className="flex space-x-4">
                     <h2>
@@ -50,7 +49,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                 day: d.date,
                                 value: d.count,
                             }))}
-                            from="2025-02-07"
+                            from="2026-02-07"
                             to={toIso}
                             emptyColor={isDark ? '#18181B' : '#F9FAFB'}
                             colors={

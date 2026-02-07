@@ -9,7 +9,6 @@ import useQuestionNav from '@/hooks/useQuestionNav';
 import { useQuestionState } from '@/hooks/useQuestionState';
 import { useQuestionTimer } from '@/hooks/useQuestionTimer';
 import useSettings from '@/hooks/useSettings';
-import useStats from '@/hooks/useStats';
 import type { Question } from '@/types/question';
 import { handleBookmark } from '@/utils/questionUtils';
 import { supabase } from '@/utils/supabaseClient';
@@ -54,7 +53,6 @@ const SmartRevisionQuestionCard = () => {
     // Global contexts
     const { user, isLogin } = useAuth();
     const { settings } = useSettings();
-    const { updateStats } = useStats();
 
     // Timer Logic
     const {
@@ -88,7 +86,6 @@ const SmartRevisionQuestionCard = () => {
         timeTaken,
         user,
         isLogin,
-        updateStats,
         setShowAnswer,
         setResult,
         resetTimer,

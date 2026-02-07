@@ -6,6 +6,7 @@ import animatedLogo from '/animated_logo.svg';
 import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/react';
 import { Text, Title } from '../ui/typography';
 import type { Tab } from './Sidebar';
+import Changelog from './Changelog';
 
 type SidebarDesktopProps = {
     showSidebar: boolean;
@@ -130,11 +131,11 @@ export const SidebarDesktop = ({
                 >
                     {/* Social links */}
                     <div
-                        className={`flex items-center ${isCollapsed ? 'flex-col gap-4' : 'space-x-2'}`}
+                        className={`flex items-center ${isCollapsed ? 'flex-col gap-6' : 'space-x-2'}`}
                     >
                         <Button
                             variant="ghost"
-                            size="icon-lg"
+                            size="sm"
                             className="p-2 rounded-none hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                             aria-label="Join our Discord"
                         >
@@ -143,11 +144,12 @@ export const SidebarDesktop = ({
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <DiscordLogo size={20} />
+                                <DiscordLogo size={16} />
                             </a>
                         </Button>
                         <Button
                             variant="ghost"
+                            size="sm"
                             className="p-2 rounded-none hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                             aria-label="Github"
                         >
@@ -157,20 +159,21 @@ export const SidebarDesktop = ({
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2"
                             >
-                                <GithubLogo size={20} />
+                                <GithubLogo size={16} />
                                 {starCount !== null && (
                                     <span className="text-base font-extralight">{starCount}</span>
                                 )}
                             </a>
                         </Button>
+                        <Changelog />
                         <Button
                             variant="ghost"
-                            size="icon-lg"
+                            size="sm"
                             className="p-2 rounded-none cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white border-b border-green-500"
                             aria-label="Support Me"
                             onClick={() => navigate('/donate')}
                         >
-                            <Coffee size={20} />
+                            <Coffee size={16} />
                         </Button>
                     </div>
 
@@ -182,7 +185,7 @@ export const SidebarDesktop = ({
                         className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                         onClick={handleCollapse}
                     >
-                        <CaretLeft size={20} />
+                        <CaretLeft size={16} />
                     </motion.button>
                 </div>
             </div>
