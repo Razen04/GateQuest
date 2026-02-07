@@ -6,20 +6,6 @@ import animatedLogo from '/animated_logo.svg';
 import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/react';
 import { Text, Title } from '../ui/typography';
 import type { Tab } from './Sidebar';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import changelog from '/CHANGELOG.md?raw';
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArticleIcon } from '@phosphor-icons/react';
-import { GithubLogoIcon } from '@phosphor-icons/react';
-import { LinkIcon } from '@phosphor-icons/react';
 import Changelog from './Changelog';
 
 type SidebarDesktopProps = {

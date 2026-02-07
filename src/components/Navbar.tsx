@@ -6,20 +6,6 @@ import useWindowSize from '../hooks/useWindowSize.ts';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import animatedLogo from '/animated_logo.svg';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import changelog from '/CHANGELOG.md?raw';
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArticleIcon } from '@phosphor-icons/react';
-import { GithubLogoIcon } from '@phosphor-icons/react';
-import { LinkIcon } from '@phosphor-icons/react';
 import Changelog from './Sidebar/Changelog.tsx';
 
 const Navbar = () => {
@@ -58,7 +44,10 @@ const Navbar = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-            <div className="flex lg:block w-full items-center gap-2">
+            <div
+                className="flex lg:block w-full items-center gap-2"
+                onClick={() => navigate('/dashboard')}
+            >
                 <img src={animatedLogo} className="w-5 h-5 md:hidden" />
                 <h1 className="text-center text-md md:text-2xl">
                     <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
