@@ -85,8 +85,8 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         setLoading(true);
 
         // Define the fixed date range for the activity heatmap (one full year).
-        const startDate = parseISO('2025-02-07');
-        const endDate = parseISO('2026-04-07');
+        const startDate = parseISO('2026-02-07');
+        const endDate = parseISO('2027-04-07');
 
         // A sanity check to prevent errors if the date range is invalid.
         if (isAfter(startDate, endDate)) {
@@ -140,7 +140,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         // --- Study Plan ---
         // These are key dates for calculating the study plan timeline.
         const GATE_EXAM_DATE = '2026-02-08';
-        const QUESTIONS_COMPLETION_DATE = '2026-04-07';
+        const QUESTIONS_COMPLETION_DATE = '2027-02-07';
         const now = new Date();
 
         // Calculate days left until the exam and until the target completion date.
