@@ -7,6 +7,7 @@ type GuestUser = {
     college?: string | null;
     email?: string | null;
     id?: string;
+    version_number?: number;
     joined_at?: string;
     name?: string | null;
     settings?: Json | null;
