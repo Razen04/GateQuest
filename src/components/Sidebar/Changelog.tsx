@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArticleIcon } from '@phosphor-icons/react';
 import { GithubLogoIcon } from '@phosphor-icons/react';
 import { LinkIcon } from '@phosphor-icons/react';
+import { SparkleIcon } from '@phosphor-icons/react';
 
 function Changelog() {
     return (
@@ -39,7 +40,8 @@ function Changelog() {
                             remarkPlugins={[remarkGfm]}
                             components={{
                                 h1: ({ children }) => (
-                                    <h1 className="text-xl text-blue-500 font-semibold border-b py-2">
+                                    <h1 className="inline-flex items-center gap-1 text-xl text-blue-500 font-semibold border-b py-2">
+                                        <SparkleIcon className="w-4 h-4 text-yellow-500" />
                                         {children}
                                     </h1>
                                 ),
