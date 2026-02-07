@@ -1,3 +1,8 @@
+# v0.9.5 - 2026-02-07
+
+- Added Clear Data feature, to clear your current progress and start fresh for new session. It has a limit for doing this at most 5 times only. Implemented [#33](https://github.com/Razen04/GateQuest/issues/33).
+- Added Changelog button to see the changelogs without visiting [Github](https://github.com/Razen04/GateQuest). Implemented [#40](https://github.com/Razen04/GateQuest/issues/40).
+
 # v0.9.4-hotfix - 2026-02-01
 
 - Fixed the ActionButtons in the QuestionCard bug for desktop screen.
@@ -33,7 +38,7 @@
 
 # v0.8.0 – 2025-12-16
 
-- Added **Smart Revision** feature. [See documentation](./SUPABASE_DOCUMENTATION.md)
+- Added **Smart Revision** feature. See [SUPABASE DOCS](https://github.com/Razen04/GateQuest/blob/master/SUPABASE_DOCUMENTATION.md) for more information.
 - Rolled out **AI explanations**. Explanations for questions will be added incrementally.
 - Removed copy link from donations page for now and updated the instructions accordingly.
 - Implemented ShadCN in the project which fixes Issue [#12](https://github.com/Razen04/GateQuest/issues/12)

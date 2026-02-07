@@ -6,6 +6,21 @@ import useWindowSize from '../hooks/useWindowSize.ts';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import animatedLogo from '/animated_logo.svg';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import changelog from '/CHANGELOG.md?raw';
+import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArticleIcon } from '@phosphor-icons/react';
+import { GithubLogoIcon } from '@phosphor-icons/react';
+import { LinkIcon } from '@phosphor-icons/react';
+import Changelog from './Sidebar/Changelog.tsx';
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -94,7 +109,7 @@ const Navbar = () => {
                             </a>
                         </motion.button>
                     )}
-
+                    {isMobile && <Changelog />}
                     {isMobile && (
                         <motion.button
                             aria-label="Support Me"
