@@ -53,7 +53,7 @@ function Changelog() {
                                             href={href}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1 text-primary underline underline-offset-4 italic"
+                                            className="inline-flex items-center gap-1 text-primary italic bg-blue-200 dark:bg-blue-800"
                                         >
                                             {children}
                                             {isGithubLink ? (
