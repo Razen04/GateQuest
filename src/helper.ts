@@ -98,12 +98,13 @@ type AttemptParams = {
     was_correct: boolean | null;
     time_taken: number;
     attempt_number: number;
+    user_version_number: number;
 };
 
 type recordAttemptLocallyProps = {
     params: AttemptParams;
     user: AppUser;
-    updateStats: (user: AppUser) => void;
+    refresh: () => void;
 };
 
 type AttemptBufferItem = AttemptParams & { attempted_at: string };
@@ -111,7 +112,7 @@ type AttemptBufferItem = AttemptParams & { attempted_at: string };
 export const recordAttemptLocally = async ({
     params,
     user,
-    updateStats,
+    refresh,
 }: recordAttemptLocallyProps) => {
     // A check to ensure attempts are only recorded for logged-in users.
     if (!user || !user.id) {
@@ -140,8 +141,8 @@ export const recordAttemptLocally = async ({
 
     // When the buffer reaches a size of 3, sync it to the database.
     // Chainging this to 3 for now, let's observe how to API calls are made for a week
-    if (buffer.length >= 3) {
-        const error = await recordAttempt({ buffer, user, updateStats });
+    if (buffer.length >= 1) {
+        const error = await recordAttempt({ buffer, user, refresh });
         if (error) {
             toast.error('Failed to record attempt: ' + error.message);
             return;
@@ -156,10 +157,10 @@ export const recordAttemptLocally = async ({
 type recordAttemptProp = {
     buffer: AttemptBufferItem[];
     user: AppUser;
-    updateStats: (user: AppUser) => void;
+    refresh: () => void;
 };
 
-export const recordAttempt = async ({ buffer, user, updateStats }: recordAttemptProp) => {
+export const recordAttempt = async ({ buffer, user, refresh }: recordAttemptProp) => {
     if (!user || !user.id) {
         toast.error('No valid user profile found.');
         return;
@@ -183,7 +184,7 @@ export const recordAttempt = async ({ buffer, user, updateStats }: recordAttempt
         }
     }
     // After syncing, immediately update the user's stats to reflect the new data.
-    updateStats(user);
+    refresh();
 
     toast.success('Attempt synced successfully!');
 };

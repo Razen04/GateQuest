@@ -3,7 +3,6 @@
 
 import { useContext, useCallback } from 'react';
 import StatsContext from '../context/StatsContext.ts';
-import { getUserProfile } from '../helper.ts';
 
 interface StudyPlanType {
     uniqueAttemptCount: number;
@@ -33,10 +32,7 @@ const useStudyPlan = (): UseStudyPlanReturnType => {
     // A memoized function to manually trigger a refresh of the user's stats.
     // This is useful for components that need to ensure they have the latest data.
     const refresh = useCallback(() => {
-        const user = getUserProfile();
-        if (user) {
-            return updateStats(user);
-        }
+        return updateStats();
     }, [updateStats]); // Depends on the updateStats function from the context.
 
     // Safely access the studyPlan object from the stats, providing an empty object as a fallback.

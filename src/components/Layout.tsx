@@ -4,14 +4,14 @@ import Sidebar from './Sidebar/Sidebar.tsx';
 import Navbar from './Navbar.tsx';
 import { getUserProfile } from '../helper.ts';
 import { supabase } from '../utils/supabaseClient.ts';
-import useStats from '../hooks/useStats.ts';
 import type { AppUser } from '../types/AppUser.ts';
+import useStudyPlan from '@/hooks/useStudyPlan.ts';
 
 type SyncOnUnloadProps = {
     user: AppUser | null;
-    updateStats: (user: AppUser | null) => void;
 };
-function SyncOnUnload({ user, updateStats }: SyncOnUnloadProps) {
+function SyncOnUnload({ user }: SyncOnUnloadProps) {
+    const { refresh } = useStudyPlan();
     useEffect(() => {
         const LOCAL_KEY = `attempt_buffer_${user?.id}`;
 
@@ -23,7 +23,7 @@ function SyncOnUnload({ user, updateStats }: SyncOnUnloadProps) {
                 try {
                     await supabase.from('user_question_activity').insert(buffer);
 
-                    await updateStats(user); // safe to call
+                    refresh(); // safe to call
 
                     localStorage.removeItem(LOCAL_KEY);
                 } catch (err) {
@@ -37,13 +37,12 @@ function SyncOnUnload({ user, updateStats }: SyncOnUnloadProps) {
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [user, updateStats]);
+    }, [user, refresh]);
 
     return null;
 }
 
 const Layout = () => {
-    const { updateStats } = useStats();
     const [showSidebar, setShowSidebar] = useState(window.innerWidth > 1024);
     const user = getUserProfile();
 
@@ -66,7 +65,7 @@ const Layout = () => {
             <div className="flex-1 flex flex-grow flex-col overflow-x-hidden">
                 <Navbar />
                 <main className="h-full overflow-y-auto overflow-x-hidden flex-1 dark:bg-zinc-900">
-                    <SyncOnUnload user={user} updateStats={updateStats} />
+                    <SyncOnUnload user={user} />
                     <Outlet />
                 </main>
             </div>
