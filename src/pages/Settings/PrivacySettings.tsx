@@ -20,25 +20,24 @@ import { BroomIcon } from '@phosphor-icons/react';
 import { getUserProfile } from '@/helper.ts';
 import { toast } from 'sonner';
 import { supabase } from '@/utils/supabaseClient.ts';
-import useStudyPlan from '@/hooks/useStudyPlan.ts';
 
 const PrivacySettings = () => {
     const { logout, showLogin, setShowLogin } = useAuth();
     const { settings, handleSettingToggle } = useSettings();
-    const { refresh } = useStudyPlan();
     const user = getUserProfile();
 
     const handleClearData = async () => {
         try {
-            const { data } = await supabase.rpc('clear_user_data');
+            const { data, error } = await supabase.rpc('clear_user_data');
 
-            console.log('Version: ', data);
+            if (error) throw error;
+            toast.success(`Data cleared. Starting Profile Version ${data.version}.`);
         } catch (error) {
             console.error('Unable to clear data: ', error);
             toast.error('Unable to clear data.');
+            return;
         } finally {
             // perform logout
-            refresh();
             logout();
         }
     };
