@@ -110,7 +110,7 @@ const Sidebar = ({ showSidebar, setShowSidebar, hideMobileNavigation }: SidebarP
     }
 
     // Mobile: bottom navbar, Desktop: sidebar
-    const isMobile: boolean = width < 768;
+    const isMobile: boolean = width < 1024;
 
     if (isMobile) {
         if (hideMobileNavigation) return null;
