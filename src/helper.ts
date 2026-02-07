@@ -140,7 +140,7 @@ export const recordAttemptLocally = async ({
     localStorage.setItem(LOCAL_KEY, JSON.stringify(buffer));
 
     // When the buffer reaches a size of 3, sync it to the database.
-    // Chainging this to 3 for now, let's observe how to API calls are made for a week
+    // Chainging this to 1 for now, let's observe how to API calls are made for a week
     if (buffer.length >= 1) {
         const error = await recordAttempt({ buffer, user, refresh });
         if (error) {
