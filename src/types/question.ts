@@ -1,3 +1,32 @@
+type ExactAnswer = {
+    type: 'exact';
+    value: number;
+};
+
+type MultipleExactAnswers = {
+    type: 'multiple';
+    values: number[];
+};
+
+type RangeAnswer = {
+    type: 'range';
+    min: number;
+    max: number;
+    inclusive?: boolean;
+};
+
+type ToleranceAnswer = {
+    type: 'tolerance';
+    value: number;
+    tolerance: number;
+};
+
+export type NumericalAnswerSpec =
+    | ExactAnswer
+    | MultipleExactAnswers
+    | RangeAnswer
+    | ToleranceAnswer;
+
 export type NumericalQuestion = {
     id: string;
     year: number;
@@ -7,7 +36,7 @@ export type NumericalQuestion = {
     question_type: 'Numerical Answer';
     question: string;
     options?: never;
-    correct_answer: number;
+    correct_answer: NumericalAnswerSpec;
     answer_text?: string;
     difficulty: string;
     marks: number;

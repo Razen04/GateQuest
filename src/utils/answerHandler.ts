@@ -3,6 +3,7 @@ import { isNumericalQuestion } from './questionUtils.js';
 import { recordAttemptLocally } from '../helper.js';
 import type { Question } from '../types/question.js';
 import type { AppUser } from '../types/AppUser.js';
+import type { NumericalAnswerSpec } from '@/types/storage.js';
 
 type submitAndRecordAnswerProp = {
     currentQuestion: Question;
@@ -31,11 +32,30 @@ export const submitAndRecordAnswer = async ({
         wasAttempted = selectedOptionIndices.length > 0 || isNumericalQuestion(currentQuestion);
     }
 
+    const isNumericalAnswerCorrect = (userAnswer: number, spec: NumericalAnswerSpec): boolean => {
+        switch (spec.type) {
+            case 'exact':
+                return userAnswer === spec.value;
+
+            case 'multiple':
+                return spec.values.includes(userAnswer);
+
+            case 'range':
+                return spec.inclusive !== false
+                    ? userAnswer >= spec.min && userAnswer <= spec.max
+                    : userAnswer > spec.min && userAnswer < spec.max;
+
+            case 'tolerance':
+                return Math.abs(userAnswer - spec.value) <= spec.tolerance;
+        }
+    };
+
     if (wasAttempted) {
         if (isNumericalQuestion(currentQuestion)) {
-            const correctAnswer = currentQuestion.correct_answer.toString();
-            const answerToCheck = numericalAnswer?.toString();
-            isCorrect = answerToCheck === correctAnswer;
+            const answerToCheck = numericalAnswer;
+            if (answerToCheck !== null)
+                isCorrect = isNumericalAnswerCorrect(answerToCheck, currentQuestion.correct_answer);
+            else isCorrect = false;
         } else {
             // This logic works for both MCQ and MSQ.
             function arraysMatch(a: number[], b: number[]) {
