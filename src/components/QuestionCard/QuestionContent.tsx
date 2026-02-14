@@ -99,7 +99,7 @@ const QuestionContent = ({
                                     onClick={() => !showAnswer && onOptionSelect(index)}
                                 >
                                     <div className="flex items-center">
-                                        <span className="font-mono mr-2 text-gray-300 dark:text-gray-500">
+                                        <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
                                             [{String.fromCharCode(index + 65)}/{index + 1}]
                                         </span>
                                         {isMultipleSelection(currentQuestion) ? (
