@@ -1,3 +1,7 @@
+# v0.9.6 -
+
+- Numerical Answers now support range based answers, exact answers, multiple answers and answers with tolerance as these happen very frequently in competitive exams. Fixes [#39](https://github.com/Razen04/GateQuest/issues/39).
+
 # v0.9.5 - 2026-02-08
 
 - Added Clear Data feature, to clear your current progress and start fresh for new session. It has a limit for doing this at most 5 times only. Implemented [#33](https://github.com/Razen04/GateQuest/issues/33).
