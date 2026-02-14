@@ -24,7 +24,6 @@ export const submitAndRecordAnswer = async ({
     isLogin,
     refresh,
 }: submitAndRecordAnswerProp) => {
-    // 1. Determine Correctness
     let isCorrect = null; // Default to null (unattempted)
 
     let wasAttempted;
@@ -55,7 +54,6 @@ export const submitAndRecordAnswer = async ({
             const answerToCheck = numericalAnswer;
             if (answerToCheck !== null)
                 isCorrect = isNumericalAnswerCorrect(answerToCheck, currentQuestion.correct_answer);
-            else isCorrect = false;
         } else {
             // This logic works for both MCQ and MSQ.
             function arraysMatch(a: number[], b: number[]) {
