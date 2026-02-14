@@ -21,9 +21,7 @@ function Changelog() {
             <DialogTrigger asChild>
                 <motion.button
                     aria-label="Changelog"
-                    className="cursor-pointer hover:bg-gray-700 md:p-1.5"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 md:p-1.5"
                 >
                     <ArticleIcon size={20} />
                 </motion.button>
