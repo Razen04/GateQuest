@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import subjects from '../../data/subjects.ts';
-import { getBackgroundColor } from '../../helper.ts';
+import { getBackgroundColor, SubjectIconMap } from '../../helper.ts';
 import { useNavigate } from 'react-router-dom';
 import { fadeInUp, stagger } from '../../utils/motionVariants.ts';
 import type { SubjectStat } from '../../types/Stats.ts';
@@ -11,11 +10,35 @@ import { Badge } from '@/components/ui/badge.tsx';
 import { Progress } from '@/components/ui/progress.tsx';
 import PageHeader from '@/components/ui/PageHeader.tsx';
 import AnimatedTabs from '@/components/ui/AnimatedTabs.tsx';
+import { useGoals } from '@/hooks/useGoals.ts';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
     const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
+
+    // get the subjects of the branch and exams selected by the user
+    const { userGoal, getPracticeSubjects, loading } = useGoals();
+    const [showGoalAlert, setShowGoalAlert] = useState(false);
+
+    let subjects = getPracticeSubjects();
+    console.log('Subjects: ', subjects);
+
+    useEffect(() => {
+        if (!loading && subjects.length === 0) {
+            setShowGoalAlert(true);
+        }
+    }, [loading, subjects]);
 
     // Tab Reference
     const filterRefs = useRef<Record<string, HTMLButtonElement>>({});
@@ -39,16 +62,16 @@ const Practice = () => {
             id: 'all',
         },
         {
-            label: 'Core CS',
+            label: `Core ${userGoal?.branch_id.toUpperCase()}`,
             id: 'core',
         },
         {
             label: 'Mathematics',
-            id: 'math',
+            id: 'maths',
         },
         {
             label: 'Aptitude',
-            id: 'aptitude',
+            id: 'general',
         },
         {
             label: 'Bookmarked Questions',
@@ -65,30 +88,48 @@ const Practice = () => {
     }, []);
 
     // Filter subjects based on active filter
-    const filteredSubjects =
-        activeFilter === 'all'
-            ? subjects.filter((subject) => subject.category !== 'bookmarked')
-            : subjects.filter((subject) => subject.category === activeFilter);
+    const filteredSubjects = subjects.filter((subject) => {
+        if (activeFilter === 'all' || activeFilter === 'bookmarked') return true;
+        return subject.category === activeFilter;
+    });
 
     // Handle subject selection
-    const handleSubjectSelect = (subjectId: number) => {
-        const subject = subjects.find((s) => s.id === subjectId);
-
-        if (subject) {
-            const isBookmarked = activeFilter === 'bookmarked';
-            navigate(`${subject.apiName}?bookmarked=${isBookmarked}`);
-        }
+    const handleSubjectSelect = (slug: string) => {
+        const isBookmarked = activeFilter === 'bookmarked';
+        navigate(`${slug}?bookmarked=${isBookmarked}`);
     };
 
     return (
         <div className="flex flex-col">
+            <AlertDialog open={showGoalAlert} onOpenChange={setShowGoalAlert}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Set your goal first.</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You need to have a goal that is branch and exam you are targetting to
+                            view the relevant subjects in the Account Settings page.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => navigate('/settings/account')}>
+                            Go To Account Settings Page
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <div className="p-6 shrink-0">
                 <div className="max-w-6xl">
                     {/* Header */}
                     <PageHeader
-                        primaryTitle="Practice by"
-                        secondaryTitle="Subject"
-                        caption="Select a subject and start practicing."
+                        primaryTitle={activeFilter === 'bookmarked' ? 'Your' : 'Practice by'}
+                        secondaryTitle={activeFilter === 'bookmarked' ? 'Bookmarks' : 'Subject'}
+                        caption={
+                            activeFilter === 'bookmarked'
+                                ? 'Select a subject to view your saved questions.'
+                                : 'Select a subject and start practicing.'
+                        }
                     />
 
                     {/* Filter Tabs */}
@@ -109,37 +150,32 @@ const Practice = () => {
                 {/* Subject Grid - Simplified */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
                     {filteredSubjects.map((subject) => {
-                        const stat = subjectStats.find((s) => s.subject === subject.apiName);
+                        const stat = subjectStats.find((s) => s.subject === subject.slug);
                         const progress = stat ? stat.progress : 0;
+                        const SubjectIcon = SubjectIconMap[
+                            subject.icon_name || 'default'
+                        ] as React.ElementType;
 
                         return (
                             <motion.div variants={fadeInUp} key={subject.id}>
-                                <Card
-                                    onClick={() => handleSubjectSelect(subject.id)}
-                                    className="rounded-md flex flex-col h-full"
-                                >
+                                <Card className="rounded-md flex flex-col h-full">
                                     <CardHeader className="flex items-start rounded-md">
                                         <div
-                                            className={`p-3 shadow-sm ${getBackgroundColor(subject.color)} mr-3`}
+                                            className={`p-3 shadow-sm ${subject.theme_color} mr-3`}
                                         >
-                                            {<subject.icon className="h-6 w-6" />}
+                                            <SubjectIcon className="h-6 w-6" />
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex justify-between items-center w-full">
                                                 <CardTitle className="font-medium">
                                                     {subject.name}
                                                 </CardTitle>
-                                                <Badge
-                                                    className={`rounded-sm ${
-                                                        subject.difficulty === 'Easy'
-                                                            ? 'bg-green-500 dark:text-white'
-                                                            : subject.difficulty === 'Medium'
-                                                              ? 'bg-yellow-500 dark:text-white'
-                                                              : 'bg-red-500 dark:text-white'
-                                                    }
-                                                      `}
-                                                >
-                                                    {subject.difficulty}
+                                                <Badge variant="secondary" className="text-[10px]">
+                                                    {(subject.difficulty_score ?? 0) > 0.7
+                                                        ? 'Hard'
+                                                        : (subject.difficulty_score ?? 0 > 0.4)
+                                                          ? 'Medium'
+                                                          : 'Easy'}
                                                 </Badge>
                                             </div>
 
@@ -151,21 +187,26 @@ const Practice = () => {
 
                                                 <h4 className="text-xs text-gray-500 mt-1">
                                                     Progress: {progress.toFixed(0)}% | Total
-                                                    Questions: {subject.questions}
+                                                    Questions: {subject.question_count}
                                                 </h4>
                                             </div>
                                         </div>
                                     </CardHeader>
 
-                                    <CardFooter className="mt-auto">
-                                        <Button
-                                            className="w-full"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSubjectSelect(subject.id);
-                                            }}
-                                        >
-                                            Practice
+                                    <CardFooter
+                                        className="mt-auto"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSubjectSelect(subject.slug);
+                                        }}
+                                    >
+                                        <Button variant="ghost" className="w-full text-xs group">
+                                            {activeFilter === 'bookmarked'
+                                                ? 'View Bookmarks'
+                                                : 'Start Practice'}
+                                            <span className="ml-2 group-hover:translate-x-1 transition-transform">
+                                                →
+                                            </span>
                                         </Button>
                                     </CardFooter>
                                 </Card>

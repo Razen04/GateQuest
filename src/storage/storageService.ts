@@ -15,13 +15,19 @@ export class StorageService extends Dexie {
         super(DB_NAME);
 
         // Schema definition
-        this.version(2).stores({
-            questions:
-                'id, subject, topic, year, difficulty, marks, question_type, verified, *tags, metadata.set, [subject+topic], updated_at',
-            questions_sync_metadata: 'subject, last_fetched_at, last_sync',
-            sessions: 'id, status, is_synced',
-            attempts: '[session_id+question_id], session_id, is_synced', // composite primary key
-        });
+        this.version(3)
+            .stores({
+                questions:
+                    'id, subject, subject_id, topic, year, difficulty, marks, question_type, verified, *tags, metadata.set, metadata.exam, [subject_id+topic], updated_at',
+                questions_sync_metadata: 'subject_id, last_fetched_at, last_sync',
+                sessions: 'id, status, branch_id, is_synced',
+                attempts: '[session_id+question_id], session_id, is_synced', // composite primary key
+            })
+            .upgrade(async (tx) => {
+                // clear old cache
+                await tx.table('questions').clear();
+                await tx.table('questions_sync_metadata').clear();
+            });
     }
 
     // nuke the entire Db when doing logout.

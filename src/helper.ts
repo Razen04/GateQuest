@@ -1,9 +1,23 @@
 // This file contains various utility functions used throughout the application,such as interacting with localStorage, styling, and syncing data with Supabase.
-
+import React from 'react';
 import { toast } from 'sonner';
 import { supabase } from './utils/supabaseClient.js';
 import type { Question } from './types/question.js';
 import type { AppUser } from './types/AppUser.js';
+import {
+    Calculator,
+    Code,
+    Database,
+    Globe,
+    Cpu,
+    TreeStructure,
+    Bicycle,
+    Brain,
+    TerminalWindow,
+    Books,
+    FlameIcon,
+    LightbulbIcon,
+} from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -16,24 +30,42 @@ export const getUserProfile = (): AppUser | null => {
     }
 };
 
+// Icon mapper for the subjects
+export const SubjectIconMap: Record<string, React.ElementType> = {
+    calculator: Calculator,
+    code: Code,
+    database: Database,
+    globe: Globe,
+    cpu: Cpu,
+    'tree-structure': TreeStructure,
+    bicycle: Bicycle,
+    brain: Brain,
+    terminal: TerminalWindow,
+    flame: FlameIcon,
+    zap: LightbulbIcon,
+    // Add a default icon for new subjects
+    default: Books,
+};
+
 // Maps a color name to corresponding Tailwind CSS classes for background and text color.
 const colors = {
-    blue: 'bg-blue-100 text-blue-600',
-    purple: 'bg-purple-100 text-purple-600',
-    green: 'bg-green-100 text-green-600',
-    indigo: 'bg-indigo-100 text-indigo-600',
-    red: 'bg-red-100 text-red-600',
-    orange: 'bg-orange-100 text-orange-600',
-    teal: 'bg-teal-100 text-teal-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    pink: 'bg-pink-100 text-pink-600',
-    violet: 'bg-violet-100 text-violet-600',
+    blue: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+    green: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+    purple: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+    orange: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
+    red: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+    yellow: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+    cyan: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400',
+    pink: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
+    indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
+    // Fallback color
+    gray: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 } as const;
 
 type ColorKey = keyof typeof colors;
 type ColorClass = (typeof colors)[ColorKey];
 export const getBackgroundColor = (color: string): ColorClass => {
-    return colors[color as ColorKey] ?? 'bg-gray-100 text-gray-600';
+    return colors[color as ColorKey];
 };
 
 // Updates the user profile in localStorage by merging new data with the existing profile.
@@ -95,6 +127,8 @@ type AttemptParams = {
     user_id: string;
     question_id: string;
     subject: string;
+    subject_id: string;
+    branch_id: string;
     was_correct: boolean | null;
     time_taken: number;
     attempt_number: number;
@@ -142,6 +176,7 @@ export const recordAttemptLocally = async ({
     // When the buffer reaches a size of 3, sync it to the database.
     // Chainging this to 1 for now, let's observe how to API calls are made for a week
     if (buffer.length >= 1) {
+        console.log('Buffer: ', buffer);
         const error = await recordAttempt({ buffer, user, refresh });
         if (error) {
             toast.error('Failed to record attempt: ' + error.message);

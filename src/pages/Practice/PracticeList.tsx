@@ -8,6 +8,7 @@ import useQuestions from '../../hooks/useQuestions.ts'; // Fetches the raw quest
 import ModernLoader from '../../components/ui/ModernLoader.js';
 import QuestionsList from '@/components/QuestionsList/QuestionsList.tsx';
 import type { Question } from '@/types/question.ts';
+import { useGoals } from '@/hooks/useGoals.ts';
 
 // This component is the main hub for showing list of questions. It's responsible for:
 // - Fetching all questions for a subject.
@@ -19,7 +20,12 @@ const PracticeList = () => {
 
     // Standard React Router hooks to get our bearings.
     const navigate = useNavigate();
-    const { subject } = useParams(); // e.g., 'Aptitude', 'Data Structures' from the URL /practice/:subject
+    const { subject } = useParams(); // e.g., 'aptitude', 'dsa' from the URL /practice/:subject
+    // get the subject_slug uuid from the subjects present in the GoalProvider
+    const { subjects } = useGoals();
+    const selectedSubject = subjects.filter((s) => s.slug === subject);
+    const subjectId = selectedSubject[0]?.id;
+    const subjectName = selectedSubject[0]?.name;
 
     // We need to read URL params to initialize our state.
     const [searchParams] = useSearchParams();
@@ -28,8 +34,9 @@ const PracticeList = () => {
     const bookmarked = searchParams.get('bookmarked') === 'true';
 
     // Fetch the questions. This hook handles the loading and error states for us.
-    // It takes the subject and the bookmarked flag to get the base dataset.
-    const { questions, isLoading, error } = useQuestions(subject, bookmarked);
+    // It takes the subjectId and the bookmarked flag to get the base dataset.
+    console.log('subjectId: ', subjectId);
+    const { questions, isLoading, error } = useQuestions(subjectId, bookmarked);
 
     // --- Event Handlers ---
 
@@ -65,7 +72,7 @@ const PracticeList = () => {
     return (
         <QuestionsList
             questions={questions}
-            title={`${subject} Questions`}
+            title={`${subjectName} Questions`}
             onBack={() => navigate('/practice')}
             onQuestionClick={handleQuestionClick}
             subject={subject}

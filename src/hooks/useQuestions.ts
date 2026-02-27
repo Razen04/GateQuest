@@ -5,7 +5,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { getUserProfile, sortQuestionsByYear } from '../helper.ts';
-import type { Question } from '../types/question.ts';
 import { supabase } from '../utils/supabaseClient.ts';
 import {
     bulkUpsertQuestions,
@@ -14,6 +13,7 @@ import {
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
 } from '@/storage/questionRepository.ts';
+import type { Question } from '@/types/storage.ts';
 
 const getLatestTimestamp = (questions: Question[], currentMax: string | undefined) => {
     if (!questions.length) return currentMax;
@@ -29,17 +29,17 @@ const getLatestTimestamp = (questions: Question[], currentMax: string | undefine
 
 // Questions fetch using supabase
 const fetchQuestionsBySubject = async (
-    subject: string | undefined,
+    subject_id: string | undefined,
     last_fetched_at: string | undefined,
 ) => {
     console.log('Fetching');
 
-    let query = supabase.from('questions').select('*').eq('subject', subject);
+    let query = supabase.from('questions').select('*').eq('subject_id', subject_id);
 
     if (last_fetched_at) {
         query = query.gt('updated_at', last_fetched_at);
     }
-    if (subject) {
+    if (subject_id) {
         const { data, error } = await query;
         if (error) {
             console.error('Error fetching questions: ', error.message);
@@ -53,28 +53,31 @@ const fetchQuestionsBySubject = async (
 };
 
 // Fetches questions for a specific subject, handling both regular and bookmarked questions.
-const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
+const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
         // A guard to prevent fetching if the subject is not yet defined.
-        if (!subject) {
+        if (!subjectId) {
             setIsLoading(false);
             return;
         }
+        console.log('SubjectId: ', subjectId);
 
         let isMounted = true;
-
+        console.log('fetching');
         const fetchData = async () => {
             setIsLoading(true);
             setError('');
-
+            console.log('something?');
             try {
+                console.log('happening?');
                 let localData: Question[] = [];
                 // If the 'bookmarked' flag is true, we fetch bookmarked questions.
                 if (bookmarked) {
+                    console.log('bookmarked? ', bookmarked);
                     const profile = getUserProfile();
                     // The user's bookmarked questions are retrieved from their profile.
                     const bookmarkIds =
@@ -82,10 +85,12 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                         [];
                     if (bookmarkIds.length > 0) {
                         localData = await getQuestionByIds(bookmarkIds);
-                        localData = localData.filter((q) => q.subject === subject);
+                        localData = localData.filter((q) => q.subject_id === subjectId);
                     }
                 } else {
-                    localData = await getQuestionsBySubject(subject);
+                    console.log('trying localData');
+                    localData = await getQuestionsBySubject(subjectId);
+                    console.log('tried');
                 }
 
                 if (isMounted) {
@@ -94,23 +99,24 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                 }
 
                 // Background Sync
-                const syncMeta = await getSubjectSyncMetadata(subject);
+                const syncMeta = await getSubjectSyncMetadata(subjectId);
                 const lastFetched = syncMeta?.last_fetched_at;
                 const lastSynced = syncMeta?.last_sync;
 
                 let remoteUpdates: Question[] = [];
                 let remotedFetched = false;
                 if (!lastSynced || Date.now() - Number(lastSynced) >= 1 * 60 * 60 * 1000) {
-                    remoteUpdates = await fetchQuestionsBySubject(subject, lastFetched);
-                    await updateSubjectSyncMetadata(subject);
+                    remoteUpdates = await fetchQuestionsBySubject(subjectId, lastFetched);
+                    await updateSubjectSyncMetadata(subjectId);
                     remotedFetched = true;
                 }
+                console.log('trying.');
 
                 if (remoteUpdates.length > 0) {
                     await bulkUpsertQuestions(remoteUpdates);
                     const newMaxTime = getLatestTimestamp(remoteUpdates, lastFetched);
                     if (newMaxTime) {
-                        await updateSubjectSyncMetadata(subject, newMaxTime);
+                        await updateSubjectSyncMetadata(subjectId, newMaxTime);
                     }
 
                     // refresh UI
@@ -122,11 +128,11 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
                             ) || [];
                         if (bookmarkIds.length > 0) {
                             const updatedLocal = await getQuestionByIds(bookmarkIds);
-                            const filtered = updatedLocal.filter((q) => q.subject === subject);
+                            const filtered = updatedLocal.filter((q) => q.subject_id === subjectId);
                             if (isMounted) setQuestions(sortQuestionsByYear(filtered));
                         }
                     } else {
-                        const updatedLocal = await getQuestionsBySubject(subject);
+                        const updatedLocal = await getQuestionsBySubject(subjectId);
                         if (isMounted) setQuestions(sortQuestionsByYear(updatedLocal));
                     }
 
@@ -150,7 +156,7 @@ const useQuestions = (subject: string | undefined, bookmarked: boolean) => {
         return () => {
             isMounted = false;
         };
-    }, [subject, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
+    }, [subjectId, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
 
     // Expose the questions, loading state, and error state to the component.
     return { questions, isLoading, error };

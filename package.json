@@ -26,6 +26,7 @@
         "*.{js,ts,jsx,tsx,json,css,md}": "prettier --write"
     },
     "dependencies": {
+        "@base-ui/react": "^1.2.0",
         "@nivo/calendar": "^0.99.0",
         "@phosphor-icons/react": "^2.1.10",
         "@radix-ui/react-alert-dialog": "^1.1.15",

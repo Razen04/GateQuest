@@ -20,7 +20,7 @@ interface QuestionsListProps {
     title?: string; // Optional title (e.g., "Revision Questions")
     onQuestionClick?: OnQuestionClick; // Callback when a question is clicked
     onBack: () => void;
-    subject?: string;
+    subject?: string | undefined;
     mode: FilterMode;
 }
 

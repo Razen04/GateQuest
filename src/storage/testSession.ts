@@ -55,8 +55,17 @@ const updateAttempts = async (
     });
 };
 
-const getOngoingTestSession = async () => {
-    return await db.sessions.where('status').anyOf(['ongoing', 'paused', 'created']).toArray();
+const getOngoingTestSession = async (branchId?: string) => {
+    const sessions = await db.sessions
+        .where('status')
+        .anyOf(['ongoing', 'paused', 'created'])
+        .toArray();
+
+    if (branchId) {
+        return sessions.filter((session) => session.branch_id === branchId);
+    }
+
+    return sessions;
 };
 
 // Saving an Attempt locally using saveAttempt method

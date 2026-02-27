@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { Topic } from '@/hooks/topic-test/useTopicTestGenerator';
 
 interface TopicsSelectionProps {
-    selectedSubjectId: number | null;
+    selectedSubjectId: string | null;
     selectedTopics: Topic[];
     isTopicsLoading: boolean;
     availableTopics: Topic[];
@@ -34,6 +34,8 @@ const TopicsSelection = ({
     const visiblePrimaryTopics = showAllPrimary
         ? primaryTopics
         : primaryTopics.slice(0, MOBILE_VISIBLE_LIMIT);
+
+    console.log('Selected Topics: ', selectedTopics);
 
     return (
         <AnimatePresence mode="wait">
@@ -72,7 +74,7 @@ const TopicsSelection = ({
                                     const isSelected = selectedTopics.some(
                                         (t) =>
                                             t.name === topic.name &&
-                                            t.subjectName === topic.subjectName,
+                                            t.subjectId === topic.subjectId,
                                     );
 
                                     return (
@@ -149,7 +151,7 @@ const TopicsSelection = ({
                                                     const isSelected = selectedTopics.some(
                                                         (t) =>
                                                             t.name === topic.name &&
-                                                            t.subjectName === topic.subjectName,
+                                                            t.subjectId === topic.subjectId,
                                                     );
 
                                                     return (

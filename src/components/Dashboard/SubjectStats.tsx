@@ -64,7 +64,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                                 <Icon className={`h-6 w-6 ${bgClass}`} />
                                             </div>
                                             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                                                {subject.subject}
+                                                {subject.subjectName}
                                             </h3>
                                         </div>
 
