@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-import subjects from '@/data/subjects';
 import { containerVariants, itemVariants } from '@/utils/motionVariants';
 import { supabase } from '@/utils/supabaseClient';
 
@@ -24,16 +23,18 @@ import TopicTestConfiguration from './TopicTestConfiguration';
 import TopicTestFooter from './TopicTestFooter';
 
 import { useTopicTestGenerator } from '@/hooks/topic-test/useTopicTestGenerator';
+import { useGoals } from '@/hooks/useGoals';
+import { SubjectIconMap } from '@/helper';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();
+    const { getPracticeSubjects, userGoal } = useGoals();
+    const subjects = getPracticeSubjects();
 
-    const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
+    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
-
-    const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
 
     const {
         availableTopics,
@@ -45,7 +46,7 @@ const TopicTestGeneratePage = () => {
         toggleTopic,
         removeTopic,
     } = useTopicTestGenerator({
-        subjectName: selectedSubject?.apiName,
+        subjectId: selectedSubjectId,
         requestedQuestionCount: questionLimit,
     });
 
@@ -64,7 +65,7 @@ const TopicTestGeneratePage = () => {
         try {
             setIsGenerating(true);
             const topicFilter = selectedTopics.map((t) => ({
-                subject: t.subjectName,
+                subject_id: t.subjectId,
                 topic: t.name,
             }));
 
@@ -73,6 +74,7 @@ const TopicTestGeneratePage = () => {
                 p_question_count: finalQuestionCount,
                 p_total_seconds: estimatedTime * 60,
                 p_already_attempted_questions: includeAttempted,
+                p_branch_id: userGoal?.branch_id,
             });
 
             if (error) throw error;
@@ -128,7 +130,7 @@ const TopicTestGeneratePage = () => {
 
                 <motion.div variants={itemVariants}>
                     <Select
-                        onValueChange={(value) => setSelectedSubjectId(Number(value))}
+                        onValueChange={(value) => setSelectedSubjectId(value)}
                         value={selectedSubjectId?.toString() || ''}
                     >
                         <SelectTrigger className="w-full md:w-2xl rounded-md">
@@ -138,13 +140,16 @@ const TopicTestGeneratePage = () => {
                             <SelectGroup>
                                 <SelectLabel>Subjects</SelectLabel>
                                 {subjects.map((s) => {
-                                    if (s.id <= 100)
-                                        return (
-                                            <SelectItem key={s.id} value={s.id.toString()}>
-                                                <s.icon className="h-4 w-4 mr-2 inline" />
-                                                {s.name}
-                                            </SelectItem>
-                                        );
+                                    const SubjectIcon = SubjectIconMap[
+                                        s.icon_name || 'default'
+                                    ] as React.ElementType;
+
+                                    return (
+                                        <SelectItem key={s.id} value={s.id.toString()}>
+                                            <SubjectIcon className="h-4 w-4 mr-2 inline" />
+                                            {s.name}
+                                        </SelectItem>
+                                    );
                                 })}
                             </SelectGroup>
                         </SelectContent>

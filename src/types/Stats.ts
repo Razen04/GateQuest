@@ -1,4 +1,5 @@
 export interface SubjectStat {
+    subjectName: string;
     subject: string;
     accuracy: number;
     progress: number;

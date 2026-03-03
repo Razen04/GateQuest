@@ -80,7 +80,22 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
 
     try {
         if (isNumericalQuestion(currentQuestion)) {
-            return currentQuestion.correct_answer?.toString();
+            const spec = currentQuestion.correct_answer;
+            switch (spec.type) {
+                case 'exact':
+                    return spec.value.toString();
+
+                case 'multiple':
+                    return spec.values.join(', ');
+
+                case 'range':
+                    return spec.inclusive !== false
+                        ? `${spec.min} to ${spec.max} (inclusive)`
+                        : `${spec.min} to ${spec.max} (exclusive)`;
+
+                case 'tolerance':
+                    return `${spec.value} ± ${spec.tolerance}`;
+            }
         }
 
         if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correct_answer)) {

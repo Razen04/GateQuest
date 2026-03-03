@@ -1,3 +1,10 @@
+# v0.10.0 - 2026-03-03
+
+- Extended the Keyboard shortcuts for the main practice page in the app and also added visual indicators. Fixes [#38](https://github.com/Razen04/GateQuest/issues/38).
+- Numerical Answers now support range based answers, exact answers, multiple answers and answers with tolerance as these happen very frequently in competitive exams. Fixes [#39](https://github.com/Razen04/GateQuest/issues/39).
+- Added dynamic difficulty feature for both Subjects and Questions. [#35](https://github.com/Razen04/GateQuest/issues/35).
+- Expanding the scope of the project as a whole to include other branches and exams. This can be buggy so maybe clear cache for this and re-login, I will be monitoring this.
+
 # v0.9.5 - 2026-02-08
 
 - Added Clear Data feature, to clear your current progress and start fresh for new session. It has a limit for doing this at most 5 times only. Implemented [#33](https://github.com/Razen04/GateQuest/issues/33).

@@ -3,6 +3,7 @@ import { isNumericalQuestion } from './questionUtils.js';
 import { recordAttemptLocally } from '../helper.js';
 import type { Question } from '../types/question.js';
 import type { AppUser } from '../types/AppUser.js';
+import type { NumericalAnswerSpec } from '@/types/storage.js';
 
 type submitAndRecordAnswerProp = {
     currentQuestion: Question;
@@ -12,6 +13,7 @@ type submitAndRecordAnswerProp = {
     user: AppUser | null;
     isLogin: boolean;
     refresh: () => void;
+    branchId?: string | undefined;
 };
 
 export const submitAndRecordAnswer = async ({
@@ -22,20 +24,41 @@ export const submitAndRecordAnswer = async ({
     user,
     isLogin,
     refresh,
+    branchId,
 }: submitAndRecordAnswerProp) => {
-    // 1. Determine Correctness
     let isCorrect = null; // Default to null (unattempted)
+    console.log('branchId: ', branchId);
+
+    if (!branchId) return;
 
     let wasAttempted;
     if (selectedOptionIndices) {
         wasAttempted = selectedOptionIndices.length > 0 || isNumericalQuestion(currentQuestion);
     }
 
+    const isNumericalAnswerCorrect = (userAnswer: number, spec: NumericalAnswerSpec): boolean => {
+        switch (spec.type) {
+            case 'exact':
+                return userAnswer === spec.value;
+
+            case 'multiple':
+                return spec.values.includes(userAnswer);
+
+            case 'range':
+                return spec.inclusive !== false
+                    ? userAnswer >= spec.min && userAnswer <= spec.max
+                    : userAnswer > spec.min && userAnswer < spec.max;
+
+            case 'tolerance':
+                return Math.abs(userAnswer - spec.value) <= spec.tolerance;
+        }
+    };
+
     if (wasAttempted) {
         if (isNumericalQuestion(currentQuestion)) {
-            const correctAnswer = currentQuestion.correct_answer.toString();
-            const answerToCheck = numericalAnswer?.toString();
-            isCorrect = answerToCheck === correctAnswer;
+            const answerToCheck = numericalAnswer;
+            if (answerToCheck !== null)
+                isCorrect = isNumericalAnswerCorrect(answerToCheck, currentQuestion.correct_answer);
         } else {
             // This logic works for both MCQ and MSQ.
             function arraysMatch(a: number[], b: number[]) {
@@ -51,7 +74,6 @@ export const submitAndRecordAnswer = async ({
         }
     }
     // If not attempted, `isCorrect` remains null.
-
     // 2. Record the Attempt
     (async () => {
         if (isLogin && user && user?.id !== '1') {
@@ -61,6 +83,8 @@ export const submitAndRecordAnswer = async ({
                         user_id: user.id!,
                         question_id: currentQuestion.id,
                         subject: currentQuestion.subject,
+                        subject_id: currentQuestion.subject_id,
+                        branch_id: branchId,
                         was_correct: isCorrect, // This can now be true, false, or null
                         time_taken: timeTaken,
                         attempt_number: 1,
@@ -69,6 +93,9 @@ export const submitAndRecordAnswer = async ({
                     user,
                     refresh,
                 });
+
+                // NEW: Broadcast an event telling the app the attempt is saved
+                window.dispatchEvent(new Event('STATS_UPDATED'));
             } catch (error) {
                 console.error('Failed to record attempt:', error);
                 toast.error('Could not save your attempt.');

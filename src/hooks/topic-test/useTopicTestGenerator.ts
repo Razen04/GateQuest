@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/utils/supabaseClient';
+import { useGoals } from '../useGoals';
 
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour for the cache after which we will refetch the topics
 
 export interface Topic {
     name: string;
     subjectName: string;
+    subjectId: string;
     questionCount: number;
 }
 
 interface UseTopicTestGeneratorParams {
-    subjectName?: string | undefined;
+    subjectId: string | null;
     requestedQuestionCount: number;
 }
 
@@ -20,7 +22,7 @@ interface TopicFromSupabase {
 }
 
 export const useTopicTestGenerator = ({
-    subjectName,
+    subjectId,
     requestedQuestionCount,
 }: UseTopicTestGeneratorParams) => {
     const [availableTopics, setAvailableTopics] = useState<Topic[]>([]);
@@ -28,10 +30,15 @@ export const useTopicTestGenerator = ({
     const [loading, setLoading] = useState(false);
     const [warnings, setWarnings] = useState<string[]>([]);
 
-    // cache helpers
-    const getCacheKey = (subject: string) => `topic_counts:${subject}`;
+    const { getPracticeSubjects } = useGoals();
 
-    const readCache = (subject: string) => {
+    const subjects = getPracticeSubjects();
+    const subjectName = subjects.find((s) => s.id === subjectId)?.name;
+
+    // cache helpers
+    const getCacheKey = (id: string) => `topic_counts:${id}`;
+
+    const readCache = useCallback((subject: string) => {
         try {
             const raw = localStorage.getItem(getCacheKey(subject));
             if (!raw) return null;
@@ -43,17 +50,17 @@ export const useTopicTestGenerator = ({
         } catch {
             return null;
         }
-    };
+    }, []);
 
-    const writeCache = (subject: string, data: Topic[]) => {
+    const writeCache = useCallback((subject: string, data: Topic[]) => {
         localStorage.setItem(getCacheKey(subject), JSON.stringify({ timestamp: Date.now(), data }));
-    };
+    }, []);
 
     // fetch topics from supabase
     const fetchTopics = useCallback(async () => {
-        if (!subjectName) return;
+        if (!subjectId) return;
 
-        const cached = readCache(subjectName);
+        const cached = readCache(subjectId);
         if (cached) {
             setAvailableTopics(cached);
             return;
@@ -62,7 +69,7 @@ export const useTopicTestGenerator = ({
         setLoading(true);
 
         const { data, error } = await supabase.rpc('get_topic_counts', {
-            p_subject: subjectName,
+            p_subject_id: subjectId,
         });
 
         if (error) {
@@ -72,15 +79,16 @@ export const useTopicTestGenerator = ({
             const topics: Topic[] = data.map((t: TopicFromSupabase) => ({
                 name: t.topic,
                 subjectName,
+                subjectId,
                 questionCount: t.question_count,
             }));
 
             setAvailableTopics(topics);
-            writeCache(subjectName, topics);
+            writeCache(subjectId, topics);
         }
 
         setLoading(false);
-    }, [subjectName]);
+    }, [subjectId, subjectName, readCache, writeCache]);
 
     useEffect(() => {
         fetchTopics();

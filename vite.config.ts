@@ -38,6 +38,17 @@ export default defineConfig({
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-icons': ['@phosphor-icons/react'],
+                    'vendor-utils': ['date-fns', 'framer-motion'],
+                    'vendor-supabase': ['@supabase/supabase-js'],
+                },
+            },
+        },
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),

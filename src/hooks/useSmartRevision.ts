@@ -5,6 +5,7 @@ import { getUserProfile } from '../helper.ts';
 import { useNavigate } from 'react-router-dom';
 import { compress } from 'lz-string';
 import { toast } from 'sonner';
+import { useGoals } from './useGoals.ts';
 
 export type WeeklySet = {
     success: boolean;
@@ -32,6 +33,8 @@ export type StartWeeklySetResponse = {
 const useSmartRevision = () => {
     // Getting the user
     const user = getUserProfile();
+
+    const { userGoal, getPracticeSubjects } = useGoals();
     const userId = user?.id;
     const [loading, setLoading] = useState<boolean>(true);
     const [currentSet, setCurrentSet] = useState<WeeklySet | null>(null);
@@ -46,7 +49,7 @@ const useSmartRevision = () => {
         try {
             // Call RPC to get weekly set
             const { data, error } = await supabase
-                .rpc('get_weekly_set')
+                .rpc('get_weekly_set', { p_branch_id: userGoal?.branch_id })
                 .single()
                 .overrideTypes<WeeklySet>();
 
@@ -67,14 +70,18 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [userGoal?.branch_id]);
 
     // Generate a set
     const generateSet = useCallback(async () => {
         setLoading(true);
+        const activeSubjects = getPracticeSubjects().map((s) => s.id);
 
         try {
-            const { data, error } = await supabase.rpc('generate_weekly_revision_set');
+            const { data, error } = await supabase.rpc('generate_weekly_revision_set', {
+                p_branch_id: userGoal?.branch_id,
+                p_valid_subjects: activeSubjects,
+            });
 
             if (error) throw error;
             if (data?.success && data?.status === 'existing') {
@@ -94,7 +101,7 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, [fetchCurrentSet]);
+    }, [userGoal?.branch_id, getPracticeSubjects, fetchCurrentSet]);
 
     // Start the set
     const startSet = useCallback(async () => {
@@ -134,12 +141,14 @@ const useSmartRevision = () => {
         try {
             // Get present week's Sunday (end of week)
             const now = new Date();
+            const activeSubjects = getPracticeSubjects().map((s) => s.id);
 
             const { error, count } = await supabase
                 .from('user_incorrect_queue')
-                .select('user_id', { count: 'exact' })
+                .select('user_id, questions!inner(subject_id))', { count: 'exact' })
                 .eq('user_id', userId)
-                .lte('next_review_at', now.toISOString());
+                .lte('next_review_at', now.toISOString())
+                .in('questions.subject_id', activeSubjects);
 
             if (error) throw error;
 
@@ -147,7 +156,7 @@ const useSmartRevision = () => {
         } catch (err) {
             console.error('Error fetching critical question count:', err);
         }
-    }, [userId]);
+    }, [userId, getPracticeSubjects]);
 
     useEffect(() => {
         fetchCurrentSet();

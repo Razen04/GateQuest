@@ -10,6 +10,7 @@ import useAuth from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { getUserProfile } from '@/helper';
 import ModernLoader from '@/components/ui/ModernLoader';
+import { useGoals } from '@/hooks/useGoals';
 
 const getTestName = (completedAt?: string | null) => {
     if (!completedAt) return 'Untitled Test';
@@ -28,6 +29,7 @@ const getTestName = (completedAt?: string | null) => {
 
 const TopicTest = () => {
     const navigate = useNavigate();
+    const { userGoal } = useGoals();
     const { isLogin } = useAuth();
     if (!isLogin) {
         toast.error('You should be logged in to view this page.');
@@ -36,7 +38,11 @@ const TopicTest = () => {
 
     const user = getUserProfile();
     const userId = user?.id;
-    const { loading, activeTest, history: testHistory } = useTopicTestHubData(userId);
+    const {
+        loading,
+        activeTest,
+        history: testHistory,
+    } = useTopicTestHubData(userId, userGoal?.branch_id);
 
     if (loading) {
         return <ModernLoader />;

@@ -4,6 +4,7 @@ import type { AppUser } from '../types/AppUser.ts';
 import type { Question } from '../types/question.ts';
 import { submitAndRecordAnswer } from '../utils/answerHandler.ts';
 import useStudyPlan from './useStudyPlan.ts';
+import { useGoals } from './useGoals.ts';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;
@@ -32,6 +33,7 @@ export default function useAnswerFlow({
     showAnswer,
 }: useAnswerFlowProps) {
     const { refresh } = useStudyPlan();
+    const { userGoal } = useGoals();
     // This function is triggered when the user wants to see the correct answer.
     // It orchestrates stopping the timer, showing the result, and recording the attempt.
     const handleShowAnswer = async () => {
@@ -53,6 +55,7 @@ export default function useAnswerFlow({
             user,
             isLogin,
             refresh,
+            branchId: userGoal?.branch_id,
         });
 
         // Update the UI with the result (e.g., 'Correct' or 'Incorrect').

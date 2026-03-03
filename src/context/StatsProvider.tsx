@@ -1,10 +1,9 @@
 // This file provides a context for managing and calculating all user-related statistics.
 // It fetches user activity from Supabase and computes metrics like progress, accuracy, study streaks for heatmap, and a personalized study plan.
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import StatsContext from './StatsContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
-import subjects from '../data/subjects.ts';
 import {
     differenceInCalendarDays,
     parseISO,
@@ -17,8 +16,11 @@ import type { Stats } from '../types/Stats.ts';
 import type { Database } from '../types/supabase.ts';
 import useSmartRevision from '@/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/helper.ts';
+import { useGoals } from '@/hooks/useGoals.ts';
 
-type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'];
+type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'] & {
+    subject_id?: string;
+};
 
 // The StatsProvider component orchestrates fetching and processing user activity data.
 // It exposes the calculated stats, loading state, and an update function to its children.
@@ -47,33 +49,11 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
     const { currentSet, fetchCurrentSet } = useSmartRevision();
 
-    // 1. Listener Effect: Waits for the "Signal" from Dashboard
-    useEffect(() => {
-        const handleRevisionUpdate = () => {
-            fetchCurrentSet();
-        };
-
-        // Add listener
-        window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
-
-        // Cleanup on unmount
-        return () => {
-            window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
-        };
-    }, [fetchCurrentSet]);
-
-    useEffect(() => {
-        let u = getUserProfile();
-        if (!u || u.id === '1') {
-            setLoading(false);
-            return;
-        }
-
-        updateStats();
-    }, [currentSet?.set_id]);
+    //  Importing the dynamic goal data
+    const { getPracticeSubjects, userGoal } = useGoals();
 
     // Fetches and processes all user activity data to build the stats object.
-    const updateStats = async () => {
+    const updateStats = useCallback(async () => {
         const user = getUserProfile();
 
         // If there's no user or it's a guest user, we don't need to fetch stats.
@@ -110,8 +90,31 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             return;
         }
 
+        // -- Goal Driven Filtering --
+        // Fetch the subjects relevnat to the user's current goal
+        const practiceSubjects = getPracticeSubjects();
+
+        const subjectMetaMap = practiceSubjects.reduce(
+            (acc, s) => {
+                acc[s.id] = {
+                    name: s.name,
+                    slug: s.slug,
+                    count: s.question_count || 0,
+                };
+                return acc;
+            },
+            {} as Record<string, { name: string; slug: string; count: number }>,
+        );
+
+        const relevantData = (data || []).filter((d) => {
+            const isValid = d.subject_id && subjectMetaMap[d.subject_id];
+            // fallback to slug
+            const isValidName = d.subject && practiceSubjects.some((ps) => ps.slug === d.subject);
+            return isValid || isValidName;
+        });
+
         // If there's no activity, initialize with an empty heatmap for the full year.
-        if (!data || data.length === 0) {
+        if (relevantData.length === 0 && (!data || data.length === 0)) {
             const fallback = eachDayOfInterval({
                 start: startDate,
                 end: endDate,
@@ -125,22 +128,22 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         }
 
         // Calculate the total number of questions available in the app, excluding bookmarks from the subjects.js file present in the data folder.
-        const totalQuestions = subjects.reduce(
-            (sum, s) => (s.category !== 'bookmarked' ? sum + s.questions : sum),
+        const totalQuestions = practiceSubjects.reduce(
+            (sum, s) => sum + (s.question_count || 0),
             0,
         );
 
         // --- Accuracy & Progress ---
-        const attempted = data.length;
-        const correctAttempts = data.filter((q) => q.was_correct).length;
+        const attempted = relevantData.length;
+        const correctAttempts = relevantData.filter((q) => q.was_correct).length;
         // A Set is used to count unique questions attempted for progress calculation.
-        const uniqueQuestionSet = new Set(data.map((d) => d.question_id));
+        const uniqueQuestionSet = new Set(relevantData.map((d) => d.question_id));
         const uniqueAttemptCount = uniqueQuestionSet.size;
 
         // --- Study Plan ---
         // These are key dates for calculating the study plan timeline.
-        const GATE_EXAM_DATE = '2026-02-08';
-        const QUESTIONS_COMPLETION_DATE = '2027-02-07';
+        const GATE_EXAM_DATE = '2027-02-08';
+        const QUESTIONS_COMPLETION_DATE = '2027-02-15';
         const now = new Date();
 
         // Calculate days left until the exam and until the target completion date.
@@ -168,7 +171,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         // Using startOfDay ensures this calculation is robust across different timezones.
         const todayStart = startOfDay(now);
         const todayUniqueAttemptCount = new Set(
-            data
+            relevantData
                 .filter((a) => a.attempted_at && startOfDay(parseISO(a.attempted_at)) >= todayStart)
                 .map((a) => a.question_id),
         ).size;
@@ -184,14 +187,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             dailyQuestionTarget > 0 && todayUniqueAttemptCount >= dailyQuestionTarget;
 
         // --- Subject Stats ---
-        // First, create a map of total questions per subject for later progress calculation.
-        type QuestionCounts = Record<string, number>;
-        const questionCounts: QuestionCounts = {};
-        subjects.forEach((s) => {
-            if (s.category !== 'bookmarked') {
-                questionCounts[s.apiName] = s.questions;
-            }
-        });
 
         let revisedQuestionIds = new Set<string>();
         if (currentSet) {
@@ -218,10 +213,14 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             }
         >;
         const grouped: GroupedType = {};
-        data.forEach(({ subject, was_correct, question_id }) => {
-            if (subject && question_id) {
-                if (!grouped[subject]) {
-                    grouped[subject] = {
+
+        relevantData.forEach((row) => {
+            const groupKey = row.subject_id || row.subject;
+            const { was_correct, question_id } = row;
+
+            if (groupKey && question_id) {
+                if (!grouped[groupKey]) {
+                    grouped[groupKey] = {
                         total: 0,
                         correct: 0,
                         attemptedQuestions: new Set(),
@@ -230,22 +229,27 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 }
 
                 if (revisedQuestionIds?.has(question_id)) {
-                    grouped[subject].revisionAttemptedQuestionIds.add(question_id);
+                    grouped[groupKey].revisionAttemptedQuestionIds.add(question_id);
                 }
 
-                if (question_id) grouped[subject].attemptedQuestions.add(question_id);
-                grouped[subject].total++;
-                if (was_correct) grouped[subject].correct++;
+                grouped[groupKey].attemptedQuestions.add(question_id);
+                grouped[groupKey].total++;
+                if (was_correct) grouped[groupKey].correct++;
             }
         });
 
         // Map the grouped data into the final subjectStats array format.
-        const subjectStats = Object.entries(grouped).map(([subject, stats]) => {
-            const totalAvailable = questionCounts[subject] || 1;
+        const subjectStats = Object.entries(grouped).map(([groupKey, stats]) => {
+            // Metadata whether the key is an id or a slug
+            const meta =
+                subjectMetaMap[groupKey] ||
+                Object.values(subjectMetaMap).find((m) => m.slug === groupKey);
+            const totalAvailable = meta?.count || 1;
             const attemptedCount = stats.attemptedQuestions.size;
             return {
-                subject,
-                accuracy: Math.round((stats.correct / stats.total) * 100),
+                subjectName: meta?.name,
+                subject: meta?.slug,
+                accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
                 progress: Math.round((attemptedCount / totalAvailable) * 100),
                 attemptedQuestionIds: stats.attemptedQuestions,
                 revisionAttemptedQuestionIds: stats.revisionAttemptedQuestionIds,
@@ -253,6 +257,9 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 totalAvailable,
             };
         });
+
+        // Write to localStorage so Practice.tsx can read the latest progress
+        localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
 
         // --- Heatmap ---
         // Count the number of attempts for each day.
@@ -295,10 +302,11 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             prevDate = dateObj;
         });
 
-        const question = new Set(data.map((d) => d.question_id).filter((id): id is string => !!id));
+        const question = new Set(
+            relevantData.map((d) => d.question_id).filter((id): id is string => !!id),
+        );
 
         // --- Final Set ---
-        // Finally, update the main stats state with all the newly computed values.
         setStats({
             progress: overallUniqueProgressPercent,
             accuracy: attempted ? Math.round((correctAttempts / attempted) * 100) : 0,
@@ -320,7 +328,34 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         });
 
         setLoading(false);
-    };
+    }, [currentSet, getPracticeSubjects]);
+
+    useEffect(() => {
+        let u = getUserProfile();
+        if (!u || u.id === '1') {
+            setLoading(false);
+            return;
+        }
+
+        updateStats();
+    }, [currentSet?.set_id, userGoal, updateStats]);
+
+    // Listener Effect: Waits for the "Signal" from Dashboard
+    useEffect(() => {
+        const handleRevisionUpdate = () => {
+            fetchCurrentSet();
+        };
+
+        const handleStatsUpdate = () => {
+            updateStats();
+        };
+
+        window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
+        window.addEventListener('STATS_UPDATED', handleStatsUpdate);
+        return () => {
+            window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
+        };
+    }, [fetchCurrentSet, updateStats]);
 
     // The context provider makes the stats, loading state, and update function available to child components.
     return (

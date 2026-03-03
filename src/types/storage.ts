@@ -1,8 +1,38 @@
+type ExactAnswer = {
+    type: 'exact';
+    value: number;
+};
+
+type MultipleExactAnswers = {
+    type: 'multiple';
+    values: number[];
+};
+
+type RangeAnswer = {
+    type: 'range';
+    min: number;
+    max: number;
+    inclusive?: boolean;
+};
+
+type ToleranceAnswer = {
+    type: 'tolerance';
+    value: number;
+    tolerance: number;
+};
+
+export type NumericalAnswerSpec =
+    | ExactAnswer
+    | MultipleExactAnswers
+    | RangeAnswer
+    | ToleranceAnswer;
+
 interface BaseQuestion {
     id: string;
     year: number;
     question_number: number;
     subject: string;
+    subject_id: string;
     topic?: string;
     question: string;
     difficulty: string;
@@ -15,6 +45,7 @@ interface BaseQuestion {
     explanation: string;
     metadata: {
         set: string;
+        exam: string; // To identify which exam this particular question belongs too.
         paperType: string;
         language: string;
     };
@@ -24,7 +55,7 @@ interface BaseQuestion {
 
 export interface NumericalQuestion extends BaseQuestion {
     question_type: 'Numerical Answer';
-    correct_answer: number;
+    correct_answer: NumericalAnswerSpec;
     options?: never;
 }
 
@@ -43,7 +74,7 @@ export interface MSQQuestion extends BaseQuestion {
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;
 
 export interface QuestionSyncMetadata {
-    subject: string;
+    subject_id: string;
     last_fetched_at?: string;
     last_sync: string;
 }
@@ -56,6 +87,7 @@ export interface TestSession {
     updated_at: string;
     completed_at?: string;
     status: string;
+    branch_id: string;
     remaining_time_seconds: number;
     total_questions: number;
     score?: number;

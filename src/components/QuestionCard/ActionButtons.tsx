@@ -41,7 +41,9 @@ const ActionButtons = ({
                 title="Previous"
             >
                 <ArrowLeft className="inline text-lg" />
-                <span className="hidden md:inline ml-2">Previous</span>
+                <span className="hidden md:inline ml-2">
+                    Previous <span className="font-mono">[Q/←]</span>
+                </span>
             </Button>
 
             {/* Show/Submit or Show Explanation */}
@@ -53,7 +55,9 @@ const ActionButtons = ({
                         title="Submit"
                     >
                         <Eye className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">Submit</span>
+                        <span className="hidden md:inline ml-2">
+                            Submit <span className="font-mono">[⎵/↵]</span>
+                        </span>
                     </Button>
                     <Button
                         className="flex-1 px-2 py-3 bg-purple-100 text-purple-700 text-base font-semibold hover:bg-purple-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 active:scale-95 active:bg-purple-200"
@@ -61,7 +65,9 @@ const ActionButtons = ({
                         title="Show Answer"
                     >
                         <Flag className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">Show Answer</span>
+                        <span className="hidden md:inline ml-2">
+                            Show Answer <span className="font-mono">[⎵/↵]</span>
+                        </span>
                     </Button>
                 </>
             ) : (
@@ -72,7 +78,9 @@ const ActionButtons = ({
                         title="Show Explanation"
                     >
                         <ChatCircle className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">Show Explanation</span>
+                        <span className="hidden md:inline ml-2">
+                            Show Explanation <span className="font-mono">[/]</span>
+                        </span>
                     </Button>
                 </>
             )}
@@ -90,7 +98,9 @@ const ActionButtons = ({
                 title="Next"
             >
                 <ArrowRight className="inline text-lg" />
-                <span className="hidden md:inline ml-2">Next</span>
+                <span className="hidden md:inline ml-2">
+                    Next <span className="font-mono">[W/→]</span>
+                </span>
             </Button>
         </div>
     );

@@ -1,14 +1,18 @@
 import { initializeTestSession } from '@/storage/testSession';
 import { supabase } from '@/utils/supabaseClient';
 
-export const syncTestFromSupabaseToDexie = async (userId: string | undefined) => {
-    if (!userId) return;
+export const syncTestFromSupabaseToDexie = async (
+    userId: string | undefined,
+    branchId: string | undefined,
+) => {
+    if (!userId || !branchId) return;
 
     // get the test session row
     const { data: testSession, error: sessionError } = await supabase
         .from('topic_tests')
         .select('*')
         .eq('user_id', userId)
+        .eq('branch_id', branchId)
         .in('status', ['ongoing', 'paused', ['created']])
         .maybeSingle();
 

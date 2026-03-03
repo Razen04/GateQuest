@@ -1,0 +1,1 @@
+select refresh_dynamic_difficulty();

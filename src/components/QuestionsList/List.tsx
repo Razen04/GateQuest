@@ -51,7 +51,9 @@ const List = ({
                             {question.difficulty}
                         </span>
                         <span className="font-semibold">
-                            {question.year ? `GATE ${question.year}` : 'Year Unknown'}
+                            {question.year
+                                ? `${question.metadata.exam?.toUpperCase() || 'GATE'} ${question.year}`
+                                : 'Year Unknown'}
                         </span>
                     </div>
                 </motion.div>

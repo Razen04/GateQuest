@@ -34,7 +34,7 @@ const TestSolutionView = () => {
 
     const safeQuestion = useMemo(() => {
         return (
-            currentQuestion || ({ id: '0', options: [], correct_answer: [], subject: '' } as any)
+            currentQuestion || ({ id: '0', options: [], correct_answer: [], subject_id: '' } as any)
         );
     }, [currentQuestion]);
 

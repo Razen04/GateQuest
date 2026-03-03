@@ -1,7 +1,7 @@
 {
     "name": "gate-prep",
     "private": true,
-    "version": "0.9.5",
+    "version": "0.10.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -13,7 +13,7 @@
         "format:check": "prettier --check .",
         "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
         "test": "vitest",
-        "supabase:update:types": "supabase gen types typescript --project-id zewzixicpoxirmouyeje > src/types/supabase.ts",
+        "supabase:update:types": "supabase gen types typescript --db-url 'postgresql://postgres:postgres@localhost:54322/postgres' > src/types/supabase.ts",
         "//": "--- LOCAL DEV ---",
         "supabase:start": "supabase start",
         "supabase:stop": "supabase stop",
@@ -26,6 +26,7 @@
         "*.{js,ts,jsx,tsx,json,css,md}": "prettier --write"
     },
     "dependencies": {
+        "@base-ui/react": "^1.2.0",
         "@nivo/calendar": "^0.99.0",
         "@phosphor-icons/react": "^2.1.10",
         "@radix-ui/react-alert-dialog": "^1.1.15",
