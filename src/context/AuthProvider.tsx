@@ -126,7 +126,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             provider: 'google',
             options: {
                 // After login, Google redirects back to the application's origin URL.
-                redirectTo: window.location.origin,
+                redirectTo: 'https://supabase-proxy.badbyeworld.workers.dev/auth/v1/callback', // temporary
             },
         });
         if (error) {
