@@ -18,18 +18,18 @@ ON CONFLICT DO NOTHING;
 -- 4. Insert Subjects (Using deterministic UUIDs for consistency)
 INSERT INTO public.subjects (id, slug, name, icon_name, theme_color, difficulty, category, is_universal)
 VALUES
-    ('22222222-2222-2222-2222-000000000001', 'eng-maths', 'Engineering Mathematics', 'Pi', 'violet', 'Medium', 'math', true),
-    ('22222222-2222-2222-2222-000000000002', 'discrete-maths', 'Discrete Maths', 'Empty', 'violet', 'Hard', 'math', false),
-    ('22222222-2222-2222-2222-000000000003', 'digital-logic', 'Digital Logic', 'Binary', 'pink', 'Easy', 'core', false),
-    ('22222222-2222-2222-2222-000000000004', 'co-architecture', 'Computer Organization & Architecture', 'Cpu', 'indigo', 'Medium', 'core', false),
-    ('22222222-2222-2222-2222-000000000005', 'data-structures', 'Data Structures', 'Graph', 'orange', 'Medium', 'core', false),
-    ('22222222-2222-2222-2222-000000000006', 'algorithms', 'Algorithms', 'GitBranch', 'teal', 'Hard', 'core', false),
-    ('22222222-2222-2222-2222-000000000007', 'theory-of-computation', 'Theory of Computation', 'Terminal', 'red', 'Hard', 'core', false),
-    ('22222222-2222-2222-2222-000000000008', 'compiler-design', 'Compiler Design', 'FileCode', 'yellow', 'Medium', 'core', false),
-    ('22222222-2222-2222-2222-000000000009', 'operating-system', 'Operating System', 'LinuxLogo', 'blue', 'Medium', 'core', false),
-    ('22222222-2222-2222-2222-000000000010', 'databases', 'Database Management Systems', 'Database', 'purple', 'Easy', 'core', false),
-    ('22222222-2222-2222-2222-000000000011', 'computer-networks', 'Computer Networks', 'Globe', 'green', 'Medium', 'core', false),
-    ('22222222-2222-2222-2222-000000000012', 'aptitude', 'Aptitude', 'Brain', 'red', 'Easy', 'aptitude', true)
+    ('22222222-2222-2222-2222-000000000001', 'eng-maths', 'Engineering Mathematics', 'pi', 'violet', 'Medium', 'math', true),
+    ('22222222-2222-2222-2222-000000000002', 'discrete-maths', 'Discrete Maths', 'empty', 'violet', 'Hard', 'math', false),
+    ('22222222-2222-2222-2222-000000000003', 'digital-logic', 'Digital Logic', 'binary', 'pink', 'Easy', 'core', false),
+    ('22222222-2222-2222-2222-000000000004', 'co-architecture', 'Computer Organization & Architecture', 'cpu', 'indigo', 'Medium', 'core', false),
+    ('22222222-2222-2222-2222-000000000005', 'data-structures', 'Data Structures', 'graph', 'orange', 'Medium', 'core', false),
+    ('22222222-2222-2222-2222-000000000006', 'algorithms', 'Algorithms', 'gitbranch', 'teal', 'Hard', 'core', false),
+    ('22222222-2222-2222-2222-000000000007', 'theory-of-computation', 'Theory of Computation', 'terminal', 'red', 'Hard', 'core', false),
+    ('22222222-2222-2222-2222-000000000008', 'compiler-design', 'Compiler Design', 'filecode', 'yellow', 'Medium', 'core', false),
+    ('22222222-2222-2222-2222-000000000009', 'operating-system', 'Operating System', 'linuxlogo', 'blue', 'Medium', 'core', false),
+    ('22222222-2222-2222-2222-000000000010', 'databases', 'Database Management Systems', 'database', 'purple', 'Easy', 'core', false),
+    ('22222222-2222-2222-2222-000000000011', 'computer-networks', 'Computer Networks', 'globe', 'green', 'Medium', 'core', false),
+    ('22222222-2222-2222-2222-000000000012', 'aptitude', 'Aptitude', 'brain', 'red', 'Easy', 'aptitude', true)
 ON CONFLICT (slug) DO UPDATE SET 
     name = EXCLUDED.name,
     icon_name = EXCLUDED.icon_name,

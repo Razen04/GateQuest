@@ -9,7 +9,6 @@ import {
     Code,
     Database,
     Globe,
-    Cpu,
     TreeStructure,
     Bicycle,
     Brain,
@@ -18,6 +17,14 @@ import {
     FlameIcon,
     LightbulbIcon,
 } from '@phosphor-icons/react';
+import { EmptyIcon } from '@phosphor-icons/react';
+import { PiIcon } from '@phosphor-icons/react';
+import { BinaryIcon } from '@phosphor-icons/react';
+import { CpuIcon } from '@phosphor-icons/react';
+import { GraphIcon } from '@phosphor-icons/react';
+import { GitBranchIcon } from '@phosphor-icons/react';
+import { FileCodeIcon } from '@phosphor-icons/react';
+import { LinuxLogoIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -32,11 +39,18 @@ export const getUserProfile = (): AppUser | null => {
 
 // Icon mapper for the subjects
 export const SubjectIconMap: Record<string, React.ElementType> = {
+    pi: PiIcon,
+    empty: EmptyIcon,
+    binary: BinaryIcon,
+    cpu: CpuIcon,
+    graph: GraphIcon,
+    gitbranch: GitBranchIcon,
+    filecode: FileCodeIcon,
     calculator: Calculator,
+    linuxlogo: LinuxLogoIcon,
     code: Code,
     database: Database,
     globe: Globe,
-    cpu: Cpu,
     'tree-structure': TreeStructure,
     bicycle: Bicycle,
     brain: Brain,
@@ -58,6 +72,27 @@ const colors = {
     cyan: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400',
     pink: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
     indigo: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
+
+    // New colors
+    lime: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400',
+    emerald: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    teal: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400',
+    sky: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400',
+    violet: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
+    fuchsia: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
+    rose: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
+    amber: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+    slate: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400',
+    zinc: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400',
+    neutral: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400',
+    stone: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400',
+    trueGray: 'bg-trueGray-100 text-trueGray-600 dark:bg-trueGray-900/30 dark:text-trueGray-400',
+    coolGray: 'bg-coolGray-100 text-coolGray-600 dark:bg-coolGray-900/30 dark:text-coolGray-400',
+    blueGray: 'bg-blueGray-100 text-blueGray-600 dark:bg-blueGray-900/30 dark:text-blueGray-400',
+    turquoise: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+    brown: 'bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+    black: 'bg-black/10 text-black dark:bg-white/10 dark:text-white',
+
     // Fallback color
     gray: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 } as const;

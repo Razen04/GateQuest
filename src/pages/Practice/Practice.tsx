@@ -170,7 +170,10 @@ const Practice = () => {
                                                 <CardTitle className="font-medium">
                                                     {subject.name}
                                                 </CardTitle>
-                                                <Badge variant="secondary" className="text-[10px]">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={`text-[10px] font-bold ${subject.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : subject.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}
+                                                >
                                                     {subject.difficulty}
                                                 </Badge>
                                             </div>
