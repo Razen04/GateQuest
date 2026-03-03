@@ -55,7 +55,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                     >
                                         <div className="flex items-center mb-4">
                                             <div className={`p-3 ${bgClass} text-white mr-3`}>
-                                                <SubjectIcon className={`h-6 w-6 ${bgClass}`} />
+                                                <SubjectIcon className={`h-6 w-6`} />
                                             </div>
                                             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                                                 {subject.subjectName}

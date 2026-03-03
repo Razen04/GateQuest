@@ -199,7 +199,7 @@ const Practice = () => {
                                             handleSubjectSelect(subject.slug);
                                         }}
                                     >
-                                        <Button variant="ghost" className="w-full text-xs group">
+                                        <Button className="w-full text-xs group">
                                             {activeFilter === 'bookmarked'
                                                 ? 'View Bookmarks'
                                                 : 'Start Practice'}
