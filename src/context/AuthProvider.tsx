@@ -122,26 +122,18 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     // Initiates the Google OAuth login flow provided by Supabase.
     const handleLogin = async () => {
-        // 1. Define your Worker's Auth Callback URL
-        // This is where Google will send the user after they click "Sign In"
-        const PROXY_CALLBACK = 'https://supabase-proxy.badbyeworld.workers.dev/auth/v1/callback';
-
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                // DO NOT use window.location.origin here yet.
-                // We need the data to hit the Worker so it can proxy to Supabase.
-                redirectTo: PROXY_CALLBACK,
-                // (Optional) If you want the user to end up back on a specific page:
-                queryParams: {
-                    next: window.location.origin, // We can pass the final destination here
-                },
+                // After the Worker finishes the handshake,
+                // tell Supabase to send the user back to Vercel.
+                redirectTo: 'https://your-app-name.vercel.app/auth/callback',
+                // OR window.location.origin + '/auth/callback'
+                skipBrowserRedirect: false,
             },
         });
 
-        if (error) {
-            toast.error(`Login failed: ${error.message}`);
-        }
+        if (error) toast.error(error.message);
     };
 
     const clearStaleData = async () => {
