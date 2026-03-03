@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -68,6 +68,12 @@ export default function TopicTestResult() {
             unvisited,
         };
     }, [attempts]);
+
+    // TopicTestResult.tsx
+    useEffect(() => {
+        // This wakes up the StatsProvider.tsx listener
+        window.dispatchEvent(new Event('STATS_UPDATED'));
+    }, []);
 
     const timeTakenSeconds = attempts.reduce((sum, a) => sum + (a.time_spent_seconds ?? 0), 0);
 

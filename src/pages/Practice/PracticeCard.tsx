@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import ReportModal from '@/components/ReportModal.tsx';
 import QuestionCard from '@/components/QuestionCard/QuestionCard.tsx';
 import { supabase } from '@/utils/supabaseClient.ts';
+import { useGoals } from '@/hooks/useGoals.ts';
 
 // This component is the main event for the practice session. It's a "controller" component
 // that pulls together a bunch of hooks and smaller UI components to create the full question view.
@@ -36,11 +37,13 @@ const PracticeCard = () => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { subject, qid } = useParams();
+    const { subjects } = useGoals();
     const qs = searchParams.toString();
 
+    const subjectId = subjects.filter((s) => s.slug === subject)[0]?.id;
     // Fetching questions using useQuestions hook in-case the of shareable-link. For more details visit Issue #6 (https://github.com/Razen04/GateQuest/issues/6)
     const { questions: fetchedQuestions, isLoading: isQuestionsLoading } = useQuestions(
-        subject,
+        subjectId,
         false,
     );
 

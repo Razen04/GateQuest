@@ -32,6 +32,7 @@ interface BaseQuestion {
     year: number;
     question_number: number;
     subject: string;
+    subject_id: string;
     topic?: string;
     question: string;
     difficulty: string;
@@ -44,6 +45,7 @@ interface BaseQuestion {
     explanation: string;
     metadata: {
         set: string;
+        exam: string; // To identify which exam this particular question belongs too.
         paperType: string;
         language: string;
     };
@@ -72,7 +74,7 @@ export interface MSQQuestion extends BaseQuestion {
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;
 
 export interface QuestionSyncMetadata {
-    subject: string;
+    subject_id: string;
     last_fetched_at?: string;
     last_sync: string;
 }
@@ -85,6 +87,7 @@ export interface TestSession {
     updated_at: string;
     completed_at?: string;
     status: string;
+    branch_id: string;
     remaining_time_seconds: number;
     total_questions: number;
     score?: number;

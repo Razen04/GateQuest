@@ -1,27 +1,18 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { getBackgroundColor } from '../../helper.ts';
-import { Laptop } from '@phosphor-icons/react';
-import subjects from '../../data/subjects.ts';
+import { getBackgroundColor, SubjectIconMap } from '../../helper.ts';
 import { itemVariants } from '../../utils/motionVariants.ts';
 import type { SubjectStat } from '../../types/Stats.ts';
+import { useGoals } from '@/hooks/useGoals.ts';
+import type React from 'react';
 
 type SubjectStatsPropsType = {
     subjectStats: SubjectStat[];
 };
 
-type subjectMetaType = {
-    id: number;
-    name: string;
-    apiName: string;
-    icon: React.ElementType;
-    questions: number;
-    difficulty: string;
-    category: string;
-    color: string;
-};
-
 const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
+    const { getPracticeSubjects } = useGoals();
+    const subjects = getPracticeSubjects();
+    console.log('subjectStats: ', subjectStats);
     return (
         <motion.div
             className="lg:col-span-2 space-y-8"
@@ -45,12 +36,15 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                 const accuracy = Number(subject.accuracy) || 0;
 
                                 // Find the subject meta info
-                                const subjectMeta: subjectMetaType | undefined = subjects.find(
-                                    (s) => s.apiName === subject.subject,
+                                const subjectMeta = subjects.find(
+                                    (s) => s.slug === subject.subject,
                                 );
-                                const Icon = subjectMeta?.icon || Laptop; // fallback icon
-                                const questionCount = subjectMeta?.questions;
-                                const subjectColor = subjectMeta?.color;
+                                console.log('subjectMeta: ', subjectMeta);
+                                const SubjectIcon = SubjectIconMap[
+                                    subjectMeta?.icon_name || 'default'
+                                ] as React.ElementType;
+                                const questionCount = subjectMeta?.question_count;
+                                const subjectColor = subjectMeta?.theme_color;
                                 const bgClass = getBackgroundColor(subjectColor as string);
 
                                 return (
@@ -61,10 +55,10 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                     >
                                         <div className="flex items-center mb-4">
                                             <div className={`p-3 ${bgClass} text-white mr-3`}>
-                                                <Icon className={`h-6 w-6 ${bgClass}`} />
+                                                <SubjectIcon className={`h-6 w-6`} />
                                             </div>
                                             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                                                {subject.subject}
+                                                {subject.subjectName}
                                             </h3>
                                         </div>
 

@@ -13,6 +13,7 @@ type submitAndRecordAnswerProp = {
     user: AppUser | null;
     isLogin: boolean;
     refresh: () => void;
+    branchId?: string | undefined;
 };
 
 export const submitAndRecordAnswer = async ({
@@ -23,8 +24,12 @@ export const submitAndRecordAnswer = async ({
     user,
     isLogin,
     refresh,
+    branchId,
 }: submitAndRecordAnswerProp) => {
     let isCorrect = null; // Default to null (unattempted)
+    console.log('branchId: ', branchId);
+
+    if (!branchId) return;
 
     let wasAttempted;
     if (selectedOptionIndices) {
@@ -69,7 +74,6 @@ export const submitAndRecordAnswer = async ({
         }
     }
     // If not attempted, `isCorrect` remains null.
-
     // 2. Record the Attempt
     (async () => {
         if (isLogin && user && user?.id !== '1') {
@@ -79,6 +83,8 @@ export const submitAndRecordAnswer = async ({
                         user_id: user.id!,
                         question_id: currentQuestion.id,
                         subject: currentQuestion.subject,
+                        subject_id: currentQuestion.subject_id,
+                        branch_id: branchId,
                         was_correct: isCorrect, // This can now be true, false, or null
                         time_taken: timeTaken,
                         attempt_number: 1,
@@ -87,6 +93,9 @@ export const submitAndRecordAnswer = async ({
                     user,
                     refresh,
                 });
+
+                // NEW: Broadcast an event telling the app the attempt is saved
+                window.dispatchEvent(new Event('STATS_UPDATED'));
             } catch (error) {
                 console.error('Failed to record attempt:', error);
                 toast.error('Could not save your attempt.');

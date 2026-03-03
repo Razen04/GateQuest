@@ -28,6 +28,81 @@ export type Database = {
     };
     public: {
         Tables: {
+            branch_exams: {
+                Row: {
+                    branch_id: string;
+                    exam_id: string;
+                };
+                Insert: {
+                    branch_id: string;
+                    exam_id: string;
+                };
+                Update: {
+                    branch_id?: string;
+                    exam_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'branch_exams_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'branch_exams_exam_id_fkey';
+                        columns: ['exam_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'exams';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            branch_subjects: {
+                Row: {
+                    branch_id: string;
+                    subject_id: string;
+                };
+                Insert: {
+                    branch_id: string;
+                    subject_id: string;
+                };
+                Update: {
+                    branch_id?: string;
+                    subject_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'branch_subjects_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'branch_subjects_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            branches: {
+                Row: {
+                    id: string;
+                    name: string;
+                };
+                Insert: {
+                    id: string;
+                    name: string;
+                };
+                Update: {
+                    id?: string;
+                    name?: string;
+                };
+                Relationships: [];
+            };
             donations: {
                 Row: {
                     actual_amount: number | null;
@@ -71,6 +146,54 @@ export type Database = {
                         columns: ['user_id'];
                         isOneToOne: false;
                         referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            exams: {
+                Row: {
+                    id: string;
+                    name: string;
+                    short_name: string;
+                };
+                Insert: {
+                    id: string;
+                    name: string;
+                    short_name: string;
+                };
+                Update: {
+                    id?: string;
+                    name?: string;
+                    short_name?: string;
+                };
+                Relationships: [];
+            };
+            exams_subjects: {
+                Row: {
+                    exams_id: string;
+                    subject_id: string;
+                };
+                Insert: {
+                    exams_id: string;
+                    subject_id: string;
+                };
+                Update: {
+                    exams_id?: string;
+                    subject_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'exams_subjects_exams_id_fkey';
+                        columns: ['exams_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'exams';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'exams_subjects_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
                         referencedColumns: ['id'];
                     },
                 ];
@@ -200,6 +323,7 @@ export type Database = {
                     source: string | null;
                     source_url: string | null;
                     subject: string;
+                    subject_id: string | null;
                     tags: string[] | null;
                     topic: string | null;
                     updated_at: string | null;
@@ -223,6 +347,7 @@ export type Database = {
                     source?: string | null;
                     source_url?: string | null;
                     subject: string;
+                    subject_id?: string | null;
                     tags?: string[] | null;
                     topic?: string | null;
                     updated_at?: string | null;
@@ -246,13 +371,22 @@ export type Database = {
                     source?: string | null;
                     source_url?: string | null;
                     subject?: string;
+                    subject_id?: string | null;
                     tags?: string[] | null;
                     topic?: string | null;
                     updated_at?: string | null;
                     verified?: boolean | null;
                     year?: number;
                 };
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: 'questions_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             revision_set_questions: {
                 Row: {
@@ -290,10 +424,47 @@ export type Database = {
                     },
                 ];
             };
+            subjects: {
+                Row: {
+                    category: string | null;
+                    difficulty: string | null;
+                    icon_name: string | null;
+                    id: string;
+                    is_universal: boolean;
+                    name: string;
+                    question_count: number | null;
+                    slug: string;
+                    theme_color: string | null;
+                };
+                Insert: {
+                    category?: string | null;
+                    difficulty?: string | null;
+                    icon_name?: string | null;
+                    id?: string;
+                    is_universal?: boolean;
+                    name: string;
+                    question_count?: number | null;
+                    slug: string;
+                    theme_color?: string | null;
+                };
+                Update: {
+                    category?: string | null;
+                    difficulty?: string | null;
+                    icon_name?: string | null;
+                    id?: string;
+                    is_universal?: boolean;
+                    name?: string;
+                    question_count?: number | null;
+                    slug?: string;
+                    theme_color?: string | null;
+                };
+                Relationships: [];
+            };
             topic_tests: {
                 Row: {
                     accuracy: number | null;
                     attempted_count: number | null;
+                    branch_id: string;
                     completed_at: string | null;
                     correct_count: number | null;
                     created_at: string | null;
@@ -310,6 +481,7 @@ export type Database = {
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
+                    branch_id: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -326,6 +498,7 @@ export type Database = {
                 Update: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
+                    branch_id?: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -339,7 +512,15 @@ export type Database = {
                     updated_at?: string | null;
                     user_id?: string;
                 };
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: 'topic_tests_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             topic_tests_attempts: {
                 Row: {
@@ -392,6 +573,45 @@ export type Database = {
                     },
                 ];
             };
+            user_goals: {
+                Row: {
+                    branch_id: string;
+                    id: string;
+                    is_active: boolean;
+                    target_exams: Json | null;
+                    user_id: string;
+                };
+                Insert: {
+                    branch_id: string;
+                    id?: string;
+                    is_active?: boolean;
+                    target_exams?: Json | null;
+                    user_id: string;
+                };
+                Update: {
+                    branch_id?: string;
+                    id?: string;
+                    is_active?: boolean;
+                    target_exams?: Json | null;
+                    user_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'user_goals_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'user_goals_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
             user_incorrect_queue: {
                 Row: {
                     added_at: string | null;
@@ -435,9 +655,11 @@ export type Database = {
                 Row: {
                     attempt_number: number | null;
                     attempted_at: string | null;
+                    branch_id: string | null;
                     id: string;
                     question_id: string | null;
                     subject: string | null;
+                    subject_id: string | null;
                     time_taken: number | null;
                     user_id: string | null;
                     user_version_number: number;
@@ -446,9 +668,11 @@ export type Database = {
                 Insert: {
                     attempt_number?: number | null;
                     attempted_at?: string | null;
+                    branch_id?: string | null;
                     id?: string;
                     question_id?: string | null;
                     subject?: string | null;
+                    subject_id?: string | null;
                     time_taken?: number | null;
                     user_id?: string | null;
                     user_version_number?: number;
@@ -457,15 +681,31 @@ export type Database = {
                 Update: {
                     attempt_number?: number | null;
                     attempted_at?: string | null;
+                    branch_id?: string | null;
                     id?: string;
                     question_id?: string | null;
                     subject?: string | null;
+                    subject_id?: string | null;
                     time_taken?: number | null;
                     user_id?: string | null;
                     user_version_number?: number;
                     was_correct?: boolean | null;
                 };
                 Relationships: [
+                    {
+                        foreignKeyName: 'user_question_activity_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'user_question_activity_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
+                        referencedColumns: ['id'];
+                    },
                     {
                         foreignKeyName: 'user_question_activity_user_id_fkey';
                         columns: ['user_id'];
@@ -523,6 +763,7 @@ export type Database = {
             weekly_revision_set: {
                 Row: {
                     accuracy: number | null;
+                    branch_id: string | null;
                     correct_count: number | null;
                     created_at: string | null;
                     expires_at: string | null;
@@ -535,6 +776,7 @@ export type Database = {
                 };
                 Insert: {
                     accuracy?: number | null;
+                    branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
                     expires_at?: string | null;
@@ -547,6 +789,7 @@ export type Database = {
                 };
                 Update: {
                     accuracy?: number | null;
+                    branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
                     expires_at?: string | null;
@@ -559,6 +802,13 @@ export type Database = {
                 };
                 Relationships: [
                     {
+                        foreignKeyName: 'weekly_revision_set_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
                         foreignKeyName: 'weekly_revision_set_generated_for_fkey';
                         columns: ['generated_for'];
                         isOneToOne: false;
@@ -569,6 +819,15 @@ export type Database = {
             };
         };
         Views: {
+            dynamic_difficulty_stats: {
+                Row: {
+                    question_id: string | null;
+                    question_rating: number | null;
+                    subject_rating: number | null;
+                    total_attempts: number | null;
+                };
+                Relationships: [];
+            };
             v_user_cycle_stats: {
                 Row: {
                     attempt_number: number | null;
@@ -576,12 +835,20 @@ export type Database = {
                     id: string | null;
                     question_id: string | null;
                     subject: string | null;
+                    subject_id: string | null;
                     time_taken: number | null;
                     user_id: string | null;
                     user_version_number: number | null;
                     was_correct: boolean | null;
                 };
                 Relationships: [
+                    {
+                        foreignKeyName: 'user_question_activity_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
+                        referencedColumns: ['id'];
+                    },
                     {
                         foreignKeyName: 'user_question_activity_user_id_fkey';
                         columns: ['user_id'];
@@ -594,23 +861,48 @@ export type Database = {
         };
         Functions: {
             clear_user_data: { Args: never; Returns: Json };
-            generate_topic_test: {
-                Args: {
-                    p_already_attempted_questions: boolean;
-                    p_filters: Json;
-                    p_question_count: number;
-                    p_total_seconds: number;
-                };
-                Returns: Json;
-            };
-            generate_weekly_revision_set: { Args: never; Returns: Json };
-            get_topic_counts: {
-                Args: { p_subject: string };
-                Returns: {
-                    question_count: number;
-                    topic: string;
-                }[];
-            };
+            generate_topic_test:
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  }
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_branch_id: string;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  };
+            generate_weekly_revision_set:
+                | { Args: never; Returns: Json }
+                | {
+                      Args: { p_branch_id: string; p_valid_subjects: string[] };
+                      Returns: Json;
+                  };
+            get_topic_counts:
+                | {
+                      Args: { p_subject: string };
+                      Returns: {
+                          question_count: number;
+                          topic: string;
+                      }[];
+                  }
+                | {
+                      Args: { p_subject_id: string };
+                      Returns: {
+                          question_count: number;
+                          subject_id: string;
+                          topic: string;
+                      }[];
+                  };
             get_verified_donations: {
                 Args: never;
                 Returns: {
@@ -625,17 +917,17 @@ export type Database = {
                     verified: boolean;
                 }[];
             };
-            get_weekly_set: { Args: never; Returns: Json };
+            get_weekly_set:
+                | { Args: never; Returns: Json }
+                | { Args: { p_branch_id: string }; Returns: Json };
             insert_user_question_activity_batch: {
                 Args: { batch: Json };
                 Returns: undefined;
             };
+            refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
             start_weekly_revision_set: { Args: { v_set_id: string }; Returns: Json };
-            update_status_of_weekly_set: {
-                Args: { v_set_id: string };
-                Returns: Json;
-            };
+            update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };
         };
         Enums: {
             revision_status: 'pending' | 'started' | 'expired';

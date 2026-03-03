@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import type { TestSession } from '@/types/storage';
 import ModernLoader from '@/components/ui/ModernLoader';
 import { syncTestFromSupabaseToDexie } from '@/hooks/topic-test/service/testSyncService';
+import { useGoals } from '@/hooks/useGoals';
 
 type InstructionRule = {
     id: string;
@@ -67,6 +68,7 @@ const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
 const TopicTestLobby = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
+    const { userGoal } = useGoals();
 
     const [testData, setTestData] = useState<TestSession | null>(null);
     const [loading, setLoading] = useState(true);
@@ -121,7 +123,7 @@ const TopicTestLobby = () => {
                 if (error) throw error;
             }
 
-            await syncTestFromSupabaseToDexie(user.id);
+            await syncTestFromSupabaseToDexie(user.id, userGoal?.branch_id);
             navigate(`/topic-test/${testId}/attempt`);
         } catch (err) {
             console.error(err);
@@ -152,7 +154,6 @@ const TopicTestLobby = () => {
                     caption="Review the test parameters below."
                 />
             </div>
-
             <main className="px-6 flex-1 flex flex-col gap-6">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}

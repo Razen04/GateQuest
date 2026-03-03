@@ -66,12 +66,6 @@ const Dashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                     Your preparation journey is {stats?.progress}% complete. Keep going!
                 </p>
-                <div className="flex items-center mt-[12px] mb-[-30px]">
-                    <InfoIcon className="text-sm text-red-500 mr-2" />
-                    <p className="text-base text-red-500">
-                        Attempt 3 questions for Dashboard to refresh.
-                    </p>
-                </div>
             </motion.div>
 
             <section className="w-full mb-4">

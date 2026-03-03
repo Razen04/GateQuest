@@ -32,6 +32,7 @@ export type NumericalQuestion = {
     year: number;
     question_number: number;
     subject: string;
+    subject_id: string;
     topic?: string;
     question_type: 'Numerical Answer';
     question: string;
@@ -48,6 +49,7 @@ export type NumericalQuestion = {
     explanation: string;
     metadata: {
         set: string;
+        exam: string;
         paperType: string;
         language: string;
     };
@@ -60,6 +62,7 @@ export type MCQQuestion = {
     year: number;
     question_number: number;
     subject: string;
+    subject_id: string;
     topic?: string;
     question_type: 'Multiple Choice Question';
     question: string;
@@ -76,6 +79,7 @@ export type MCQQuestion = {
     explanation: string;
     metadata: {
         set: string;
+        exam: string;
         paperType: string;
         language: string;
     };
@@ -88,6 +92,7 @@ export type MSQQuestion = {
     year: number;
     question_number: number;
     subject: string;
+    subject_id: string;
     topic?: string;
     question_type: 'Multiple Select Question';
     question: string;
@@ -104,6 +109,7 @@ export type MSQQuestion = {
     explanation: string;
     metadata: {
         set: string;
+        exam: string;
         paperType: string;
         language: string;
     };

@@ -2,8 +2,9 @@ import type { Question } from '@/types/storage';
 import { appStorage } from './storageService';
 const db = appStorage;
 
-const getQuestionsBySubject = async (subject: string) => {
-    return await db.questions.where('subject').equals(subject).toArray();
+const getQuestionsBySubject = async (subjectId: string) => {
+    console.log('huh?');
+    return await db.questions.where('subject_id').equals(subjectId).toArray();
 };
 
 const getAllQuestions = async () => {
@@ -14,8 +15,8 @@ const getQuestionByIds = async (ids: string[]) => {
     return await db.questions.where('id').anyOf(ids).toArray();
 };
 
-const getSubjectSyncMetadata = async (subject: string) => {
-    return await db.questions_sync_metadata.get(subject);
+const getSubjectSyncMetadata = async (subjectId: string) => {
+    return await db.questions_sync_metadata.get(subjectId);
 };
 
 // Write methods
@@ -24,14 +25,17 @@ const bulkUpsertQuestions = async (questions: Question[]) => {
     await db.questions.bulkPut(questions);
 };
 
-const updateSubjectSyncMetadata = async (subject: string, last_fetched_at?: string | undefined) => {
+const updateSubjectSyncMetadata = async (
+    subject_id: string,
+    last_fetched_at?: string | undefined,
+) => {
     let payload;
     if (!last_fetched_at) {
-        payload = { subject, last_sync: Date.now().toString() };
-        await db.questions_sync_metadata.update(subject, payload);
+        payload = { subject_id, last_sync: Date.now().toString() };
+        await db.questions_sync_metadata.update(subject_id, payload);
     } else {
         payload = {
-            subject,
+            subject_id,
             last_fetched_at,
             last_sync: Date.now().toString(),
         };

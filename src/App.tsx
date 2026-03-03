@@ -12,6 +12,7 @@ import AuthProvider from './context/AuthProvider.tsx';
 import StatsProvider from './context/StatsProvider.tsx';
 import AppRoutes from './routes/AppRoutes.tsx';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { GoalProvider } from './context/GoalProvider.tsx';
 
 /**
  * @function App
@@ -23,20 +24,23 @@ function App() {
     return (
         // Router must be at the very top so hooks like useNavigate() work inside Providers
         <Router>
-            {/* StatsProvider manages user's practice statistics. */}
-            <StatsProvider>
-                {/* AuthProvider handles user authentication state and logic. */}
-                <AuthProvider>
-                    {/* AppProvider manages general application settings, like sound effects. */}
-                    <AppProvider>
-                        {/* AppRoutes contains all the defined application routes. */}
-                        <AppRoutes />
+            {/* GoalProvider manages user's exam goals. */}
+            <GoalProvider>
+                {/* StatsProvider manages user's practice statistics. */}
+                <StatsProvider>
+                    {/* AuthProvider handles user authentication state and logic. */}
+                    <AuthProvider>
+                        {/* AppProvider manages general application settings, like sound effects. */}
+                        <AppProvider>
+                            {/* AppRoutes contains all the defined application routes. */}
+                            <AppRoutes />
 
-                        {/* Vercel Speed Insights */}
-                        <SpeedInsights />
-                    </AppProvider>
-                </AuthProvider>
-            </StatsProvider>
+                            {/* Vercel Speed Insights */}
+                            <SpeedInsights />
+                        </AppProvider>
+                    </AuthProvider>
+                </StatsProvider>
+            </GoalProvider>
         </Router>
     );
 }
