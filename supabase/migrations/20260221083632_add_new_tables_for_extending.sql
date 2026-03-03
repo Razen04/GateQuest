@@ -25,7 +25,7 @@ create table if not exists subjects (
     name text not null,
     icon_name text,
     theme_color text,
-		difficulty_score float default 0.5,
+		difficulty text default 'Medium',
 		question_count int default 0,
 		category text,
     is_universal boolean not null default false

@@ -2,7 +2,7 @@ create materialized view dynamic_difficulty_stats as
 with first_attempts as (
 	select question_id, subject_id, was_correct
 	from public.user_question_activity
-	where attempt_number = 1 and time_taken > 5
+	where attempt_number = 1
 ),
 question_stats as (
 	-- Applying Laplace Smoothing where K = 10 and Baseline = 0.5
@@ -13,6 +13,7 @@ question_stats as (
 )
 select 
 	qs.question_id,
+	qs.subject_id,
 	qs.calculated_difficulty as question_rating,
 	avg(qs.calculated_difficulty) over (partition by qs.subject_id) as subject_rating,
 	qs.total_attempts

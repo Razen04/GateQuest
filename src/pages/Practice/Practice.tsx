@@ -161,7 +161,7 @@ const Practice = () => {
                                 <Card className="rounded-md flex flex-col h-full">
                                     <CardHeader className="flex items-start rounded-md">
                                         <div
-                                            className={`p-3 shadow-sm ${subject.theme_color} mr-3`}
+                                            className={`p-3 shadow-sm ${getBackgroundColor(subject.theme_color)} mr-3`}
                                         >
                                             <SubjectIcon className="h-6 w-6" />
                                         </div>
@@ -171,11 +171,7 @@ const Practice = () => {
                                                     {subject.name}
                                                 </CardTitle>
                                                 <Badge variant="secondary" className="text-[10px]">
-                                                    {(subject.difficulty_score ?? 0) > 0.7
-                                                        ? 'Hard'
-                                                        : (subject.difficulty_score ?? 0 > 0.4)
-                                                          ? 'Medium'
-                                                          : 'Easy'}
+                                                    {subject.difficulty}
                                                 </Badge>
                                             </div>
 

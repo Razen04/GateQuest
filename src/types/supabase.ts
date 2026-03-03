@@ -427,7 +427,7 @@ export type Database = {
             subjects: {
                 Row: {
                     category: string | null;
-                    difficulty_score: number | null;
+                    difficulty: string | null;
                     icon_name: string | null;
                     id: string;
                     is_universal: boolean;
@@ -438,7 +438,7 @@ export type Database = {
                 };
                 Insert: {
                     category?: string | null;
-                    difficulty_score?: number | null;
+                    difficulty?: string | null;
                     icon_name?: string | null;
                     id?: string;
                     is_universal?: boolean;
@@ -449,7 +449,7 @@ export type Database = {
                 };
                 Update: {
                     category?: string | null;
-                    difficulty_score?: number | null;
+                    difficulty?: string | null;
                     icon_name?: string | null;
                     id?: string;
                     is_universal?: boolean;
@@ -464,6 +464,7 @@ export type Database = {
                 Row: {
                     accuracy: number | null;
                     attempted_count: number | null;
+                    branch_id: string;
                     completed_at: string | null;
                     correct_count: number | null;
                     created_at: string | null;
@@ -480,6 +481,7 @@ export type Database = {
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
+                    branch_id: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -496,6 +498,7 @@ export type Database = {
                 Update: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
+                    branch_id?: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -509,7 +512,15 @@ export type Database = {
                     updated_at?: string | null;
                     user_id?: string;
                 };
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: 'topic_tests_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             topic_tests_attempts: {
                 Row: {
@@ -752,6 +763,7 @@ export type Database = {
             weekly_revision_set: {
                 Row: {
                     accuracy: number | null;
+                    branch_id: string | null;
                     correct_count: number | null;
                     created_at: string | null;
                     expires_at: string | null;
@@ -764,6 +776,7 @@ export type Database = {
                 };
                 Insert: {
                     accuracy?: number | null;
+                    branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
                     expires_at?: string | null;
@@ -776,6 +789,7 @@ export type Database = {
                 };
                 Update: {
                     accuracy?: number | null;
+                    branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
                     expires_at?: string | null;
@@ -788,6 +802,13 @@ export type Database = {
                 };
                 Relationships: [
                     {
+                        foreignKeyName: 'weekly_revision_set_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
+                    {
                         foreignKeyName: 'weekly_revision_set_generated_for_fkey';
                         columns: ['generated_for'];
                         isOneToOne: false;
@@ -798,6 +819,15 @@ export type Database = {
             };
         };
         Views: {
+            dynamic_difficulty_stats: {
+                Row: {
+                    question_id: string | null;
+                    question_rating: number | null;
+                    subject_rating: number | null;
+                    total_attempts: number | null;
+                };
+                Relationships: [];
+            };
             v_user_cycle_stats: {
                 Row: {
                     attempt_number: number | null;
@@ -831,23 +861,48 @@ export type Database = {
         };
         Functions: {
             clear_user_data: { Args: never; Returns: Json };
-            generate_topic_test: {
-                Args: {
-                    p_already_attempted_questions: boolean;
-                    p_filters: Json;
-                    p_question_count: number;
-                    p_total_seconds: number;
-                };
-                Returns: Json;
-            };
-            generate_weekly_revision_set: { Args: never; Returns: Json };
-            get_topic_counts: {
-                Args: { p_subject: string };
-                Returns: {
-                    question_count: number;
-                    topic: string;
-                }[];
-            };
+            generate_topic_test:
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  }
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_branch_id: string;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  };
+            generate_weekly_revision_set:
+                | { Args: never; Returns: Json }
+                | {
+                      Args: { p_branch_id: string; p_valid_subjects: string[] };
+                      Returns: Json;
+                  };
+            get_topic_counts:
+                | {
+                      Args: { p_subject: string };
+                      Returns: {
+                          question_count: number;
+                          topic: string;
+                      }[];
+                  }
+                | {
+                      Args: { p_subject_id: string };
+                      Returns: {
+                          question_count: number;
+                          subject_id: string;
+                          topic: string;
+                      }[];
+                  };
             get_verified_donations: {
                 Args: never;
                 Returns: {
@@ -862,11 +917,14 @@ export type Database = {
                     verified: boolean;
                 }[];
             };
-            get_weekly_set: { Args: never; Returns: Json };
+            get_weekly_set:
+                | { Args: never; Returns: Json }
+                | { Args: { p_branch_id: string }; Returns: Json };
             insert_user_question_activity_batch: {
                 Args: { batch: Json };
                 Returns: undefined;
             };
+            refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
             start_weekly_revision_set: { Args: { v_set_id: string }; Returns: Json };
             update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };

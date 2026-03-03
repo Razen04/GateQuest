@@ -64,7 +64,7 @@ const colors = {
 
 type ColorKey = keyof typeof colors;
 type ColorClass = (typeof colors)[ColorKey];
-export const getBackgroundColor = (color: string): ColorClass => {
+export const getBackgroundColor = (color: string | null): ColorClass => {
     return colors[color as ColorKey];
 };
 

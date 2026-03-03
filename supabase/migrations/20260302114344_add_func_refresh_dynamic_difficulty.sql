@@ -18,10 +18,10 @@ begin
 	where q.id = d.question_id;
 
 	update public.subjects s
-	set difficluty_index = 
+	set difficulty = 
 		case
-			when d.subject_rating < 0.35 then 'Easy'
-			when d.subject_rating < 0.7 then 'Medium'
+			when d.avg_rating < 0.35 then 'Easy'
+			when d.avg_rating < 0.7 then 'Medium'
 			else 'Hard'
 		end
 	from (
