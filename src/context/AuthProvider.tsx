@@ -122,17 +122,25 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     // Initiates the Google OAuth login flow provided by Supabase.
     const handleLogin = async () => {
+        // 1. Define your Worker's Auth Callback URL
+        // This is where Google will send the user after they click "Sign In"
+        const PROXY_CALLBACK = 'https://supabase-proxy.badbyeworld.workers.dev/auth/v1/callback';
+
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                // After login, Google redirects back to the application's origin URL.
-                redirectTo: 'https://supabase-proxy.badbyeworld.workers.dev/auth/v1/callback', // temporary
+                // DO NOT use window.location.origin here yet.
+                // We need the data to hit the Worker so it can proxy to Supabase.
+                redirectTo: PROXY_CALLBACK,
+                // (Optional) If you want the user to end up back on a specific page:
+                queryParams: {
+                    next: window.location.origin, // We can pass the final destination here
+                },
             },
         });
+
         if (error) {
-            if (error instanceof Error) {
-                toast.error(`Login failed: ${error.message}`);
-            }
+            toast.error(`Login failed: ${error.message}`);
         }
     };
 
