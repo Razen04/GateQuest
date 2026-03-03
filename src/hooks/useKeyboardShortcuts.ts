@@ -4,10 +4,11 @@ import { useEffect, type DependencyList } from 'react';
 
 /**
  * Attaches global keyboard event listeners for practice card actions.
- * - A: previous question
- * - D: next question
- * - Enter: show answer
- * - E: open explanation
+ * - Q: previous question
+ * - W: next question
+ * - Enter/Space: show answer
+ * - Slash (/): open explanation
+ * - Option selection using A/B/C/D/E or 1/2/3/4/5
  * The hook ensures these shortcuts don't interfere with text inputs.
  */
 
@@ -21,6 +22,27 @@ export default function useKeyboardShortcuts(
     { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,
     deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
 ) {
+    const getOptionCodeFromKey = (code: string) => {
+        const map: Record<string, number> = {
+            KeyA: 0,
+            KeyB: 1,
+            KeyC: 2,
+            KeyD: 3,
+            KeyE: 4,
+            Digit1: 0,
+            Digit2: 1,
+            Digit3: 2,
+            Digit4: 3,
+            Digit5: 4,
+            Numpad1: 0,
+            Numpad2: 1,
+            Numpad3: 2,
+            Numpad4: 3,
+            Numpad5: 4,
+        };
+
+        return map[code] ?? null;
+    };
     useEffect(() => {
         // This function handles the 'keydown' event.
         const handleKeyStroke = (e: KeyboardEvent) => {
@@ -30,21 +52,35 @@ export default function useKeyboardShortcuts(
                 return;
             }
 
+            // Option selection
+            const optionIndex = getOptionCodeFromKey(e.code);
+            if (optionIndex !== null) {
+                window.dispatchEvent(
+                    new CustomEvent('selectOptionByIndex', {
+                        detail: optionIndex,
+                    }),
+                );
+                return;
+            }
+
             // A switch statement to handle the different key presses.
             switch (e.code) {
-                case 'KeyA': // 'A' for previous
+                case 'KeyQ': // 'Q' for previous
+                case 'ArrowLeft': // 'ArrowLeft' for previous
                     e.preventDefault();
                     onPrev?.(); // Optional chaining in case a handler isn't provided.
                     break;
-                case 'KeyD': // 'D' for next
+                case 'KeyW': // 'W' for next
+                case 'ArrowRight':
                     e.preventDefault();
                     onNext?.();
                     break;
                 case 'Enter': // 'Enter' to submit/show answer
+                case 'Space':
                     e.preventDefault();
                     onShowAnswer?.();
                     break;
-                case 'KeyE': // 'E' for explanation
+                case 'Slash': // 'E' for explanation
                     e.preventDefault();
                     onExplain?.();
                     break;

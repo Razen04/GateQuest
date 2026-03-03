@@ -3,6 +3,7 @@ import MathRenderer from '../Renderers/MathRenderer.js';
 import { isMultipleSelection } from '../../utils/questionUtils.js';
 import { CheckCircle } from '@phosphor-icons/react';
 import type { Question } from '../../types/question.ts';
+import { useEffect } from 'react';
 
 type QuestionContentProps = {
     currentQuestion: Question;
@@ -22,6 +23,27 @@ const QuestionContent = ({
     userAnswerIndex,
     onOptionSelect,
 }: QuestionContentProps) => {
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const customEvent = e as CustomEvent<number>;
+            const idx = customEvent.detail;
+
+            if (
+                !showAnswer &&
+                typeof idx === 'number' &&
+                currentQuestion?.options &&
+                idx < currentQuestion.options.length &&
+                onOptionSelect
+            ) {
+                onOptionSelect(idx);
+            }
+        };
+
+        window.addEventListener('selectOptionByIndex', handler);
+
+        return () => window.removeEventListener('selectOptionByIndex', handler);
+    }, [currentQuestion, showAnswer, onOptionSelect]);
+
     return (
         <div>
             <div className="mb-4 sm:mb-6 overflow-x-scroll">
@@ -77,6 +99,9 @@ const QuestionContent = ({
                                     onClick={() => !showAnswer && onOptionSelect(index)}
                                 >
                                     <div className="flex items-center">
+                                        <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
+                                            [{String.fromCharCode(index + 65)}/{index + 1}]
+                                        </span>
                                         {isMultipleSelection(currentQuestion) ? (
                                             // Checkbox for multiple selection
                                             <div
