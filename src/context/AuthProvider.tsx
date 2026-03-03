@@ -5,7 +5,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
 import { toast } from 'sonner';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import type { AppUser } from '../types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
 import useStudyPlan from '@/hooks/useStudyPlan.ts';

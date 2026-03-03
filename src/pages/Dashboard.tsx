@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button.tsx';
 import { LightningIcon } from '@phosphor-icons/react';
 import { ArrowClockwiseIcon } from '@phosphor-icons/react';
-import { InfoIcon } from '@phosphor-icons/react';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
