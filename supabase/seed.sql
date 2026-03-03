@@ -148,7 +148,10 @@ VALUES
   ('a0000000-0000-0000-0000-000000000011'::uuid,
    'If a cylinder has radius 3 cm and height 7 cm, what is its volume in cm³? (Use π = 22/7)',
    NULL,
-   '198'::jsonb,
+   '{
+	"type": "exact",
+	"value": 120
+	}'::jsonb,
    'Medium', 2, 'Aptitude', 'Mensuration', 2016,
    'numerical-answer', 'gateoverflow', true, 'seed_script',
    ARRAY['numerical']),
@@ -156,7 +159,12 @@ VALUES
   ('a0000000-0000-0000-0000-000000000012'::uuid,
    'If $5^x = 125$, what is the value of $x$?',
    NULL,
-   '3'::jsonb,
+   '{
+	"type": "range",
+	"min": 0.39,
+	"max": 0.41,
+	"inclusive": true
+	}'::jsonb,
    'Easy', 1, 'Aptitude', 'Exponents', 2015,
    'numerical-answer', 'gateoverflow', true, 'seed_script',
    ARRAY['numerical']),

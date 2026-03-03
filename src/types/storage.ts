@@ -1,3 +1,32 @@
+type ExactAnswer = {
+    type: 'exact';
+    value: number;
+};
+
+type MultipleExactAnswers = {
+    type: 'multiple';
+    values: number[];
+};
+
+type RangeAnswer = {
+    type: 'range';
+    min: number;
+    max: number;
+    inclusive?: boolean;
+};
+
+type ToleranceAnswer = {
+    type: 'tolerance';
+    value: number;
+    tolerance: number;
+};
+
+export type NumericalAnswerSpec =
+    | ExactAnswer
+    | MultipleExactAnswers
+    | RangeAnswer
+    | ToleranceAnswer;
+
 interface BaseQuestion {
     id: string;
     year: number;
@@ -24,7 +53,7 @@ interface BaseQuestion {
 
 export interface NumericalQuestion extends BaseQuestion {
     question_type: 'Numerical Answer';
-    correct_answer: number;
+    correct_answer: NumericalAnswerSpec;
     options?: never;
 }
 

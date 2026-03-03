@@ -98,7 +98,7 @@ type AttemptParams = {
     was_correct: boolean | null;
     time_taken: number;
     attempt_number: number;
-    user_version_number: number;
+    user_version_number: number | undefined;
 };
 
 type recordAttemptLocallyProps = {
