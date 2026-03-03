@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '../utils/supabaseClient.ts';
 import { toast } from 'sonner';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import type { AppUser } from '../types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
 import useStudyPlan from '@/hooks/useStudyPlan.ts';
@@ -121,19 +122,21 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }, []); // The empty dependency array ensures this effect runs only once on mount.
 
     // Initiates the Google OAuth login flow provided by Supabase.
-    const handleLogin = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
+    // Processes the token after the user clicks the Google button in your UI
+    const handleLogin = async (credential: string) => {
+        // This sends the token to Supabase via your unblocked Cloudflare proxy
+        const { data, error } = await supabase.auth.signInWithIdToken({
             provider: 'google',
-            options: {
-                // After the Worker finishes the handshake,
-                // tell Supabase to send the user back to Vercel.
-                redirectTo: 'https://your-app-name.vercel.app/auth/callback',
-                // OR window.location.origin + '/auth/callback'
-                skipBrowserRedirect: false,
-            },
+            token: credential,
         });
 
-        if (error) toast.error(error.message);
+        if (error) {
+            console.error('Auth error:', error.message);
+            toast.error('Failed to log in');
+        } else {
+            console.log('Logged in successfully!', data);
+            setShowLogin(false); // Close your modal on success
+        }
     };
 
     const clearStaleData = async () => {

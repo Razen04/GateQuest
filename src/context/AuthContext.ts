@@ -3,7 +3,7 @@ import type { AppUser } from '../types/AppUser.ts';
 
 type AuthContextType = {
     user: AppUser | null;
-    handleLogin: () => Promise<void>;
+    handleLogin: (token: string) => Promise<void>;
     isLogin: boolean;
     logout: () => Promise<void>;
     loading: boolean;
