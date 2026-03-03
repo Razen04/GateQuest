@@ -11,12 +11,6 @@ SET subject_id = s.id
 FROM subjects s
 WHERE uqa.subject ILIKE s.name; 
 
--- 3. Backfill 'branch_id' for existing records
--- Since GATEQuest was previously a CS-centric app, all historical attempts belong to the 'cs' branch.
-UPDATE user_question_activity
-SET branch_id = 'cs'
-WHERE branch_id IS NULL;
-
 
 -- This view selects the EARLIEST attempt for every question within every version cycle,
 -- now joined with the questions table to retrieve the new relational subject_id (UUID).
