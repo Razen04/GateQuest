@@ -35,8 +35,6 @@ const TopicsSelection = ({
         ? primaryTopics
         : primaryTopics.slice(0, MOBILE_VISIBLE_LIMIT);
 
-    console.log('Selected Topics: ', selectedTopics);
-
     return (
         <AnimatePresence mode="wait">
             {selectedSubjectId && (

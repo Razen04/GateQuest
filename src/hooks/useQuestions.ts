@@ -32,8 +32,6 @@ const fetchQuestionsBySubject = async (
     subject_id: string | undefined,
     last_fetched_at: string | undefined,
 ) => {
-    console.log('Fetching');
-
     let query = supabase.from('questions').select('*').eq('subject_id', subject_id);
 
     if (last_fetched_at) {
@@ -64,20 +62,15 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
             setIsLoading(false);
             return;
         }
-        console.log('SubjectId: ', subjectId);
 
         let isMounted = true;
-        console.log('fetching');
         const fetchData = async () => {
             setIsLoading(true);
             setError('');
-            console.log('something?');
             try {
-                console.log('happening?');
                 let localData: Question[] = [];
                 // If the 'bookmarked' flag is true, we fetch bookmarked questions.
                 if (bookmarked) {
-                    console.log('bookmarked? ', bookmarked);
                     const profile = getUserProfile();
                     // The user's bookmarked questions are retrieved from their profile.
                     const bookmarkIds =
@@ -88,9 +81,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                         localData = localData.filter((q) => q.subject_id === subjectId);
                     }
                 } else {
-                    console.log('trying localData');
                     localData = await getQuestionsBySubject(subjectId);
-                    console.log('tried');
                 }
 
                 if (isMounted) {
@@ -110,7 +101,6 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                     await updateSubjectSyncMetadata(subjectId);
                     remotedFetched = true;
                 }
-                console.log('trying.');
 
                 if (remoteUpdates.length > 0) {
                     await bulkUpsertQuestions(remoteUpdates);

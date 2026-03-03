@@ -73,6 +73,27 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    // Inside GoalProvider.tsx
+    useEffect(() => {
+        // Listen for auth changes to re-fetch goals when a user logs in
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event) => {
+            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                fetchData();
+            }
+            if (event === 'SIGNED_OUT') {
+                // Clear local states on logout
+                setUserGoal(null);
+                setLoading(false);
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
+
     useEffect(() => {
         fetchData();
     }, []);

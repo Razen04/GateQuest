@@ -27,7 +27,6 @@ export const submitAndRecordAnswer = async ({
     branchId,
 }: submitAndRecordAnswerProp) => {
     let isCorrect = null; // Default to null (unattempted)
-    console.log('branchId: ', branchId);
 
     if (!branchId) return;
 

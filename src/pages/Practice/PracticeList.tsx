@@ -35,7 +35,6 @@ const PracticeList = () => {
 
     // Fetch the questions. This hook handles the loading and error states for us.
     // It takes the subjectId and the bookmarked flag to get the base dataset.
-    console.log('subjectId: ', subjectId);
     const { questions, isLoading, error } = useQuestions(subjectId, bookmarked);
 
     // --- Event Handlers ---

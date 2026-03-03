@@ -12,7 +12,6 @@ type SubjectStatsPropsType = {
 const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
     const { getPracticeSubjects } = useGoals();
     const subjects = getPracticeSubjects();
-    console.log('subjectStats: ', subjectStats);
     return (
         <motion.div
             className="lg:col-span-2 space-y-8"
@@ -39,7 +38,6 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                 const subjectMeta = subjects.find(
                                     (s) => s.slug === subject.subject,
                                 );
-                                console.log('subjectMeta: ', subjectMeta);
                                 const SubjectIcon = SubjectIconMap[
                                     subjectMeta?.icon_name || 'default'
                                 ] as React.ElementType;

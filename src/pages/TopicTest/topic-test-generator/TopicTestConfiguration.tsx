@@ -27,8 +27,6 @@ const TopicTestConfiguration = ({
     const visibleTopics = selectedTopics.slice(0, MAX_VISIBLE_PILLS);
     const hiddenCount = selectedTopics.length - visibleTopics.length;
 
-    console.log('topics: ', selectedTopics);
-
     return (
         <AnimatePresence>
             {selectedTopics.length > 0 && (

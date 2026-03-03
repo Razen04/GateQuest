@@ -3,7 +3,6 @@ import { appStorage } from './storageService';
 const db = appStorage;
 
 const getQuestionsBySubject = async (subjectId: string) => {
-    console.log('huh?');
     return await db.questions.where('subject_id').equals(subjectId).toArray();
 };
 

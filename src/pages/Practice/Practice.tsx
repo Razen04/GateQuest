@@ -32,7 +32,6 @@ const Practice = () => {
     const [showGoalAlert, setShowGoalAlert] = useState(false);
 
     let subjects = getPracticeSubjects();
-    console.log('Subjects: ', subjects);
 
     useEffect(() => {
         if (!loading && subjects.length === 0) {
