@@ -354,6 +354,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         window.addEventListener('STATS_UPDATED', handleStatsUpdate);
         return () => {
             window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
+            window.addEventListener('STATS_UPDATED', handleStatsUpdate);
         };
     }, [fetchCurrentSet, updateStats]);
 
