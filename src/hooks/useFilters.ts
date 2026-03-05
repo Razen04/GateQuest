@@ -22,6 +22,7 @@ const useFilters = (
     const [yearFilter, setYearFilter] = useState('all');
     const [topicFilter, setTopicFilter] = useState('all');
     const [attemptFilter, setAttemptFilter] = useState('unattempted');
+    const [examFilter, setExamFilter] = useState('all');
 
     // Access the global stats context to get information about attempted questions.
     const { stats } = useContext(StatsContext)!;
@@ -96,6 +97,17 @@ const useFilters = (
             });
         }
 
+        if (examFilter !== 'all') {
+            filtered = filtered.filter((qn) => {
+                const examData = qn.metadata?.exam;
+                if (!examData) return false;
+
+                return Array.isArray(examData)
+                    ? examData.includes(examFilter.toUpperCase())
+                    : examData === examFilter.toUpperCase();
+            });
+        }
+
         // Finally, sort the filtered results by year.
         return sortQuestionsByYear(filtered);
     }, [
@@ -106,6 +118,7 @@ const useFilters = (
         topicFilter,
         attemptFilter,
         attemptedIds,
+        examFilter,
         selectedQuestion,
     ]);
 
@@ -122,6 +135,8 @@ const useFilters = (
         setTopicFilter,
         attemptFilter,
         setAttemptFilter,
+        examFilter,
+        setExamFilter,
     };
 };
 

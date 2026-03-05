@@ -30,6 +30,9 @@ type SearchAndFiltersProps = {
     setAttemptFilter: React.Dispatch<React.SetStateAction<string>>;
     years: string[];
     topics: string[];
+    examFilter: string;
+    setExamFilter: React.Dispatch<React.SetStateAction<string>>;
+    availableExams: string[];
 };
 
 const SearchAndFilters = ({
@@ -47,6 +50,9 @@ const SearchAndFilters = ({
     setAttemptFilter,
     years,
     topics,
+    examFilter,
+    setExamFilter,
+    availableExams,
 }: SearchAndFiltersProps) => {
     return (
         <div className="p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
@@ -84,6 +90,26 @@ const SearchAndFilters = ({
                         className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden overflow-y-scroll"
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div>
+                                <Label className="mb-2">Exams</Label>
+                                <Select value={examFilter} onValueChange={(e) => setExamFilter(e)}>
+                                    <SelectTrigger className="w-full rounded-md">
+                                        <SelectValue placeholder="Select an exam" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Target Exams</SelectLabel>
+                                            <SelectItem value="all">All</SelectItem>
+                                            {availableExams.map((exam) => (
+                                                <SelectItem key={exam} value={exam}>
+                                                    {exam.toUpperCase()}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
                             <div>
                                 <Label className="mb-2">Difficulty</Label>
                                 <Select

@@ -12,6 +12,7 @@ type SubjectStatsPropsType = {
 const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
     const { getPracticeSubjects } = useGoals();
     const subjects = getPracticeSubjects();
+
     return (
         <motion.div
             className="lg:col-span-2 space-y-8"
@@ -41,7 +42,8 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                 const SubjectIcon = SubjectIconMap[
                                     subjectMeta?.icon_name || 'default'
                                 ] as React.ElementType;
-                                const questionCount = subjectMeta?.question_count;
+                                const questionCount =
+                                    subject.totalAvailable || subjectMeta?.question_count;
                                 const subjectColor = subjectMeta?.theme_color;
                                 const bgClass = getBackgroundColor(subjectColor as string);
 

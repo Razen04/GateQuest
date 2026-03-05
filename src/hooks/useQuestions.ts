@@ -2,7 +2,7 @@
 // It handles loading and error states, and implements a caching strategy using localStorage to reduce network requests.
 // It also compresses data to save space in localStorage and handles migration for existing uncompressed data.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { getUserProfile, sortQuestionsByYear } from '../helper.ts';
 import { supabase } from '../utils/supabaseClient.ts';
@@ -14,6 +14,22 @@ import {
     updateSubjectSyncMetadata,
 } from '@/storage/questionRepository.ts';
 import type { Question } from '@/types/storage.ts';
+import { useGoals } from './useGoals.ts';
+
+// We normalise the mixed "exam" metadata (string or string[])
+const isQuestionInActiveExams = (q: Question, activeExams: string[]) => {
+    const examData = q.metadata?.exam;
+    if (!examData) return false;
+
+    const normalizedActive = activeExams.map((e) => e.toUpperCase());
+
+    // if the metadata is an array
+    if (Array.isArray(examData)) {
+        return examData.some((e) => normalizedActive.includes(e.toUpperCase()));
+    }
+
+    return normalizedActive.includes(examData.toUpperCase());
+};
 
 const getLatestTimestamp = (questions: Question[], currentMax: string | undefined) => {
     if (!questions.length) return currentMax;
@@ -31,8 +47,13 @@ const getLatestTimestamp = (questions: Question[], currentMax: string | undefine
 const fetchQuestionsBySubject = async (
     subject_id: string | undefined,
     last_fetched_at: string | undefined,
+    examId: string | undefined,
 ) => {
     let query = supabase.from('questions').select('*').eq('subject_id', subject_id);
+
+    if (examId) {
+        query = query.contains('metadata->exam', [examId.toUpperCase()]);
+    }
 
     if (last_fetched_at) {
         query = query.gt('updated_at', last_fetched_at);
@@ -52,9 +73,18 @@ const fetchQuestionsBySubject = async (
 
 // Fetches questions for a specific subject, handling both regular and bookmarked questions.
 const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
-    const [questions, setQuestions] = useState<Question[]>([]);
+    const [allQuestions, setAllQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const { userGoal } = useGoals();
+
+    // we will filter questions in-memory for display
+    const filteredQuestions = useMemo(() => {
+        const activeExams = (userGoal?.target_exams as string[]) || [];
+        if (bookmarked) return allQuestions; // bookmarks will show all the questions regadless of exam selected
+        return allQuestions.filter((q) => isQuestionInActiveExams(q, activeExams));
+    }, [allQuestions, bookmarked, userGoal?.target_exams]);
 
     useEffect(() => {
         // A guard to prevent fetching if the subject is not yet defined.
@@ -85,7 +115,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                 }
 
                 if (isMounted) {
-                    setQuestions(sortQuestionsByYear(localData));
+                    setAllQuestions(sortQuestionsByYear(localData));
                     if (localData.length > 0) setIsLoading(false);
                 }
 
@@ -97,7 +127,11 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                 let remoteUpdates: Question[] = [];
                 let remotedFetched = false;
                 if (!lastSynced || Date.now() - Number(lastSynced) >= 1 * 60 * 60 * 1000) {
-                    remoteUpdates = await fetchQuestionsBySubject(subjectId, lastFetched);
+                    remoteUpdates = await fetchQuestionsBySubject(
+                        subjectId,
+                        lastFetched,
+                        undefined,
+                    ); // we will sync everything
                     await updateSubjectSyncMetadata(subjectId);
                     remotedFetched = true;
                 }
@@ -119,11 +153,11 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                         if (bookmarkIds.length > 0) {
                             const updatedLocal = await getQuestionByIds(bookmarkIds);
                             const filtered = updatedLocal.filter((q) => q.subject_id === subjectId);
-                            if (isMounted) setQuestions(sortQuestionsByYear(filtered));
+                            if (isMounted) setAllQuestions(sortQuestionsByYear(filtered));
                         }
                     } else {
                         const updatedLocal = await getQuestionsBySubject(subjectId);
-                        if (isMounted) setQuestions(sortQuestionsByYear(updatedLocal));
+                        if (isMounted) setAllQuestions(sortQuestionsByYear(updatedLocal));
                     }
 
                     if (isMounted && remotedFetched) toast.success('Questions updated.');
@@ -149,7 +183,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
     }, [subjectId, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
 
     // Expose the questions, loading state, and error state to the component.
-    return { questions, isLoading, error };
+    return { questions: filteredQuestions, isLoading, error };
 };
 
 export default useQuestions;

@@ -49,7 +49,7 @@ export type NumericalQuestion = {
     explanation: string;
     metadata: {
         set: string;
-        exam: string;
+        exam: string | string[];
         paperType: string;
         language: string;
     };
@@ -79,7 +79,7 @@ export type MCQQuestion = {
     explanation: string;
     metadata: {
         set: string;
-        exam: string;
+        exam: string | string[];
         paperType: string;
         language: string;
     };
@@ -109,7 +109,7 @@ export type MSQQuestion = {
     explanation: string;
     metadata: {
         set: string;
-        exam: string;
+        exam: string | string[];
         paperType: string;
         language: string;
     };
