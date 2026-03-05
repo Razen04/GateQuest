@@ -76,11 +76,13 @@ const useSmartRevision = () => {
     const generateSet = useCallback(async () => {
         setLoading(true);
         const activeSubjects = getPracticeSubjects().map((s) => s.id);
+        const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
         try {
             const { data, error } = await supabase.rpc('generate_weekly_revision_set', {
-                p_branch_id: userGoal?.branch_id,
                 p_valid_subjects: activeSubjects,
+                p_target_exams: activeExams,
+                p_branch_id: userGoal?.branch_id,
             });
 
             if (error) throw error;
@@ -101,7 +103,7 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, [userGoal?.branch_id, getPracticeSubjects, fetchCurrentSet]);
+    }, [userGoal?.branch_id, userGoal?.target_exams, getPracticeSubjects, fetchCurrentSet]);
 
     // Start the set
     const startSet = useCallback(async () => {
@@ -140,15 +142,14 @@ const useSmartRevision = () => {
 
         try {
             // Get present week's Sunday (end of week)
-            const now = new Date();
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
+            const activeExams =
+                (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
-            const { error, count } = await supabase
-                .from('user_incorrect_queue')
-                .select('user_id, questions!inner(subject_id))', { count: 'exact' })
-                .eq('user_id', userId)
-                .lte('next_review_at', now.toISOString())
-                .in('questions.subject_id', activeSubjects);
+            const { data: count, error } = await supabase.rpc('get_critical_question_count', {
+                p_valid_subjects: activeSubjects,
+                p_target_exams: activeExams,
+            });
 
             if (error) throw error;
 
@@ -156,7 +157,7 @@ const useSmartRevision = () => {
         } catch (err) {
             console.error('Error fetching critical question count:', err);
         }
-    }, [userId, getPracticeSubjects]);
+    }, [userId, getPracticeSubjects, userGoal?.target_exams]);
 
     useEffect(() => {
         fetchCurrentSet();

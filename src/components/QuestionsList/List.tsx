@@ -52,7 +52,12 @@ const List = ({
                         </span>
                         <span className="font-semibold">
                             {question.year
-                                ? `${question.metadata.exam?.toUpperCase() || 'GATE'} ${question.year}`
+                                ? `${(Array.isArray(question.metadata.exam)
+                                      ? question.metadata.exam
+                                      : [question.metadata.exam || 'GATE']
+                                  )
+                                      .join(' / ')
+                                      .toUpperCase()} ${question.year}`
                                 : 'Year Unknown'}
                         </span>
                     </div>

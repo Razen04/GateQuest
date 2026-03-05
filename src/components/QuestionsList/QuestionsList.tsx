@@ -7,6 +7,7 @@ import Header from './Header';
 import SearchAndFilters from './SearchAndFilters';
 import List from './List';
 import useUrlFilters from '@/hooks/useUrlFilters';
+import { useGoals } from '@/hooks/useGoals';
 
 type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
@@ -35,6 +36,9 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
     const [showFilters, setShowFilters] = useState(false);
 
+    const { userGoal } = useGoals();
+    const availableExam = (userGoal?.target_exams as string[]) || [];
+
     // Filters
     const {
         filteredQuestions,
@@ -48,6 +52,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setTopicFilter,
         attemptFilter,
         setAttemptFilter,
+        examFilter,
+        setExamFilter,
     } = useFilters(questions, subject ?? null, selectedQuestion, mode);
 
     // This ensures that when filters change, the URL updates
@@ -124,6 +130,9 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
                     setAttemptFilter={setAttemptFilter}
                     years={years}
                     topics={topics}
+                    examFilter={examFilter}
+                    setExamFilter={setExamFilter}
+                    availableExams={availableExam}
                 />
 
                 <div>

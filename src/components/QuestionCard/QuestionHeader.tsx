@@ -77,11 +77,16 @@ const QuestionHeader = ({
                     </span>
 
                     {/* Year Badge */}
-                    {question.year && (
-                        <span className="text-sm px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
-                            GATE {question.year}
-                        </span>
-                    )}
+                    <span className="text-sm px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100">
+                        {question.year
+                            ? `${(Array.isArray(question.metadata.exam)
+                                  ? question.metadata.exam
+                                  : [question.metadata.exam || 'GATE']
+                              )
+                                  .join(' / ')
+                                  .toUpperCase()} ${question.year}`
+                            : 'Year Unknown'}
+                    </span>
 
                     {marked && (
                         <span className="px-2 py-1 text-sm text-violet-100 dark:bg-violet-900 dark:text-violet-100">

@@ -14,17 +14,45 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button.tsx';
 import { LightningIcon } from '@phosphor-icons/react';
 import { ArrowClockwiseIcon } from '@phosphor-icons/react';
+import { useGoals } from '@/hooks/useGoals.ts';
+import { useEffect, useMemo, useState } from 'react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { CaretDownIcon } from '@phosphor-icons/react';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
     const { stats, loading: statsLoading } = useStats();
     const user = getUserProfile();
-    const subjectStats = stats?.subjectStats;
     const navigate = useNavigate();
+    const { userGoal } = useGoals();
 
-    if (subjectStats) {
-        localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
-    }
+    const activeExams = useMemo(() => {
+        return (userGoal?.target_exams as string[]) || [];
+    }, [userGoal?.target_exams]);
+
+    const [selectedExam, setSelectedExam] = useState(activeExams[0] || '');
+
+    useEffect(() => {
+        const firstExam = activeExams[0];
+        if (firstExam && !selectedExam) {
+            setSelectedExam(firstExam);
+        }
+    }, [selectedExam, activeExams]);
+
+    const currentSubjectStats = useMemo(() => {
+        return stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [];
+    }, [stats?.subjectStatsMap, selectedExam]);
+
+    useEffect(() => {
+        if (currentSubjectStats.length > 0) {
+            localStorage.setItem('subjectStats', JSON.stringify(currentSubjectStats));
+        }
+    }, [currentSubjectStats]);
 
     // Handle loading
     if (loading) {
@@ -128,14 +156,53 @@ const Dashboard = () => {
                 </motion.div>
             </div>
 
+            {/*Study Plan component*/}
             <StudyPlan />
 
+            {/* Streak Map component*/}
             {!statsLoading && stats?.heatmapData?.length > 0 && <StreakMap stats={stats} />}
 
-            {/* Subject Stats */}
-            {subjectStats && (
-                <div className="w-full">
-                    <SubjectStats subjectStats={subjectStats} />
+            {/* Subject Stats (Contextual - With Dropdown) */}
+            <div className="w-full mt-8 mb-4">
+                {/* Exam Switcher */}
+                {activeExams.length > 1 && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2 border-blue-200 dark:border-zinc-700"
+                            >
+                                <span className="font-bold text-blue-600 dark:text-blue-400">
+                                    {selectedExam.toUpperCase()}
+                                </span>
+                                <CaretDownIcon size={14} weight="bold" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            {activeExams.map((exam) => (
+                                <DropdownMenuItem
+                                    key={exam}
+                                    onClick={() => setSelectedExam(exam)}
+                                    className={
+                                        selectedExam === exam
+                                            ? 'bg-blue-50 dark:bg-zinc-800 font-bold'
+                                            : ''
+                                    }
+                                >
+                                    {exam.toUpperCase()}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </div>
+
+            {currentSubjectStats.length > 0 ? (
+                <SubjectStats subjectStats={currentSubjectStats} />
+            ) : (
+                <div className="p-12 text-center border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-lg">
+                    <p className="text-gray-500">No data found for {selectedExam} subjects.</p>
                 </div>
             )}
         </div>

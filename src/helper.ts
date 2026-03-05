@@ -25,6 +25,8 @@ import { GraphIcon } from '@phosphor-icons/react';
 import { GitBranchIcon } from '@phosphor-icons/react';
 import { FileCodeIcon } from '@phosphor-icons/react';
 import { LinuxLogoIcon } from '@phosphor-icons/react';
+import { AppWindowIcon } from '@phosphor-icons/react';
+import { BrowsersIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -57,6 +59,8 @@ export const SubjectIconMap: Record<string, React.ElementType> = {
     terminal: TerminalWindow,
     flame: FlameIcon,
     zap: LightbulbIcon,
+    appwindow: AppWindowIcon,
+    browsers: BrowsersIcon,
     // Add a default icon for new subjects
     default: Books,
 };

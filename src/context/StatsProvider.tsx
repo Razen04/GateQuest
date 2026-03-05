@@ -12,7 +12,7 @@ import {
     format,
     isAfter,
 } from 'date-fns';
-import type { Stats } from '../types/Stats.ts';
+import type { Stats, SubjectStat } from '../types/Stats.ts';
 import type { Database } from '../types/supabase.ts';
 import useSmartRevision from '@/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/helper.ts';
@@ -20,6 +20,7 @@ import { useGoals } from '@/hooks/useGoals.ts';
 
 type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'] & {
     subject_id?: string;
+    exam_tags?: string[];
 };
 
 // The StatsProvider component orchestrates fetching and processing user activity data.
@@ -30,6 +31,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         progress: 0,
         accuracy: 0,
         subjectStats: [],
+        subjectStatsMap: {},
         question: new Set(),
         streaks: { current: 0, longest: 0 },
         heatmapData: [],
@@ -75,6 +77,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             setLoading(false);
             return;
         }
+
         // Fetch all question activity for the given user, ordered by time.
         const { data, error } = await supabase
             .from('v_user_cycle_stats')
@@ -91,30 +94,55 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         }
 
         // -- Goal Driven Filtering --
-        // Fetch the subjects relevnat to the user's current goal
+        // Fetch the subjects relevant to the user's current goal
         const practiceSubjects = getPracticeSubjects();
 
-        const subjectMetaMap = practiceSubjects.reduce(
-            (acc, s) => {
-                acc[s.id] = {
-                    name: s.name,
-                    slug: s.slug,
-                    count: s.question_count || 0,
-                };
-                return acc;
-            },
-            {} as Record<string, { name: string; slug: string; count: number }>,
-        );
+        // Identifying the active exams for the dashboard to filter accordingly. Ensure it defaults to an empty array.
+        const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
-        const relevantData = (data || []).filter((d) => {
-            const isValid = d.subject_id && subjectMetaMap[d.subject_id];
-            // fallback to slug
-            const isValidName = d.subject && practiceSubjects.some((ps) => ps.slug === d.subject);
-            return isValid || isValidName;
+        // get actual subject count
+        const CACHE_KEY = `exam_counts_${activeExams.sort().join('_')}`;
+        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+        // Helper to cleanly fetch and cache RPC calls for different exam combinations
+        const fetchExamCounts = async (examsToFetch: string[]) => {
+            const cacheKey = `exam_counts_${examsToFetch.sort().join('_')}`;
+            const cachedData = localStorage.getItem(cacheKey);
+
+            if (cachedData) {
+                const { data, timestamp } = JSON.parse(cachedData);
+                if (Date.now() - timestamp < CACHE_DURATION) return data;
+            }
+
+            const { data, error } = await supabase.rpc('get_exam_subject_counts', {
+                target_exams: examsToFetch,
+            });
+
+            if (!error && data) {
+                localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+                return data;
+            }
+            if (error) console.error('RPC Error:', error);
+            return [];
+        };
+
+        // 1. Fetch UNION counts (For Global Study Plan, prevents double counting)
+        const unionExamCounts = await fetchExamCounts(activeExams);
+
+        // 2. Fetch INDIVIDUAL counts (For Exam-Specific Subject Stats)
+        const individualExamCounts: Record<string, any[]> = {};
+        for (const exam of activeExams) {
+            individualExamCounts[exam] = await fetchExamCounts([exam]);
+        }
+
+        // Global data contains attempts that belong to ANY of the active exams.
+        const globalData = (data || []).filter((d) => {
+            const examTags = (d.exam_tags as string[]) || [];
+            return examTags.some((tag) => activeExams.includes(tag.toUpperCase()));
         });
 
-        // If there's no activity, initialize with an empty heatmap for the full year.
-        if (relevantData.length === 0 && (!data || data.length === 0)) {
+        // If there's no activity for the active goals, initialize with an empty heatmap for the full year.
+        if (globalData.length === 0 && (!data || data.length === 0)) {
             const fallback = eachDayOfInterval({
                 start: startDate,
                 end: endDate,
@@ -127,20 +155,14 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             return;
         }
 
-        // Calculate the total number of questions available in the app, excluding bookmarks from the subjects.js file present in the data folder.
-        const totalQuestions = practiceSubjects.reduce(
-            (sum, s) => sum + (s.question_count || 0),
-            0,
-        );
-
-        // --- Accuracy & Progress ---
-        const attempted = relevantData.length;
-        const correctAttempts = relevantData.filter((q) => q.was_correct).length;
+        // --- Accuracy & Progress (Global) ---
+        const attempted = globalData.length;
+        const correctAttempts = globalData.filter((q) => q.was_correct).length;
         // A Set is used to count unique questions attempted for progress calculation.
-        const uniqueQuestionSet = new Set(relevantData.map((d) => d.question_id));
+        const uniqueQuestionSet = new Set(globalData.map((d) => d.question_id));
         const uniqueAttemptCount = uniqueQuestionSet.size;
 
-        // --- Study Plan ---
+        // --- Study Plan (Global) ---
         // These are key dates for calculating the study plan timeline.
         const GATE_EXAM_DATE = '2027-02-08';
         const QUESTIONS_COMPLETION_DATE = '2027-02-15';
@@ -160,34 +182,16 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         if (rawDaysLeft < 0) rawDaysLeft = 0;
         if (rawDaysBeforeComplete < 0) rawDaysBeforeComplete = 0;
 
-        // The daily target is the remaining unique questions spread over the days left.
-        const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
-        const dailyQuestionTarget =
-            rawDaysBeforeComplete > 0
-                ? Math.ceil(remainingQuestions / rawDaysBeforeComplete)
-                : remainingQuestions;
-
         // To calculate today's progress, we count unique questions attempted today.
         // Using startOfDay ensures this calculation is robust across different timezones.
         const todayStart = startOfDay(now);
         const todayUniqueAttemptCount = new Set(
-            relevantData
+            globalData
                 .filter((a) => a.attempted_at && startOfDay(parseISO(a.attempted_at)) >= todayStart)
                 .map((a) => a.question_id),
         ).size;
 
-        // Calculate the percentage of the study plan completed overall and for today.
-        const overallUniqueProgressPercent = totalQuestions
-            ? Math.round((uniqueAttemptCount / totalQuestions) * 100)
-            : 0;
-        const todayProgressPercent = dailyQuestionTarget
-            ? Math.round((todayUniqueAttemptCount / dailyQuestionTarget) * 100)
-            : 0;
-        const isTargetMetToday =
-            dailyQuestionTarget > 0 && todayUniqueAttemptCount >= dailyQuestionTarget;
-
-        // --- Subject Stats ---
-
+        // --- Smart Revision Data ---
         let revisedQuestionIds = new Set<string>();
         if (currentSet) {
             const { data: revisionData, error: revisionError } = await supabase
@@ -202,70 +206,131 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             }
         }
 
-        // Group all attempts by subject to calculate accuracy and progress for each.
-        type GroupedType = Record<
-            string,
-            {
-                total: number;
-                correct: number;
-                attemptedQuestions: Set<string>;
-                revisionAttemptedQuestionIds: Set<string>;
-            }
-        >;
-        const grouped: GroupedType = {};
+        // --- Subject Stats Segregation (Exam-Specific) ---
+        const subjectMetaMap = practiceSubjects.reduce(
+            (acc, s) => {
+                const specificCount = unionExamCounts?.find(
+                    (ec) => ec.subject_id === s.id,
+                )?.exam_specific_count;
 
-        relevantData.forEach((row) => {
-            const groupKey = row.subject_id || row.subject;
-            const { was_correct, question_id } = row;
+                acc[s.id] = {
+                    name: s.name,
+                    slug: s.slug,
+                    count: Number(specificCount) || 0,
+                };
+                return acc;
+            },
+            {} as Record<string, { name: string; slug: string; count: number }>,
+        );
 
-            if (groupKey && question_id) {
-                if (!grouped[groupKey]) {
-                    grouped[groupKey] = {
-                        total: 0,
-                        correct: 0,
-                        attemptedQuestions: new Set(),
-                        revisionAttemptedQuestionIds: new Set(),
-                    };
+        // Calculate the total number of questions available in the app for the current goal.
+        const totalQuestions = Object.values(subjectMetaMap).reduce(
+            (sum, s) => sum + (s.count || 0),
+            0,
+        );
+
+        // The daily target is the remaining unique questions spread over the days left.
+        const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
+        const dailyQuestionTarget =
+            rawDaysBeforeComplete > 0
+                ? Math.ceil(remainingQuestions / rawDaysBeforeComplete)
+                : remainingQuestions;
+
+        // Calculate the percentage of the study plan completed overall and for today.
+        const overallUniqueProgressPercent = totalQuestions
+            ? Math.round((uniqueAttemptCount / totalQuestions) * 100)
+            : 0;
+        const todayProgressPercent = dailyQuestionTarget
+            ? Math.round((todayUniqueAttemptCount / dailyQuestionTarget) * 100)
+            : 0;
+        const isTargetMetToday =
+            dailyQuestionTarget > 0 && todayUniqueAttemptCount >= dailyQuestionTarget;
+
+        const subjectStatsMap: Record<string, SubjectStat[]> = {};
+
+        // Build the subject stats for each active exam using globalData
+        activeExams.forEach((exam) => {
+            const examData = globalData.filter((d) =>
+                ((d.exam_tags as string[]) || []).some((t) => t.toUpperCase() === exam),
+            );
+
+            type GroupedType = Record<
+                string,
+                {
+                    total: number;
+                    correct: number;
+                    attemptedQuestions: Set<string>;
+                    revisionAttemptedQuestionIds: Set<string>;
                 }
+            >;
+            const grouped: GroupedType = {};
 
-                if (revisedQuestionIds?.has(question_id)) {
-                    grouped[groupKey].revisionAttemptedQuestionIds.add(question_id);
+            examData.forEach((row) => {
+                const groupKey = row.subject_id || row.subject;
+                const { was_correct, question_id } = row;
+
+                if (groupKey && question_id) {
+                    if (!grouped[groupKey]) {
+                        grouped[groupKey] = {
+                            total: 0,
+                            correct: 0,
+                            attemptedQuestions: new Set(),
+                            revisionAttemptedQuestionIds: new Set(),
+                        };
+                    }
+
+                    if (revisedQuestionIds?.has(question_id)) {
+                        grouped[groupKey].revisionAttemptedQuestionIds.add(question_id);
+                    }
+
+                    grouped[groupKey].attemptedQuestions.add(question_id);
+                    grouped[groupKey].total++;
+                    if (was_correct) grouped[groupKey].correct++;
                 }
+            });
 
-                grouped[groupKey].attemptedQuestions.add(question_id);
-                grouped[groupKey].total++;
-                if (was_correct) grouped[groupKey].correct++;
-            }
+            subjectStatsMap[exam] = Object.entries(grouped).map(([groupKey, stats]) => {
+                // Safely lookup metadata whether the key is an id or a slug
+                const meta =
+                    subjectMetaMap[groupKey] ||
+                    Object.values(subjectMetaMap).find((m) => m.slug === groupKey);
+
+                const subjectId = practiceSubjects.find(
+                    (s) => s.slug === meta?.slug || s.id === groupKey,
+                )?.id;
+                const examSpecificData = individualExamCounts[exam]?.find(
+                    (ec) => ec.subject_id === subjectId,
+                );
+                const totalAvailable = Number(examSpecificData?.exam_specific_count) || 0;
+
+                const attemptedCount = stats.attemptedQuestions.size;
+
+                return {
+                    subjectName: meta?.name || 'Unknown Subject',
+                    subject: meta?.slug || groupKey,
+                    accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
+                    progress:
+                        totalAvailable > 0
+                            ? Math.round((attemptedCount / totalAvailable) * 100)
+                            : 0,
+                    attemptedQuestionIds: stats.attemptedQuestions,
+                    revisionAttemptedQuestionIds: stats.revisionAttemptedQuestionIds,
+                    attempted: attemptedCount,
+                    totalAvailable,
+                };
+            });
         });
 
-        // Map the grouped data into the final subjectStats array format.
-        const subjectStats = Object.entries(grouped).map(([groupKey, stats]) => {
-            // Metadata whether the key is an id or a slug
-            const meta =
-                subjectMetaMap[groupKey] ||
-                Object.values(subjectMetaMap).find((m) => m.slug === groupKey);
-            const totalAvailable = meta?.count || 1;
-            const attemptedCount = stats.attemptedQuestions.size;
-            return {
-                subjectName: meta?.name,
-                subject: meta?.slug,
-                accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
-                progress: Math.round((attemptedCount / totalAvailable) * 100),
-                attemptedQuestionIds: stats.attemptedQuestions,
-                revisionAttemptedQuestionIds: stats.revisionAttemptedQuestionIds,
-                attempted: attemptedCount,
-                totalAvailable,
-            };
-        });
+        // Write the first active exam's stats to localStorage so Practice.tsx can read the latest progress
+        const firstExam = activeExams[0];
+        const defaultSubjectStats = (firstExam ? subjectStatsMap[firstExam] : []) ?? [];
+        localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
 
-        // Write to localStorage so Practice.tsx can read the latest progress
-        localStorage.setItem('subjectStats', JSON.stringify(subjectStats));
-
-        // --- Heatmap ---
-        // Count the number of attempts for each day.
+        // --- Heatmap (Global) ---
+        // Count the number of attempts for each day using the filtered globalData.
         type AttemptsByDateType = Record<string, number>;
         const attemptsByDate: AttemptsByDateType = {};
-        data.forEach((d) => {
+        globalData.forEach((d) => {
             if (d.attempted_at) {
                 const dateStr = format(parseISO(d.attempted_at), 'yyyy-MM-dd');
                 attemptsByDate[dateStr] = (attemptsByDate[dateStr] || 0) + 1;
@@ -273,7 +338,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         });
 
         // Create the full heatmap data structure, filling in days with no attempts with a count of 0.
-        // This ensures the heatmap displays all days in the range, not just active ones.
         const mappedHeatmap = eachDayOfInterval({
             start: startDate,
             end: endDate,
@@ -282,8 +346,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             return { date: dateStr, count: attemptsByDate[dateStr] || 0 };
         });
 
-        // --- Streaks ---
-        // To calculate streaks, we iterate through the sorted dates of activity, these are not yet displayed in the UI but soon will in future not yet sure where to place it.
+        // --- Streaks (Global) ---
         let currentStreak = 0,
             longestStreak = 0,
             prevDate: Date | null = null;
@@ -303,7 +366,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         });
 
         const question = new Set(
-            relevantData.map((d) => d.question_id).filter((id): id is string => !!id),
+            globalData.map((d) => d.question_id).filter((id): id is string => !!id),
         );
 
         // --- Final Set ---
@@ -311,7 +374,8 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             progress: overallUniqueProgressPercent,
             accuracy: attempted ? Math.round((correctAttempts / attempted) * 100) : 0,
             question: question,
-            subjectStats,
+            subjectStats: defaultSubjectStats, // The current default fallback for components not yet updated to use subjectStatsMap
+            subjectStatsMap,
             heatmapData: mappedHeatmap,
             streaks: { current: currentStreak, longest: longestStreak },
             studyPlan: {
@@ -328,7 +392,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         });
 
         setLoading(false);
-    }, [currentSet, getPracticeSubjects]);
+    }, [currentSet, getPracticeSubjects, userGoal]);
 
     useEffect(() => {
         let u = getUserProfile();
@@ -354,7 +418,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         window.addEventListener('STATS_UPDATED', handleStatsUpdate);
         return () => {
             window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
-            window.addEventListener('STATS_UPDATED', handleStatsUpdate);
+            window.removeEventListener('STATS_UPDATED', handleStatsUpdate);
         };
     }, [fetchCurrentSet, updateStats]);
 

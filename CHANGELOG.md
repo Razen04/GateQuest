@@ -1,3 +1,9 @@
+# v0.10.1 - 2026-03-05
+
+- Added ISRO PYQs.
+- Fixed question counts error and proper stats calculation.
+- Added a dropdown to show individual exam statistics.
+
 # v0.10.0 - 2026-03-03
 
 - Extended the Keyboard shortcuts for the main practice page in the app and also added visual indicators. Fixes [#38](https://github.com/Razen04/GateQuest/issues/38).

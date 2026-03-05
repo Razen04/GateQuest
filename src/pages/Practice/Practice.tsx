@@ -66,11 +66,11 @@ const Practice = () => {
         },
         {
             label: 'Mathematics',
-            id: 'maths',
+            id: 'math',
         },
         {
             label: 'Aptitude',
-            id: 'general',
+            id: 'aptitude',
         },
         {
             label: 'Bookmarked Questions',
@@ -184,8 +184,7 @@ const Practice = () => {
                                                 />
 
                                                 <h4 className="text-xs text-gray-500 mt-1">
-                                                    Progress: {progress.toFixed(0)}% | Total
-                                                    Questions: {subject.question_count}
+                                                    Progress: {progress.toFixed(0)}%
                                                 </h4>
                                             </div>
                                         </div>

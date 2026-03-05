@@ -1,6 +1,6 @@
 export interface SubjectStat {
-    subjectName: string;
-    subject: string;
+    subjectName?: string; // This is the subject slug
+    subject?: string;
     accuracy: number;
     progress: number;
     attemptedQuestionIds: Set<string>;
@@ -35,6 +35,7 @@ export interface Stats {
     progress: number;
     accuracy: number;
     subjectStats: SubjectStat[];
+    subjectStatsMap: Record<string, SubjectStat[]>;
     question: Set<string>;
     streaks: Streaks;
     heatmapData: Heatmap[];
