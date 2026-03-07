@@ -4,7 +4,7 @@
 import { useContext, useMemo, useState } from 'react';
 import StatsContext from '../context/StatsContext.js';
 import { sortQuestionsByYear } from '../helper.ts';
-import type { Question, RevisionQuestion } from '../types/question.ts';
+import type { Question, RevisionQuestion } from '@/types/storage.ts';
 
 // Type of filter mode for smart-Revision
 type FilterMode = 'practice' | 'revision';

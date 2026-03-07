@@ -51,9 +51,6 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                             Sign up or log in to track your progress, bookmark important questions,
                             and join the leaderboard (in future)!
                         </p>
-                        <p className="mt-2 italic text-sm text-red-300">
-                            You can try out the Practice page without sign up.
-                        </p>
                     </div>
 
                     {/* 3. Replace your custom button with the official Google Login widget */}

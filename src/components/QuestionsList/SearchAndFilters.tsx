@@ -14,6 +14,8 @@ import {
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { useParams } from 'react-router-dom';
+import { useGoals } from '@/hooks/useGoals';
 
 type SearchAndFiltersProps = {
     searchQuery: string;
@@ -54,6 +56,12 @@ const SearchAndFilters = ({
     setExamFilter,
     availableExams,
 }: SearchAndFiltersProps) => {
+    const { subject } = useParams();
+    const { getPracticeSubjects } = useGoals();
+
+    const currentSubject = getPracticeSubjects().find((s) => s.slug === subject);
+
+    const displayExams = currentSubject?.is_universal ? ['GATE', 'ISRO'] : availableExams;
     return (
         <div className="p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
             <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
@@ -100,7 +108,7 @@ const SearchAndFilters = ({
                                         <SelectGroup>
                                             <SelectLabel>Target Exams</SelectLabel>
                                             <SelectItem value="all">All</SelectItem>
-                                            {availableExams.map((exam) => (
+                                            {displayExams.map((exam) => (
                                                 <SelectItem key={exam} value={exam}>
                                                     {exam.toUpperCase()}
                                                 </SelectItem>

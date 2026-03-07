@@ -4,9 +4,9 @@ import type { Database } from '@/types/supabase.ts';
 type BenchmarkData = Database['public']['Tables']['question_peer_stats']['Row'];
 
 type QuestionPeerStatsType = {
-    loading: boolean;
-    message: string | null;
-    data: BenchmarkData | null;
+    loading: boolean | undefined;
+    message: string | null | undefined;
+    data: BenchmarkData | null | undefined;
 };
 
 const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) => {

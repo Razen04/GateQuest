@@ -1,9 +1,8 @@
 import { toast } from 'sonner';
 import { isNumericalQuestion } from './questionUtils.js';
 import { recordAttemptLocally } from '../helper.js';
-import type { Question } from '../types/question.js';
 import type { AppUser } from '../types/AppUser.js';
-import type { NumericalAnswerSpec } from '@/types/storage.js';
+import type { NumericalAnswerSpec, Question } from '@/types/storage.js';
 
 type submitAndRecordAnswerProp = {
     currentQuestion: Question;

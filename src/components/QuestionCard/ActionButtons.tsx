@@ -1,5 +1,4 @@
 import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
-import type { Question } from '../../types/question.ts';
 import { Button } from '@/components/ui/button.tsx';
 
 type ActionButtonsProps = {
@@ -10,8 +9,7 @@ type ActionButtonsProps = {
     showAnswer: boolean;
     handleShowAnswer?: (() => void) | undefined;
     handleSubmit?: (() => void) | undefined;
-    handleExplainationClick: (id: string) => void;
-    currentQuestion: Question;
+    handleExplainationClick: () => void;
 };
 
 const ActionButtons = ({
@@ -23,7 +21,6 @@ const ActionButtons = ({
     handleShowAnswer,
     handleSubmit,
     handleExplainationClick,
-    currentQuestion,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
@@ -74,7 +71,7 @@ const ActionButtons = ({
                 <>
                     <Button
                         className="flex-1 px-2 py-3 bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
-                        onClick={() => handleExplainationClick(currentQuestion.explanation)}
+                        onClick={() => handleExplainationClick()}
                         title="Show Explanation"
                     >
                         <ChatCircle className="inline text-lg" />

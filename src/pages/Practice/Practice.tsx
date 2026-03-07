@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getBackgroundColor, SubjectIconMap } from '../../helper.ts';
+import { getBackgroundColor, getUserProfile, SubjectIconMap } from '../../helper.ts';
 import { useNavigate } from 'react-router-dom';
 import { fadeInUp, stagger } from '../../utils/motionVariants.ts';
 import type { SubjectStat } from '../../types/Stats.ts';
@@ -26,6 +26,9 @@ const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
     const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
+
+    // User profile
+    const user = getUserProfile();
 
     // get the subjects of the branch and exams selected by the user
     const { userGoal, getPracticeSubjects, loading } = useGoals();
@@ -111,9 +114,15 @@ const Practice = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => navigate('/settings/account')}>
-                            Go To Account Settings Page
-                        </AlertDialogAction>
+                        {user === null ? (
+                            <AlertDialogAction onClick={() => navigate('/dashboard')}>
+                                Go to the Dashboard Page to login first.
+                            </AlertDialogAction>
+                        ) : (
+                            <AlertDialogAction onClick={() => navigate('/settings/account')}>
+                                Go To Account Settings Page
+                            </AlertDialogAction>
+                        )}
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

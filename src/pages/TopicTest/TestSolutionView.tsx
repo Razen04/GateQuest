@@ -131,8 +131,8 @@ const TestSolutionView = () => {
     };
 
     const handleExplanation = () => {
-        if (currentQuestion?.explanation) {
-            window.open(currentQuestion.explanation, '_blank');
+        if (currentQuestion?.source_url) {
+            window.open(currentQuestion.source_url, '_blank');
         }
     };
 

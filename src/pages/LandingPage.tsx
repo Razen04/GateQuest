@@ -267,7 +267,7 @@ export default function LandingPage() {
 
                         <Button
                             size="lg"
-                            onClick={() => navigate('/practice')}
+                            onClick={() => navigate('/dashboard')}
                             className="rounded-none"
                         >
                             Start Practicing Now <ArrowRight weight="bold" />

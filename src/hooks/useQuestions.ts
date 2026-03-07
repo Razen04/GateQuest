@@ -13,8 +13,8 @@ import {
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
 } from '@/storage/questionRepository.ts';
-import type { Question } from '@/types/storage.ts';
 import { useGoals } from './useGoals.ts';
+import type { Question } from '@/types/storage.ts';
 
 // We normalise the mixed "exam" metadata (string or string[])
 const isQuestionInActiveExams = (q: Question, activeExams: string[]) => {
@@ -77,14 +77,19 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const { userGoal } = useGoals();
+    const { userGoal, getPracticeSubjects } = useGoals();
 
     // we will filter questions in-memory for display
     const filteredQuestions = useMemo(() => {
         const activeExams = (userGoal?.target_exams as string[]) || [];
-        if (bookmarked) return allQuestions; // bookmarks will show all the questions regadless of exam selected
+
+        const currSubject = getPracticeSubjects().find((s) => s.id === subjectId);
+
+        const isUniversalSubject = currSubject?.is_universal;
+
+        if (bookmarked || isUniversalSubject) return allQuestions; // bookmarks will show all the questions regadless of exam selected
         return allQuestions.filter((q) => isQuestionInActiveExams(q, activeExams));
-    }, [allQuestions, bookmarked, userGoal?.target_exams]);
+    }, [allQuestions, bookmarked, userGoal?.target_exams, getPracticeSubjects, subjectId]);
 
     useEffect(() => {
         // A guard to prevent fetching if the subject is not yet defined.

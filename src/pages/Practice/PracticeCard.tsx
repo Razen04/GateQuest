@@ -21,13 +21,13 @@ import ModernLoader from '../../components/ui/ModernLoader.js';
 import useAuth from '../../hooks/useAuth.js';
 import useSettings from '../../hooks/useSettings.js';
 import useQuestions from '../../hooks/useQuestions.ts';
-import type { Question } from '@/types/question.ts';
 import { usePeerBenchmark } from '@/hooks/usePeerBenchmark.ts';
 import { toast } from 'sonner';
 import ReportModal from '@/components/ReportModal.tsx';
 import QuestionCard from '@/components/QuestionCard/QuestionCard.tsx';
 import { supabase } from '@/utils/supabaseClient.ts';
 import { useGoals } from '@/hooks/useGoals.ts';
+import type { Question } from '@/types/storage.ts';
 
 // This component is the main event for the practice session. It's a "controller" component
 // that pulls together a bunch of hooks and smaller UI components to create the full question view.
@@ -122,8 +122,8 @@ const PracticeCard = () => {
     } = usePeerBenchmark(safeQuestion.id);
 
     const onExplanationClick = () => {
-        if (safeQuestion.explanation) {
-            window.open(safeQuestion.explanation, '_blank');
+        if (safeQuestion.source_url) {
+            window.open(safeQuestion.source_url, '_blank');
         }
     };
 

@@ -1,10 +1,10 @@
 // This custom hook encapsulates the logic for handling the entire answer submission process, from revealing the correct answer to recording the user's attempt.
 import React from 'react';
 import type { AppUser } from '../types/AppUser.ts';
-import type { Question } from '../types/question.ts';
 import { submitAndRecordAnswer } from '../utils/answerHandler.ts';
 import useStudyPlan from './useStudyPlan.ts';
 import { useGoals } from './useGoals.ts';
+import type { Question } from '@/types/storage.ts';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;

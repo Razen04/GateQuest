@@ -1,6 +1,12 @@
+# v0.10.2 - 2026-03-07
+
+- Fixed GATE DA (Data Science & Artificial Intelligence) PYQs.
+- Removed Guest Mode in the Practice Tab as of now.
+- Fixed URL params to include exam filter too.
+
 # v0.10.1 - 2026-03-05
 
-- Added ISRO PYQs.
+- Added ISRO CS PYQs.
 - Fixed question counts error and proper stats calculation.
 - Added a dropdown to show individual exam statistics.
 

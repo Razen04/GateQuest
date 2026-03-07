@@ -7,8 +7,8 @@ import useQuestions from '../../hooks/useQuestions.ts'; // Fetches the raw quest
 // 3. Component imports - Breaking the UI into smaller, manageable pieces.
 import ModernLoader from '../../components/ui/ModernLoader.js';
 import QuestionsList from '@/components/QuestionsList/QuestionsList.tsx';
-import type { Question } from '@/types/question.ts';
 import { useGoals } from '@/hooks/useGoals.ts';
+import type { Question } from '@/types/storage.ts';
 
 // This component is the main hub for showing list of questions. It's responsible for:
 // - Fetching all questions for a subject.

@@ -4,7 +4,7 @@ import { getDifficultyClassNames, getQuestionDisplayText } from '../../utils/que
 import Pagination from './Pagination.tsx';
 import MathRenderer from '../Renderers/MathRenderer.tsx';
 import { fadeInUp, stagger } from '../../utils/motionVariants.ts';
-import type { Question } from '@/types/question.ts';
+import type { Question } from '@/types/storage.ts';
 
 type ListProps = {
     listRef: React.RefObject<HTMLDivElement | null>;

@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Question } from '../../types/question.ts';
 import { getCorrectAnswerText } from '../../utils/questionUtils.ts';
 import MathRenderer from '@/components/Renderers/MathRenderer.tsx';
+import type { Question } from '@/types/storage.ts';
 
 type ResultMessageProps = {
     showAnswer: boolean;
