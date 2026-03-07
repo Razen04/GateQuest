@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 
 // Types
-import type { Question } from '../../types/question';
 import type { Database } from '../../types/supabase'; // Needed for PeerStats type
 
 // Utils
@@ -14,6 +13,7 @@ import QuestionPeerStats from '@/components/QuestionCard/QuestionPeerStats';
 import ActionButtons from '@/components/QuestionCard/ActionButtons';
 import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
+import type { Question } from '@/types/storage';
 
 // Child Components
 
@@ -153,7 +153,6 @@ const QuestionCard = ({
                         selectedOptionIndices={selectedOptionIndices}
                         userAnswerIndex={userAnswerIndex}
                         onOptionSelect={onOptionSelect}
-                        marked={marked}
                     />
 
                     {/* Numerical Input Section (Conditional) */}
@@ -216,7 +215,6 @@ const QuestionCard = ({
                         handleShowAnswer={onShowAnswer}
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
-                        currentQuestion={question}
                     />
                 </div>
 

@@ -5,9 +5,9 @@ import {
 } from '../../utils/questionUtils.js';
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
-import type { Question } from '../../types/question.ts';
 import { Warning, ShareFat } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button.tsx';
+import type { Question } from '@/types/storage.js';
 
 type TimerProps = {
     minutes: string;

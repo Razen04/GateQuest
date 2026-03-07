@@ -42,6 +42,7 @@ interface BaseQuestion {
     source_url: string;
     added_by?: string;
     verified: boolean;
+    answer_text: string;
     explanation: string;
     metadata: {
         set: string;
@@ -72,6 +73,11 @@ export interface MSQQuestion extends BaseQuestion {
 }
 
 export type Question = NumericalQuestion | MCQQuestion | MSQQuestion;
+
+export type RevisionQuestion = Question & {
+    is_correct?: boolean | null;
+    time_spent_seconds?: boolean | null;
+};
 
 export interface QuestionSyncMetadata {
     subject_id: string;

@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 import MathRenderer from '../Renderers/MathRenderer.js';
 import { isMultipleSelection } from '../../utils/questionUtils.js';
 import { CheckCircle } from '@phosphor-icons/react';
-import type { Question } from '../../types/question.ts';
 import { useEffect } from 'react';
+import type { Question } from '@/types/storage.js';
 
 type QuestionContentProps = {
     currentQuestion: Question;

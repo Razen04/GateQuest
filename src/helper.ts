@@ -2,7 +2,6 @@
 import React from 'react';
 import { toast } from 'sonner';
 import { supabase } from './utils/supabaseClient.js';
-import type { Question } from './types/question.js';
 import type { AppUser } from './types/AppUser.js';
 import {
     Calculator,
@@ -27,6 +26,8 @@ import { FileCodeIcon } from '@phosphor-icons/react';
 import { LinuxLogoIcon } from '@phosphor-icons/react';
 import { AppWindowIcon } from '@phosphor-icons/react';
 import { BrowsersIcon } from '@phosphor-icons/react';
+import type { Question } from './types/storage.js';
+import { HeadCircuitIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -61,6 +62,7 @@ export const SubjectIconMap: Record<string, React.ElementType> = {
     zap: LightbulbIcon,
     appwindow: AppWindowIcon,
     browsers: BrowsersIcon,
+    headcircuit: HeadCircuitIcon,
     // Add a default icon for new subjects
     default: Books,
 };

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../utils/supabaseClient.ts';
-import type { RevisionQuestion } from '../types/question.ts';
 import { getUserProfile } from '../helper.ts';
 import { useNavigate } from 'react-router-dom';
 import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from './useGoals.ts';
+import type { RevisionQuestion } from '@/types/storage.ts';
 
 export type WeeklySet = {
     success: boolean;
@@ -145,7 +145,6 @@ const useSmartRevision = () => {
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
             const activeExams =
                 (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
-
             const { data: count, error } = await supabase.rpc('get_critical_question_count', {
                 p_valid_subjects: activeSubjects,
                 p_target_exams: activeExams,

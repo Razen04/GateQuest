@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import useFilters from '@/hooks/useFilters';
-import type { Question, RevisionQuestion } from '@/types/question';
 import usePagination from '@/hooks/usePagination';
 import { AnimatePresence, motion } from 'framer-motion';
 import Header from './Header';
@@ -8,6 +7,7 @@ import SearchAndFilters from './SearchAndFilters';
 import List from './List';
 import useUrlFilters from '@/hooks/useUrlFilters';
 import { useGoals } from '@/hooks/useGoals';
+import type { Question, RevisionQuestion } from '@/types/storage';
 
 type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
@@ -68,6 +68,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setTopicFilter,
         attemptFilter,
         setAttemptFilter,
+        examFilter,
+        setExamFilter,
     });
 
     // Pagination

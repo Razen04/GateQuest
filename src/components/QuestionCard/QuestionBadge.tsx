@@ -1,5 +1,4 @@
-import React from 'react';
-import type { Question } from '../../types/question.ts';
+import type { Question } from '@/types/storage';
 
 type QuestionBadgeProps = {
     currentQuestion: Question;

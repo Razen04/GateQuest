@@ -1,8 +1,8 @@
 // This custom hook provides logic for paginating a list of items.
 // It calculates the total number of pages and returns the items for the current page.
 
+import type { Question, RevisionQuestion } from '@/types/storage';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Question, RevisionQuestion } from '../types/question.ts';
 
 // Manages the state and calculations for paginating an array of items.
 export default function usePagination(items: Question[] | RevisionQuestion[], perPage = 20) {

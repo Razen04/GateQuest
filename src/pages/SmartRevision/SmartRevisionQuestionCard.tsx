@@ -9,7 +9,7 @@ import useQuestionNav from '@/hooks/useQuestionNav';
 import { useQuestionState } from '@/hooks/useQuestionState';
 import { useQuestionTimer } from '@/hooks/useQuestionTimer';
 import useSettings from '@/hooks/useSettings';
-import type { Question } from '@/types/question';
+import type { Question } from '@/types/storage';
 import { handleBookmark } from '@/utils/questionUtils';
 import { supabase } from '@/utils/supabaseClient';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -94,7 +94,7 @@ const SmartRevisionQuestionCard = () => {
 
     // Navigation Logic
     const { isFirst, isLast, handleNext, handlePrevious } = useQuestionNav({
-        filteredQuestions: questions, // TODO: Fix this
+        filteredQuestions: questions,
         subject: subject,
         qs,
         currentIndex, // Pass the ID here

@@ -1,5 +1,5 @@
+import type { Question } from '@/types/storage';
 import { ArrowLeft } from '@phosphor-icons/react';
-import type { Question } from '../../types/question.js';
 
 type HeaderProps = {
     handleBack: () => void;

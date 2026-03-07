@@ -1,6 +1,6 @@
+import type { NumericalQuestion, Question } from '@/types/storage.js';
 import { getUserProfile, updateUserProfile, syncUserToSupabase } from '../helper.js';
 import { toast } from 'sonner';
-import type { NumericalQuestion, Question } from '../types/question.js';
 
 // Get difficulty class names
 export const getDifficultyClassNames = (difficulty: string) => {

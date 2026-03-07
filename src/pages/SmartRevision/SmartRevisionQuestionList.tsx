@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { decompress } from 'lz-string';
 import QuestionsList from '../../components/QuestionsList/QuestionsList.tsx';
-import type { Question, RevisionQuestion } from '@/types/question.ts';
 import { toast } from 'sonner';
+import type { Question, RevisionQuestion } from '@/types/storage.ts';
 
 const SmartRevisionQuestionList = () => {
     let stored;

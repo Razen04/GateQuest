@@ -2,7 +2,7 @@
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { isMultipleSelection } from '../utils/questionUtils.ts';
-import type { Question } from '../types/question.ts';
+import type { Question } from '@/types/storage.ts';
 
 // Manages the interactive state for a question card.
 export const useQuestionState = (currentQuestion: Question) => {
