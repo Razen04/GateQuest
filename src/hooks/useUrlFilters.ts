@@ -10,11 +10,13 @@ type useUrlFiltersProps = {
     yearFilter: string;
     topicFilter: string;
     attemptFilter: string;
+    examFilter: string;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     setDifficultyFilter: React.Dispatch<React.SetStateAction<string>>;
     setYearFilter: React.Dispatch<React.SetStateAction<string>>;
     setTopicFilter: React.Dispatch<React.SetStateAction<string>>;
     setAttemptFilter: React.Dispatch<React.SetStateAction<string>>;
+    setExamFilter: React.Dispatch<React.SetStateAction<string>>;
 };
 
 // Manages the two-way data binding between the filter state and the URL search parameters.
@@ -29,6 +31,8 @@ export default function useUrlFilters({
     setTopicFilter,
     attemptFilter,
     setAttemptFilter,
+    examFilter,
+    setExamFilter,
 }: useUrlFiltersProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     // A ref to ensure the initialization logic runs only once.
@@ -49,6 +53,7 @@ export default function useUrlFilters({
             year: searchParams.get('year') ?? 'all',
             topic: searchParams.get('topic') ?? 'all',
             attempt: searchParams.get('attempt') ?? 'unattempted',
+            exam: searchParams.get('exam') ?? 'all',
         };
 
         let changed = false;
@@ -72,11 +77,13 @@ export default function useUrlFilters({
         const year = searchParams.get('year') ?? 'all';
         const topic = searchParams.get('topic') ?? 'all';
         const attempt = searchParams.get('attempt') ?? 'unattempted';
+        const exam = searchParams.get('exam') ?? 'all';
         setSearchQuery(q);
         setDifficultyFilter(diff);
         setYearFilter(year);
         setTopicFilter(topic);
         setAttemptFilter(attempt);
+        setExamFilter(exam);
         // The exhaustive-deps rule is disabled because this effect is intentionally designed to run only once.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -93,6 +100,7 @@ export default function useUrlFilters({
             year: yearFilter,
             topic: topicFilter,
             attempt: attemptFilter,
+            exam: examFilter,
         };
 
         let changed = false;
@@ -113,6 +121,7 @@ export default function useUrlFilters({
         attemptFilter,
         searchParams,
         setSearchParams,
+        examFilter,
     ]);
 
     // A derived boolean state for the 'bookmarked' filter.
@@ -127,8 +136,17 @@ export default function useUrlFilters({
             year: yearFilter,
             topic: topicFilter,
             attempt: attemptFilter,
+            exam: examFilter,
         }).toString();
-    }, [bookmarked, searchQuery, difficultyFilter, yearFilter, topicFilter, attemptFilter]);
+    }, [
+        bookmarked,
+        searchQuery,
+        difficultyFilter,
+        yearFilter,
+        topicFilter,
+        attemptFilter,
+        examFilter,
+    ]);
 
     // Expose the generated query string and the raw searchParams object.
     return { queryString, searchParams };
