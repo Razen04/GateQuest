@@ -17,6 +17,7 @@ import type { Database } from '../types/supabase.ts';
 import useSmartRevision from '@/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/helper.ts';
 import { useGoals } from '@/hooks/useGoals.ts';
+import SubjectStats from '@/components/Dashboard/SubjectStats.tsx';
 
 type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'] & {
     subject_id?: string;
@@ -83,6 +84,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             .from('v_user_cycle_stats')
             .select('*')
             .eq('user_id', user.id)
+            .or(`branch_id.eq.${userGoal?.branch_id},is_universal.eq.true`)
             .eq('user_version_number', user.version_number)
             .order('attempted_at', { ascending: true })
             .overrideTypes<UserQuestionActivity[]>();
@@ -101,7 +103,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
         // get actual subject count
-        const CACHE_KEY = `exam_counts_${activeExams.sort().join('_')}`;
         const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
         // Helper to cleanly fetch and cache RPC calls for different exam combinations
@@ -135,8 +136,13 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             individualExamCounts[exam] = await fetchExamCounts([exam]);
         }
 
-        // Global data contains attempts that belong to ANY of the active exams.
+        const universalSubjectIds = new Set(
+            practiceSubjects.filter((s) => s.is_universal).map((s) => s.id),
+        );
+
         const globalData = (data || []).filter((d) => {
+            if (d.subject_id && universalSubjectIds.has(d.subject_id)) return true;
+
             const examTags = (d.exam_tags as string[]) || [];
             return examTags.some((tag) => activeExams.includes(tag.toUpperCase()));
         });
@@ -250,9 +256,14 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         // Build the subject stats for each active exam using globalData
         activeExams.forEach((exam) => {
-            const examData = globalData.filter((d) =>
-                ((d.exam_tags as string[]) || []).some((t) => t.toUpperCase() === exam),
-            );
+            const examData = globalData.filter((d) => {
+                const isUniversal = d.subject_id && universalSubjectIds.has(d.subject_id);
+                const matchesCurrentExam = ((d.exam_tags as string[]) || []).some(
+                    (t) => t.toUpperCase() === exam,
+                );
+
+                return isUniversal || matchesCurrentExam;
+            });
 
             type GroupedType = Record<
                 string,
