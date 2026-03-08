@@ -28,6 +28,11 @@ import { AppWindowIcon } from '@phosphor-icons/react';
 import { BrowsersIcon } from '@phosphor-icons/react';
 import type { Question } from './types/storage.js';
 import { HeadCircuitIcon } from '@phosphor-icons/react';
+import { PulseIcon } from '@phosphor-icons/react';
+import { WaveSineIcon } from '@phosphor-icons/react';
+import { SlidersIcon } from '@phosphor-icons/react';
+import { BroadcastIcon } from '@phosphor-icons/react';
+import { MagnetIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -63,6 +68,11 @@ export const SubjectIconMap: Record<string, React.ElementType> = {
     appwindow: AppWindowIcon,
     browsers: BrowsersIcon,
     headcircuit: HeadCircuitIcon,
+    pulse: PulseIcon,
+    wavesine: WaveSineIcon,
+    sliders: SlidersIcon,
+    broadcast: BroadcastIcon,
+    magnet: MagnetIcon,
     // Add a default icon for new subjects
     default: Books,
 };

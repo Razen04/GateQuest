@@ -1,6 +1,10 @@
+# v0.10.3 - 2026-03-09
+
+- Added GATE EC (Electronics & Communication Engineering) PYQs.
+
 # v0.10.2 - 2026-03-07
 
-- Fixed GATE DA (Data Science & Artificial Intelligence) PYQs.
+- Added GATE DA (Data Science & Artificial Intelligence) PYQs.
 - Removed Guest Mode in the Practice Tab as of now.
 - Fixed URL params to include exam filter too.
 
