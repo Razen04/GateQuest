@@ -82,7 +82,7 @@ const AppMockup = () => {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="w-full max-w-md sm:max-w-2xl lg:max-w-3xl mx-auto mt-12 z-10 pb-20"
         >
-            <div className="relative aspect-[9/10] lg:aspect-[16/10] border border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/50 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 backdrop-blur-xl min-h-[400px]">
+            <div className="relative flex flex-col border border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/50 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 backdrop-blur-xl min-h-[420px]">
                 {/* Browser Header */}
                 <div className="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-700/50">
                     <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -91,46 +91,51 @@ const AppMockup = () => {
                 </div>
 
                 {/* App Content */}
-                <div className="p-4 sm:p-6 md:p-8 text-left">
+                <div className="p-4 sm:p-6 md:p-8 text-left flex-1">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
                         <p className="text-sm sm:text-base font-medium text-blue-500 dark:text-blue-400">
                             Question 1 of 162
                         </p>
+
                         <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
                             <Button
                                 size="icon"
-                                className="h-5 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                                className="h-6 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
                             >
-                                <Bookmark size={16} classname="text-white" />
+                                <Bookmark size={14} className="text-white" />
                             </Button>
+
                             <Button
                                 size="icon"
-                                className="h-5 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                                className="h-6 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
                             >
-                                <Timer size={4} classname="text-white" />
+                                <Timer size={14} className="text-white" />
                             </Button>
+
                             <Badge
                                 variant="secondary"
-                                className="bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400"
+                                className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                             >
                                 Easy
                             </Badge>
+
                             <Badge
                                 variant="secondary"
-                                className="bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
+                                className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                             >
                                 GATE 2024
                             </Badge>
+
                             <Badge
                                 variant="secondary"
-                                className="bg-teal-100 text-teal-700 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400"
+                                className="bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400"
                             >
                                 MCQ
                             </Badge>
                         </div>
                     </div>
 
-                    <h3 className="mt-2 text-sm sm:text-lg md:text-xl text-slate-800 dark:text-slate-100">
+                    <h3 className="mt-4 text-sm sm:text-lg md:text-xl text-slate-800 dark:text-slate-100">
                         Q. What is the maximum number of hosts in a Class C network?
                     </h3>
 
@@ -141,30 +146,31 @@ const AppMockup = () => {
                                 className={`flex items-center gap-3 p-2 rounded-lg
                                 ${
                                     option === '256'
-                                        ? 'bg-blue-500/10 dark:bg-blue-600/20 border border-blue-500/30 dark:border-blue-500/50 ring-2 ring-blue-500/20 dark:ring-blue-500/30'
-                                        : 'bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700'
+                                        ? 'bg-blue-500/10 border border-blue-500/30 ring-2 ring-blue-500/20'
+                                        : 'bg-slate-100/50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
                                 }`}
                             >
                                 <div
                                     className={`w-5 h-5 rounded-full border-2
-                                    ${option === '256' ? 'border-blue-500 dark:border-blue-400 bg-blue-500 flex items-center justify-center' : 'border-slate-400 dark:border-slate-500'}`}
+                                    ${
+                                        option === '256'
+                                            ? 'border-blue-500 bg-blue-500 flex items-center justify-center'
+                                            : 'border-slate-400'
+                                    }`}
                                 >
                                     {option === '256' && (
                                         <div className="w-2 h-2 rounded-full bg-white"></div>
                                     )}
                                 </div>
-                                <span
-                                    className={`${option === '256' ? 'text-slate-800 dark:text-white' : ''}`}
-                                >
-                                    {option}
-                                </span>
+
+                                <span>{option}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="absolute left-0 bottom-3 flex flex-row gap-2 w-full px-4 sm:px-8 text-xs sm:text-base">
+                <div className="flex flex-row gap-2 w-full px-4 pb-3 text-xs sm:text-sm md:text-base mt-auto">
                     {[
                         {
                             label: 'Previous',
@@ -187,9 +193,13 @@ const AppMockup = () => {
                             bg: 'bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-white',
                         },
                     ].map((btn, i) => (
-                        <Button className={`${btn.bg} flex-1`} size="lg" key={i}>
-                            {btn.icon && <btn.icon />}
-                            {btn.label}
+                        <Button
+                            className={`${btn.bg} flex-1 flex items-center justify-center gap-1`}
+                            size="lg"
+                            key={i}
+                        >
+                            <btn.icon size={16} />
+                            <span className="hidden sm:inline">{btn.label}</span>
                         </Button>
                     ))}
                 </div>
@@ -260,9 +270,8 @@ export default function LandingPage() {
                             </span>
                         </h1>
                         <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10">
-                            The ultimate open-source platform with a massive question bank,
-                            real-time analytics, and a modern, distraction-free interface. Engineer
-                            your success.
+                            The open-source platform with a massive question bank, real-time
+                            analytics, and a modern, distraction-free interface.
                         </p>
 
                         <Button
