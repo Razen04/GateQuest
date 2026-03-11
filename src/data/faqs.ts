@@ -67,7 +67,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS branch as of now). I may add descriptive questions in the future.',
+                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS, DA, EC, EE branch as of now). I may add descriptive questions in the future.',
             },
         ],
     },
@@ -77,7 +77,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Most probably you will because everything is done manually so would like you to let me know about it via reporting question through the app itself.',
+                    'Most probably you will because everything is done manually so would like you to let me know about it via reporting question through the app itself. It will make the app better for everyone.',
             },
         ],
     },

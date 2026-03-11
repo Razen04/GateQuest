@@ -140,7 +140,7 @@ const About = ({ landing = false }: AboutProps) => {
                                         </motion.a>
                                     </Button>
                                 </div>
-                                <Button asChild className=" bg-green-500 hover:bg-green-400 flex-1">
+                                <Button asChild className="bg-green-700 hover:bg-green-600 flex-1">
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}

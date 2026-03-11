@@ -112,7 +112,7 @@ const Dashboard = () => {
                        transition-all duration-200"
                     >
                         <LightningIcon size={22} weight="bold" />
-                        <span>Topic Test (New)</span>
+                        <span>Topic Test</span>
                     </Button>
 
                     <Button
