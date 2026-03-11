@@ -17,7 +17,6 @@ import type { Database } from '../types/supabase.ts';
 import useSmartRevision from '@/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/helper.ts';
 import { useGoals } from '@/hooks/useGoals.ts';
-import SubjectStats from '@/components/Dashboard/SubjectStats.tsx';
 
 type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'] & {
     subject_id?: string;

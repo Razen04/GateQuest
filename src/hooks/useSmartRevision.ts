@@ -6,6 +6,7 @@ import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from './useGoals.ts';
 import type { RevisionQuestion } from '@/types/storage.ts';
+import useAuth from './useAuth.ts';
 
 export type WeeklySet = {
     success: boolean;
@@ -45,6 +46,8 @@ const useSmartRevision = () => {
 
     // Fetch current user and weekly set
     const fetchCurrentSet = useCallback(async () => {
+        if (!userId || !userGoal?.branch_id) return;
+
         setLoading(true);
         try {
             // Call RPC to get weekly set
@@ -70,7 +73,7 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, [userGoal?.branch_id]);
+    }, [userGoal?.branch_id, userId]);
 
     // Generate a set
     const generateSet = useCallback(async () => {
@@ -159,9 +162,11 @@ const useSmartRevision = () => {
     }, [userId, getPracticeSubjects, userGoal?.target_exams]);
 
     useEffect(() => {
-        fetchCurrentSet();
-        getCriticalQuestionCount();
-    }, [fetchCurrentSet, getCriticalQuestionCount]);
+        if (userId && userId !== '1') {
+            fetchCurrentSet();
+            getCriticalQuestionCount();
+        }
+    }, [fetchCurrentSet, getCriticalQuestionCount, userId]);
 
     return {
         loading,

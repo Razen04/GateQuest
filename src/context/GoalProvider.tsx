@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '@/utils/supabaseClient';
 import { toast } from 'sonner';
 import type {
@@ -24,9 +24,13 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchData = async () => {
+    const fetchedRef = useRef(false);
+
+    const fetchData = useCallback(async (force = false) => {
+        if (fetchedRef.current && !force) return;
         try {
             setLoading(true);
+            fetchedRef.current = true;
 
             // Fetch all metadata and user goals in parallel
             const [
@@ -62,6 +66,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setExamSubjects(resES.data || []);
             setBranchExams(resBE.data || []);
         } catch (err: unknown) {
+            fetchedRef.current = false;
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -71,7 +76,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // Inside GoalProvider.tsx
     useEffect(() => {
@@ -86,61 +91,63 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // Clear local states on logout
                 setUserGoal(null);
                 setLoading(false);
+                fetchedRef.current = false;
             }
         });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+    }, [fetchData]);
 
     // API: Create a new goal record
-    const setInitialGoal = useCallback(async (branchId: string, examIds: string[]) => {
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
+    const setInitialGoal = useCallback(
+        async (branchId: string, examIds: string[], silent = false): Promise<void> => {
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
+            if (!user) return;
 
-        try {
-            setLoading(true);
+            try {
+                setLoading(true);
 
-            // Deactivate all exisiting goals for the user
-            await supabase.from('user_goals').update({ is_active: false }).eq('user_id', user.id);
+                // Deactivate all exisiting goals for the user
+                await supabase
+                    .from('user_goals')
+                    .update({ is_active: false })
+                    .eq('user_id', user.id);
 
-            const { data, error } = await supabase
-                .from('user_goals')
-                .upsert(
-                    {
-                        user_id: user.id,
-                        branch_id: branchId,
-                        target_exams: examIds,
-                        is_active: true,
-                    },
-                    { onConflict: 'user_id, branch_id' },
-                )
-                .select()
-                .single();
+                const { data, error } = await supabase
+                    .from('user_goals')
+                    .upsert(
+                        {
+                            user_id: user.id,
+                            branch_id: branchId,
+                            target_exams: examIds,
+                            is_active: true,
+                        },
+                        { onConflict: 'user_id, branch_id' },
+                    )
+                    .select()
+                    .single();
 
-            if (error) {
-                toast.error('Failed to set your goals.');
-                return;
+                if (error) {
+                    if (!silent) toast.error('Failed to set your goals.');
+                    return;
+                }
+
+                setUserGoal(data);
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    console.error(err);
+                }
+                toast.error('Failed to update your goals.');
+            } finally {
+                setLoading(false);
             }
-
-            setUserGoal(data);
-            toast.success('Goal updated successfully.');
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                console.error(err);
-            }
-            toast.error('Failed to update your goals.');
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        },
+        [],
+    );
 
     /**
      * The Intersection Logic:
@@ -185,7 +192,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             error,
             setInitialGoal,
             getPracticeSubjects,
-            refresh: fetchData,
+            refresh: () => fetchData(true),
         }),
         [
             branches,
@@ -197,6 +204,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             error,
             setInitialGoal,
             getPracticeSubjects,
+            fetchData,
         ],
     );
 

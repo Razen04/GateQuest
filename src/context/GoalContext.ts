@@ -19,7 +19,7 @@ interface GoalContextType {
     loading: boolean;
     error: string | null;
     // Logic-derived helper
-    setInitialGoal: (branchId: string, examIds: string[]) => void;
+    setInitialGoal: (branchId: string, examIds: string[], silent: boolean) => Promise<void>;
     getPracticeSubjects: () => Subject[];
     refresh: () => Promise<void>;
 }

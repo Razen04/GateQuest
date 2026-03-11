@@ -84,17 +84,11 @@ const AccountSettings = () => {
         try {
             const updated = { ...user, name, college, targetYear };
             updateUserProfile(updated);
-            await syncUserToSupabase(isLogin);
-
-            const goalPromises = [];
 
             if (tempBranch) {
-                goalPromises.push(setInitialGoal(tempBranch, tempExams));
+                await setInitialGoal(tempBranch, tempExams, true);
             }
-
-            await Promise.all(goalPromises);
-
-            toast.success('Profile updated successfully.');
+            await syncUserToSupabase(isLogin);
         } catch (err) {
             console.error('Unable to save profile: ', err);
             toast.error('Unable to save profile.');
