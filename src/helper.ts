@@ -33,6 +33,12 @@ import { WaveSineIcon } from '@phosphor-icons/react';
 import { SlidersIcon } from '@phosphor-icons/react';
 import { BroadcastIcon } from '@phosphor-icons/react';
 import { MagnetIcon } from '@phosphor-icons/react';
+import { WaveformIcon } from '@phosphor-icons/react';
+import { PowerIcon } from '@phosphor-icons/react';
+import { PlugChargingIcon } from '@phosphor-icons/react';
+import { GaugeIcon } from '@phosphor-icons/react';
+import { CircuitryIcon } from '@phosphor-icons/react';
+import { EngineIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -73,6 +79,12 @@ export const SubjectIconMap: Record<string, React.ElementType> = {
     sliders: SlidersIcon,
     broadcast: BroadcastIcon,
     magnet: MagnetIcon,
+    engine: EngineIcon,
+    circuitry: CircuitryIcon,
+    gauge: GaugeIcon,
+    plugcharging: PlugChargingIcon,
+    power: PowerIcon,
+    waveform: WaveformIcon,
     // Add a default icon for new subjects
     default: Books,
 };
