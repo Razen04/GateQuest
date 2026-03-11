@@ -1,3 +1,10 @@
+# v0.10.4 - 2026-03-11
+
+- Added GATE EE (Electrical Engineering) PYQS. Will have many issues, I hope you guys report questions so I can fix them incrementally.
+- Fixed unnecessary DB calls via Smart Revision.
+- Updated FAQs section.
+- Updated assets, let's see how they look, you might have to reinstall the PWA for ew assets to show up.
+
 # v0.10.3 - 2026-03-09
 
 - Added GATE EC (Electronics & Communication Engineering) PYQs.
