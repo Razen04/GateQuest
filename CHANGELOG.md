@@ -1,3 +1,7 @@
+# v0.10.5 -
+
+- No need to add goals again and again after a re-login if once done before. Fixes [#46](https://github.com/Razen04/GateQuest/issues/46).
+
 # v0.10.4 - 2026-03-11
 
 - Added GATE EE (Electrical Engineering) PYQS. Will have many issues, I hope you guys report questions so I can fix them incrementally.
