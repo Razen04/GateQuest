@@ -7,14 +7,21 @@ Welcome to the GATEQuest database documentation. This document provides a detail
 The database is designed around a few core concepts. Understanding their relationships is key to understanding the application.
 
 - **`users`**: Stores the public-facing profiles for everyone who signs up. This is linked to Supabase's private `auth.users` table.
-- **`questions`**: Contains all the GATE exam questions. This is the central content of the app.
+- **`user_goals`**: Stores the user goals, i.e., the branch and the exams he/she is preparing for.
+- **`branches`**: Stores the master list of academic disciplines like CS, ME, and EE.
+- **`exams`**: Contains the official names and short names of all supported competitive exams.
+- **`branch_exams`**: A junction table that maps which exams are applicable to which academic branches.
+- **`subjects`**: A global list of all subjects featuring metadata like icons, theme colors, and difficulty scores.
+- **`exams_subjects`**: Maps specific subjects to the exams they appear in for syllabus categorization.
+- **`branch_subjects`**: Links subjects to branches to ensure users only see content relevant to their stream.
+- **`questions`**: Contains all the exam questions. This is the central content of the app.
 - **`user_question_activity`**: Acts as a logbook. Every time a user attempts a question, a record is created here, linking a `user` to a `question`.
 - **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question, calculated from the `user_question_activity` data.
 - **`question_reports`**: Allows users to report issues with specific questions.
 - **`notifications`**: A simple table for storing in-app notifications for users.
-- **`user_incorrect_queue`**: Table to store the incorrect attemtps of the user and then helps in Smart Revision
-- **`weekly_revision_set`**: Table to store the weekly set of each user.
-- **`revision_set_questions`**: Table to store the revision questions corresponding to each set.
+- **`user_incorrect_queue`**: Stores the incorrect attempts of the user and helps power Smart Revision.
+- **`weekly_revision_set`**: Stores the weekly revision set for each user.
+- **`revision_set_questions`**: Stores the revision questions corresponding to each revision set.
 
 ---
 
@@ -26,19 +33,20 @@ This section provides a detailed breakdown of each table in the `public` schema.
 
 Stores public profile information for authenticated users. This table is linked 1-to-1 with the private `auth.users` table.
 
-| Column Name          | Data Type     | Constraints & Defaults                          | Description                                                                  |
-| :------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------- |
-| `id`                 | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`. |
-| `joined_at`          | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                             |
-| `email`              | `text`        | `NULL` allowed                                  | The user's email address.                                                    |
-| `name`               | `text`        | `NULL` allowed                                  | The user's full display name.                                                |
-| `avatar`             | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                         |
-| `show_name`          | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.              |
-| `total_xp`           | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                        |
-| `settings`           | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                            |
-| `college`            | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                               |
-| `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                    |
-| `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                       |
+| Column Name          | Data Type     | Constraints & Defaults                          | Description                                                                        |
+| :------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------------- |
+| `id`                 | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.       |
+| `joined_at`          | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                   |
+| `email`              | `text`        | `NULL` allowed                                  | The user's email address.                                                          |
+| `name`               | `text`        | `NULL` allowed                                  | The user's full display name.                                                      |
+| `avatar`             | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                               |
+| `show_name`          | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                    |
+| `total_xp`           | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                              |
+| `settings`           | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                                  |
+| `college`            | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                     |
+| `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                          |
+| `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                             |
+| `version_number`     | `integer`     | `DEFAULT 1`                                     | Used for versioning or schema updates related to user settings Clear Data feature. |
 
 **Row Level Security (RLS) Policies:**
 
@@ -51,61 +59,79 @@ Stores public profile information for authenticated users. This table is linked 
 
 Contains the full details for every question in the GATEQuest database.
 
-| Column Name       | Data Type     | Constraints & Defaults                                 | Description                                                                                                                             |
-| :---------------- | :------------ | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`              | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT gen_random_uuid()` | The unique identifier for the question.                                                                                                 |
-| `year`            | `integer`     | `NOT NULL`                                             | The year the question appeared in the GATE exam.                                                                                        |
-| `question_number` | `integer`     | `NULL` allowed                                         | The original question number from the exam paper.                                                                                       |
-| `subject`         | `text`        | `NOT NULL`                                             | The main subject of the question (e.g., "Quantitative Aptitude").                                                                       |
-| `topic`           | `text`        | `NULL` allowed                                         | The specific topic within the subject (e.g., "Logarithms").                                                                             |
-| `question_type`   | `text`        | `NOT NULL`                                             | The type of question (e.g., "multiple-choice", "numerical").                                                                            |
-| `question`        | `text`        | `NOT NULL`                                             | The full text of the question, can include Markdown/HTML.                                                                               |
-| `options`         | `text[]`      | `NULL` allowed                                         | An array of strings representing the choices for multiple-choice questions.                                                             |
-| `correct_answer`  | `jsonb`       | `NOT NULL`                                             | A JSON object containing the correct answer(s). For MCQ, this is typically an array with the index of the correct option (e.g., `[2]`). |
-| `answer_text`     | `text`        | `NULL` allowed                                         | A textual representation of the answer for non-MCQ types.                                                                               |
-| `difficulty`      | `text`        | `NULL` allowed                                         | The difficulty level (e.g., 'Easy', 'Medium', 'Hard').                                                                                  |
-| `marks`           | `integer`     | `NULL` allowed                                         | The number of marks the question is worth.                                                                                              |
-| `tags`            | `text[]`      | `NULL` allowed                                         | An array of strings for tagging and categorization.                                                                                     |
-| `source`          | `text`        | `NULL` allowed                                         | The original source of the question (e.g., "gateoverflow").                                                                             |
-| `source_url`      | `text`        | `NULL` allowed                                         | A URL to the original question source.                                                                                                  |
-| `added_by`        | `text`        | `NULL` allowed                                         | Identifier for who added the question to the database.                                                                                  |
-| `verified`        | `boolean`     | `DEFAULT false`                                        | A flag to indicate if the question has been verified for accuracy.                                                                      |
-| `explanation`     | `text`        | `NULL` allowed                                         | A detailed explanation or solution for the question.                                                                                    |
-| `metadata`        | `jsonb`       | `NULL` allowed                                         | A JSON object for any extra metadata.                                                                                                   |
-| `created_at`      | `timestamptz` | `DEFAULT now()`                                        | The timestamp when the question was added to the database.                                                                              |
+| Column Name       | Data Type | Constraints & Defaults                      | Description                                                       |
+| :---------------- | :-------- | :------------------------------------------ | :---------------------------------------------------------------- |
+| `id`              | `uuid`    | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`  | The unique identifier for the question.                           |
+| `year`            | `integer` | `NULL` allowed                              | The year the question appeared in the GATE exam.                  |
+| `question_number` | `integer` | `NULL` allowed                              | The original question number from the exam paper.                 |
+| `subject`         | `text`    | `NULL` allowed                              | The main subject of the question (e.g., "Quantitative Aptitude"). |
+| `subject_id`      | `uuid`    | `FOREIGN KEY → subjects.id`, `NULL` allowed | References the subject associated with the question.              |
+| `topic`           | `text`    | `NULL` allowed                              | The specific topic within the subject (e.g., "Logarithms").       |
+| `question_type`   | `text`    | `NULL` allowed                              | The type of question (e.g., "multiple-choice", "numeric").        |
+| `question`        | `text`    | `NULL` allowed                              | The full text of the question.                                    |
+| `options`         | `text[]`  | `NULL` allowed                              | An array of options for MCQ/MSQ questions.                        |
+| `correct_answer`  | `jsonb`   | `NULL` allowed                              | JSON object containing the correct answer(s).                     |
+| `answer_text`     | `text`    | `NULL` allowed                              | Stores the AI explainations for the question.                     |
+| `difficulty`      | `text`    | `NULL` allowed                              | Difficulty level (e.g., Easy, Medium, Hard).                      |
+| `marks`           | `integer` | `NULL` allowed                              | Marks assigned to the question.                                   |
+| `tags`            | `text[]`  | `NULL` allowed                              | Tags used for categorization.                                     |
+| `source`          | `text`    | `NULL` allowed                              | Source of the question.                                           |
+| `source_url`      | `text`    | `NULL` allowed                              | URL pointing to the original source.                              |
+| `added_by`        | `text`    | `NULL` allowed                              | Identifier of the contributor who added the question.             |
+| `verified`        | `boolean` | `DEFAULT false`                             | Indicates whether the question has been verified.                 |
+| `explanation`     | `text`    | `NULL` allowed                              | Explanation or solution for the question.                         |
+| `metadata`        | `jsonb`   | `NULL` allowed                              | Extra metadata such as exam, paper type, or set.                  |
+
+**Indexes**
+
+- `idx_questions_exams_path` → `GIN` index on `metadata`
 
 **Row Level Security (RLS) Policies:**
 
-- **Policy:** Anyone, including logged-out users, can read questions.
+- **Policy:** Anyone (including unauthenticated users) can read questions.
 - **SQL Logic:** `FOR SELECT USING (true)`
 
 ---
 
-### Table: `public.user_question_activity`
+### Table: `public.user_questions_activity`
 
-Logs every attempt a user makes on a question. This table is crucial for tracking progress and calculating statistics.
+Logs every attempt a user makes on a question. This table is crucial for tracking user progress, analytics, and Smart Revision features.
 
-| Column Name      | Data Type     | Constraints & Defaults                                 | Description                                                                                                               |
-| :--------------- | :------------ | :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| `id`             | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT gen_random_uuid()` | The unique identifier for this specific attempt.                                                                          |
-| `user_id`        | `uuid`        | `NULL` allowed                                         | Foreign key that references `public.users.id`. The user who made the attempt.                                             |
-| `question_id`    | `text`        | `NULL` allowed                                         | The ID of the question that was attempted. **Note:** This should likely be a `uuid` with a foreign key to `questions.id`. |
-| `subject`        | `text`        | `NULL` allowed                                         | The subject of the question at the time of the attempt.                                                                   |
-| `was_correct`    | `boolean`     | `NULL` allowed                                         | `true` if the user's answer was correct, `false` otherwise.                                                               |
-| `time_taken`     | `bigint`      | `NULL` allowed                                         | The time in seconds the user took to answer.                                                                              |
-| `attempted_at`   | `timestamptz` | `DEFAULT now()`                                        | The timestamp of when the attempt was made.                                                                               |
-| `attempt_number` | `bigint`      | `NULL` allowed                                         | The attempt number for this user on this specific question (1 for the first time, 2 for the second, etc.).                |
+| Column Name           | Data Type     | Constraints & Defaults                       | Description                                                 |
+| :-------------------- | :------------ | :------------------------------------------- | :---------------------------------------------------------- |
+| `id`                  | `uuid`        | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`   | Unique identifier for this attempt.                         |
+| `user_id`             | `uuid`        | `FOREIGN KEY → users.id`, `NULL` allowed     | The user who made the attempt.                              |
+| `question_id`         | `uuid`        | `FOREIGN KEY → questions.id`, `NULL` allowed | The question that was attempted.                            |
+| `subject`             | `uuid`        | `FOREIGN KEY → subjects.id`, `NULL` allowed  | The subject associated with the question.                   |
+| `branch_id`           | `text`        | `FOREIGN KEY → branches.id`, `NULL` allowed  | The branch of the user at the time of the attempt.          |
+| `was_correct`         | `boolean`     | `NULL` allowed                               | `true` if the user's answer was correct; `false` otherwise. |
+| `time_taken`          | `bigint`      | `NULL` allowed                               | Time taken to answer in seconds.                            |
+| `attempted_at`        | `timestamptz` | `DEFAULT current_timestamp`                  | Timestamp of when the attempt occurred.                     |
+| `attempt_number`      | `bigint`      | `DEFAULT 1`                                  | The nth attempt of the user on this question.               |
+| `user_version_number` | `integer`     | `DEFAULT 1`                                  | Version of the user schema when the attempt was recorded.   |
 
 **Relationships:**
 
-- Many-to-One: `user_question_activity.user_id` references `public.users.id`.
+- Many-to-One: `user_id` → `users.id`
+- Many-to-One: `question_id` → `questions.id`
+- Many-to-One: `subject` → `subjects.id`
+- Many-to-One: `branch_id` → `branches.id`
 
 **Row Level Security (RLS) Policies:**
 
-- **Insert Policy:** A user can only insert activity logs for themselves.
-- **SQL Logic:** `FOR INSERT WITH CHECK (auth.uid() = user_id)`
-- **Select Policy:** A user can only read their own activity logs.
-- **SQL Logic:** `FOR SELECT USING (auth.uid() = user_id)`
+- **Insert Policy:** Users can only insert activity records for themselves.  
+  **SQL Logic:** `FOR INSERT WITH CHECK (auth.uid() = user_id)`
+
+- **Select Policy:** Users can only read their own activity records.  
+  **SQL Logic:** `FOR SELECT USING (auth.uid() = user_id)`
+
+**Indexes:**
+
+| Index Name                       | Columns                                 | Type   | Purpose / Notes                                                                 |
+| -------------------------------- | --------------------------------------- | ------ | ------------------------------------------------------------------------------- |
+| Primary Key (default)            | `id`                                    | B-tree | Ensures uniqueness of each attempt.                                             |
+| `idx_uqa_question_first_attempt` | `question_id`                           | B-tree | Optimizes queries fetching the first attempt per question for analytics.        |
+| `idx_user_attempt` (view)        | `user_id, attempt_number, attempted_at` | B-tree | Speeds up queries for user-specific attempts, used in dashboards and revisions. |
 
 ---
 
