@@ -1,3 +1,7 @@
+# v0.10.5 -
+
+- Now questions list support multi-filter selection. Fixes [#5](https://github.com/Razen04/GateQuest/issues/5).
+
 # v0.10.4 - 2026-03-11
 
 - Added GATE EE (Electrical Engineering) PYQS. Will have many issues, I hope you guys report questions so I can fix them incrementally.
