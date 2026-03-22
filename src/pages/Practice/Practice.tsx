@@ -32,7 +32,7 @@ const Practice = () => {
 
     // get the subjects of the branch and exams selected by the user
     const { userGoal, getPracticeSubjects, loading } = useGoals();
-    const [showGoalAlert, setShowGoalAlert] = useState(false);
+    const [showGoalAlert, setShowGoalAlert] = useState(user === null ? true : false);
 
     let subjects = getPracticeSubjects();
 
@@ -108,8 +108,9 @@ const Practice = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Set your goal first.</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You need to have a goal that is branch and exam you are targetting to
-                            view the relevant subjects in the Account Settings page.
+                            {user === null
+                                ? 'You need to login first.'
+                                : 'You need to have a goal that is branch and exam you are targetting to view the relevant subjects in the Account Settings page.'}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

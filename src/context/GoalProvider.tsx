@@ -27,7 +27,11 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchedRef = useRef(false);
 
     const fetchData = useCallback(async (force = false) => {
-        if (fetchedRef.current && !force) return;
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session || (fetchedRef.current && !force)) return;
         try {
             setLoading(true);
             fetchedRef.current = true;
