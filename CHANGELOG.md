@@ -1,3 +1,7 @@
+# v0.10.5 -
+
+- The timer will now show how much time it took to attempt the question and also won't run after a question is answered.
+
 # v0.10.4 - 2026-03-11
 
 - Added GATE EE (Electrical Engineering) PYQS. Will have many issues, I hope you guys report questions so I can fix them incrementally.
