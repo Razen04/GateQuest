@@ -173,7 +173,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                 } else {
                     console.error(String(err)); // fallback for non-Error objects
                 }
-                toast.error('Could not load questions.');
+                toast.error('Could not load questions. Try clearing cache and fetch again.');
             } finally {
                 // Ensure the loading state is set to false in all cases (success or error).
                 if (isMounted) setIsLoading(false);

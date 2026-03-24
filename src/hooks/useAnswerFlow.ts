@@ -15,7 +15,7 @@ type useAnswerFlowProps = {
     isLogin: boolean;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
     setResult: React.Dispatch<React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>>;
-    resetTimer: () => void;
+    stop: () => void;
     showAnswer: boolean;
 };
 
@@ -29,7 +29,7 @@ export default function useAnswerFlow({
     isLogin,
     setShowAnswer,
     setResult,
-    resetTimer,
+    stop,
     showAnswer,
 }: useAnswerFlowProps) {
     const { refresh } = useStudyPlan();
@@ -42,7 +42,7 @@ export default function useAnswerFlow({
         if (!currentQuestion || showAnswer) return;
 
         // Stop the timer as soon as the answer is requested.
-        resetTimer?.();
+        stop?.();
         // Set the state to reveal the answer UI.
         setShowAnswer(true);
 

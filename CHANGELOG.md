@@ -2,6 +2,7 @@
 
 - No need to add goals again after a re-login if once done before. Fixes [#46](https://github.com/Razen04/GateQuest/issues/46).
 - A user can't attempt questions from another branch which they can acess via shared link. Fixes [#45](https://github.com/Razen04/GateQuest/issues/45).
+- The timer will now show how much time it took to attempt the question and also won't run after a question is answered.
 
 # v0.10.4 - 2026-03-11
 
