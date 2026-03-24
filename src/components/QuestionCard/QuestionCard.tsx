@@ -142,6 +142,7 @@ const QuestionCard = ({
                     onShare={onShare}
                     onBookmark={onBookmark}
                     marked={marked}
+                    isAnswered={showAnswer}
                 />
 
                 <div className="p-4 sm:p-6">

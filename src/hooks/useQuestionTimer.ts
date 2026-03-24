@@ -5,7 +5,11 @@ import type { Question } from '@/types/storage';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 // Manages the state and logic for a question timer.
-export const useQuestionTimer = (autoTimer = false, currentQuestion?: Question) => {
+export const useQuestionTimer = (
+    autoTimer = false,
+    currentQuestion?: Question,
+    isAnswered = false,
+) => {
     // State to track if the timer is currently running.
     const [isActive, setIsActive] = useState(autoTimer);
     // State to store the elapsed time in seconds.
@@ -52,6 +56,10 @@ export const useQuestionTimer = (autoTimer = false, currentQuestion?: Question) 
     // This effect handles the auto-start behavior based on the user's settings.
     // It runs whenever the current question or the autoTimer setting changes.
     useEffect(() => {
+        if (isAnswered) {
+            stop();
+            return;
+        }
         if (autoTimer) {
             // If auto-timer is on, reset and start the timer for the new question.
             reset();
@@ -67,7 +75,7 @@ export const useQuestionTimer = (autoTimer = false, currentQuestion?: Question) 
                 clearInterval(intervalRef.current);
             }
         };
-    }, [currentQuestion, autoTimer, reset, start]); // Dependencies include the memoized functions.
+    }, [currentQuestion, autoTimer, reset, start, stop, isAnswered]); // Dependencies include the memoized functions.
 
     // Format the elapsed time into a 'MM:SS' string for display.
     const minutes = String(Math.floor(time / 60)).padStart(2, '0');
