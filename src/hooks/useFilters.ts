@@ -18,11 +18,11 @@ const useFilters = (
 ) => {
     // State for each available filter option.
     const [searchQuery, setSearchQuery] = useState('');
-    const [difficultyFilter, setDifficultyFilter] = useState('all');
-    const [yearFilter, setYearFilter] = useState('all');
-    const [topicFilter, setTopicFilter] = useState('all');
+    const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
+    const [yearFilter, setYearFilter] = useState<string[]>([]);
+    const [topicFilter, setTopicFilter] = useState<string[]>([]);
     const [attemptFilter, setAttemptFilter] = useState('unattempted');
-    const [examFilter, setExamFilter] = useState('all');
+    const [examFilter, setExamFilter] = useState<string[]>([]);
 
     // Access the global stats context to get information about attempted questions.
     const { stats } = useContext(StatsContext)!;
@@ -73,18 +73,18 @@ const useFilters = (
         }
 
         // Apply difficulty filter.
-        if (difficultyFilter !== 'all') {
-            filtered = filtered.filter((qn) => qn.difficulty === difficultyFilter);
+        if (difficultyFilter.length > 0) {
+            filtered = filtered.filter((qn) => difficultyFilter.includes(qn.difficulty || ''));
         }
 
         // Apply year filter.
-        if (yearFilter !== 'all') {
-            filtered = filtered.filter((qn) => qn.year?.toString() === yearFilter);
+        if (yearFilter.length > 0) {
+            filtered = filtered.filter((qn) => yearFilter.includes(qn.year?.toString() || ''));
         }
 
         // Apply topic filter.
-        if (topicFilter && topicFilter !== 'all') {
-            filtered = filtered.filter((qn) => qn.topic === topicFilter);
+        if (topicFilter.length > 0) {
+            filtered = filtered.filter((qn) => topicFilter.includes(qn.topic || ''));
         }
 
         // Apply filter for attempted/unattempted questions.
@@ -97,14 +97,12 @@ const useFilters = (
             });
         }
 
-        if (examFilter !== 'all') {
+        if (examFilter.length > 0) {
             filtered = filtered.filter((qn) => {
                 const examData = qn.metadata?.exam;
                 if (!examData) return false;
-
-                return Array.isArray(examData)
-                    ? examData.includes(examFilter.toUpperCase())
-                    : examData === examFilter.toUpperCase();
+                const exams = Array.isArray(examData) ? examData : [examData];
+                return exams.some((e) => examFilter.includes(e.toUpperCase()));
             });
         }
 
