@@ -26,6 +26,7 @@ type QuestionHeaderProps = {
     onBookmark: () => void;
     marked?: boolean | undefined;
     isAnswered: boolean;
+    userCount: number | undefined;
 };
 
 const QuestionHeader = ({
@@ -38,6 +39,7 @@ const QuestionHeader = ({
     onBookmark,
     marked,
     isAnswered,
+    userCount,
 }: QuestionHeaderProps) => {
     // Helper: Normalize difficulty text for display
     const getDifficultyDisplayText = () => {
@@ -140,6 +142,11 @@ const QuestionHeader = ({
                         </span>
                     )}
                 </div>
+            </div>
+
+            <div className="flex items-center mt-1 bg-green-100 dark:bg-gray-800 w-fit text-sm gap-1.5 px-2 py-1">
+                <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                <span>{userCount ?? 1} online</span>
             </div>
         </div>
     );

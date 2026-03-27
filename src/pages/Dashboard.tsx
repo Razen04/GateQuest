@@ -207,7 +207,7 @@ const Dashboard = () => {
                 </div>
             )}
 
-            <Branding className="mt-4 w-full mx-0" />
+            <Branding className="mt-4 w-full" />
         </div>
     );
 };

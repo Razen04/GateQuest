@@ -16,6 +16,7 @@ import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
 import { useGoals } from '@/hooks/useGoals';
 import Branding from '../Branding';
+import { usePresence } from '@/hooks/usePresence';
 
 // Child Components
 
@@ -99,6 +100,7 @@ const QuestionCard = ({
     isLast,
 }: QuestionCardProps) => {
     const { isSubjectInGoal } = useGoals();
+    const { count } = usePresence(question.id);
 
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
@@ -160,6 +162,7 @@ const QuestionCard = ({
                     onBookmark={onBookmark}
                     marked={marked}
                     isAnswered={showAnswer}
+                    userCount={count}
                 />
 
                 <div className="p-4 sm:p-6">
