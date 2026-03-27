@@ -21,6 +21,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import Branding from '@/components/Branding.tsx';
 
 const Practice = () => {
     const navigate = useNavigate();

@@ -15,6 +15,7 @@ import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
 import { useGoals } from '@/hooks/useGoals';
+import Branding from '../Branding';
 
 // Child Components
 
@@ -238,6 +239,8 @@ const QuestionCard = ({
 
                 {/* 7. Footer Badge */}
                 <QuestionBadge currentQuestion={question} />
+
+                <Branding className="mx-4 md:mx-6" />
             </div>
         </div>
     );
