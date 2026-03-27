@@ -4,6 +4,7 @@
 - A user can't attempt questions from another branch which they can acess via shared link. Fixes [#45](https://github.com/Razen04/GateQuest/issues/45).
 - The timer will now show how much time it took to attempt the question and also won't run after a question is answered.
 - Now questions list support multi-filter selection. Fixes [#5](https://github.com/Razen04/GateQuest/issues/5).
+- Now every question in the app will have user engagement shown. Fixes [#49](https://github.com/Razen04/GateQuest/issues/49).
 
 # v0.10.4 - 2026-03-11
 

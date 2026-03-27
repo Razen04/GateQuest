@@ -7,11 +7,11 @@ const Branding = ({ className = '' }) => {
 
     return (
         <div
-            className={`flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}
+            className={`flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}
         >
             {/* Text */}
             <span className="text-sm font-medium text-center text-gray-700 dark:text-gray-200">
-                Enjoying the app? Show some love ❤️! Share it as much as possible.
+                Enjoying the app? Show some love. Share it as much as possible.
             </span>
 
             {/* Actions */}
