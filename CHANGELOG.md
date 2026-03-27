@@ -1,4 +1,4 @@
-# v0.10.5 -
+# v0.10.5 - 2026-03-24
 
 - No need to add goals again after a re-login if once done before. Fixes [#46](https://github.com/Razen04/GateQuest/issues/46).
 - A user can't attempt questions from another branch which they can acess via shared link. Fixes [#45](https://github.com/Razen04/GateQuest/issues/45).
