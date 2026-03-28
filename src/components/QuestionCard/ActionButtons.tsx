@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag, Sparkle } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button.tsx';
 
 type ActionButtonsProps = {
@@ -10,6 +10,9 @@ type ActionButtonsProps = {
     handleShowAnswer?: (() => void) | undefined;
     handleSubmit?: (() => void) | undefined;
     handleExplainationClick: () => void;
+    handleGenerateAIAnswer?: () => void;
+    isGeneratingAI?: boolean;
+    hasAIAnswer?: boolean;
 };
 
 const ActionButtons = ({
@@ -21,6 +24,9 @@ const ActionButtons = ({
     handleShowAnswer,
     handleSubmit,
     handleExplainationClick,
+    handleGenerateAIAnswer,
+    isGeneratingAI,
+    hasAIAnswer,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
@@ -76,9 +82,23 @@ const ActionButtons = ({
                     >
                         <ChatCircle className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Explanation <span className="font-mono">[/]</span>
+                            Explanation <span className="font-mono">[/]</span>
                         </span>
                     </Button>
+
+                    {handleGenerateAIAnswer && !hasAIAnswer && (
+                        <Button
+                            className="flex-1 px-2 py-3 bg-teal-100 text-teal-700 text-base font-semibold hover:bg-teal-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-teal-400 active:scale-95 active:bg-teal-200"
+                            onClick={() => handleGenerateAIAnswer()}
+                            disabled={isGeneratingAI}
+                            title="Generate AI Answer"
+                        >
+                            <Sparkle className="inline text-lg" />
+                            <span className="hidden md:inline ml-2">
+                                {isGeneratingAI ? 'Generating...' : 'AI Answer'}
+                            </span>
+                        </Button>
+                    )}
                 </>
             )}
             {/* Next */}

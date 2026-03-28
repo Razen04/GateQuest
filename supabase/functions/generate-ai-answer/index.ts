@@ -1,6 +1,5 @@
-// Change this:
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-// To this:
+
+
 import { serve } from "std/http/server.ts";
 
 import { encode } from "https://deno.land/std@0.177.0/encoding/base64.ts";

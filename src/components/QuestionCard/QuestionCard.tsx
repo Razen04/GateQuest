@@ -14,6 +14,7 @@ import ActionButtons from '@/components/QuestionCard/ActionButtons';
 import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
+import { useGenerateAIAnswer } from '@/hooks/useGenerateAIAnswer';
 
 // Child Components
 
@@ -98,6 +99,19 @@ const QuestionCard = ({
 }: QuestionCardProps) => {
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
+
+    const [localAiAnswer, setLocalAiAnswer] = React.useState<string | undefined>(question.answer_text);
+    React.useEffect(() => {
+        setLocalAiAnswer(question.answer_text);
+    }, [question.id, question.answer_text]);
+
+    const { generateAIAnswer, isGenerating } = useGenerateAIAnswer();
+
+    const handleGenerateAI = () => {
+        generateAIAnswer(question.id, (newAnswer) => {
+            setLocalAiAnswer(newAnswer);
+        });
+    };
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -203,7 +217,7 @@ const QuestionCard = ({
                     )}
 
                     {/* Question Explanation */}
-                    {showAnswer && <QuestionExplanation question={question} />}
+                    {showAnswer && <QuestionExplanation question={question} customAiAnswer={localAiAnswer} />}
 
                     {/* Action Buttons */}
                     <ActionButtons
@@ -215,6 +229,9 @@ const QuestionCard = ({
                         handleShowAnswer={onShowAnswer}
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
+                        handleGenerateAIAnswer={handleGenerateAI}
+                        isGeneratingAI={isGenerating}
+                        hasAIAnswer={!!localAiAnswer}
                     />
                 </div>
 
