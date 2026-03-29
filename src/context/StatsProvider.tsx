@@ -59,7 +59,13 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         const user = getUserProfile();
 
         // If there's no user or it's a guest user, we don't need to fetch stats.
-        if (!user || user.id === '1' || user.version_number === undefined) {
+        if (
+            !user ||
+            user.id === '1' ||
+            user.version_number === undefined ||
+            !userGoal ||
+            !userGoal.target_exams
+        ) {
             setLoading(false);
             return;
         }
