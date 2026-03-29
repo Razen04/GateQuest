@@ -5,6 +5,7 @@
 - The timer will now show how much time it took to attempt the question and also won't run after a question is answered.
 - Now questions list support multi-filter selection. Fixes [#5](https://github.com/Razen04/GateQuest/issues/5).
 - Now every question in the app will have user engagement shown. Fixes [#49](https://github.com/Razen04/GateQuest/issues/49).
+- Images will be adjusted to dark mode.
 
 # v0.10.4 - 2026-03-11
 
