@@ -13,7 +13,7 @@
         "module": "esnext",
         "moduleResolution": "bundler",
         "target": "esnext",
-        "types": [],
+        "types": ["vitest/globals"],
         // For nodejs:
         // "lib": ["esnext"],
         // "types": ["node"],

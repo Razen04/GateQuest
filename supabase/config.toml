@@ -336,7 +336,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 [functions.generate-ai-answer]
 enabled = true
 verify_jwt = true
-import_map = "./functions/generate-ai-answer/deno.json"
+import_map = "./functions/import_map.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/generate-ai-answer/index.ts"
