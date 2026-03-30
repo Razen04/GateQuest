@@ -94,15 +94,26 @@ ${formattedOptions}
 CORRECT ANSWER: ${correctOptionString}
 
 Your task:
-1. Explain step-by-step WHY the correct answer is right.
-2. State any key concepts, theorems, or formulas used.
-3. Explain why each wrong option is wrong.
+first answer in short crisp correct answer in summary way and then deep dive point by point
+1. THINK deeply: reason through the problem from first principles.
+2. Explain step-by-step WHY the correct answer is right.
+3. State any key concepts, theorems, or formulas used.
+4. Explain why each wrong option is wrong.
+5. Be thorough enough that a student encountering this topic
+   for the first time can understand completely.
 
 CRITICAL FORMATTING RULES:
-- The ENTIRE answer MUST be exactly ONE single line of text. Do NOT use physical newline characters.
-- Use the HTML <br> tag for all line breaks.
+- IMPORTANT: The ENTIRE answer MUST be exactly ONE single line of text. Do NOT use physical newline characters.
+- Do NOT use absolute newline characters (\\n) EXCEPT inside block latex ($$ ... $$) or markdown code blocks (\`\`\` ... \`\`\`).
+- For all other line breaks, use the HTML <br> tag.
+- Use HTML <strong>text</strong> instead of markdown **text** for bold.
+- Use HTML <em>text</em> instead of markdown *text* for italics.
+- Use HTML <ul><li>item</li></ul> or <ol><li>item</li></ol> tags instead of markdown lists.
+- For code blocks, use standard markdown format: \`\`\`language ... \`\`\`.
 - Use $ for inline math and $$ for display math.
-- Output the raw string directly.`;
+- NEVER use \\( or \\[ delimiters — they will break rendering.
+- never use "" use inline codes
+- Output the raw string directly. Do NOT wrap the output in JSON.`;
 
     const geminiPayload = {
         contents: [{ parts: [{ text: promptText }, ...imageParts] }],
