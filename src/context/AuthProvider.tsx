@@ -133,7 +133,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             console.error('Auth error:', error.message);
             toast.error('Failed to log in');
         } else {
-            console.log('Logged in successfully!', data);
             setShowLogin(false); // Close your modal on success
         }
     };

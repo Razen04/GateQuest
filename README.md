@@ -50,18 +50,18 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 
 ## Features
 
-- **Practice Questions**: Access a vast library of GATE PYQ questions (currently only CS), neatly organized by subject, year, and difficulty.
+- **Practice Questions**: Access a vast library of GATE and ISRO PYQ questions across multiple branches (**CS, DA, EC, EE**), neatly organized by subject, year, and difficulty.
+- **Multi-Branch Support**: Seamlessly switch between target branches, with universal subjects (like General Aptitude and Engineering Math) dynamically syncing your progress and mistakes across your profiles.
 - **Bookmarking**: Save challenging questions for later review and focused practice.
-- **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and study time.
-- **Smart Revision**: Use Leitner System to effectively revise your topics.
-- **Topic Test**: Use the topic test feature to attempt questions in a timed environemnt.
+- **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and overall progress count.
+- **Smart Revision**: Use the Leitner System to effectively revise your weak topics with auto-generated weekly recovery sets.
+- **Topic Test**: Use the topic test feature to attempt questions in a timed environment.
 - **Built-in Timer**: Simulate exam conditions with an automatic timer for each question.
 - **Light & Dark Modes**: Switch between themes for a comfortable viewing experience.
 - **Audio Feedback**: Get instant sound cues for correct and incorrect answers.
 - **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.
 - **Cloud Sync**: Your progress and profile are securely synced across devices.
 - **PWA Support**: Install GATEQuest as a Progressive Web App to get the feel of a native app in your system.
-- **Collapsible Sidebar**: Minimize distractions and focus on what matters most.
 
 ## Tech Stack
 
@@ -116,7 +116,7 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/Razen04/GateQuest.git
+    git clone [https://github.com/Razen04/GateQuest.git](https://github.com/Razen04/GateQuest.git)
     cd GateQuest
     ```
 2.  **Install dependencies:**
@@ -124,7 +124,7 @@ To get a local copy up and running, follow these simple steps.
     npm install
     ```
 3.  **Set up local Supabase instance:**
-    - Start the Supabase services:
+    - Start the Supabase services (need Docker installed, read more about it in the guide):
         ```sh
         supabase start
         ```

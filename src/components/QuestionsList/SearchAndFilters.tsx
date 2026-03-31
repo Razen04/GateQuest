@@ -11,6 +11,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from '../ui/select';
+import {
+    Combobox,
+    ComboboxChip,
+    ComboboxChips,
+    ComboboxChipsInput,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxItem,
+    ComboboxList,
+    ComboboxValue,
+} from '../ui/combobox';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -22,18 +33,18 @@ type SearchAndFiltersProps = {
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     showFilters: boolean;
     setShowFilters: React.Dispatch<React.SetStateAction<boolean>>;
-    difficultyFilter: string;
-    setDifficultyFilter: React.Dispatch<React.SetStateAction<string>>;
-    yearFilter: string;
-    setYearFilter: React.Dispatch<React.SetStateAction<string>>;
-    topicFilter: string;
-    setTopicFilter: React.Dispatch<React.SetStateAction<string>>;
+    difficultyFilter: string[];
+    setDifficultyFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    yearFilter: string[];
+    setYearFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    topicFilter: string[];
+    setTopicFilter: React.Dispatch<React.SetStateAction<string[]>>;
     attemptFilter: string;
     setAttemptFilter: React.Dispatch<React.SetStateAction<string>>;
     years: string[];
     topics: string[];
-    examFilter: string;
-    setExamFilter: React.Dispatch<React.SetStateAction<string>>;
+    examFilter: string[];
+    setExamFilter: React.Dispatch<React.SetStateAction<string[]>>;
     availableExams: string[];
 };
 
@@ -62,6 +73,8 @@ const SearchAndFilters = ({
     const currentSubject = getPracticeSubjects().find((s) => s.slug === subject);
 
     const displayExams = currentSubject?.is_universal ? ['GATE', 'ISRO'] : availableExams;
+
+    const difficulties = ['Easy', 'Medium', 'Hard'];
     return (
         <div className="p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
             <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
@@ -100,86 +113,130 @@ const SearchAndFilters = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div>
                                 <Label className="mb-2">Exams</Label>
-                                <Select value={examFilter} onValueChange={(e) => setExamFilter(e)}>
-                                    <SelectTrigger className="w-full rounded-md">
-                                        <SelectValue placeholder="Select an exam" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Target Exams</SelectLabel>
-                                            <SelectItem value="all">All</SelectItem>
-                                            {displayExams.map((exam) => (
-                                                <SelectItem key={exam} value={exam}>
-                                                    {exam.toUpperCase()}
-                                                </SelectItem>
+                                <Combobox
+                                    items={displayExams}
+                                    multiple
+                                    value={examFilter}
+                                    onValueChange={setExamFilter}
+                                >
+                                    <ComboboxChips>
+                                        <ComboboxValue>
+                                            {examFilter.map((e) => (
+                                                <ComboboxChip key={e} showRemove>
+                                                    {e.toUpperCase()}
+                                                </ComboboxChip>
                                             ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                        </ComboboxValue>
+                                        <ComboboxChipsInput placeholder="Select exams" />
+                                    </ComboboxChips>
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>No exams found.</ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(exam) => (
+                                                <ComboboxItem key={exam} value={exam}>
+                                                    {exam.toUpperCase()}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
                             </div>
 
                             <div>
                                 <Label className="mb-2">Difficulty</Label>
-                                <Select
+                                <Combobox
+                                    items={difficulties}
+                                    multiple
                                     value={difficultyFilter}
-                                    onValueChange={(e) => setDifficultyFilter(e)}
+                                    onValueChange={setDifficultyFilter}
                                 >
-                                    <SelectTrigger className="w-full rounded-md">
-                                        <SelectValue placeholder="Select a difficulty" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Difficulties</SelectLabel>
-                                            <SelectItem value="all">All</SelectItem>
-                                            <SelectItem value="Easy">Easy</SelectItem>
-                                            <SelectItem value="Medium">Medium</SelectItem>
-                                            <SelectItem value="Hard">Hard</SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                    <ComboboxChips>
+                                        <ComboboxValue>
+                                            {difficultyFilter.map((d) => (
+                                                <ComboboxChip key={d} showRemove>
+                                                    {d}
+                                                </ComboboxChip>
+                                            ))}
+                                        </ComboboxValue>
+                                        <ComboboxChipsInput placeholder="Select difficulties" />
+                                    </ComboboxChips>
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>No difficulties found.</ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(diff) => (
+                                                <ComboboxItem key={diff} value={diff}>
+                                                    {diff}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
                             </div>
 
                             <div>
                                 <Label className="mb-2">Years</Label>
-                                <Select value={yearFilter} onValueChange={(e) => setYearFilter(e)}>
-                                    <SelectTrigger className="w-full rounded-md">
-                                        <SelectValue placeholder="Select a year" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Years</SelectLabel>
-                                            <SelectItem value="all">All</SelectItem>
-                                            {years.map((year) => (
-                                                <SelectItem key={year} value={year}>
-                                                    {year}
-                                                </SelectItem>
+                                <Combobox
+                                    items={years}
+                                    multiple
+                                    value={yearFilter}
+                                    onValueChange={setYearFilter}
+                                >
+                                    <ComboboxChips>
+                                        <ComboboxValue>
+                                            {yearFilter.map((y) => (
+                                                <ComboboxChip key={y} showRemove>
+                                                    {y}
+                                                </ComboboxChip>
                                             ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                        </ComboboxValue>
+                                        <ComboboxChipsInput placeholder="Select years" />
+                                    </ComboboxChips>
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>No years found.</ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(year) => (
+                                                <ComboboxItem key={year} value={year}>
+                                                    {year}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
                             </div>
 
                             <div>
                                 <Label className="mb-2">Topics</Label>
-                                <Select
+                                <Combobox
+                                    items={topics}
+                                    multiple
                                     value={topicFilter}
-                                    onValueChange={(e) => setTopicFilter(e)}
+                                    onValueChange={setTopicFilter}
                                 >
-                                    <SelectTrigger className="w-full rounded-md">
-                                        <SelectValue placeholder="Select a topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Topics</SelectLabel>
-                                            <SelectItem value="all">All</SelectItem>
-                                            {topics.map((topic) => (
-                                                <SelectItem key={topic} value={topic}>
-                                                    {topic}
-                                                </SelectItem>
+                                    <ComboboxChips>
+                                        <ComboboxValue>
+                                            {topicFilter.map((t) => (
+                                                <ComboboxChip
+                                                    key={t}
+                                                    showRemove
+                                                    className="max-w-[150px] truncate"
+                                                >
+                                                    {t}
+                                                </ComboboxChip>
                                             ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                        </ComboboxValue>
+                                        <ComboboxChipsInput placeholder="Select topics" />
+                                    </ComboboxChips>
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>No topics found.</ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(topic) => (
+                                                <ComboboxItem key={topic} value={topic}>
+                                                    {topic}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
                             </div>
 
                             <div>

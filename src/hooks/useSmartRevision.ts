@@ -6,7 +6,6 @@ import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from './useGoals.ts';
 import type { RevisionQuestion } from '@/types/storage.ts';
-import useAuth from './useAuth.ts';
 
 export type WeeklySet = {
     success: boolean;

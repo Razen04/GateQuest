@@ -7,14 +7,24 @@ Welcome to the GATEQuest database documentation. This document provides a detail
 The database is designed around a few core concepts. Understanding their relationships is key to understanding the application.
 
 - **`users`**: Stores the public-facing profiles for everyone who signs up. This is linked to Supabase's private `auth.users` table.
-- **`questions`**: Contains all the GATE exam questions. This is the central content of the app.
+- **`user_goals`**: Stores the user goals, i.e., the branch and the exams he/she is preparing for.
+- **`branches`**: Stores the master list of academic disciplines like CS, ME, and EE.
+- **`exams`**: Contains the official names and short names of all supported competitive exams.
+- **`branch_exams`**: A junction table that maps which exams are applicable to which academic branches.
+- **`subjects`**: A global list of all subjects featuring metadata like icons, theme colors, and difficulty scores.
+- **`exams_subjects`**: Maps specific subjects to the exams they appear in for syllabus categorization.
+- **`branch_subjects`**: Links subjects to branches to ensure users only see content relevant to their stream.
+- **`questions`**: Contains all the exam questions. This is the central content of the app.
 - **`user_question_activity`**: Acts as a logbook. Every time a user attempts a question, a record is created here, linking a `user` to a `question`.
 - **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question, calculated from the `user_question_activity` data.
 - **`question_reports`**: Allows users to report issues with specific questions.
 - **`notifications`**: A simple table for storing in-app notifications for users.
-- **`user_incorrect_queue`**: Table to store the incorrect attemtps of the user and then helps in Smart Revision
-- **`weekly_revision_set`**: Table to store the weekly set of each user.
-- **`revision_set_questions`**: Table to store the revision questions corresponding to each set.
+- **`user_incorrect_queue`**: Stores the incorrect attempts of the user and helps power Smart Revision.
+- **`weekly_revision_set`**: Stores the weekly revision set for each user.
+- **`revision_set_questions`**: Stores the revision questions corresponding to each revision set.
+- **`donations`**: Stores the donations which are done via the app.
+- **`topic_tests`**: Stores user test sessions, including selected topics, test state, timing, and final performance summary.
+- **`topic_tests_attempts`**: Stores per-question data for each test session, including user answers, time spent, and status.
 
 ---
 
@@ -26,19 +36,20 @@ This section provides a detailed breakdown of each table in the `public` schema.
 
 Stores public profile information for authenticated users. This table is linked 1-to-1 with the private `auth.users` table.
 
-| Column Name          | Data Type     | Constraints & Defaults                          | Description                                                                  |
-| :------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------- |
-| `id`                 | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`. |
-| `joined_at`          | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                             |
-| `email`              | `text`        | `NULL` allowed                                  | The user's email address.                                                    |
-| `name`               | `text`        | `NULL` allowed                                  | The user's full display name.                                                |
-| `avatar`             | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                         |
-| `show_name`          | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.              |
-| `total_xp`           | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                        |
-| `settings`           | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                            |
-| `college`            | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                               |
-| `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                    |
-| `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                       |
+| Column Name          | Data Type     | Constraints & Defaults                          | Description                                                                        |
+| :------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------------- |
+| `id`                 | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.       |
+| `joined_at`          | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                   |
+| `email`              | `text`        | `NULL` allowed                                  | The user's email address.                                                          |
+| `name`               | `text`        | `NULL` allowed                                  | The user's full display name.                                                      |
+| `avatar`             | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                               |
+| `show_name`          | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                    |
+| `total_xp`           | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                              |
+| `settings`           | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                                  |
+| `college`            | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                     |
+| `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                          |
+| `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                             |
+| `version_number`     | `integer`     | `DEFAULT 1`                                     | Used for versioning or schema updates related to user settings Clear Data feature. |
 
 **Row Level Security (RLS) Policies:**
 
@@ -51,61 +62,80 @@ Stores public profile information for authenticated users. This table is linked 
 
 Contains the full details for every question in the GATEQuest database.
 
-| Column Name       | Data Type     | Constraints & Defaults                                 | Description                                                                                                                             |
-| :---------------- | :------------ | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`              | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT gen_random_uuid()` | The unique identifier for the question.                                                                                                 |
-| `year`            | `integer`     | `NOT NULL`                                             | The year the question appeared in the GATE exam.                                                                                        |
-| `question_number` | `integer`     | `NULL` allowed                                         | The original question number from the exam paper.                                                                                       |
-| `subject`         | `text`        | `NOT NULL`                                             | The main subject of the question (e.g., "Quantitative Aptitude").                                                                       |
-| `topic`           | `text`        | `NULL` allowed                                         | The specific topic within the subject (e.g., "Logarithms").                                                                             |
-| `question_type`   | `text`        | `NOT NULL`                                             | The type of question (e.g., "multiple-choice", "numerical").                                                                            |
-| `question`        | `text`        | `NOT NULL`                                             | The full text of the question, can include Markdown/HTML.                                                                               |
-| `options`         | `text[]`      | `NULL` allowed                                         | An array of strings representing the choices for multiple-choice questions.                                                             |
-| `correct_answer`  | `jsonb`       | `NOT NULL`                                             | A JSON object containing the correct answer(s). For MCQ, this is typically an array with the index of the correct option (e.g., `[2]`). |
-| `answer_text`     | `text`        | `NULL` allowed                                         | A textual representation of the answer for non-MCQ types.                                                                               |
-| `difficulty`      | `text`        | `NULL` allowed                                         | The difficulty level (e.g., 'Easy', 'Medium', 'Hard').                                                                                  |
-| `marks`           | `integer`     | `NULL` allowed                                         | The number of marks the question is worth.                                                                                              |
-| `tags`            | `text[]`      | `NULL` allowed                                         | An array of strings for tagging and categorization.                                                                                     |
-| `source`          | `text`        | `NULL` allowed                                         | The original source of the question (e.g., "gateoverflow").                                                                             |
-| `source_url`      | `text`        | `NULL` allowed                                         | A URL to the original question source.                                                                                                  |
-| `added_by`        | `text`        | `NULL` allowed                                         | Identifier for who added the question to the database.                                                                                  |
-| `verified`        | `boolean`     | `DEFAULT false`                                        | A flag to indicate if the question has been verified for accuracy.                                                                      |
-| `explanation`     | `text`        | `NULL` allowed                                         | A detailed explanation or solution for the question.                                                                                    |
-| `metadata`        | `jsonb`       | `NULL` allowed                                         | A JSON object for any extra metadata.                                                                                                   |
-| `created_at`      | `timestamptz` | `DEFAULT now()`                                        | The timestamp when the question was added to the database.                                                                              |
+| Column Name       | Data Type | Constraints & Defaults                      | Description                                                       |
+| :---------------- | :-------- | :------------------------------------------ | :---------------------------------------------------------------- |
+| `id`              | `uuid`    | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`  | The unique identifier for the question.                           |
+| `year`            | `integer` | `NULL` allowed                              | The year the question appeared in the GATE exam.                  |
+| `question_number` | `integer` | `NULL` allowed                              | The original question number from the exam paper.                 |
+| `subject`         | `text`    | `NULL` allowed                              | The main subject of the question (e.g., "Quantitative Aptitude"). |
+| `subject_id`      | `uuid`    | `FOREIGN KEY → subjects.id`, `NULL` allowed | References the subject associated with the question.              |
+| `topic`           | `text`    | `NULL` allowed                              | The specific topic within the subject (e.g., "Logarithms").       |
+| `question_type`   | `text`    | `NULL` allowed                              | The type of question (e.g., "multiple-choice", "numeric").        |
+| `question`        | `text`    | `NULL` allowed                              | The full text of the question.                                    |
+| `options`         | `text[]`  | `NULL` allowed                              | An array of options for MCQ/MSQ questions.                        |
+| `correct_answer`  | `jsonb`   | `NULL` allowed                              | JSON object containing the correct answer(s).                     |
+| `answer_text`     | `text`    | `NULL` allowed                              | Stores the AI explainations for the question.                     |
+| `difficulty`      | `text`    | `NULL` allowed                              | Difficulty level (e.g., Easy, Medium, Hard).                      |
+| `marks`           | `integer` | `NULL` allowed                              | Marks assigned to the question.                                   |
+| `tags`            | `text[]`  | `NULL` allowed                              | Tags used for categorization.                                     |
+| `source`          | `text`    | `NULL` allowed                              | Source of the question.                                           |
+| `source_url`      | `text`    | `NULL` allowed                              | URL pointing to the original source.                              |
+| `added_by`        | `text`    | `NULL` allowed                              | Identifier of the contributor who added the question.             |
+| `verified`        | `boolean` | `DEFAULT false`                             | Indicates whether the question has been verified.                 |
+| `explanation`     | `text`    | `NULL` allowed                              | Explanation or solution for the question.                         |
+| `metadata`        | `jsonb`   | `NULL` allowed                              | Extra metadata such as exam, paper type, or set.                  |
+
+**Indexes**
+
+- `idx_questions_exams_path` → `GIN` index on `metadata`
 
 **Row Level Security (RLS) Policies:**
 
-- **Policy:** Anyone, including logged-out users, can read questions.
+- **Policy:** Anyone (including unauthenticated users) can read questions.
 - **SQL Logic:** `FOR SELECT USING (true)`
 
 ---
 
-### Table: `public.user_question_activity`
+### Table: `public.user_questions_activity`
 
-Logs every attempt a user makes on a question. This table is crucial for tracking progress and calculating statistics.
+Logs every attempt a user makes on a question. This table is crucial for tracking user progress, analytics, and Smart Revision features.
 
-| Column Name      | Data Type     | Constraints & Defaults                                 | Description                                                                                                               |
-| :--------------- | :------------ | :----------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| `id`             | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT gen_random_uuid()` | The unique identifier for this specific attempt.                                                                          |
-| `user_id`        | `uuid`        | `NULL` allowed                                         | Foreign key that references `public.users.id`. The user who made the attempt.                                             |
-| `question_id`    | `text`        | `NULL` allowed                                         | The ID of the question that was attempted. **Note:** This should likely be a `uuid` with a foreign key to `questions.id`. |
-| `subject`        | `text`        | `NULL` allowed                                         | The subject of the question at the time of the attempt.                                                                   |
-| `was_correct`    | `boolean`     | `NULL` allowed                                         | `true` if the user's answer was correct, `false` otherwise.                                                               |
-| `time_taken`     | `bigint`      | `NULL` allowed                                         | The time in seconds the user took to answer.                                                                              |
-| `attempted_at`   | `timestamptz` | `DEFAULT now()`                                        | The timestamp of when the attempt was made.                                                                               |
-| `attempt_number` | `bigint`      | `NULL` allowed                                         | The attempt number for this user on this specific question (1 for the first time, 2 for the second, etc.).                |
+| Column Name           | Data Type     | Constraints & Defaults                     | Description                                        |
+| :-------------------- | :------------ | :----------------------------------------- | :------------------------------------------------- |
+| `id`                  | `uuid`        | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for this attempt.                |
+| `user_id`             | `uuid`        | `FOREIGN KEY → users.id`                   | The user who made the attempt.                     |
+| `question_id`         | `uuid`        | `FOREIGN KEY → questions.id`               | The question that was attempted.                   |
+| `subject`             | `text`        | `NULL` allowed                             | Denormalized subject name for quick access.        |
+| `subject_id`          | `uuid`        | `FOREIGN KEY → subjects.id`                | The subject associated with the question.          |
+| `branch_id`           | `text`        | `FOREIGN KEY → branches.id`                | The branch of the user at the time of the attempt. |
+| `was_correct`         | `boolean`     |                                            | `true` if correct, `false` otherwise.              |
+| `time_taken`          | `bigint`      |                                            | Time taken to answer in seconds.                   |
+| `attempted_at`        | `timestamptz` | `DEFAULT current_timestamp`                | When the attempt occurred.                         |
+| `attempt_number`      | `bigint`      | `DEFAULT 1`                                | The nth attempt on this question by the user.      |
+| `user_version_number` | `integer`     | `DEFAULT 1`                                | Versioning for tracking schema/user changes.       |
 
 **Relationships:**
 
-- Many-to-One: `user_question_activity.user_id` references `public.users.id`.
+- Many-to-One: `user_id` → `users.id`
+- Many-to-One: `question_id` → `questions.id`
+- Many-to-One: `subject` → `subjects.id`
+- Many-to-One: `branch_id` → `branches.id`
 
 **Row Level Security (RLS) Policies:**
 
-- **Insert Policy:** A user can only insert activity logs for themselves.
-- **SQL Logic:** `FOR INSERT WITH CHECK (auth.uid() = user_id)`
-- **Select Policy:** A user can only read their own activity logs.
-- **SQL Logic:** `FOR SELECT USING (auth.uid() = user_id)`
+- **Insert Policy:** Users can only insert activity records for themselves.  
+  **SQL Logic:** `FOR INSERT WITH CHECK (auth.uid() = user_id)`
+
+- **Select Policy:** Users can only read their own activity records.  
+  **SQL Logic:** `FOR SELECT USING (auth.uid() = user_id)`
+
+**Indexes:**
+
+| Index Name                       | Columns                                 | Type   | Purpose / Notes                                                                 |
+| -------------------------------- | --------------------------------------- | ------ | ------------------------------------------------------------------------------- |
+| Primary Key (default)            | `id`                                    | B-tree | Ensures uniqueness of each attempt.                                             |
+| `idx_uqa_question_first_attempt` | `question_id`                           | B-tree | Optimizes queries fetching the first attempt per question for analytics.        |
+| `idx_user_attempt` (view)        | `user_id, attempt_number, attempted_at` | B-tree | Speeds up queries for user-specific attempts, used in dashboards and revisions. |
 
 ---
 
@@ -131,31 +161,43 @@ Stores aggregated performance data for each question, allowing users to compare 
 - **Policy:** Anyone, including logged-out users, can read these statistics.
 - **SQL Logic:** `FOR SELECT USING (true)`
 
+**Indexes:**
+
+| Index Name                 | Columns       | Type   | Purpose / Notes                                  |
+| -------------------------- | ------------- | ------ | ------------------------------------------------ |
+| `question_peer_stats_pkey` | `question_id` | B-tree | Primary key index ensuring one row per question. |
+
 ---
 
 ### Table: `public.question_reports`
 
 Allows authenticated users to report problems with questions.
 
-| Column Name   | Data Type   | Constraints & Defaults                                  | Description                                                                 |
-| :------------ | :---------- | :------------------------------------------------------ | :-------------------------------------------------------------------------- |
-| `id`          | `uuid`      | `PRIMARY KEY`, `NOT NULL`, `DEFAULT uuid_generate_v4()` | The unique identifier for the report.                                       |
-| `user_id`     | `uuid`      | `NOT NULL`                                              | Foreign key referencing `public.users.id`. The user who filed the report.   |
-| `question_id` | `uuid`      | `NULL` allowed                                          | Foreign key referencing `public.questions.id`. The question being reported. |
-| `report_type` | `text`      | `NULL` allowed                                          | The category of the report (e.g., 'Incorrect Answer', 'Typo').              |
-| `report_text` | `text`      | `NOT NULL`                                              | The user's detailed description of the issue.                               |
-| `status`      | `text`      | `DEFAULT 'pending'`                                     | The status of the report (e.g., 'pending', 'resolved').                     |
-| `created_at`  | `timestamp` | `DEFAULT now()`                                         | The timestamp when the report was created.                                  |
+| Column Name   | Data Type   | Constraints & Defaults                                  | Description                                                       |
+| :------------ | :---------- | :------------------------------------------------------ | :---------------------------------------------------------------- |
+| `id`          | `uuid`      | `PRIMARY KEY`, `NOT NULL`, `DEFAULT uuid_generate_v4()` | The unique identifier for the report.                             |
+| `user_id`     | `uuid`      | `NOT NULL`                                              | Foreign key → `public.users.id`. The user who filed the report.   |
+| `question_id` | `uuid`      | `NULL` allowed                                          | Foreign key → `public.questions.id`. The question being reported. |
+| `report_type` | `text`      | `NULL` allowed                                          | Category of the report (e.g., 'Incorrect Answer', 'Typo').        |
+| `report_text` | `text`      | `NOT NULL`                                              | Detailed description of the issue.                                |
+| `status`      | `text`      | `DEFAULT 'pending'`                                     | Report status (e.g., 'pending', 'resolved').                      |
+| `created_at`  | `timestamp` | `DEFAULT now()`                                         | When the report was created.                                      |
 
 **Relationships:**
 
-- Many-to-One: `question_reports.user_id` references `public.users.id`.
-- Many-to-One: `question_reports.question_id` references `public.questions.id`.
+- Many-to-One: `question_reports.user_id` → `public.users.id`
+- Many-to-One: `question_reports.question_id` → `public.questions.id`
 
 **Row Level Security (RLS) Policies:**
 
 - **Policy:** Only authenticated users can create a report for their own user ID.
 - **SQL Logic:** `FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id)`
+
+**Indexes:**
+
+| Index Name              | Columns | Type   | Purpose / Notes                         |
+| ----------------------- | ------- | ------ | --------------------------------------- |
+| `question_reports_pkey` | `id`    | B-tree | Primary key ensuring unique report IDs. |
 
 ---
 
@@ -177,6 +219,14 @@ Stores in-app notifications to be displayed to users.
 - **Policy:** Anyone can read active notifications.
 - **SQL Logic:** `FOR SELECT USING (true)`
 
+**Indexes:**
+
+| Index Name           | Columns | Type   | Purpose / Notes                               |
+| -------------------- | ------- | ------ | --------------------------------------------- |
+| `notifications_pkey` | `id`    | B-tree | Primary key ensuring unique notification IDs. |
+
+---
+
 ### Table: `public.user_incorrect_queue`
 
 Tracks questions a user has answered incorrectly and schedules them for future review (e.g., spaced repetition).
@@ -189,11 +239,6 @@ Tracks questions a user has answered incorrectly and schedules them for future r
 | `added_at`       | `timestamptz` | `DEFAULT now()`                                       | When the question was added to the incorrect queue.   |
 | `next_review_at` | `timestamptz` | `DEFAULT current_date`                                | The next scheduled review date for the question.      |
 
-**Indexes:**
-
-- `idx_users_added (user_id, added_at)` – Speeds up lookups by user and insertion time.
-- `idx_next_reviewed (user_id, added_at, next_review_at)` – Optimizes review scheduling queries.
-
 **Row Level Security (RLS) Policies:**
 
 - **Select:** Users can only read their own incorrect questions.
@@ -204,6 +249,14 @@ Tracks questions a user has answered incorrectly and schedules them for future r
     - `FOR UPDATE USING (user_id = auth.uid())`
 - **Delete:** Users can only delete their own rows.
     - `FOR DELETE USING (user_id = auth.uid())`
+
+**Indexes:**
+
+| Index Name                  | Columns                             | Type   | Purpose / Notes                                     |
+| --------------------------- | ----------------------------------- | ------ | --------------------------------------------------- |
+| `user_incorrect_queue_pkey` | `user_id, question_id`              | B-tree | Ensures uniqueness per user-question pair.          |
+| `idx_next_reviewed`         | `user_id, added_at, next_review_at` | B-tree | Optimizes fetching questions due for review.        |
+| `idx_users_added`           | `user_id, added_at`                 | B-tree | Speeds up queries based on insertion order/history. |
 
 ---
 
@@ -223,29 +276,37 @@ Defines the lifecycle state of a weekly revision set.
 
 Represents a weekly revision session generated for a user.
 
-| Column Name       | Data Type         | Constraints & Defaults                     | Description                                              |
-| :---------------- | :---------------- | :----------------------------------------- | :------------------------------------------------------- |
-| `id`              | `uuid`            | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the revision set.                  |
-| `generated_for`   | `uuid`            | `REFERENCES users(id)`                     | The user for whom the revision set was generated.        |
-| `start_of_week`   | `date`            | `NOT NULL`                                 | The start date of the week this revision set applies to. |
-| `status`          | `revision_status` | `DEFAULT 'pending'`                        | Current status of the revision set.                      |
-| `created_at`      | `timestamptz`     | `DEFAULT now()`                            | When the revision set was created.                       |
-| `started_at`      | `timestamptz`     | `NULL` allowed                             | When the user started the revision set.                  |
-| `expires_at`      | `timestamptz`     | `NULL` allowed                             | When the revision set expires.                           |
-| `total_questions` | `int`             | `DEFAULT 0`                                | Total number of questions in the revision set.           |
-| `correct_count`   | `int`             | `DEFAULT 0`                                | Number of correctly answered questions.                  |
-| `accuracy`        | `numeric(5,2)`    | `NULL` allowed                             | Accuracy percentage for the revision set.                |
+| Column Name       | Data Type      | Constraints & Defaults                     | Description                                          |
+| :---------------- | :------------- | :----------------------------------------- | :--------------------------------------------------- |
+| `id`              | `uuid`         | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the revision set.              |
+| `generated_for`   | `uuid`         | `REFERENCES users(id)`                     | The user for whom the revision set was generated.    |
+| `branch_id`       | `text`         | `REFERENCES branches.id`                   | The branch of the user for this revision set.        |
+| `start_of_week`   | `date`         | `NOT NULL`                                 | Start date of the week this revision set applies to. |
+| `status`          | `text`         | `DEFAULT 'pending'`                        | Current status: pending / started / completed.       |
+| `created_at`      | `timestamptz`  | `DEFAULT current_timestamp`                | When the revision set was created.                   |
+| `started_at`      | `timestamptz`  | `NULL` allowed                             | When the user started the revision set.              |
+| `expires_at`      | `timestamptz`  | `DEFAULT started_at + interval '24 hours'` | When the revision set expires.                       |
+| `total_questions` | `int`          | `DEFAULT 0`                                | Total number of questions in the revision set.       |
+| `correct_count`   | `int`          | `DEFAULT 0`                                | Number of correctly answered questions.              |
+| `accuracy`        | `numeric(5,2)` | `NULL` allowed                             | Accuracy percentage for the revision set.            |
+| `exam_tags`       | `text[]`       | `NULL` allowed                             | Tags of exams/topics included in this revision set.  |
 
 **Row Level Security (RLS) Policies:**
 
-- **Select:** Users can only read their own revision sets.
-    - `FOR SELECT USING (generated_for = auth.uid())`
-- **Insert:** Users can only create revision sets for themselves.
-    - `FOR INSERT WITH CHECK (generated_for = auth.uid())`
-- **Update:** Users can only update their own revision sets.
-    - `FOR UPDATE USING (generated_for = auth.uid())`
-- **Delete:** Users can only delete their own revision sets.
-    - `FOR DELETE USING (generated_for = auth.uid())`
+- **Select:** Users can only read their own revision sets.  
+  `FOR SELECT USING (generated_for = auth.uid())`
+- **Insert:** Users can only create revision sets for themselves.  
+  `FOR INSERT WITH CHECK (generated_for = auth.uid())`
+- **Update:** Users can only update their own revision sets.  
+  `FOR UPDATE USING (generated_for = auth.uid())`
+- **Delete:** Users can only delete their own revision sets.  
+  `FOR DELETE USING (generated_for = auth.uid())`
+
+**Indexes:**
+
+| Index Name                 | Columns | Type   | Purpose / Notes                            |
+| -------------------------- | ------- | ------ | ------------------------------------------ |
+| `weekly_revision_set_pkey` | `id`    | B-tree | Primary key ensuring unique revision sets. |
 
 ---
 
@@ -264,6 +325,198 @@ Stores the questions included in a weekly revision set along with user performan
 
 - Uses a composite primary key (`set_id`, `question_id`) to ensure each question appears only once per revision set.
 - Rows are automatically removed when the parent revision set is deleted due to `ON DELETE CASCADE`.
+- RLS is **disabled**, so the table can be accessed by anyone via the Data API.
+
+**Indexes:**
+
+| Index Name                    | Columns               | Type   | Purpose / Notes                                         |
+| ----------------------------- | --------------------- | ------ | ------------------------------------------------------- |
+| `revision_set_questions_pkey` | `set_id, question_id` | B-tree | Composite primary key ensuring unique question per set. |
+
+---
+
+### Table: `public.branches`
+
+Stores the list of academic disciplines (e.g., CS, ME, EE).
+
+| Column Name | Data Type | Constraints & Defaults | Description                     |
+| ----------- | --------- | ---------------------- | ------------------------------- |
+| `id`        | `text`    | `PRIMARY KEY`          | Branch code (e.g., CS, ME, EE). |
+| `name`      | `text`    | `NOT NULL`             | Full name of the branch.        |
+
+**Indexes:**
+
+| Index Name      | Columns | Type   | Purpose / Notes                         |
+| --------------- | ------- | ------ | --------------------------------------- |
+| `branches_pkey` | `id`    | B-tree | Primary key ensuring unique branch IDs. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.exams`
+
+Stores all supported competitive exams.
+
+| Column Name  | Data Type | Constraints & Defaults | Description                                |
+| ------------ | --------- | ---------------------- | ------------------------------------------ |
+| `id`         | `text`    | `PRIMARY KEY`          | Exam code (e.g., GATE).                    |
+| `name`       | `text`    | `NOT NULL`             | Official name of the exam for the display. |
+| `short_name` | `text`    | `NOT NULL`             | Short name for storing.                    |
+
+**Indexes:**
+
+| Index Name   | Columns | Type   | Purpose / Notes                    |
+| ------------ | ------- | ------ | ---------------------------------- |
+| `exams_pkey` | `id`    | B-tree | Primary key ensuring unique exams. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.branch_exams`
+
+Maps which exams apply to which branches.
+
+| Column Name | Data Type | Constraints & Defaults         | Description                      |
+| ----------- | --------- | ------------------------------ | -------------------------------- |
+| `branch_id` | `text`    | `NOT NULL`, `FK → branches.id` | Branch associated with the exam. |
+| `exam_id`   | `text`    | `NOT NULL`, `FK → exams.id`    | Exam associated with the branch. |
+
+**Indexes:**
+
+| Index Name          | Columns              | Type   | Purpose / Notes                             |
+| ------------------- | -------------------- | ------ | ------------------------------------------- |
+| `branch_exams_pkey` | `branch_id, exam_id` | B-tree | Composite primary key to ensure uniqueness. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.subjects`
+
+Stores global subjects with metadata.
+
+| Column Name        | Data Type | Constraints & Defaults | Description                                    |
+| ------------------ | --------- | ---------------------- | ---------------------------------------------- |
+| `id`               | `uuid`    | `PRIMARY KEY`          | Unique subject identifier.                     |
+| `slug`             | `text`    | `UNIQUE`               | URL-friendly identifier (e.g., eng-maths).     |
+| `name`             | `text`    | `NOT NULL`             | Display name of the subject.                   |
+| `icon_name`        | `text`    |                        | Icon associated with the subject.              |
+| `theme_color`      | `text`    |                        | Theme color for UI display.                    |
+| `difficulty_score` | `float`   | `DEFAULT 0.5`          | Difficulty metric (0–1).                       |
+| `question_count`   | `int`     | `DEFAULT 0`            | Number of questions available in this subject. |
+| `category`         | `text`    |                        | Optional category grouping.                    |
+| `is_universal`     | `boolean` | `DEFAULT false`        | True if applicable across all branches/exams.  |
+
+**Indexes:**
+
+| Index Name          | Columns | Type   | Purpose / Notes       |
+| ------------------- | ------- | ------ | --------------------- |
+| `subjects_pkey`     | `id`    | B-tree | Primary key.          |
+| `subjects_slug_key` | `slug`  | B-tree | Ensures unique slugs. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.exams_subjects`
+
+Maps subjects to exams.
+
+| Column Name  | Data Type | Constraints & Defaults         | Description                       |
+| ------------ | --------- | ------------------------------ | --------------------------------- |
+| `exams_id`   | `text`    | `NOT NULL`, `FK → exams.id`    | Exam associated with the subject. |
+| `subject_id` | `uuid`    | `NOT NULL`, `FK → subjects.id` | Subject included in the exam.     |
+
+**Indexes:**
+
+| Index Name            | Columns                | Type   | Purpose / Notes        |
+| --------------------- | ---------------------- | ------ | ---------------------- |
+| `exams_subjects_pkey` | `exams_id, subject_id` | B-tree | Composite primary key. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.branch_subjects`
+
+Maps subjects to branches.
+
+| Column Name  | Data Type | Constraints & Defaults | Description                         |
+| ------------ | --------- | ---------------------- | ----------------------------------- |
+| `branch_id`  | `text`    | `FK → branches.id`     | Branch associated with the subject. |
+| `subject_id` | `uuid`    | `FK → subjects.id`     | Subject associated with the branch. |
+
+**Indexes:**
+
+| Index Name             | Columns                 | Type   | Purpose / Notes        |
+| ---------------------- | ----------------------- | ------ | ---------------------- |
+| `branch_subjects_pkey` | `branch_id, subject_id` | B-tree | Composite primary key. |
+
+**RLS / Policies:** Public read via `SELECT`.
+
+---
+
+### Table: `public.user_goals`
+
+Stores the goals of a user, including branch and target exams.
+
+| Column Name    | Data Type | Constraints & Defaults | Description                             |
+| -------------- | --------- | ---------------------- | --------------------------------------- |
+| `id`           | `uuid`    | `PRIMARY KEY`          | Unique identifier for this goal record. |
+| `user_id`      | `uuid`    | `FK → users.id`        | User who owns this goal.                |
+| `branch_id`    | `text`    | `FK → branches.id`     | Branch selected by the user.            |
+| `target_exams` | `jsonb`   |                        | IDs of exams the user is targeting.     |
+| `is_active`    | `boolean` | `DEFAULT true`         | Whether this goal is currently active.  |
+
+**Indexes:**
+
+| Index Name                         | Columns              | Type   | Purpose / Notes                                |
+| ---------------------------------- | -------------------- | ------ | ---------------------------------------------- |
+| `user_goals_pkey`                  | `id`                 | B-tree | Primary key.                                   |
+| `idx_user_goals_user_branch`       | `user_id, branch_id` | B-tree | Optimizes fetching goals per user and branch.  |
+| `user_goals_user_id_branch_id_key` | `user_id, branch_id` | B-tree | Ensures uniqueness of user-branch combination. |
+
+**RLS / Policies:**
+
+- Users can only manage their own goals.  
+  `USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id)`
+
+---
+
+### Table: `public.donations`
+
+Stores donation records submitted by users or guests, including amounts, messages, and verification status.
+
+| Column Name        | Data Type       | Constraints & Defaults                     | Description                                               |
+| ------------------ | --------------- | ------------------------------------------ | --------------------------------------------------------- |
+| `id`               | `uuid`          | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique donation ID.                                       |
+| `user_id`          | `uuid`          | `NULL`, `FK → users.id`                    | User who made the donation; NULL if submitted by a guest. |
+| `anonymous`        | `boolean`       | `DEFAULT false`                            | True if donor wants to hide their name.                   |
+| `message`          | `text`          |                                            | Optional message from the donor (max 100 chars).          |
+| `suggested_amount` | `numeric(10,2)` |                                            | Amount suggested by the donor.                            |
+| `actual_amount`    | `numeric(10,2)` |                                            | Verified amount received.                                 |
+| `utr`              | `text`          | `UNIQUE`                                   | UPI transaction reference number.                         |
+| `verified`         | `boolean`       | `DEFAULT false`                            | True after manual verification.                           |
+| `created_at`       | `timestamp`     | `DEFAULT current_timestamp`                | Time the donation was submitted.                          |
+| `verified_at`      | `timestamp`     |                                            | Time when the donation was verified manually.             |
+
+**Indexes:**
+
+| Index Name               | Columns    | Type   | Purpose / Notes                                            |
+| ------------------------ | ---------- | ------ | ---------------------------------------------------------- |
+| `donations_pkey`         | `id`       | B-tree | Primary key ensuring unique donation IDs.                  |
+| `donations_utr_key`      | `utr`      | B-tree | Enforces unique UPI transaction references.                |
+| `idx_donations_utr`      | `utr`      | B-tree | Optimizes lookup by UTR for verification.                  |
+| `idx_donations_verified` | `verified` | B-tree | Optimizes queries filtering verified/unverified donations. |
+
+**RLS / Policies:**
+
+- **Insert:** Guest and logged-in users can insert donations.  
+  `FOR INSERT TO public`
+- **Select:** Anyone can read donations.  
+  `FOR SELECT TO public`
 
 ---
 
@@ -273,127 +526,137 @@ Custom SQL functions to handle complex logic directly in the database.
 
 ### Function: `insert_user_question_activity_batch(batch jsonb)`
 
-- **Purpose:**
-    - Processes a batch of user question attempts and applies different behaviors depending on whether the attempt occurs during **practice mode** or an **active weekly revision set**.
-    - Records practice attempts in `user_question_activity`.
-    - Updates the spaced-repetition queue in `user_incorrect_queue` **only for official revision attempts**.
-    - Updates progress, accuracy, and completion state for an active `weekly_revision_set`.
+**Purpose:**  
+Processes a batch of user question attempts, handling both **practice mode** and **active weekly revision sets**.
 
----
+- Logs practice attempts in `user_question_activity`.
+- Updates the spaced-repetition queue in `user_incorrect_queue` **only for official revision attempts**.
+- Updates progress, accuracy, and completion status for an active `weekly_revision_set`.
 
-- **Arguments:**
-    - **batch (jsonb):**  
-      A JSON array of question attempt objects. Each object must include:
+**Arguments:**
 
-        | Field Name     | Type          | Description                                          |
-        | -------------- | ------------- | ---------------------------------------------------- |
-        | `user_id`      | `uuid`        | The user attempting the question.                    |
-        | `question_id`  | `uuid`        | The question being attempted.                        |
-        | `subject`      | `text`        | Question subject (used for practice history).        |
-        | `was_correct`  | `boolean`     | Whether the answer was correct. Defaults to `false`. |
-        | `time_taken`   | `int`         | Time spent answering, in seconds.                    |
-        | `attempted_at` | `timestamptz` | When the attempt occurred.                           |
+- `batch (jsonb)` – A JSON array of question attempt objects. Each object must include:
 
----
+| Field Name     | Type          | Description                                       |
+| -------------- | ------------- | ------------------------------------------------- |
+| `user_id`      | `uuid`        | User attempting the question.                     |
+| `question_id`  | `uuid`        | The question being attempted.                     |
+| `subject`      | `text`        | Question subject (for practice history).          |
+| `subject_id`   | `uuid`        | Subject ID reference (used for tracking).         |
+| `branch_id`    | `text`        | User’s branch at the time of attempt.             |
+| `was_correct`  | `boolean`     | Whether the answer was correct (default `false`). |
+| `time_taken`   | `int`         | Time spent answering in seconds.                  |
+| `attempted_at` | `timestamptz` | Timestamp of the attempt.                         |
 
-- **Core Concepts:**
-    - **Revision States:**
-        - `none` – Practice attempt (not part of a revision set).
-        - `first` – First attempt of a question within an active revision set.
-        - `done` – Question already attempted in the active revision set (ignored).
+**Core Concepts:**
 
-    - **Active Revision Set:**
-        - The function automatically resolves the user’s currently **started** `weekly_revision_set`.
-        - Only one active set is considered at a time.
+- **Revision States:**
+    - `none` – Practice attempt (not part of a revision set).
+    - `first` – First attempt of a question in an active revision set.
+    - `done` – Question already attempted in the active revision set (ignored).
 
----
+- **Active Revision Set:**
+    - Automatically resolves the user’s currently **started** `weekly_revision_set`.
+    - Only one active set is considered per user.
 
-- **Logic Flow:**
-    1. **Batch Iteration**
-        - Iterates through each item in the input JSON array.
+**Logic Flow:**
 
-    2. **Revision State Resolution**
-        - Checks if the question belongs to the user’s active revision set.
-        - Determines whether the attempt is:
-            - A practice attempt
-            - The first revision attempt
-            - A duplicate revision attempt (skipped)
+1. **Batch Iteration:**  
+   Iterates over each item in the input JSON array.
 
-    3. **Hard Stop for Duplicate Revision Attempts**
-        - If the question has already been answered in the revision set (`done`), the attempt is ignored.
+2. **Revision State Resolution:**  
+   Checks if the question belongs to the user’s active revision set and assigns a state (`none`, `first`, `done`).
 
-    4. **Practice Mode Handling (`revision_state = 'none'`)**
-        - Inserts a new record into `user_question_activity`.
-        - Automatically increments `attempt_number` per user/question pair.
-        - Practice attempts **do not** affect spaced-repetition boxes except for wrong attempts.
-        - If it is an incorrect attempt then that question is inserted into `user_incorrect_queue` with `box=1`.
+3. **Hard Stop for Duplicate Revision Attempts:**  
+   Skips any question already answered (`done`) in the revision set.
 
-    5. **Spaced Repetition Queue (`user_incorrect_queue`)**
-        - Applied only for:
-            - Practice attempts (`none`) **when inserting new incorrect questions**
-            - First revision attempts (`first`) **when updating existing entries**
-        - **Insert Rules:**
-            - A question is added to the queue **only if answered incorrectly**.
-        - **Update Rules (revision only):**
-            - Correct answers move questions forward:
-                - Box 1 → Box 2 → Box 3 → Removed
-            - Incorrect answers reset the question to Box 1.
-        - **Review Scheduling:**
-            - Box 1 → +1 week
-            - Box 2 → +2 weeks
-            - Box 3 → +4 weeks
+4. **Practice Mode Handling (`none` or `first`):**
+    - Inserts a record into `user_question_activity`.
+    - Automatically increments `attempt_number` per user/question.
+    - For incorrect attempts, inserts the question into `user_incorrect_queue` with `box=1`.
 
-    6. **Revision Set Question Update (`first` attempt only)**
-        - Updates `revision_set_questions` with correctness and time spent.
-        - Recalculates:
-            - Total questions
-            - Correct count
-            - Accuracy percentage
+5. **Spaced Repetition Queue (`user_incorrect_queue`):**
+    - **Insert:** Adds question only if answered incorrectly.
+    - **Update (first revision attempt only):** Moves boxes forward:
+        - Box 1 → Box 2 → Box 3 → Removed
+        - Incorrect answers reset to Box 1
+    - **Review Scheduling:**
+        - Box 1 → +1 week
+        - Box 2 → +2 weeks
+        - Box 3 → +4 weeks
 
-    7. **Revision Set Completion**
-        - If all questions have been attempted, the function triggers
-          `update_status_of_weekly_set(...)` to expire or finalize the set.
+6. **Revision Set Question Update (`first` attempt only):**
+    - Updates `revision_set_questions` with correctness and time spent.
+    - Recalculates:
+        - Total questions
+        - Attempted questions
+        - Correct count
+        - Accuracy percentage
 
----
+7. **Revision Set Completion:**
+    - If all questions have been attempted, triggers `update_status_of_weekly_set(...)` to expire or finalize the set.
 
-- **Key Behaviors & Guarantees:**
-    - Revision questions can only be answered **once** per weekly set.
-    - Practice attempts never affect revision accuracy.
-    - Spaced-repetition box movement happens **only during official revision attempts**.
-    - Incorrect questions are the only ones added to the repetition queue.
-    - Weekly accuracy is computed as:
-        ```
-        (correct_questions / attempted_questions) * 100
-        ```
+**Key Behaviors & Guarantees:**
 
----
+- Revision questions are answered **once per weekly set**.
+- Practice attempts do **not** affect revision accuracy.
+- Spaced-repetition box updates occur **only during official revision attempts**.
+- Only incorrect questions are added to the repetition queue.
+- Weekly accuracy = `(correct_questions / attempted_questions) * 100`.
 
-- **Return Value:**
-    - **void**
+**Return Value:**
 
----
+- `void`
 
-- **Example:**
-    - If a user practices a question outside a revision set:
-        - The attempt is logged.
-        - The spaced-repetition queue is unchanged unless the answer is incorrect.
-    - If the same question is attempted during an active revision set:
-        - The first attempt updates revision progress and the queue.
-        - Any subsequent attempts are ignored.
+**Example Use Cases:**
 
----
+- **Practice outside a revision set:**
+    - Attempt is logged.
+    - Spaced-repetition queue is updated only if the answer is incorrect.
 
-- **Exceptions & Safety:**
-    - Duplicate revision attempts are safely skipped.
-    - Partial revision updates are prevented by hard checks on attempt state.
-    - Batch processing ensures consistent handling of multiple attempts in one call.
+- **First attempt during active revision set:**
+    - Updates revision progress and spaced-repetition queue.
+
+- **Subsequent attempts on the same question in the revision set:**
+    - Ignored to maintain data consistency.
 
 ### Function: `refresh_question_peer_stats()`
 
-- **Purpose:** To calculate and update the aggregate statistics in the `question_peer_stats` table.
-- **Arguments:** None.
-- **Logic:** It queries the `user_question_activity` table, grouping by `question_id` to calculate the total attempts, correct/wrong counts, and average time taken for first attempts (`attempt_number = 1`). It then uses `ON CONFLICT DO UPDATE` to either insert a new stats row or update an existing one for each question.
-- **Security:** This function is `SECURITY DEFINER`, meaning it runs with the permissions of the user who defined it (the database owner), allowing it to safely read all activity data to generate accurate stats.
+**Purpose:**  
+Calculates and updates aggregate performance statistics for all questions in the `question_peer_stats` table. This allows users to compare their performance against peers.
+
+**Arguments:**
+
+- None
+
+**Logic Flow:**
+
+1. **Select First Attempts:**
+    - Queries `user_question_activity` filtering only the **first attempt** for each user/question (`attempt_number = 1`).
+
+2. **Aggregate Metrics per Question:**
+    - `total_attempts` – Number of first attempts.
+    - `correct_attempts` – Number of first attempts answered correctly.
+    - `wrong_attempts` – Number of first attempts answered incorrectly.
+    - `avg_time_seconds` – Average time spent on first attempts (ignores nulls).
+
+3. **Insert or Update:**
+    - Uses `ON CONFLICT (question_id) DO UPDATE` to insert new rows or update existing ones.
+    - Ensures `updated_at` always reflects the latest refresh.
+
+**Key Notes:**
+
+- Only **first attempts** are counted to prevent skew from repeated attempts.
+- Aggregate data is stored in `question_peer_stats` for analytics, dashboards, and peer comparison.
+- Designed to be safe to run frequently; old stats are overwritten.
+
+**Security:**
+
+- Marked `SECURITY DEFINER` – runs with the permissions of the function owner to access all user activity, even if normal users cannot.
+
+**Return Value:**
+
+- `void`
 
 ### Function: `generate_weekly_revision_set()`
 

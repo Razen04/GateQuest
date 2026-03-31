@@ -65,15 +65,6 @@ const PracticeCard = () => {
     // Global contexts
     const { user, isLogin } = useAuth();
     const { settings } = useSettings();
-    // Timer Logic
-    const {
-        time: timeTaken,
-        minutes,
-        seconds,
-        isActive: isTimerActive,
-        toggle: toggleTimer,
-        reset: resetTimer,
-    } = useQuestionTimer(settings?.autoTimer, safeQuestion);
 
     // Question State (User Selection, Numerical Input)
     const {
@@ -89,6 +80,16 @@ const PracticeCard = () => {
         handleNumericalInputChange,
     } = useQuestionState(safeQuestion);
 
+    // Timer Logic
+    const {
+        time: timeTaken,
+        minutes,
+        seconds,
+        isActive: isTimerActive,
+        toggle: toggleTimer,
+        stop: stop,
+    } = useQuestionTimer(settings?.autoTimer, safeQuestion, showAnswer);
+
     // Answer Flow (Submission Logic)
     const { handleShowAnswer, handleSubmit } = useAnswerFlow({
         currentQuestion: safeQuestion,
@@ -99,7 +100,7 @@ const PracticeCard = () => {
         isLogin,
         setShowAnswer,
         setResult,
-        resetTimer,
+        stop,
         showAnswer,
     });
 

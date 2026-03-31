@@ -14,6 +14,9 @@ import ActionButtons from '@/components/QuestionCard/ActionButtons';
 import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
+import { useGoals } from '@/hooks/useGoals';
+import Branding from '../Branding';
+import { usePresence } from '@/hooks/usePresence';
 
 // Child Components
 
@@ -96,6 +99,9 @@ const QuestionCard = ({
     isFirst,
     isLast,
 }: QuestionCardProps) => {
+    const { isSubjectInGoal } = useGoals();
+    const { count } = usePresence(question.id);
+
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
 
@@ -114,6 +120,9 @@ const QuestionCard = ({
         if (pageRef.current) pageRef.current.scrollTop = 0;
     }, [questionNumber]);
 
+    // check if the question belong to the user goal
+    const isCompatible = isSubjectInGoal(question.subject_id);
+
     return (
         <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
             {/* Top Back Button */}
@@ -126,6 +135,16 @@ const QuestionCard = ({
                     <span>Back</span>
                 </button>
             </div>
+
+            {!isCompatible && (
+                <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
+                    <p className="font-bold">Branch Mismatch</p>
+                    <p>
+                        This question belongs to a different branch. You can view it, but answering
+                        is disabled to protect your current branch progress.
+                    </p>
+                </div>
+            )}
 
             {/* Main Card Container */}
             <div
@@ -142,6 +161,8 @@ const QuestionCard = ({
                     onShare={onShare}
                     onBookmark={onBookmark}
                     marked={marked}
+                    isAnswered={showAnswer}
+                    userCount={count}
                 />
 
                 <div className="p-4 sm:p-6">
@@ -215,11 +236,14 @@ const QuestionCard = ({
                         handleShowAnswer={onShowAnswer}
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
+                        isCompatible={isCompatible}
                     />
                 </div>
 
                 {/* 7. Footer Badge */}
                 <QuestionBadge currentQuestion={question} />
+
+                <Branding className="mx-4 md:mx-6" />
             </div>
         </div>
     );

@@ -88,18 +88,14 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
     // Derived data for filter dropdowns
     const years = useMemo(() => {
-        const allYears = filteredQuestions
-            .map((q) => String(q.year))
-            .filter((y) => !isNaN(Number(y)));
+        const allYears = questions.map((q) => String(q.year)).filter((y) => !isNaN(Number(y)));
         return [...new Set(allYears)].sort((a, b) => Number(b) - Number(a));
-    }, [filteredQuestions]);
+    }, [questions]);
 
     const topics = useMemo(() => {
-        const allTopics = filteredQuestions
-            .map((q) => q.topic || '')
-            .filter((t) => t.trim() !== '');
+        const allTopics = questions.map((q) => q.topic || '').filter((t) => t.trim() !== '');
         return [...new Set(allTopics)];
-    }, [filteredQuestions]);
+    }, [questions]);
 
     return (
         <AnimatePresence mode="wait">

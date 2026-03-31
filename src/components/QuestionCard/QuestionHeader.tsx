@@ -25,6 +25,8 @@ type QuestionHeaderProps = {
     onShare: () => void;
     onBookmark: () => void;
     marked?: boolean | undefined;
+    isAnswered: boolean;
+    userCount: number | undefined;
 };
 
 const QuestionHeader = ({
@@ -36,6 +38,8 @@ const QuestionHeader = ({
     onShare,
     onBookmark,
     marked,
+    isAnswered,
+    userCount,
 }: QuestionHeaderProps) => {
     // Helper: Normalize difficulty text for display
     const getDifficultyDisplayText = () => {
@@ -66,6 +70,7 @@ const QuestionHeader = ({
                             seconds={timer.seconds}
                             isActive={timer.isActive}
                             onToggle={timer.onToggle}
+                            isAnswered={isAnswered}
                         />
                     )}
 
@@ -84,7 +89,7 @@ const QuestionHeader = ({
                                   : [question.metadata.exam || 'GATE']
                               )
                                   .join(' / ')
-                                  .toUpperCase()} ${question.year}`
+                                  .toUpperCase()} ${question.metadata.set} ${question.year}`
                             : 'Year Unknown'}
                     </span>
 
@@ -98,20 +103,20 @@ const QuestionHeader = ({
                     <Button
                         size="icon-sm"
                         onClick={onReport}
-                        className=" bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500 dark:text-red-50 dark:hover:bg-red-700"
+                        className="rounded-none bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500 dark:text-red-50 dark:hover:bg-red-700"
                         title="Report Question"
                     >
-                        <Warning size={10} />
+                        <Warning size={14} />
                     </Button>
 
                     {/* Share Button */}
                     <Button
                         size="icon-sm"
                         onClick={onShare}
-                        className=" bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-500 dark:text-green-50 dark:hover:bg-green-700"
+                        className="rounded-none bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-500 dark:text-green-50 dark:hover:bg-green-700"
                         title="Share Question"
                     >
-                        <ShareFat size={10} />
+                        <ShareFat size={14} />
                     </Button>
                 </div>
             </div>
@@ -137,6 +142,11 @@ const QuestionHeader = ({
                         </span>
                     )}
                 </div>
+            </div>
+
+            <div className="flex items-center mt-1 bg-green-100 dark:bg-gray-800 w-fit text-sm gap-1.5 px-2 py-1">
+                <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                <span>{userCount ?? 1} online</span>
             </div>
         </div>
     );

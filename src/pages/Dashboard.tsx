@@ -23,6 +23,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CaretDownIcon } from '@phosphor-icons/react';
+import Branding from '@/components/Branding.tsx';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -205,6 +206,8 @@ const Dashboard = () => {
                     <p className="text-gray-500">No data found for {selectedExam} subjects.</p>
                 </div>
             )}
+
+            <Branding className="mt-4 w-full" />
         </div>
     );
 };
