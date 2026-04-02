@@ -256,7 +256,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                                 <img
                                                     src={segment.src}
                                                     alt={segment.alt}
-                                                    className="w-full max-w-full h-auto object-contain mx-auto dark:invert dark:brightness-90 dark:contrast-100"
+                                                    className="w-full h-auto object-contain mx-auto dark:invert dark:brightness-90 dark:contrast-100"
                                                     style={{ maxHeight: '50vh' }}
                                                 />
                                             </div>

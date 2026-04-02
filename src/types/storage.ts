@@ -109,6 +109,7 @@ export interface Attempt {
     question_id: string;
     attempt_order: number;
     user_answer: number | number[] | null;
+    questions: Question;
     marked_for_review: boolean;
     status: string;
     is_correct: boolean;

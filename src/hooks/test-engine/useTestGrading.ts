@@ -1,6 +1,6 @@
 import { getTestSession, updateAttempts } from '@/storage/testSession';
-import type { Attempt, Question } from '@/types/storage';
-import { isMultipleSelection, isNumericalQuestion } from '@/utils/questionUtils';
+import type { Attempt } from '@/types/storage';
+import { supabase } from '@/utils/supabaseClient';
 import { useCallback, useState } from 'react';
 
 const useTestGrading = () => {
@@ -8,6 +8,9 @@ const useTestGrading = () => {
 
     const submitTest = useCallback(async (testId: string) => {
         setIsSubmitting(true);
+        // in case it does not submit the first time, we will use exponential backoff strategy
+        let retryCount = 0;
+        const maxRetries = 2;
 
         try {
             const testSession = await getTestSession(testId);
@@ -15,107 +18,44 @@ const useTestGrading = () => {
             if (!testSession) {
                 throw new Error('No test session present');
             }
-            const attempts: Attempt[] = testSession?.attempts;
 
-            // fetch full questions from Dexie(indexedDB)
-            const questions: Question[] = testSession.questions;
-            // variables to track all the things
-            let totalScore = 0;
-            let correctCount = 0;
-            let incorrectCount = 0;
-            let unattemptedCount = 0;
+            const payload: Attempt[] = testSession.attempts;
+            const remainingTime = testSession.session.remaining_time_seconds;
 
-            const updatedAttempts: Attempt[] = attempts.map((a) => {
-                const question = questions.find((q) => q.id === a.question_id);
-                if (!question) return a; // no question found.
+            const rpcCall = async () => {
+                const { data, error } = await supabase.rpc('submit_test_grading', {
+                    p_session_id: testId,
+                    p_payload: payload,
+                    p_remaining_time_seconds: remainingTime,
+                });
 
-                let score = 0;
-                let status: 'correct' | 'incorrect' | 'skipped' = 'skipped';
-
-                const userAnswer = a.user_answer;
-
-                if (userAnswer === null || userAnswer === undefined) {
-                    // unattempted
-                    status = 'skipped';
-                    score = 0;
-                    unattemptedCount++;
-                } else {
-                    if (isNumericalQuestion(question)) {
-                        const correctAnswer = question.correct_answer.toString();
-                        const answerToCheck = userAnswer?.toString();
-                        const isCorrect = answerToCheck === correctAnswer;
-
-                        if (isCorrect) {
-                            status = 'correct';
-                            score = question.marks || 1; // for questions with no marks in data
-                            correctCount++;
-                        } else {
-                            status = 'incorrect';
-                            incorrectCount++;
-                        }
-                    } else if (!isNumericalQuestion(question) && !isMultipleSelection(question)) {
-                        const userArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer]; // safety
-                        const sortedUser = [...userArray].sort((a, b) => a - b);
-
-                        const correctArray = Array.isArray(question.correct_answer)
-                            ? question.correct_answer
-                            : [question.correct_answer];
-                        const sortedCorrect = [...correctArray].sort((a, b) => a - b);
-
-                        const isCorrect =
-                            JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
-
-                        if (isCorrect) {
-                            status = 'correct';
-                            score = question.marks || 2;
-                            correctCount++;
-                        } else {
-                            status = 'incorrect';
-                            score = -(question.marks || 1) / 3;
-                            incorrectCount++;
-                        }
-                    } else {
-                        const userArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer]; // safety
-                        const sortedUser = [...userArray].sort((a, b) => a - b);
-
-                        const correctArray = Array.isArray(question.correct_answer)
-                            ? question.correct_answer
-                            : [question.correct_answer];
-                        const sortedCorrect = [...correctArray].sort((a, b) => a - b);
-
-                        const isCorrect =
-                            JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
-                        if (isCorrect) {
-                            status = 'correct';
-                            score = question.marks || 2;
-                            correctCount++;
-                        } else {
-                            status = 'incorrect';
-                            incorrectCount++;
-                        }
+                if (error) {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        await new Promise((res) => setTimeout(res, Math.pow(2, retryCount) * 1000));
+                        return rpcCall();
                     }
+
+                    throw error;
                 }
 
-                totalScore += score;
+                return data;
+            };
 
-                return {
-                    ...a,
-                    score,
-                    is_correct: status === 'correct' ? true : false,
-                    is_synced: 0,
-                };
-            });
+            const result = await rpcCall();
 
-            // updating attempts to indexedDB
-            const attempted = incorrectCount + correctCount;
-            await updateAttempts(testId, updatedAttempts, attempted, totalScore, correctCount);
+            const attempted = result.correct_count + result.incorrect_count;
+
+            await updateAttempts(testId, [], attempted, result.total_score, result.correct_count);
 
             return {
-                totalScore,
-                correctCount,
-                incorrectCount,
-                unattemptedCount,
+                totalScore: result.total_score,
+                correctCount: result.correct_count,
+                incorrectCount: result.incorrect_count,
             };
+        } catch (err) {
+            console.error('Submission error: ', err);
+            throw err;
         } finally {
             setIsSubmitting(false);
         }

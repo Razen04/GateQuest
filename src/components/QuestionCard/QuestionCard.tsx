@@ -100,7 +100,8 @@ const QuestionCard = ({
     isLast,
 }: QuestionCardProps) => {
     const { isSubjectInGoal } = useGoals();
-    const { count } = usePresence(question.id);
+    // const { count } = usePresence(question.id);
+    const count = 1;
 
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);

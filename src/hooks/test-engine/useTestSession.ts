@@ -4,7 +4,7 @@ import useTestNavigation from './useTestNavigation';
 import useTestTimer from './useTestTimer';
 import useTestGrading from './useTestGrading';
 import type { TestData } from './useTestLoader';
-import type { Attempt, Question } from '@/types/storage';
+import type { Question } from '@/types/storage';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/utils/supabaseClient';
 import {
@@ -86,84 +86,22 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
             commitCurrentTime();
 
             // already submitted
-            let testSession = await getTestSession(testId);
-            if (!testSession) {
-                throw new Error('Session not found after grading');
-            }
+            const testSession = await getTestSession(testId);
 
-            let session = testSession.session;
-
-            if (session?.status === 'completed') {
+            if (testSession?.session?.status === 'completed') {
                 navigate(`/topic-test-result/${testId}`, { replace: true });
                 return;
             }
 
             await grading.submitTest(testId);
 
-            testSession = await getTestSession(testId);
-            if (!testSession || testSession.session?.status !== 'completed') {
-                throw new Error('Session not found after grading');
-            }
-
-            session = testSession.session;
-            let attempts = testSession.attempts ?? [];
-
-            // update topic_tests table in supabase with the graded session
-            const { error: sessionError } = await supabase
-                .from('topic_tests')
-                .update({
-                    status: 'completed',
-                    completed_at: session.completed_at
-                        ? new Date(session.completed_at).toISOString()
-                        : null,
-                    score: session.score,
-                    accuracy: session.accuracy,
-                    correct_count: session.correct_count,
-                    attempted_count: session.attempted_count,
-                    remaining_time_seconds: session.remaining_time_seconds,
-                })
-                .eq('id', testId);
-
-            if (sessionError) {
-                throw sessionError;
-            }
-
-            // sync the final attempts a last time
-            if (attempts.length > 0) {
-                const questionIndexMap = new Map(data.questions.map((q, i) => [q.id, i + 1]));
-                const payload = attempts.map((a: Attempt) => {
-                    return {
-                        session_id: a.session_id,
-                        question_id: a.question_id,
-                        attempt_order: questionIndexMap.get(a.question_id ?? a.attempt_order),
-                        user_answer: a.user_answer ?? null,
-                        marked_for_review: a.marked_for_review ?? false,
-                        status: a.status ?? 'unvisited',
-                        is_correct: a.is_correct ?? null,
-                        score: a.score ?? 0,
-                        time_spent_seconds: a.time_spent_seconds,
-                    };
-                });
-
-                const { error: attemptError } = await supabase
-                    .from('topic_tests_attempts')
-                    .upsert(payload, { onConflict: 'session_id, question_id' });
-
-                if (attemptError) {
-                    throw attemptError;
-                }
-
-                // mark locally synced
-                await markAttemptsSynced(attempts);
-            }
-
-            setStatus('completed');
             navigate(`/topic-test-result/${testId}`, { replace: true });
+            setStatus('completed');
         } catch (err) {
             console.error('Error in handleSubmit: ', err);
             setStatus('error');
         }
-    }, [commitCurrentTime, grading, testId, data.questions, navigate, setStatus]);
+    }, [commitCurrentTime, grading, testId, navigate]);
 
     // Heartbeat: Sync timer + unsynced attempts every 30 seconds
     useEffect(() => {
@@ -192,11 +130,11 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                     // In handleSubmit AND in the Heartbeat useEffect:
 
                     const payload = dirtyAttempts.map((a) => {
-                        // Find the REAL index from the master list (Static & Safe)
+                        // Find the REAL index from the master list
                         const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
 
                         // Calculate the order (1-based)
-                        // Fallback to a.attempt_order only if not found (safety net)
+                        // Fallback to a.attempt_order only if not found
                         const finalOrder = realIndex !== -1 ? realIndex + 1 : a.attempt_order;
 
                         return {
@@ -206,7 +144,6 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                             user_answer: a.user_answer ?? null,
                             marked_for_review: a.marked_for_review ?? false,
                             status: a.status ?? 'unvisited',
-                            is_correct: a.is_correct ?? null,
                             score: a.score ?? 0,
                             time_spent_seconds: a.time_spent_seconds,
                         };
@@ -270,7 +207,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
             const time = timerRef.current;
             saveTimer(time);
         };
-    }, []);
+    }, [testId, status]);
 
     return {
         questions: data.questions,

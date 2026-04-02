@@ -257,7 +257,7 @@ const TopicTest = () => {
                                                         : 'text-gray-500 dark:text-gray-400'
                                                 }`}
                                             >
-                                                {test.accuracy ?? 0}%
+                                                {test.accuracy?.toFixed(2) ?? 0}%
                                             </div>
                                             <p className="text-xs text-slate-400">
                                                 {`${test.score?.toFixed(2)}/${test.total_marks}`}
