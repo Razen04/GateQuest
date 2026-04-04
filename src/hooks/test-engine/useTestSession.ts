@@ -78,6 +78,16 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
         [navigation, commitCurrentTime],
     );
 
+    const { currentIndex } = navigation;
+    useEffect(() => {
+        const question = data.questions[currentIndex];
+        if (question) {
+            const realIndex = data.questions.findIndex((q) => q.id === question.id);
+            const attemptOrder = realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
+            answers.markAsVisited(question.id, attemptOrder);
+        }
+    }, [currentIndex, data.questions, answers, status]);
+
     // wrapper for submit button which will also sync with supabase
     const handleSubmit = useCallback(async () => {
         setStatus('submitting');
