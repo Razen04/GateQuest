@@ -11,6 +11,19 @@ import { toast } from 'sonner';
 import { getUserProfile } from '@/helper';
 import ModernLoader from '@/components/ui/ModernLoader';
 import { useGoals } from '@/hooks/useGoals';
+import { useMemo, useState } from 'react';
+import {
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+} from 'recharts';
+import { ChartLineUpIcon } from '@phosphor-icons/react';
+import { supabase } from '@/utils/supabaseClient';
+import { syncTestFromSupabaseToDexie } from '@/hooks/topic-test/service/testSyncService';
 
 const getTestName = (completedAt?: string | null) => {
     if (!completedAt) return 'Untitled Test';
@@ -44,9 +57,56 @@ const TopicTest = () => {
         history: testHistory,
     } = useTopicTestHubData(userId, userGoal?.branch_id);
 
+    const [viewMode, setViewMode] = useState<'accuracy' | 'score'>('accuracy');
+
+    const chartData = useMemo(() => {
+        if (!testHistory) return [];
+
+        return [...testHistory]
+            .filter((t) => t.status === 'completed')
+            .reverse()
+            .map((t, idx) => ({
+                attempt: idx + 1,
+                date: new Date(t.completed_at!).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                }),
+                accuracy: parseFloat(t.accuracy?.toFixed(2) || '0'),
+                // Normalized Score Percentage to handle varying total marks
+                scorePercent: t.score
+                    ? parseFloat(((t.score / t.total_marks) * 100).toFixed(2))
+                    : 0,
+            }));
+    }, [testHistory]);
+
     if (loading) {
         return <ModernLoader />;
     }
+
+    const handleStartTest = async () => {
+        try {
+            const user = (await supabase.auth.getUser()).data.user;
+            if (!user) throw new Error('No user');
+
+            if (activeTest?.status === 'created') {
+                const { error } = await supabase
+                    .from('topic_tests')
+                    .update({
+                        status: 'ongoing',
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', activeTest?.id);
+
+                if (error) throw error;
+            }
+
+            await syncTestFromSupabaseToDexie(user.id, userGoal?.branch_id);
+            navigate(`/topic-test/${activeTest?.id}/attempt`);
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to start test. Please check your connection.');
+        }
+    };
 
     const handleResume = () => {
         // Navigate to the active test UUID
@@ -155,20 +215,28 @@ const TopicTest = () => {
                                                 {activeTest.status === 'ongoing' ||
                                                 activeTest.status === 'paused'
                                                     ? 'In Progress'
-                                                    : 'Start'}
+                                                    : 'Not Started Yet'}
                                             </span>
                                         </div>
 
-                                        <Button
-                                            onClick={() => handleResume()}
-                                            className="bg-white text-blue-500"
-                                        >
-                                            {activeTest.status === 'ongoing' ||
-                                            activeTest.status === 'paused'
-                                                ? 'Resume'
-                                                : 'Start'}{' '}
-                                            <Play weight="fill" />
-                                        </Button>
+                                        {activeTest.status === 'ongoing' ? (
+                                            <Button
+                                                onClick={() => handleResume()}
+                                                className="bg-white text-blue-500"
+                                            >
+                                                {' '}
+                                                Resume
+                                                <Play weight="fill" />
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                onClick={() => handleStartTest()}
+                                                className="bg-white text-blue-500"
+                                            >
+                                                Start
+                                                <Play weight="fill" />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -199,6 +267,119 @@ const TopicTest = () => {
                     )}
                 </motion.div>
 
+                <motion.div variants={itemVariants} className="my-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Progress Trends
+                        </h3>
+
+                        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-2">
+                            <button
+                                onClick={() => setViewMode('accuracy')}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${
+                                    viewMode === 'accuracy'
+                                        ? 'bg-white dark:bg-zinc-800 shadow-sm text-blue-500'
+                                        : 'text-slate-500'
+                                }`}
+                            >
+                                Accuracy
+                            </button>
+                            <button
+                                onClick={() => setViewMode('score')}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${
+                                    viewMode === 'score'
+                                        ? 'bg-white dark:bg-zinc-800 shadow-sm text-blue-500'
+                                        : 'text-slate-500'
+                                }`}
+                            >
+                                Performance %
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 h-64 shadow-sm">
+                        {chartData.length > 1 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData}>
+                                    <defs>
+                                        <linearGradient
+                                            id="colorMetric"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#3b82f6"
+                                                stopOpacity={0.3}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#3b82f6"
+                                                stopOpacity={0}
+                                            />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        vertical={false}
+                                        stroke="#e2e8f0"
+                                        opacity={0.5}
+                                    />
+                                    <XAxis
+                                        dataKey="date"
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tick={{ fill: '#94a3b8' }}
+                                    />
+                                    <YAxis
+                                        domain={[0, 100]}
+                                        fontSize={10}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tick={{ fill: '#94a3b8' }}
+                                        tickFormatter={(val) => `${val}%`}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: '#1e293b',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontSize: '12px',
+                                            color: '#f8fafc',
+                                        }}
+                                        itemStyle={{ color: '#60a5fa' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey={
+                                            viewMode === 'accuracy' ? 'accuracy' : 'scorePercent'
+                                        }
+                                        stroke="#3b82f6"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorMetric)"
+                                        animationDuration={1500}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-zinc-400">
+                                <ChartLineUpIcon
+                                    size={32}
+                                    weight="duotone"
+                                    className="mb-2 opacity-20"
+                                />
+                                <p className="text-xs italic">
+                                    Complete at least 2 tests to see your progress graph
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+
                 <motion.div variants={itemVariants} className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                         <h3 className="text-sm font-semibold mb-2 uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -221,7 +402,7 @@ const TopicTest = () => {
                                     <div
                                         key={test.id}
                                         onClick={() => navigate(`/topic-test-result/${test.id}`)}
-                                        className="bg-white mb-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer group"
+                                        className="bg-white my-2 dark:bg-zinc-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer group"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div

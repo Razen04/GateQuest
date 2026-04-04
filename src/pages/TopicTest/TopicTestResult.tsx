@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -8,7 +8,6 @@ import {
     ListChecks,
     ArrowRight,
     House,
-    Flag,
     ArrowLeftIcon,
     WarningCircle,
     PresentationChart,
@@ -19,14 +18,31 @@ import {
 import PageHeader from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { containerVariants, itemVariants } from '@/utils/motionVariants';
-import type { Attempt, TestSession } from '@/types/storage';
+import type { Attempt, Question, TestSession } from '@/types/storage';
 
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { QuestionGrid } from './test-result/QuestionGrid';
 
 type OutletContext = {
     session: TestSession;
     attempts: Attempt[];
 };
+
+interface FullAttempt extends Attempt {
+    questions: Question;
+    originalIndex: number;
+}
+
+interface GroupData {
+    attempts: FullAttempt[];
+    totalTime: number;
+    correct: number;
+}
+
+interface TypeGroupData {
+    total: number;
+    correct: number;
+}
 
 const StatCard = ({
     label,
@@ -51,28 +67,51 @@ const StatCard = ({
     </div>
 );
 
+function SectionHeading({
+    icon: Icon,
+    title,
+    color = 'text-slate-900 dark:text-slate-100',
+}: {
+    icon: any;
+    title: string;
+    color?: string;
+}) {
+    return (
+        <div className="flex items-center gap-3">
+            <Icon size={22} className={color} weight="duotone" />
+            <h2 className={`font-black uppercase tracking-widest text-xs ${color}`}>{title}</h2>
+        </div>
+    );
+}
+
 export default function TopicTestResult() {
     const { testId } = useParams<{ testId: string }>();
     const navigate = useNavigate();
     const { session, attempts } = useOutletContext<OutletContext>();
 
+    const formatTime = (secs: number) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m}m ${Math.round(s)}s`;
+    };
+
     // 1. Unified Data Analysis Engine
     const analysis = useMemo(() => {
-        const diffGroups: Record<string, any> = {
+        const diffGroups: Record<string, GroupData> = {
             Easy: { attempts: [], totalTime: 0, correct: 0 },
             Medium: { attempts: [], totalTime: 0, correct: 0 },
             Hard: { attempts: [], totalTime: 0, correct: 0 },
         };
 
-        const topicGroups: Record<string, any> = {};
-        const typeGroups: Record<string, any> = {
+        const topicGroups: Record<string, GroupData> = {};
+        const typeGroups: Record<string, TypeGroupData> = {
             MCQ: { total: 0, correct: 0 },
             MSQ: { total: 0, correct: 0 },
             NAT: { total: 0, correct: 0 },
         };
 
         attempts.forEach((a, idx) => {
-            const q = (a as any).questions; // Extract full question from attempt
+            const q = (a as FullAttempt).questions; // Extract full question from attempt
             const diff = q?.difficulty || 'Medium';
             const topic = q?.topic || 'Uncategorized';
             const type =
@@ -110,32 +149,39 @@ export default function TopicTestResult() {
         const globalAvg =
             attempts.reduce((acc, a) => acc + (a.time_spent_seconds || 0), 0) /
             (attempts.length || 1);
+
         const timeSinks = attempts
             .filter((a) => !a.is_correct && (a.time_spent_seconds || 0) > globalAvg * 1.5)
             .sort((a, b) => (b.time_spent_seconds || 0) - (a.time_spent_seconds || 0))
             .slice(0, 3);
 
         // Inside the analysis useMemo in TopicTestResult.tsx
-        const pacingData = attempts.map((a, idx) => ({
-            name: `${idx + 1}`,
-            time: a.time_spent_seconds || 0,
-            isCorrect: a.is_correct,
-            timeSpent: a.time_spent_seconds,
-            status: a.status,
-        }));
+        const pacingData = attempts.map((a, idx) => {
+            let bgColor = '#808080';
+
+            if (a.status === 'answered') {
+                bgColor =
+                    a.is_correct === true
+                        ? '#10b981'
+                        : a.is_correct === false
+                          ? '#ef4444'
+                          : '#808080';
+            }
+
+            return {
+                name: `${idx + 1}`,
+                time: a.time_spent_seconds || 0,
+                isCorrect: a.is_correct,
+                fill: bgColor,
+            };
+        });
 
         return { diffGroups, topicGroups, typeGroups, timeSinks, pacingData };
     }, [attempts]);
 
-    const formatTime = (secs: number) => {
-        const m = Math.floor(secs / 60);
-        const s = secs % 60;
-        return `${m}m ${s}s`;
-    };
-
     return (
         <div className="min-h-screen pb-20 bg-slate-50/30 dark:bg-zinc-950/30">
-            <div className="p-6">
+            <div className="p-6 max-w-6xl mx-auto">
                 <button
                     onClick={() => navigate('/topic-test')}
                     className="flex items-center mb-4 text-sm font-bold uppercase tracking-tight hover:text-blue-500 transition-colors"
@@ -195,7 +241,7 @@ export default function TopicTestResult() {
                 <motion.div variants={itemVariants} className="space-y-6">
                     <SectionHeading icon={PresentationChart} title="Difficulty Analysis" />
                     {Object.entries(analysis.diffGroups).map(
-                        ([diff, data]: [string, any]) =>
+                        ([diff, data]: [string, GroupData]) =>
                             data.attempts.length > 0 && (
                                 <QuestionGrid
                                     key={diff}
@@ -211,16 +257,20 @@ export default function TopicTestResult() {
                 {/* 4. Topic-Wise Performance (With Buttons) */}
                 <motion.div variants={itemVariants} className="space-y-6">
                     <SectionHeading icon={ListChecks} title="Topic Breakdown" />
-                    {Object.entries(analysis.topicGroups).map(([topic, data]: [string, any]) => (
-                        <QuestionGrid
-                            key={topic}
-                            title={topic}
-                            data={data}
-                            testId={testId!}
-                            navigate={navigate}
-                            isTopic
-                        />
-                    ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Object.entries(analysis.topicGroups).map(
+                            ([topic, data]: [string, GroupData]) => (
+                                <QuestionGrid
+                                    key={topic}
+                                    title={topic}
+                                    data={data}
+                                    testId={testId!}
+                                    navigate={navigate}
+                                    isTopic
+                                />
+                            ),
+                        )}
+                    </div>
                 </motion.div>
 
                 {/* Pacing Analysis Graph */}
@@ -259,27 +309,18 @@ export default function TopicTestResult() {
                                                     QUESTION {data.name}: {data.time}s
                                                     <br />
                                                     RESULT:{' '}
-                                                    {data.isCorrect ? 'CORRECT' : 'INCORRECT'}
+                                                    {data.isCorrect
+                                                        ? 'CORRECT'
+                                                        : data.isCorrect === false
+                                                          ? 'INCORRECT'
+                                                          : 'SKIPPED'}
                                                 </div>
                                             );
                                         }
                                         return null;
                                     }}
                                 />
-                                <Bar dataKey="time" radius={[2, 2, 0, 0]}>
-                                    {analysis.pacingData.map((entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={
-                                                entry.status === 'unvisited'
-                                                    ? '#e2e8f0'
-                                                    : entry.timeSpent < 120
-                                                      ? '#10b981'
-                                                      : '#ef4444'
-                                            }
-                                        />
-                                    ))}
-                                </Bar>
+                                <Bar dataKey="time" radius={[2, 2, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -313,7 +354,7 @@ export default function TopicTestResult() {
                                             </p>
                                         </div>
                                         <p className="font-mono font-black text-rose-600">
-                                            {sink.time_spent_seconds}s
+                                            {formatTime(sink.time_spent_seconds)}
                                         </p>
                                     </div>
                                 ))
@@ -325,7 +366,7 @@ export default function TopicTestResult() {
                         <SectionHeading icon={Shapes} title="Question Type Accuracy" />
                         <div className="grid grid-cols-3 gap-4">
                             {Object.entries(analysis.typeGroups).map(
-                                ([type, data]: [string, any]) =>
+                                ([type, data]: [string, TypeGroupData]) =>
                                     data.total > 0 && (
                                         <div
                                             key={type}
@@ -354,83 +395,6 @@ export default function TopicTestResult() {
                     </Button>
                 </motion.div>
             </motion.main>
-        </div>
-    );
-}
-
-// Sub-component for Grouped Question Grids
-function QuestionGrid({ title, data, testId, navigate, isTopic = false }: any) {
-    const avgTime = (data.totalTime / data.attempts.length).toFixed(1);
-    const accuracy = ((data.correct / data.attempts.length) * 100).toFixed(0);
-
-    return (
-        <div className="space-y-4">
-            <div
-                className={`flex items-center justify-between p-4 border-l-4 ${isTopic ? 'bg-white dark:bg-zinc-900 border-emerald-500 shadow-sm' : 'bg-slate-50 dark:bg-zinc-800/50 border-blue-500'}`}
-            >
-                <h3 className="font-black uppercase tracking-tight text-sm md:text-base">
-                    {title}{' '}
-                    <span className="text-slate-400 font-medium text-xs ml-1">
-                        ({data.attempts.length})
-                    </span>
-                </h3>
-                <div className="flex gap-6 text-[10px] md:text-xs font-bold font-mono">
-                    <div className="text-right">
-                        <p className="text-slate-400 uppercase">Avg Time</p>
-                        <p className="text-blue-500">{avgTime}s</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-slate-400 uppercase">Accuracy</p>
-                        <p className="text-blue-500">{accuracy}%</p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
-                {data.attempts.map((attempt: any) => {
-                    let styles = 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
-                    if (attempt.status === 'answered' && attempt.is_correct)
-                        styles =
-                            'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400';
-                    else if (attempt.status === 'answered')
-                        styles =
-                            'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400';
-
-                    return (
-                        <motion.button
-                            key={attempt.question_id}
-                            whileHover={{ scale: 1.05 }}
-                            className={`relative flex flex-col items-center justify-center h-14 border rounded-sm transition-colors ${styles}`}
-                            onClick={() =>
-                                navigate(`/topic-test-review/${testId}/${attempt.originalIndex}`)
-                            }
-                        >
-                            <span className="text-xs font-black mb-0.5">
-                                {attempt.originalIndex + 1}
-                            </span>
-                            <span className="text-[9px] font-mono font-bold opacity-70">
-                                {attempt.time_spent_seconds}s
-                            </span>
-                            {attempt.marked_for_review && (
-                                <Flag
-                                    size={10}
-                                    weight="fill"
-                                    className="absolute -top-1 -right-1 text-violet-500"
-                                />
-                            )}
-                        </motion.button>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
-function SectionHeading({ icon: Icon, title, color = 'text-slate-900 dark:text-slate-100' }: any) {
-    return (
-        <div className="flex items-center gap-3">
-            <Icon size={22} className={color} weight="duotone" />
-            <h2 className={`font-black uppercase tracking-widest text-xs ${color}`}>{title}</h2>
         </div>
     );
 }
