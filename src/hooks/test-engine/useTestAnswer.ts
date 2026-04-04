@@ -95,6 +95,40 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         [testId],
     );
 
+    const markAsVisited = useCallback(
+        (questionId: string, attemptOrder: number) => {
+            setAnswers((prev) => {
+                const existing = prev.get(questionId);
+
+                // If an attempt already exists (could be 'answered' or 'visited'),
+                // we don't want to overwrite it.
+                if (existing && existing?.status !== 'unvisited') return prev;
+
+                const next = new Map(prev);
+                const newAttempt: Attempt = {
+                    session_id: testId,
+                    question_id: questionId,
+                    attempt_order: attemptOrder,
+                    user_answer: null,
+                    marked_for_review: false,
+                    status: 'viewed',
+                    is_correct: false,
+                    score: 0,
+                    time_spent_seconds: 0,
+                    is_synced: 0,
+                };
+
+                next.set(questionId, newAttempt);
+
+                setIsSaving(true);
+                saveAttempt(newAttempt).finally(() => setIsSaving(false));
+
+                return next;
+            });
+        },
+        [testId],
+    );
+
     const toggleReview = useCallback(
         (questionId: string, attemptOrder: number) => {
             const isCurrentlyMarked = reviewList.has(questionId);
@@ -177,6 +211,15 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         [answers],
     );
 
+    const isVisited = useCallback(
+        (questionId: string) => {
+            const attempt = answers.get(questionId);
+
+            return attempt ? attempt.status !== 'unvisited' : false;
+        },
+        [answers],
+    );
+
     return {
         answers,
         reviewList,
@@ -188,6 +231,8 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         markedForReviewCount,
         isMarkedForReview,
         isAnswered,
+        isVisited,
+        markAsVisited,
     };
 };
 
