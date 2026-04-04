@@ -834,3 +834,155 @@ Calculates and updates aggregate performance statistics for all questions in the
 - **Exception**
     - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
     - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
+
+### Function: `submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)`
+
+**Purpose:**
+Processes and grades a completed topic test session by evaluating user answers, calculating scores, and updating test results.
+
+- Grades both **numerical (NAT)** and **objective (MCQ/MSQ)** questions.
+- Records per-question attempts in `topic_tests_attempts`.
+- Calculates total score, accuracy, and performance metrics.
+- Finalizes the test session in `topic_tests`.
+
+**Arguments:**
+
+- `p_session_id (uuid)` – Unique identifier for the test session.
+- `p_payload (jsonb)` – A JSON array of question attempt objects. Each object must include:
+
+| Field Name           | Type      | Description                                       |
+| -------------------- | --------- | ------------------------------------------------- |
+| `question_id`        | `uuid`    | The question being attempted.                     |
+| `user_answer`        | `jsonb`   | User’s submitted answer (can be scalar or array). |
+| `time_spent_seconds` | `int`     | Time spent on the question.                       |
+| `marked_for_review`  | `boolean` | Whether the question was flagged for review.      |
+| `status`             | `text`    | Question state (e.g., `visited`, `answered`).     |
+| `attempt_order`      | `int`     | Order in which the question was attempted.        |
+
+- `p_remaining_time_seconds (int)` – Remaining time when the test was submitted.
+
+**Core Concepts:**
+
+- **Question Types:**
+    - `numerical` – Evaluated using flexible answer formats (exact, range, tolerance, etc.).
+    - `multiple-choice` / `multiple-select` – Evaluated using exact match logic.
+
+- **Answer States:**
+    - `NULL` – Question skipped (no answer provided).
+    - `true` – Correct answer.
+    - `false` – Incorrect answer.
+
+- **Session Finalization:**
+    - A session marked as `completed` cannot be graded again.
+
+**Logic Flow:**
+
+1. **Completion Check:**
+   If the test session is already marked as `completed`, returns early with status `already_completed`.
+
+2. **Payload Iteration:**
+   Iterates through each question attempt in the input JSON array.
+
+3. **Answer Normalization:**
+   Converts JSON `null` values to SQL `NULL` to properly handle skipped questions.
+
+4. **Question Data Fetch:**
+   Retrieves:
+    - Correct answer (`correct_answer`)
+    - Marks (`marks`)
+    - Question type (`question_type`)
+
+5. **Attempt Evaluation:**
+    - If no answer is provided:
+        - Marked as skipped (`is_correct = NULL`)
+        - No score change
+
+    - If answered:
+        - Increments `attempted_count`
+
+6. **Numerical (NAT) Grading:**
+    - Supports multiple evaluation modes:
+        - `exact` – Exact value match
+        - `multiple` – Matches any valid value in a set
+        - `range` – Value falls within min/max bounds
+        - `tolerance` – Within acceptable deviation
+
+    - Correct → full marks
+    - Incorrect → zero marks
+
+7. **MCQ/MSQ Grading:**
+    - Compares sorted JSON arrays for exact match.
+    - Correct → full marks (default 2 if unspecified)
+    - Incorrect:
+        - MCQ → negative marking (⅓ of marks)
+        - MSQ → no negative marking
+
+8. **Score Aggregation:**
+    - Updates:
+        - `v_total_score`
+        - `v_correct_count`
+        - `v_incorrect_count`
+
+9. **Attempt Persistence:**
+    - Inserts or updates records in `topic_tests_attempts`.
+    - Uses `ON CONFLICT` to handle re-submissions safely.
+
+10. **Session Update:**
+    - Marks session as `completed`
+    - Updates:
+        - Total score
+        - Correct and attempted counts
+        - Remaining time
+        - Completion timestamp
+        - Accuracy:
+
+            ```
+            (correct_count / attempted_count) * 100
+            ```
+
+**Key Behaviors & Guarantees:**
+
+- A test session can only be graded **once**.
+- Skipped questions do **not** affect accuracy.
+- Numerical questions support **flexible validation schemes**.
+- MCQ questions apply **negative marking**, MSQ does not.
+- Answer comparison is **order-independent** for multi-select questions.
+- Attempt records are **idempotent** via conflict handling.
+- Accuracy is calculated only from **attempted questions**.
+
+**Return Value:**
+
+- `jsonb`
+
+```json
+{
+  "total_score": float,
+  "correct_count": int,
+  "incorrect_count": int
+}
+```
+
+- If already completed:
+
+```json
+{
+    "status": "already_completed"
+}
+```
+
+**Example Use Cases:**
+
+- **Normal submission:**
+    - Grades all questions.
+    - Stores attempts and finalizes the test.
+
+- **Skipped questions:**
+    - Stored with `is_correct = NULL`.
+    - Do not impact score or accuracy.
+
+- **Re-submission attempt:**
+    - Immediately returns `already_completed`.
+    - Prevents duplicate grading.
+
+- **Mixed question types (NAT + MCQ/MSQ):**
+    - Each evaluated using its respective grading logic.

@@ -40,7 +40,7 @@ begin
     into v_correct_ans, v_q_marks, v_q_type
     from questions where id = v_q_id;
 
--- Initialize as NULL for skipped questions
+		-- Initialize as NULL for skipped questions
     v_is_correct := NULL;
     v_score := 0;
 
