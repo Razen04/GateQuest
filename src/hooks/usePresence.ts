@@ -19,8 +19,8 @@ export const usePresence = (questionId: string) => {
 
         const syncPresence = () => {
             const state = channel.presenceState();
-            console.log('state: ', state);
-            setCount(Object.keys(state).length);
+            const count = Object.values(state).flat().length;
+            setCount(count);
         };
 
         const debug = (...args: unknown[]) => {
@@ -40,7 +40,6 @@ export const usePresence = (questionId: string) => {
 
         // When a new user joins the questionRoom
         channel.subscribe(async (status) => {
-            console.log('Subscription Status:', status);
             if (status === 'CHANNEL_ERROR') {
                 console.warn('Realtime limit reached. Presence data unavailable.');
             }
