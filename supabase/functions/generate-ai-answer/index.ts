@@ -142,7 +142,7 @@ CRITICAL FORMATTING RULES:
 
     if (updateError) throw new Error("Failed to save to DB: " + updateError.message);
 
-    return new Response(JSON.stringify({ answer: finalAnswerContent }), {
+    return new Response(JSON.stringify({ answer: finalAnswerContent, status: 'generated' }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 

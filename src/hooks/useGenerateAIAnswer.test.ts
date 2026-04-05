@@ -37,7 +37,7 @@ describe('useGenerateAIAnswer Hook', () => {
   it('Scenario 1: Successfully generates a new AI answer', async () => {
     
     (supabase.functions.invoke as any).mockResolvedValue({
-      data: { answer: 'The correct option is A because of X.' },
+      data: { answer: 'The correct option is A because of X.', status: 'generated' },
       error: null,
     });
 
@@ -61,7 +61,7 @@ describe('useGenerateAIAnswer Hook', () => {
   it('Scenario 2: Handles the Concurrency Lock (202 Accepted)', async () => {
     
     (supabase.functions.invoke as any).mockResolvedValue({
-      data: { status: 'generating' },
+      data: { answer: null, status: 'generating' },
       error: null,
     });
 

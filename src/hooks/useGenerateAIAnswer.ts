@@ -88,6 +88,9 @@ export const useGenerateAIAnswer = () => {
             } else if (data?.error) {
                 toast.error(data.error);
                 setIsGenerating(false);
+            } else {
+                toast.error("Received an invalid or empty response from the server.");
+                setIsGenerating(false);
             }
         } catch (e: any) {
              console.error("Network error generating AI answer:", e);
