@@ -7,19 +7,19 @@ export const usePresence = (questionId: string) => {
 
     useEffect(() => {
         const user = getUserProfile();
-        if (!user || !questionId) return;
+        if (!user?.id || !questionId) return;
 
         const channel = supabase.channel(`presence:${questionId}`, {
             config: {
                 presence: {
-                    key: questionId,
+                    key: user.id,
                 },
             },
         });
 
         const syncPresence = () => {
             const state = channel.presenceState();
-            const count = Object.values(state).flat().length;
+            const count = Object.keys(state).length;
             setCount(count);
         };
 
