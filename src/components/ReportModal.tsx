@@ -16,10 +16,12 @@ import { Textarea } from './ui/textarea';
 const ReportModal = ({
     onClose,
     onSubmit,
+    reportSubmitting,
 }: {
     show: boolean;
     onClose: () => void;
     onSubmit: (type: string, reason: string) => void;
+    reportSubmitting: boolean;
 }) => {
     const [reportType, setReportType] = useState('');
     const [reportText, setReportText] = useState('');
@@ -104,7 +106,7 @@ const ReportModal = ({
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={!reportType || !reportText.trim()}
+                        disabled={!reportType || !reportText.trim() || reportSubmitting}
                         className="rounded-md text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                     >
                         Submit
