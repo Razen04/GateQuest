@@ -23,20 +23,10 @@ export const usePresence = (questionId: string) => {
             setCount(count);
         };
 
-        const debug = (...args: unknown[]) => {
-            if (import.meta.env.NODE_ENV !== 'production') {
-                console.log(...args);
-            }
-        };
-
         channel
             .on('presence', { event: 'sync' }, syncPresence)
-            .on('presence', { event: 'join' }, ({ newPresences }) => {
-                debug('join', newPresences);
-            })
-            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-                debug('leave', leftPresences);
-            });
+            .on('presence', { event: 'join' }, () => {})
+            .on('presence', { event: 'leave' }, () => {});
 
         // When a new user joins the questionRoom
         channel.subscribe(async (status) => {
