@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { getCorrectAnswerText } from '../../utils/questionUtils.ts';
+import { getCorrectAnswerText, isNumericalQuestion } from '../../utils/questionUtils.ts';
 import MathRenderer from '@/components/Renderers/MathRenderer.tsx';
 import type { Question } from '@/types/storage.ts';
 
@@ -7,10 +7,17 @@ type ResultMessageProps = {
     showAnswer: boolean;
     result: string;
     currentQuestion: Question;
+    numericalAnswer: number;
 };
 
-const ResultMessage = ({ showAnswer, result, currentQuestion }: ResultMessageProps) => {
+const ResultMessage = ({
+    showAnswer,
+    result,
+    currentQuestion,
+    numericalAnswer,
+}: ResultMessageProps) => {
     const correctAnswer = getCorrectAnswerText(currentQuestion);
+    const isNAT = isNumericalQuestion(currentQuestion);
     return (
         <AnimatePresence>
             {showAnswer && (
@@ -37,6 +44,8 @@ const ResultMessage = ({ showAnswer, result, currentQuestion }: ResultMessagePro
                                 <span className="font-semibold">
                                     <MathRenderer text={correctAnswer} />
                                 </span>
+                                <br />
+                                {isNAT && `Your answer: ${numericalAnswer}`}
                             </div>
                         </div>
                     ) : (

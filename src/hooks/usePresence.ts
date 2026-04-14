@@ -7,40 +7,29 @@ export const usePresence = (questionId: string) => {
 
     useEffect(() => {
         const user = getUserProfile();
-        if (!user || !questionId) return;
+        if (!user?.id || !questionId) return;
 
         const channel = supabase.channel(`presence:${questionId}`, {
             config: {
                 presence: {
-                    key: questionId,
+                    key: user.id,
                 },
             },
         });
 
         const syncPresence = () => {
             const state = channel.presenceState();
-            console.log('state: ', state);
-            setCount(Object.keys(state).length);
-        };
-
-        const debug = (...args: unknown[]) => {
-            if (import.meta.env.NODE_ENV !== 'production') {
-                console.log(...args);
-            }
+            const count = Object.keys(state).length;
+            setCount(count);
         };
 
         channel
             .on('presence', { event: 'sync' }, syncPresence)
-            .on('presence', { event: 'join' }, ({ newPresences }) => {
-                debug('join', newPresences);
-            })
-            .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-                debug('leave', leftPresences);
-            });
+            .on('presence', { event: 'join' }, () => {})
+            .on('presence', { event: 'leave' }, () => {});
 
         // When a new user joins the questionRoom
         channel.subscribe(async (status) => {
-            console.log('Subscription Status:', status);
             if (status === 'CHANNEL_ERROR') {
                 console.warn('Realtime limit reached. Presence data unavailable.');
             }

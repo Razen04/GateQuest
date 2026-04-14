@@ -47,14 +47,20 @@ export const handleBookmark = (
 // Determine if current question is a multiple selection question
 export const isMultipleSelection = (currentQuestion: Question) => {
     if (!currentQuestion) return false;
-    if (currentQuestion.tags && Array.isArray(currentQuestion.tags)) {
-        return currentQuestion.tags.some(
-            (tag) =>
-                tag.toLowerCase().includes('multiple-select') ||
-                tag.toLowerCase().includes('multiple select'),
-        );
-    }
-    return currentQuestion.question_type === 'Multiple Select Question';
+
+    const isTypeMatch =
+        currentQuestion.question_type &&
+        currentQuestion.question_type.toLowerCase().includes('multiple-select');
+
+    const isTagMatch =
+        currentQuestion.tags &&
+        Array.isArray(currentQuestion.tags) &&
+        currentQuestion.tags.some((tag) => {
+            const t = tag.toLowerCase();
+            return t.includes('multiple-select') || t.includes('multiple select');
+        });
+
+    return isTypeMatch || isTagMatch;
 };
 
 export function isNumericalQuestion(q: Question): q is NumericalQuestion {

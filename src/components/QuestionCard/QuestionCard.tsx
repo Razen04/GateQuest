@@ -208,6 +208,7 @@ const QuestionCard = ({
                     {/* Result Message */}
                     {showAnswer && (
                         <ResultMessage
+                            numericalAnswer={numericalAnswer}
                             showAnswer={showAnswer}
                             result={result}
                             currentQuestion={question}

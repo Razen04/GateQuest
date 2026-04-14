@@ -49,7 +49,11 @@ const fetchQuestionsBySubject = async (
     last_fetched_at: string | undefined,
     examId: string | undefined,
 ) => {
-    let query = supabase.from('questions').select('*').eq('subject_id', subject_id);
+    let query = supabase
+        .from('questions')
+        .select('*')
+        .eq('subject_id', subject_id)
+        .eq('verified', true);
 
     if (examId) {
         query = query.contains('metadata->exam', [examId.toUpperCase()]);

@@ -37,7 +37,7 @@ describe('usePresence hook', () => {
             }),
             unsubscribe: vi.fn(),
             track: vi.fn().mockResolvedValue('ok'),
-            presenceState: vi.fn().mockResolvedValue({}),
+            presenceState: vi.fn().mockReturnValue({}),
         };
 
         mockChannel.on.mockImplementation((_type, config, callback) => {
@@ -87,5 +87,35 @@ describe('usePresence hook', () => {
         const { unmount } = renderHook(() => usePresence('test'));
         unmount();
         expect(mockChannel.unsubscribe).toHaveBeenCalled();
+    });
+
+    it('should use user.id as presence key', () => {
+        renderHook(() => usePresence('test'));
+
+        expect(supabase.channel).toHaveBeenCalledWith(
+            'presence:test',
+            expect.objectContaining({
+                config: {
+                    presence: {
+                        key: 'user-1',
+                    },
+                },
+            }),
+        );
+    });
+
+    it('should count users, not sessions', () => {
+        const { result } = renderHook(() => usePresence('test'));
+
+        mockChannel.presenceState.mockReturnValue({
+            'user-1': [{}, {}], // 2 tabs opened by same user with same question
+            'user-2': [{}], // only 1 tab
+        });
+
+        act(() => {
+            return syncCallback();
+        });
+
+        expect(result.current.count).toBe(2);
     });
 });

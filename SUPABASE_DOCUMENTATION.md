@@ -526,99 +526,62 @@ Custom SQL functions to handle complex logic directly in the database.
 
 ### Function: `insert_user_question_activity_batch(batch jsonb)`
 
-**Purpose:**  
-Processes a batch of user question attempts, handling both **practice mode** and **active weekly revision sets**.
-
-- Logs practice attempts in `user_question_activity`.
-- Updates the spaced-repetition queue in `user_incorrect_queue` **only for official revision attempts**.
-- Updates progress, accuracy, and completion status for an active `weekly_revision_set`.
+**Purpose:** Processes a batch of user question attempts, handling the synchronization of practice history, the spaced-repetition queue (Leitner system), and active weekly revision sets. It is the central engine for recording user progress while ensuring data integrity through a strict verification guard.
 
 **Arguments:**
 
-- `batch (jsonb)` – A JSON array of question attempt objects. Each object must include:
+| Field Name | Data Type | Description                                                                                                                                     |
+| :--------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `batch`    | `jsonb`   | A JSON array of question attempt objects, each containing `user_id`, `question_id`, `was_correct`, `time_taken`, `subject_id`, and `branch_id`. |
 
-| Field Name     | Type          | Description                                       |
-| -------------- | ------------- | ------------------------------------------------- |
-| `user_id`      | `uuid`        | User attempting the question.                     |
-| `question_id`  | `uuid`        | The question being attempted.                     |
-| `subject`      | `text`        | Question subject (for practice history).          |
-| `subject_id`   | `uuid`        | Subject ID reference (used for tracking).         |
-| `branch_id`    | `text`        | User’s branch at the time of attempt.             |
-| `was_correct`  | `boolean`     | Whether the answer was correct (default `false`). |
-| `time_taken`   | `int`         | Time spent answering in seconds.                  |
-| `attempted_at` | `timestamptz` | Timestamp of the attempt.                         |
-
-**Core Concepts:**
-
-- **Revision States:**
-    - `none` – Practice attempt (not part of a revision set).
-    - `first` – First attempt of a question in an active revision set.
-    - `done` – Question already attempted in the active revision set (ignored).
-
-- **Active Revision Set:**
-    - Automatically resolves the user’s currently **started** `weekly_revision_set`.
-    - Only one active set is considered per user.
+---
 
 **Logic Flow:**
 
-1. **Batch Iteration:**  
-   Iterates over each item in the input JSON array.
+1.  **User Profile Sync**: Retrieves the `version_number` from the `users` table for the first user in the batch to ensure attempts are logged against the correct user data version.
+2.  **Verification Guard (Silent Skip)**: For every item in the batch, the function queries the `questions` table. If the question is not found or `verified = false`, the function execution for that specific item is skipped using `CONTINUE`. This prevents stale or unvetted content in a user's local cache from affecting their statistics.
+3.  **Revision Context Resolution**: Checks if the user has an active `weekly_revision_set` with a status of `'started'`. If so, it determines the "Revision State" for the current question:
+    - **`none`**: Standard practice mode (not part of the current revision set).
+    - **`first`**: The question belongs to the active set and has not been answered yet.
+    - **`done`**: The question was already answered in this revision set (triggers a **Hard Stop** to ignore the duplicate attempt).
+4.  **Practice History Logging**: For states `none` and `first`, it records the attempt in `user_question_activity`, automatically incrementing the `attempt_number` for that specific user-question pair.
+5.  **Spaced Repetition Management (`user_incorrect_queue`)**:
+    - **New Mistakes**: If the answer is incorrect and the question isn't in the queue, it is inserted at **Box 1**.
+    - **Box Progression**: If the attempt is a `first` revision attempt, correct answers move the question to the next box (Box 1 → 2 → 3 → Removal), while incorrect answers reset it to Box 1.
+    - **Practice Protection**: Standard practice attempts (`none`) can add questions to the queue but **cannot** advance them to higher boxes, preserving the integrity of the official revision cycle.
+6.  **Revision Aggregate Updates**: For `first` attempts, the function updates the `revision_set_questions` record and recalculates the overall `total_questions`, `correct_count`, and `accuracy` for the `weekly_revision_set`.
+7.  **Auto-Expiration**: If all questions in the active revision set have been attempted, the function triggers `update_status_of_weekly_set` to mark the set as `expired`.
 
-2. **Revision State Resolution:**  
-   Checks if the question belongs to the user’s active revision set and assigns a state (`none`, `first`, `done`).
-
-3. **Hard Stop for Duplicate Revision Attempts:**  
-   Skips any question already answered (`done`) in the revision set.
-
-4. **Practice Mode Handling (`none` or `first`):**
-    - Inserts a record into `user_question_activity`.
-    - Automatically increments `attempt_number` per user/question.
-    - For incorrect attempts, inserts the question into `user_incorrect_queue` with `box=1`.
-
-5. **Spaced Repetition Queue (`user_incorrect_queue`):**
-    - **Insert:** Adds question only if answered incorrectly.
-    - **Update (first revision attempt only):** Moves boxes forward:
-        - Box 1 → Box 2 → Box 3 → Removed
-        - Incorrect answers reset to Box 1
-    - **Review Scheduling:**
-        - Box 1 → +1 week
-        - Box 2 → +2 weeks
-        - Box 3 → +4 weeks
-
-6. **Revision Set Question Update (`first` attempt only):**
-    - Updates `revision_set_questions` with correctness and time spent.
-    - Recalculates:
-        - Total questions
-        - Attempted questions
-        - Correct count
-        - Accuracy percentage
-
-7. **Revision Set Completion:**
-    - If all questions have been attempted, triggers `update_status_of_weekly_set(...)` to expire or finalize the set.
+---
 
 **Key Behaviors & Guarantees:**
 
-- Revision questions are answered **once per weekly set**.
-- Practice attempts do **not** affect revision accuracy.
-- Spaced-repetition box updates occur **only during official revision attempts**.
-- Only incorrect questions are added to the repetition queue.
-- Weekly accuracy = `(correct_questions / attempted_questions) * 100`.
+- **Resilience to Stale Data**: The `verified` check ensures that unverified questions are ignored rather than causing database errors, allowing the system to handle users who may have unvetted questions in their local browser cache.
+- **Idempotency in Revision**: Users cannot "pad" their revision accuracy by attempting the same question multiple times within a single weekly set; only the first attempt is recorded for revision stats.
+- **Leitner System Logic**: Box level and `next_review_at` intervals (1 week, 2 weeks, 4 weeks) are only modified during official revision sets to accurately measure long-term retention.
 
 **Return Value:**
 
 - `void`
 
-**Example Use Cases:**
+---
 
-- **Practice outside a revision set:**
-    - Attempt is logged.
-    - Spaced-repetition queue is updated only if the answer is incorrect.
+**Example SQL Usage:**
 
-- **First attempt during active revision set:**
-    - Updates revision progress and spaced-repetition queue.
-
-- **Subsequent attempts on the same question in the revision set:**
-    - Ignored to maintain data consistency.
+```sql
+-- Batching a practice attempt and a revision attempt
+SELECT insert_user_question_activity_batch('[
+  {
+    "user_id": "uuid",
+    "question_id": "verified-uuid",
+    "was_correct": true,
+    "time_taken": 45,
+    "subject_id": "subject-uuid",
+    "branch_id": "CS",
+    "attempted_at": "2026-04-14T21:42:00Z"
+  }
+]'::jsonb);
+```
 
 ### Function: `refresh_question_peer_stats()`
 
@@ -658,38 +621,76 @@ Calculates and updates aggregate performance statistics for all questions in the
 
 - `void`
 
-### Function: `generate_weekly_revision_set()`
+### Function: `generate_weekly_revision_set(p_branch_id text, p_target_exams text[], p_valid_subjects uuid[])`
 
-- **Purpose**: To generate a weekly revision set for a user based on their progress in the `user_incorrect_queue` table. This function selects questions for revision, prioritizing based on the Leitner lite system (3-box system) and ranks them to ensure the most relevant questions are reviewed first. It creates a new revision set for the week if one doesn't already exist.
-- **Arguments**: None: This function does not accept any external parameters. It derives the user ID (v_user_id) from the current authenticated user using `auth.uid()`.
-- **Logic**:
-    - **Authentication Check**: The function first checks if the user is authenticated. If not, it raises an exception.
-    - **Start of the Week Calculation**: It calculates the start of the current week (Sunday) to prevent generating multiple revision sets for the same week.
-    - **Existing Set Check**: It checks if a revision set has already been created for the user for the current week. If found, it returns the existing set ID and a message.
-    - **Creating New Revision Set**: If no set exists, it inserts a new entry in the `weekly_revision_set` table with a status of pending.
-    - **Populating Revision Set**:
-        - The function selects questions from the `user_incorrect_queue` table that are due for review (i.e., next_review_at is less than or equal to the current date).
-        - It then ranks the questions within each box using `ROW_NUMBER()`, ensuring that the questions from _box 3_ are given priority, followed by _box 2_, and then _box 1_.
-        - A maximum of 30 questions are selected to populate the revision set.
-    - **Return**: The function returns a JSON object with the `set_id`, `status`, the count of questions added to the set, and a success message.
-- **Return Value**:
-    - A `json` object containing:
-        - **set_id**: The ID of the generated or existing weekly revision set.
-        - **status**: Either existing (if the set already exists) or created (if a new set is generated).
-        - **questions_count**: The number of questions added to the revision set.
-        - **message**: A message indicating whether the set was newly created or already exists.
-- **Example**:
-    ```json
-    {
-        "set_id": "uuid",
-        "status": "created",
-        "questions_count": 30,
-        "message": "Generated new smart revision set."
-    }
-    ```
-- **Exceptions**:
-    - If the user is not authenticated, an exception is raised with the message Not authenticated.
-    - If an error occurs during the function execution, a general error message is raised.
+**Purpose:** Generates a personalized weekly revision set for an authenticated user by selecting questions they previously answered incorrectly. It prioritizes questions based on the Leitner "Box" system and strictly filters for verified content to ensure high-quality revision sessions.
+
+**Arguments:**
+
+| Field Name         | Data Type | Description                                                                        |
+| :----------------- | :-------- | :--------------------------------------------------------------------------------- |
+| `p_branch_id`      | `text`    | The academic branch (e.g., 'CS') used to filter branch-specific core subjects.     |
+| `p_target_exams`   | `text[]`  | An array of targeted exams (e.g., `['GATE', 'ISRO']`) to include in the selection. |
+| `p_valid_subjects` | `uuid[]`  | A list of subject IDs currently relevant to the user's practice profile.           |
+
+---
+
+**Logic Flow:**
+
+1.  **Authentication & Date Initialization**:
+    - Retrieves the current user's ID using `auth.uid()` and raises an exception if not authenticated.
+    - Calculates the start of the current week (Sunday) to ensure only one set is generated per user per week.
+
+2.  **Duplicate Prevention**:
+    - Checks the `weekly_revision_set` table for an existing record matching the user, the current week, and the specific `branch_id`.
+    - Returns the existing set details if found to prevent redundant generation.
+
+3.  **Header Creation**:
+    - Inserts a new record into `weekly_revision_set` with a status of `'pending'`, mapping the user's target exams and branch.
+
+4.  **The `RankedQueue` Selection (The Core Engine)**:
+    - **Mistake Retrieval**: Joins `user_incorrect_queue` with `questions` and `subjects` to find questions where `next_review_at` has passed.
+    - **Strict Verification**: Implements a mandatory `verified = true` filter. Unverified or "draft" questions are ignored even if the user got them wrong previously.
+    - **Branch & Exam Relevance**:
+        - Always includes mistakes from **Universal** subjects (e.g., General Aptitude).
+        - For core subjects, it filters based on the user's `branch_id` (via the metadata `'set'` tag) or by matching the `p_target_exams` array.
+
+5.  **Prioritization & Batching**:
+    - Selects a maximum of **30 questions**.
+    - Orders by `box ASC` (prioritizing Box 1 mistakes that need more frequent review) and `added_at ASC` (oldest mistakes first).
+
+6.  **Finalization**:
+    - Inserts the selected questions into `revision_set_questions`.
+    - Updates the revision set header with the final `total_questions` count.
+
+---
+
+**Key Behaviors & Guarantees:**
+
+- **Verified Content Only**: By enforcing the `verified` check, the function guarantees users only spend revision time on finalized, accurate questions.
+- **Targeted Relevance**: The use of `p_branch_id` and `p_target_exams` ensures that a CS student preparing for GATE doesn't accidentally receive EE-specific revision questions.
+- **Leitner Efficiency**: Prioritizes lower-box questions (recent or frequent errors) to optimize the spaced-repetition learning cycle.
+
+**Return Value:**
+
+Returns a `json` object:
+
+- `success`: Boolean indicating if the process completed successfully.
+- `status`: `'created'` for new sets or `'existing'` for redundant requests.
+- `message`: Human-readable status update.
+
+---
+
+**Example Usage:**
+
+```sql
+-- Generate a revision set for a CS student targeting GATE 2026
+SELECT generate_weekly_revision_set(
+    'CS',
+    ARRAY['GATE'],
+    ARRAY['22222222-2222-2222-2222-000000000001', '22222222-2222-2222-2222-000000000002']::uuid[]
+);
+```
 
 ### Function: `update_status_of_weekly_set(v_set_id uuid)`
 
@@ -834,3 +835,312 @@ Calculates and updates aggregate performance statistics for all questions in the
 - **Exception**
     - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
     - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
+
+### Function: `submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)`
+
+**Purpose:**
+Processes and grades a completed topic test session by evaluating user answers, calculating scores, and updating test results.
+
+- Grades both **numerical (NAT)** and **objective (MCQ/MSQ)** questions.
+- Records per-question attempts in `topic_tests_attempts`.
+- Calculates total score, accuracy, and performance metrics.
+- Finalizes the test session in `topic_tests`.
+
+**Arguments:**
+
+- `p_session_id (uuid)` – Unique identifier for the test session.
+- `p_payload (jsonb)` – A JSON array of question attempt objects. Each object must include:
+
+| Field Name           | Type      | Description                                       |
+| -------------------- | --------- | ------------------------------------------------- |
+| `question_id`        | `uuid`    | The question being attempted.                     |
+| `user_answer`        | `jsonb`   | User’s submitted answer (can be scalar or array). |
+| `time_spent_seconds` | `int`     | Time spent on the question.                       |
+| `marked_for_review`  | `boolean` | Whether the question was flagged for review.      |
+| `status`             | `text`    | Question state (e.g., `visited`, `answered`).     |
+| `attempt_order`      | `int`     | Order in which the question was attempted.        |
+
+- `p_remaining_time_seconds (int)` – Remaining time when the test was submitted.
+
+**Core Concepts:**
+
+- **Question Types:**
+    - `numerical` – Evaluated using flexible answer formats (exact, range, tolerance, etc.).
+    - `multiple-choice` / `multiple-select` – Evaluated using exact match logic.
+
+- **Answer States:**
+    - `NULL` – Question skipped (no answer provided).
+    - `true` – Correct answer.
+    - `false` – Incorrect answer.
+
+- **Session Finalization:**
+    - A session marked as `completed` cannot be graded again.
+
+**Logic Flow:**
+
+1. **Completion Check:**
+   If the test session is already marked as `completed`, returns early with status `already_completed`.
+
+2. **Payload Iteration:**
+   Iterates through each question attempt in the input JSON array.
+
+3. **Answer Normalization:**
+   Converts JSON `null` values to SQL `NULL` to properly handle skipped questions.
+
+4. **Question Data Fetch:**
+   Retrieves:
+    - Correct answer (`correct_answer`)
+    - Marks (`marks`)
+    - Question type (`question_type`)
+
+5. **Attempt Evaluation:**
+    - If no answer is provided:
+        - Marked as skipped (`is_correct = NULL`)
+        - No score change
+
+    - If answered:
+        - Increments `attempted_count`
+
+6. **Numerical (NAT) Grading:**
+    - Supports multiple evaluation modes:
+        - `exact` – Exact value match
+        - `multiple` – Matches any valid value in a set
+        - `range` – Value falls within min/max bounds
+        - `tolerance` – Within acceptable deviation
+
+    - Correct → full marks
+    - Incorrect → zero marks
+
+7. **MCQ/MSQ Grading:**
+    - Compares sorted JSON arrays for exact match.
+    - Correct → full marks (default 2 if unspecified)
+    - Incorrect:
+        - MCQ → negative marking (⅓ of marks)
+        - MSQ → no negative marking
+
+8. **Score Aggregation:**
+    - Updates:
+        - `v_total_score`
+        - `v_correct_count`
+        - `v_incorrect_count`
+
+9. **Attempt Persistence:**
+    - Inserts or updates records in `topic_tests_attempts`.
+    - Uses `ON CONFLICT` to handle re-submissions safely.
+
+10. **Session Update:**
+    - Marks session as `completed`
+    - Updates:
+        - Total score
+        - Correct and attempted counts
+        - Remaining time
+        - Completion timestamp
+        - Accuracy:
+
+            ```
+            (correct_count / attempted_count) * 100
+            ```
+
+**Key Behaviors & Guarantees:**
+
+- A test session can only be graded **once**.
+- Skipped questions do **not** affect accuracy.
+- Numerical questions support **flexible validation schemes**.
+- MCQ questions apply **negative marking**, MSQ does not.
+- Answer comparison is **order-independent** for multi-select questions.
+- Attempt records are **idempotent** via conflict handling.
+- Accuracy is calculated only from **attempted questions**.
+
+**Return Value:**
+
+- `jsonb`
+
+```json
+{
+  "total_score": float,
+  "correct_count": int,
+  "incorrect_count": int
+}
+```
+
+- If already completed:
+
+```json
+{
+    "status": "already_completed"
+}
+```
+
+**Example Use Cases:**
+
+- **Normal submission:**
+    - Grades all questions.
+    - Stores attempts and finalizes the test.
+
+- **Skipped questions:**
+    - Stored with `is_correct = NULL`.
+    - Do not impact score or accuracy.
+
+- **Re-submission attempt:**
+    - Immediately returns `already_completed`.
+    - Prevents duplicate grading.
+
+- **Mixed question types (NAT + MCQ/MSQ):**
+    - Each evaluated using its respective grading logic.
+
+### Function: `get_exam_subject_counts(target_exams text[])`
+
+**Purpose:** Calculates the total number of unique, verified questions available for each subject based on a list of targeted exams. This function is used to determine the "Total Question Pool" for progress bars and study plan calculations.
+
+**Arguments:**
+
+| Field Name     | Type     | Description                                                                          |
+| :------------- | :------- | :----------------------------------------------------------------------------------- |
+| `target_exams` | `text[]` | An array of exam codes (e.g., `['GATE', 'ISRO']`) used to filter the question count. |
+
+**Logic Flow:**
+
+1.  **Tag Normalization**: Expands question metadata using a `LATERAL` join with `jsonb_array_elements_text`. It handles metadata stored as arrays, single strings, or defaults to `["GATE"]` for legacy data.
+2.  **Subject Filtering**: Joins `questions` and `subjects` to evaluate relevance. A question is included if its subject is `is_universal` or if its metadata tags match any value in the `target_exams` array.
+3.  **Strict Verification**: Filters strictly for `verified = true`, ensuring only vetted content contributes to user progress metrics.
+4.  **Distinct Aggregation**: Groups results by `subject_id` and performs a `COUNT(DISTINCT q.id)` to ensure each question is counted only once, even if it is tagged with multiple relevant exams.
+
+**Key Behaviors & Guarantees:**
+
+- **Quality Control**: The `verified = true` filter ensures that practice progress and subject stats reflect only finalized content.
+- **Universal Inclusion**: Core subjects marked as `is_universal` (e.g., General Aptitude) are always included in the count regardless of specific exam tags.
+- **Accuracy**: The `DISTINCT` count prevents double-counting questions that may belong to multiple targeted exams.
+
+**Return Value:**
+
+Returns a table with the following columns:
+
+| Column Name           | Data Type | Description                                                     |
+| :-------------------- | :-------- | :-------------------------------------------------------------- |
+| `subject_id`          | `uuid`    | The unique identifier for the subject.                          |
+| `exam_specific_count` | `bigint`  | The total number of unique verified questions for that subject. |
+
+**Example Usage (Frontend):**
+
+```typescript
+//
+const { data, error } = await supabase.rpc('get_exam_subject_counts', {
+    target_exams: ['GATE', 'ESE'],
+});
+```
+
+### Function: `get_topic_counts(p_subject_id uuid)`
+
+**Purpose:** Retrieves a granular breakdown of verified question counts for every topic associated with a specific subject. This function is primary used to power the **Topic Test** selection screen, allowing users to see exactly how many vetted questions are available for specific syllabus areas.
+
+**Arguments:**
+
+| Field Name     | Data Type | Description                                                                          |
+| :------------- | :-------- | :----------------------------------------------------------------------------------- |
+| `p_subject_id` | `uuid`    | The unique identifier of the subject (e.g., Operating Systems) to filter topics for. |
+
+---
+
+**Logic Flow:**
+
+1.  **Subject Filtering**: The function queries the `questions` table, isolating only those records that match the provided `p_subject_id`.
+2.  **Data Cleaning**: It explicitly excludes any questions where the `topic` column is `NULL` to ensure the resulting list only contains valid, categorizable topics.
+3.  **Strict Verification Filter**: A mandatory filter is applied where `verified = true`. This ensures that "draft" or unvetted questions do not inflate the counts shown to the user.
+4.  **Grouping & Counting**: The results are grouped by the `topic` string. It performs a `COUNT(*)` to determine the volume of questions per topic.
+5.  **Contextual Mapping**: The original `p_subject_id` is passed back in every row as `subject_id` to assist the frontend in mapping topics back to their parent subject without extra logic.
+
+---
+
+**Key Behaviors & Guarantees:**
+
+- **Content Integrity**: Users are prevented from starting Topic Tests on topics that have zero verified questions, as those topics will either show a count of 0 or be filtered out by the UI.
+- **Signature Stability**: By returning the `subject_id` in the result set, the function maintains backward compatibility with frontend components that expect a full relational mapping of the data.
+- **Performance Optimization**: The function utilizes indexed columns (`subject_id` and `verified`) to ensure that counts are calculated rapidly even as the `questions` table scales toward thousands of entries.
+
+---
+
+**Return Value:**
+
+The function returns a table with the following structure:
+
+| Column Name      | Data Type | Description                                                                  |
+| :--------------- | :-------- | :--------------------------------------------------------------------------- |
+| `topic`          | `text`    | The name of the syllabus topic (e.g., "CPU Scheduling").                     |
+| `question_count` | `bigint`  | The total number of unique, **verified** questions available for that topic. |
+| `subject_id`     | `uuid`    | The ID of the parent subject, used for state management in the application.  |
+
+---
+
+**Example SQL Usage:**
+
+```sql
+-- Fetch verified topic counts for a specific subject ID
+SELECT * FROM get_topic_counts('22222222-2222-2222-2222-000000000009');
+```
+
+**Example Frontend Integration:**
+
+```typescript
+//
+const { data, error } = await supabase.rpc('get_topic_counts', {
+    p_subject_id: 'your-subject-uuid',
+});
+```
+
+### Function: `get_critical_question_count(p_valid_subjects uuid[])`
+
+**Purpose:** Returns the total count of verified, overdue questions currently in the user's personal mistake queue (`user_incorrect_queue`). This function is used to display "Critical" or "Action Needed" badges on the dashboard, helping users identify exactly how many questions require immediate attention based on their spaced-repetition schedule.
+
+**Arguments:**
+
+| Field Name         | Data Type | Description                                                                       |
+| :----------------- | :-------- | :-------------------------------------------------------------------------------- |
+| `p_valid_subjects` | `uuid[]`  | An array of subject IDs that are currently active in the user's practice profile. |
+
+---
+
+**Logic Flow:**
+
+1.  **Branch Context Retrieval**:
+    - The function first identifies the currently authenticated user via `auth.uid()`.
+    - It retrieves the user's active `branch_id` (e.g., 'CS', 'DA') from the `user_goals` table. This ensures that the count only includes mistakes relevant to their current academic focus.
+
+2.  **Queue Filtering**:
+    - Queries the `user_incorrect_queue` for records belonging to the user where the `next_review_at` timestamp is less than or equal to `NOW()`.
+
+3.  **Strict Verification Guard**:
+    - Joins with the `questions` table to enforce a mandatory `verified = true` check. Questions that were recently unverified or marked as draft are excluded from the "Critical" count to prevent users from reviewing unreliable content.
+
+4.  **Subject & Branch Validation**:
+    - **Subject Filter**: Only questions belonging to the `p_valid_subjects` array are counted.
+    - **Universal Rule**: Questions from universal subjects (like Mathematics or General Aptitude) are always included.
+    - **Core Rule**: For non-universal subjects, the question's metadata `'set'` tag must match the user's active `branch_id`.
+
+5.  **Aggregation**:
+    - Uses `COUNT(DISTINCT question_id)` to provide an accurate total of unique questions due for review.
+
+---
+
+**Key Behaviors & Guarantees:**
+
+- **Content Quality Assurance**: By adding the `verified` check, the dashboard count remains a reliable indicator of high-quality work remaining, rather than being inflated by unvetted system data.
+- **Dynamic Goal Alignment**: The count automatically adjusts if a user changes their active branch or exams, ensuring they are not prompted to review irrelevant material.
+- **Leitner System Support**: Directly integrates with the "Box" system logic by only counting questions that the spaced-repetition algorithm has marked as "due".
+
+**Return Value:**
+
+Returns an `integer` representing the total number of unique, verified, and overdue revision questions.
+
+---
+
+**Example SQL Usage:**
+
+```sql
+-- Get count of verified overdue revision questions for active subjects
+SELECT get_critical_question_count(
+    ARRAY[
+        '22222222-2222-2222-2222-000000000001',
+        '22222222-2222-2222-2222-000000000002'
+    ]::uuid[]
+);
+```

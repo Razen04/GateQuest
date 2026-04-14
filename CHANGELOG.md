@@ -1,3 +1,12 @@
+# v0.10.6 - 2026-04-14
+
+- Topic Test has more analysis now and better layout. Fixes [#53](https://github.com/Razen04/GateQuest/issues/53).
+- Fixed bug not showing real count of users solving the problem.
+- You can see your own answer in numerical questions now.
+- Only verified questions will be fixed.
+- Sidebar comes back after window changes. Fixes [#58](https://github.com/Razen04/GateQuest/issues/58).
+- Removed unverified GATE EC questions for now, will add them eventually after fixing them at my own pace.
+
 # v0.10.5 - 2026-03-31
 
 - No need to add goals again after a re-login if once done before. Fixes [#46](https://github.com/Razen04/GateQuest/issues/46).
