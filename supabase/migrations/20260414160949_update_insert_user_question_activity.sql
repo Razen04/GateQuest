@@ -50,7 +50,7 @@ begin
         -- 2. Verification Guard: Ignore unverified or missing questions
         ------------------------------------------------------------------
         select verified into v_is_verified from questions where id = v_question_id;
-        
+
         -- If question is not found or not verified, silently skip this item
         if not coalesce(v_is_verified, false) then
             continue;
@@ -135,11 +135,12 @@ begin
             select box
             into v_box
             from user_incorrect_queue
-            where[118;1:3u user_id = v_user_id
+            where user_id = v_user_id
               and question_id = v_question_id
             limit 1;
 
             if found then
+                -- Only update queue if this is an official REVISION attempt ('first').
                 if v_revision_state = 'first' then
                     if v_is_correct then
                         if v_box = 1 then v_new_box := 2;
@@ -202,6 +203,7 @@ begin
                 perform update_status_of_weekly_set(v_set_id => v_set_id);
             end if;
         end if;
+
     end loop;
 end;
 $$ LANGUAGE plpgsql;
