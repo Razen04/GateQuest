@@ -7,7 +7,6 @@ type DonorListProps = {
     donations: DonationData[];
 };
 
-// TODO: Fix Timezone Issue
 const DonorList: React.FC<DonorListProps> = ({ donations }: DonorListProps) => {
     return (
         <div>
@@ -33,7 +32,17 @@ const DonorList: React.FC<DonorListProps> = ({ donations }: DonorListProps) => {
                                             : donation.user_name}
 
                                         <span className="text-gray-500 ml-2 text-xs">
-                                            {formatDistanceToNow(new Date(donation.created_at))} ago
+                                            {/* Supabase sends timestamps without a 'Z', so browsers
+                                                might treat them as local time instead of UTC — we
+                                                append 'Z' if it's missing to force correct parsing */}
+                                            {formatDistanceToNow(
+                                                new Date(
+                                                    donation.created_at.endsWith('Z')
+                                                        ? donation.created_at
+                                                        : donation.created_at + 'Z',
+                                                ),
+                                            )}{' '}
+                                            ago
                                         </span>
                                     </span>
 
