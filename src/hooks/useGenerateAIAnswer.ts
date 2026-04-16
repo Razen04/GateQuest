@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/utils/supabaseClient';
 import { toast } from 'sonner';
+import useSettings from '@/hooks/useSettings';
 
 export const useGenerateAIAnswer = () => {
     const [isGenerating, setIsGenerating] = useState(false);
+    const { settings } = useSettings();
     
     // We use a ref to keep track of the active Realtime channel so we can 
     const channelRef = useRef<any>(null);
@@ -21,12 +23,19 @@ export const useGenerateAIAnswer = () => {
     const generateAIAnswer = async (
         questionId: string, 
         onSuccess: (answer: string) => void,
-        syncToLocalDB?: (questionId: string, answer: string) => Promise<void> 
+        syncToLocalDB?: (questionId: string, answer: string) => Promise<void>,
+        /** Pass a fresh key directly to avoid stale closure issues right after saving the key */
+        overrideApiKey?: string
     ) => {
+        // Prefer the overrideApiKey (freshly typed), then stored setting, then nothing
+        const resolvedApiKey = overrideApiKey?.trim() || settings.geminiApiKey?.trim() || undefined;
         setIsGenerating(true);
         try {
             const { data, error } = await supabase.functions.invoke('generate-ai-answer', {
-                body: { question_id: questionId }
+                body: { 
+                    question_id: questionId,
+                    ...(resolvedApiKey ? { user_api_key: resolvedApiKey } : {}),
+                }
             });
 
             if (error) {

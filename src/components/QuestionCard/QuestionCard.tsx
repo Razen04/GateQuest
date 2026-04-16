@@ -15,6 +15,10 @@ import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
 import { useGenerateAIAnswer } from '@/hooks/useGenerateAIAnswer';
+import { openInAI } from '@/utils/aiPromptUtils';
+import AskAIBanner from '@/components/QuestionCard/AskAIBanner';
+import APIKeyModal from '@/components/QuestionCard/APIKeyModal';
+import useSettings from '@/hooks/useSettings';
 
 // Child Components
 
@@ -101,17 +105,44 @@ const QuestionCard = ({
     const pageRef = useRef<HTMLDivElement>(null);
 
     const [localAiAnswer, setLocalAiAnswer] = React.useState<string | undefined>(question.answer_text);
+    const [showKeyModal, setShowKeyModal] = React.useState(false);
+
     React.useEffect(() => {
         setLocalAiAnswer(question.answer_text);
     }, [question.id, question.answer_text]);
 
     const { generateAIAnswer, isGenerating } = useGenerateAIAnswer();
+    const { settings, handleSettingChange } = useSettings();
+    const aiProvider = settings.aiProvider ?? 'chatgpt';
 
-    const handleGenerateAI = () => {
+    // Actually run the generation (key is guaranteed to exist at this point)
+    const runGenerate = () => {
         generateAIAnswer(question.id, (newAnswer) => {
             setLocalAiAnswer(newAnswer);
         });
     };
+
+    const handleGenerateAI = () => {
+        if (!settings.geminiApiKey?.trim()) {
+            // No key — show the inline modal to collect it first
+            setShowKeyModal(true);
+            return;
+        }
+        runGenerate();
+    };
+
+    // Called by APIKeyModal when the user saves their key
+    const handleKeySaved = (key: string) => {
+        handleSettingChange('geminiApiKey', key);
+        setShowKeyModal(false);
+        // Pass the fresh key directly as overrideApiKey — avoids stale closure.
+        // No timeout needed: the key travels in the same call, not via settings state.
+        generateAIAnswer(question.id, (newAnswer) => {
+            setLocalAiAnswer(newAnswer);
+        }, undefined, key);
+    };
+
+    const handleAskAI = async () => { await openInAI(question, aiProvider); };
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -129,6 +160,14 @@ const QuestionCard = ({
     }, [questionNumber]);
 
     return (
+        <>
+        {/* API Key Modal — shown when user clicks AI Answer with no key set */}
+        {showKeyModal && (
+            <APIKeyModal
+                onKeySaved={handleKeySaved}
+                onClose={() => setShowKeyModal(false)}
+            />
+        )}
         <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
             {/* Top Back Button */}
             <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
@@ -216,8 +255,11 @@ const QuestionCard = ({
                         />
                     )}
 
-                    {/* Question Explanation */}
+                    {/* Question Explanation (AI cached answer) */}
                     {showAnswer && <QuestionExplanation question={question} customAiAnswer={localAiAnswer} />}
+
+
+                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
 
                     {/* Action Buttons */}
                     <ActionButtons
@@ -239,6 +281,7 @@ const QuestionCard = ({
                 <QuestionBadge currentQuestion={question} />
             </div>
         </div>
+        </>
     );
 };
 

@@ -13,6 +13,7 @@ const defaultSettings: Settings = {
     darkMode: true,
     shareProgress: true,
     dataCollection: true,
+    aiProvider: 'chatgpt',
 };
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.
@@ -31,6 +32,14 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         setSettings((prev) => ({
             ...prev,
             [key]: !prev[key],
+        }));
+    };
+
+    // A generic function to set any setting to a specific value (for non-boolean settings).
+    const handleSettingChange = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+        setSettings((prev) => ({
+            ...prev,
+            [key]: value,
         }));
     };
 
@@ -62,7 +71,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (
-        <AppSettingContext.Provider value={{ settings, handleSettingToggle }}>
+        <AppSettingContext.Provider value={{ settings, handleSettingToggle, handleSettingChange }}>
             {children}
         </AppSettingContext.Provider>
     );
