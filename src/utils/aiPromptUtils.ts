@@ -98,19 +98,19 @@ function resolveCorrectAnswer(question: Question): string {
  * Works with any AI provider (ChatGPT, Gemini, Claude, Grok).
  *
  * @param question    The GATE question object.
- * @param hasImages   Pass true when the question contains diagrams — changes the
- *                    image placeholder text to tell the AI to look at the pasted image.
+ * @param imageCount  The number of diagrams in the question. Used to format placeholders.
  */
-export function buildGateAIPrompt(question: Question, hasImages = false): string {
+export function buildGateAIPrompt(question: Question, imageCount = 0): string {
     const isMCQ = question.question_type !== 'Numerical Answer';
     const q = question as MCQQuestion | MSQQuestion;
 
     // Replace markdown image syntax with a context-aware placeholder.
-    // When hasImages=true the diagram is being sent via clipboard, so we tell
-    // the AI to reference the attached image instead of ignoring it.
-    const imagePlaceholder = hasImages
-        ? '[Diagram attached — refer to the pasted image]'
-        : '[Image — diagram not available in text format]';
+    let imagePlaceholder = '[Image — diagram not available in text format]';
+    if (imageCount === 1) {
+        imagePlaceholder = '[Diagram attached — refer to the pasted image]';
+    } else if (imageCount > 1) {
+        imagePlaceholder = '[Diagram attached — refer to the pasted images (the first was copied to your clipboard, the rest must be uploaded manually)]';
+    }
 
     const cleanQuestion = question.question
         .replace(/!\[.*?\]\(.*?\)/g, imagePlaceholder)
@@ -172,11 +172,12 @@ export async function openInAI(question: Question, provider: AIProvider = 'chatg
     const fallback = FALLBACK_URLS[provider] || FALLBACK_URLS['chatgpt'];
 
     const imageUrls = extractImageUrls(question.question);
-    const hasImages = imageUrls.length > 0;
+    const imageCount = imageUrls.length;
+    const hasImages = imageCount > 0;
 
     // Build the prompt — if we have images, the placeholder tells the AI to
     // reference the attached diagram rather than ignoring it.
-    const prompt  = buildGateAIPrompt(question, hasImages);
+    const prompt  = buildGateAIPrompt(question, imageCount);
     const encoded = encodeURIComponent(prompt);
 
     // ── LONG PROMPT FALLBACK ──────────────────────────────────────────────────
@@ -184,7 +185,7 @@ export async function openInAI(question: Question, provider: AIProvider = 'chatg
     // Append a note about the diagram URL so the user isn't left without context.
     if (encoded.length > 8000) {
         const longPrompt = hasImages
-            ? `${prompt}\n\n[NOTE: This question contains a diagram. Please upload it manually from the original question page.]`
+            ? `${prompt}\n\n[NOTE: This question contains ${imageCount > 1 ? 'multiple diagrams' : 'a diagram'}. Please upload ${imageCount > 1 ? 'them' : 'it'} manually from the original question page.]`
             : prompt;
 
         navigator.clipboard.writeText(longPrompt).finally(() => {
@@ -216,10 +217,17 @@ export async function openInAI(question: Question, provider: AIProvider = 'chatg
             // Open the AI app — text is pre-filled from the URL.
             window.open(config.url(encoded), '_blank', 'noopener,noreferrer');
 
-            toast.info(
-                `Diagram copied! Paste it (⌘V / Ctrl+V) in the ${config.label} chat before sending.`,
-                { duration: 7000 }
-            );
+            if (imageCount > 1) {
+                toast.info(
+                    `First diagram copied! Paste it in ${config.label}. Remember to manually upload the other ${imageCount - 1} diagram(s).`,
+                    { duration: 8000 }
+                );
+            } else {
+                toast.info(
+                    `Diagram copied! Paste it (⌘V / Ctrl+V) in the ${config.label} chat before sending.`,
+                    { duration: 7000 }
+                );
+            }
         } catch {
             // ClipboardItem unavailable (old browser / non-HTTPS) — open anyway
             // and tell the user to grab the image manually.

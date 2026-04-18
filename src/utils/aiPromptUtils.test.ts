@@ -89,7 +89,7 @@ describe('aiPromptUtils', () => {
             expect(prompt).toContain('CORRECT ANSWER: B) 2');
         });
 
-        it('removes image markdown in default mode (hasImages flag false)', () => {
+        it('removes image markdown in default mode (imageCount = 0)', () => {
             const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png).' };
             const prompt = buildGateAIPrompt(q);
             
@@ -97,11 +97,18 @@ describe('aiPromptUtils', () => {
             expect(prompt).not.toContain('![alt](img.png)');
         });
 
-        it('uses alternative placeholder when hasImages=true', () => {
+        it('uses alternative placeholder when imageCount = 1', () => {
             const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png).' };
-            const prompt = buildGateAIPrompt(q, true);
+            const prompt = buildGateAIPrompt(q, 1);
             
             expect(prompt).toContain('[Diagram attached — refer to the pasted image]');
+        });
+
+        it('uses multiple images placeholder when imageCount > 1', () => {
+            const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png) and ![alt2](img2.png).' };
+            const prompt = buildGateAIPrompt(q, 2);
+            
+            expect(prompt).toContain('[Diagram attached — refer to the pasted images (the first was copied to your clipboard, the rest must be uploaded manually)]');
         });
     });
 
@@ -165,6 +172,23 @@ describe('aiPromptUtils', () => {
                 expect.stringContaining('Couldn\'t auto-copy the diagram'),
                 expect.any(Object)
             );
+        });
+
+        it('handles multiple images gracefully', async () => {
+            const imageQ = { ...mockQuestionTemplate, question: 'Question ![diag](https://a.com/b.png) ![diag2](https://a.com/c.png)' };
+            
+            await openInAI(imageQ, 'chatgpt');
+            
+            expect(global.fetch).toHaveBeenCalledWith('https://a.com/b.png');
+            expect(navigator.clipboard.write).toHaveBeenCalledTimes(1);
+            expect(toast.info).toHaveBeenCalledWith(
+                expect.stringContaining('First diagram copied!'),
+                expect.any(Object)
+            );
+
+            const url = (window.open as any).mock.calls[0][0];
+            const decoded = decodeURIComponent(url);
+            expect(decoded).toContain('copied to your clipboard, the rest must be uploaded');
         });
 
         it('handles long prompts with images by writing text, not image, with note', async () => {
