@@ -1,4 +1,4 @@
-export type AIProvider = 'chatgpt' | 'claude' | 'grok';
+
 
 export type Settings = {
     sound: boolean;
@@ -7,8 +7,7 @@ export type Settings = {
     // Placeholder settings as of now
     shareProgress: boolean;
     dataCollection: boolean;
-    /** Which AI provider to deep-link to for question explanations */
-    aiProvider: AIProvider;
+
     /** User-supplied Gemini API key for generating AI answers (BYOK) */
     geminiApiKey?: string;
 };

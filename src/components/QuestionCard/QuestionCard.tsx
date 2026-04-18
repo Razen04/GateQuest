@@ -15,8 +15,6 @@ import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
 import { useGenerateAIAnswer } from '@/hooks/useGenerateAIAnswer';
-import { openInAI } from '@/utils/aiPromptUtils';
-import AskAIBanner from '@/components/QuestionCard/AskAIBanner';
 import APIKeyModal from '@/components/QuestionCard/APIKeyModal';
 import useSettings from '@/hooks/useSettings';
 
@@ -113,7 +111,6 @@ const QuestionCard = ({
 
     const { generateAIAnswer, isGenerating } = useGenerateAIAnswer();
     const { settings, handleSettingChange } = useSettings();
-    const aiProvider = settings.aiProvider ?? 'chatgpt';
 
     // Actually run the generation (key is guaranteed to exist at this point)
     const runGenerate = () => {
@@ -141,8 +138,6 @@ const QuestionCard = ({
             setLocalAiAnswer(newAnswer);
         }, undefined, key);
     };
-
-    const handleAskAI = async () => { await openInAI(question, aiProvider); };
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -258,8 +253,6 @@ const QuestionCard = ({
                     {/* Question Explanation (AI cached answer) */}
                     {showAnswer && <QuestionExplanation question={question} customAiAnswer={localAiAnswer} />}
 
-
-                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
 
                     {/* Action Buttons */}
                     <ActionButtons

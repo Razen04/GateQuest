@@ -13,7 +13,7 @@ const defaultSettings: Settings = {
     darkMode: true,
     shareProgress: true,
     dataCollection: true,
-    aiProvider: 'chatgpt',
+
 };
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.
