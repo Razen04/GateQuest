@@ -1,9 +1,12 @@
 import { Faders } from '@phosphor-icons/react';
 import useSettings from '../../hooks/useSettings.ts';
 import ToggleSwitch from '@/components/ui/ToggleSwitch.tsx';
+import { version, last_updated } from '../../../package.json';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle } = useSettings();
+    const APP_VERSION = version;
+    const APP_LAST_UPDATED_AT = last_updated;
 
     return (
         <div className="pb-20 px-4">
@@ -35,11 +38,11 @@ const AppSettings = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center">
                             <span>Version</span>
-                            <span>0.10.6</span>
+                            <span>{APP_VERSION}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span>Last Updated</span>
-                            <span>April 15, 2026</span>
+                            <span>{APP_LAST_UPDATED_AT}</span>
                         </div>
                     </div>
                 </div>
