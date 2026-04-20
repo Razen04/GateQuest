@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import type { Question } from '@/types/storage.js';
 
 type QuestionContentProps = {
+    env: 'Test' | 'Practice';
     currentQuestion: Question;
     hasOptions: boolean;
     showAnswer: boolean;
@@ -16,6 +17,7 @@ type QuestionContentProps = {
 
 // This component now only receives props. It has NO hooks.
 const QuestionContent = ({
+    env,
     currentQuestion,
     hasOptions,
     showAnswer,
@@ -99,9 +101,11 @@ const QuestionContent = ({
                                     onClick={() => !showAnswer && onOptionSelect(index)}
                                 >
                                     <div className="flex items-center">
-                                        <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
-                                            [{String.fromCharCode(index + 65)}/{index + 1}]
-                                        </span>
+                                        {env === 'Practice' && (
+                                            <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
+                                                [{String.fromCharCode(index + 65)}/{index + 1}]
+                                            </span>
+                                        )}
                                         {isMultipleSelection(currentQuestion) ? (
                                             // Checkbox for multiple selection
                                             <div

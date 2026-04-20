@@ -48,6 +48,7 @@ const TopicTestGeneratePage = () => {
     } = useTopicTestGenerator({
         subjectId: selectedSubjectId,
         requestedQuestionCount: questionLimit,
+        includeAttempted,
     });
 
     const finalQuestionCount = useMemo(() => {
@@ -169,6 +170,7 @@ const TopicTestGeneratePage = () => {
                     isTopicsLoading={loading}
                     handleTopicToggle={toggleTopic}
                     selectedSubjectId={selectedSubjectId}
+                    includeAttempted={includeAttempted}
                 />
 
                 <TopicTestConfiguration

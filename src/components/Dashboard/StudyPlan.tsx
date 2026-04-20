@@ -66,8 +66,8 @@ const StudyPlan = () => {
                             style={{
                                 width: `${Math.min(100, todayProgressPercent)}%`,
                                 background: isTargetMetToday
-                                    ? 'linear-gradient(to right, #10b981, #06b6d4)' // green-blue if met
-                                    : 'linear-gradient(to right, #6366f1, #a78bfa)', // purple if pending
+                                    ? 'linear-gradient(to right, #60a5fa, #1d4ed8)' // stronger blue
+                                    : 'linear-gradient(to right, #dbeafe, #60a5fa)', // softer blue
                                 transition: 'width .5s ease',
                             }}
                         ></div>

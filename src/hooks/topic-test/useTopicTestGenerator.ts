@@ -9,21 +9,25 @@ export interface Topic {
     subjectName: string;
     subjectId: string;
     questionCount: number;
+    unattemptedCount: number;
 }
 
 interface UseTopicTestGeneratorParams {
     subjectId: string | null;
     requestedQuestionCount: number;
+    includeAttempted: boolean;
 }
 
 interface TopicFromSupabase {
     topic: string;
     question_count: number;
+    unattempted_count: number;
 }
 
 export const useTopicTestGenerator = ({
     subjectId,
     requestedQuestionCount,
+    includeAttempted,
 }: UseTopicTestGeneratorParams) => {
     const [availableTopics, setAvailableTopics] = useState<Topic[]>([]);
     const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
@@ -72,6 +76,8 @@ export const useTopicTestGenerator = ({
             p_subject_id: subjectId,
         });
 
+        console.log('Data: ', data);
+
         if (error) {
             console.error(error);
             setAvailableTopics([]);
@@ -81,7 +87,10 @@ export const useTopicTestGenerator = ({
                 subjectName,
                 subjectId,
                 questionCount: t.question_count,
+                unattemptedCount: t.unattempted_count,
             }));
+
+            console.log('Topics: ', topics);
 
             setAvailableTopics(topics);
             writeCache(subjectId, topics);
@@ -119,8 +128,11 @@ export const useTopicTestGenerator = ({
 
     // state to track the minimum questionCount requirement
     const poolSize = useMemo(() => {
-        return selectedTopics.reduce((sum, t) => sum + t.questionCount, 0);
-    }, [selectedTopics]);
+        return selectedTopics.reduce((sum, t) => {
+            // If includeAttempted is false, use unattemptedCount
+            return sum + (includeAttempted ? t.questionCount : t.unattemptedCount);
+        }, 0);
+    }, [selectedTopics, includeAttempted]);
 
     const canGenerate = poolSize >= requestedQuestionCount;
 

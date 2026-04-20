@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SidebarItem } from './SidebarItem';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/reac
 import { Text, Title } from '../ui/typography';
 import type { Tab } from './Sidebar';
 import Changelog from './Changelog';
+import { useLocation } from 'react-router-dom';
 
 type SidebarDesktopProps = {
     showSidebar: boolean;
@@ -21,11 +22,24 @@ export const SidebarDesktop = ({
     locationPath,
     navigate,
 }: SidebarDesktopProps) => {
+    const location = useLocation();
+    const isTopicTestAttempt = /^\/topic-test\/[^/]+\/attempt$/.test(location.pathname);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const handleCollapse = () => setIsCollapsed(!isCollapsed);
+    const handleCollapse = useCallback(() => {
+        setIsCollapsed((prev) => !prev);
+    }, []);
 
     const [starCount, setStarCount] = useState<number | null>(null);
+
+    const prevRef = useRef(false);
+
+    useEffect(() => {
+        if (isTopicTestAttempt && !prevRef.current) {
+            setIsCollapsed(true);
+        }
+        prevRef.current = isTopicTestAttempt;
+    }, [isTopicTestAttempt]);
 
     useEffect(() => {
         const CACHE_KEY = 'repo_stars';
