@@ -838,122 +838,286 @@ SELECT generate_weekly_revision_set(
 
 ### Function: `submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)`
 
-**Purpose:**
-Processes and grades a completed topic test session by evaluating user answers, calculating scores, and updating test results.
+---
 
-- Grades both **numerical (NAT)** and **objective (MCQ/MSQ)** questions.
-- Records per-question attempts in `topic_tests_attempts`.
-- Calculates total score, accuracy, and performance metrics.
-- Finalizes the test session in `topic_tests`.
+## **Purpose:**
 
-**Arguments:**
+Processes and grades a completed topic test session by evaluating user answers, calculating scores, and persisting results across multiple tracking tables.
 
-- `p_session_id (uuid)` – Unique identifier for the test session.
-- `p_payload (jsonb)` – A JSON array of question attempt objects. Each object must include:
+This function:
 
-| Field Name           | Type      | Description                                       |
-| -------------------- | --------- | ------------------------------------------------- |
-| `question_id`        | `uuid`    | The question being attempted.                     |
-| `user_answer`        | `jsonb`   | User’s submitted answer (can be scalar or array). |
-| `time_spent_seconds` | `int`     | Time spent on the question.                       |
-| `marked_for_review`  | `boolean` | Whether the question was flagged for review.      |
-| `status`             | `text`    | Question state (e.g., `visited`, `answered`).     |
-| `attempt_order`      | `int`     | Order in which the question was attempted.        |
+- Grades **numerical (NAT)** and **objective (MCQ/MSQ)** questions
+- Stores per-question attempts in `topic_tests_attempts`
+- Syncs user activity into `user_question_activity` for dashboard analytics
+- Calculates total score, correctness, and accuracy
+- Finalizes the test session in `topic_tests`
+- Ensures **idempotent, single-time grading per session**
 
-- `p_remaining_time_seconds (int)` – Remaining time when the test was submitted.
+---
 
-**Core Concepts:**
+## **Arguments:**
 
-- **Question Types:**
-    - `numerical` – Evaluated using flexible answer formats (exact, range, tolerance, etc.).
-    - `multiple-choice` / `multiple-select` – Evaluated using exact match logic.
+### Core Inputs
 
-- **Answer States:**
-    - `NULL` – Question skipped (no answer provided).
-    - `true` – Correct answer.
-    - `false` – Incorrect answer.
+| Field Name                 | Type    | Description                                |
+| :------------------------- | :------ | :----------------------------------------- |
+| `p_session_id`             | `uuid`  | Unique identifier for the test session     |
+| `p_payload`                | `jsonb` | Array of question attempt objects          |
+| `p_remaining_time_seconds` | `int`   | Remaining time at the moment of submission |
 
-- **Session Finalization:**
-    - A session marked as `completed` cannot be graded again.
+---
 
-**Logic Flow:**
+### Payload Schema (`p_payload` items)
 
-1. **Completion Check:**
-   If the test session is already marked as `completed`, returns early with status `already_completed`.
+Each object inside the JSON array must follow:
 
-2. **Payload Iteration:**
-   Iterates through each question attempt in the input JSON array.
+| Field Name           | Type      | Description                         |
+| :------------------- | :-------- | :---------------------------------- |
+| `question_id`        | `uuid`    | Question being attempted            |
+| `user_answer`        | `jsonb`   | User’s answer (scalar or array)     |
+| `time_spent_seconds` | `int`     | Time spent on the question          |
+| `marked_for_review`  | `boolean` | Whether question was flagged        |
+| `status`             | `text`    | State (`visited`, `answered`, etc.) |
+| `attempt_order`      | `int`     | Order of attempt                    |
 
-3. **Answer Normalization:**
-   Converts JSON `null` values to SQL `NULL` to properly handle skipped questions.
+---
 
-4. **Question Data Fetch:**
-   Retrieves:
-    - Correct answer (`correct_answer`)
-    - Marks (`marks`)
-    - Question type (`question_type`)
+## **Core Concepts:**
 
-5. **Attempt Evaluation:**
-    - If no answer is provided:
-        - Marked as skipped (`is_correct = NULL`)
-        - No score change
+### Question Types
 
-    - If answered:
-        - Increments `attempted_count`
+- **numerical (NAT)** → evaluated using:
+    - exact match
+    - multiple valid answers
+    - range-based validation
+    - tolerance-based validation
 
-6. **Numerical (NAT) Grading:**
-    - Supports multiple evaluation modes:
-        - `exact` – Exact value match
-        - `multiple` – Matches any valid value in a set
-        - `range` – Value falls within min/max bounds
-        - `tolerance` – Within acceptable deviation
+- **multiple-choice (MCQ)** → single correct option with negative marking
+- **multiple-select (MSQ)** → multi-option exact match, no negative marking
 
-    - Correct → full marks
-    - Incorrect → zero marks
+---
 
-7. **MCQ/MSQ Grading:**
-    - Compares sorted JSON arrays for exact match.
-    - Correct → full marks (default 2 if unspecified)
-    - Incorrect:
-        - MCQ → negative marking (⅓ of marks)
-        - MSQ → no negative marking
+### Answer States
 
-8. **Score Aggregation:**
-    - Updates:
-        - `v_total_score`
-        - `v_correct_count`
-        - `v_incorrect_count`
+- `NULL` → skipped question (no attempt recorded)
+- `true` → correct answer
+- `false` → incorrect answer
 
-9. **Attempt Persistence:**
-    - Inserts or updates records in `topic_tests_attempts`.
-    - Uses `ON CONFLICT` to handle re-submissions safely.
+---
 
-10. **Session Update:**
-    - Marks session as `completed`
-    - Updates:
-        - Total score
-        - Correct and attempted counts
-        - Remaining time
-        - Completion timestamp
-        - Accuracy:
+## **Logic Flow:**
 
-            ```
-            (correct_count / attempted_count) * 100
-            ```
+---
 
-**Key Behaviors & Guarantees:**
+### 1. Session Completion Guard
 
-- A test session can only be graded **once**.
-- Skipped questions do **not** affect accuracy.
-- Numerical questions support **flexible validation schemes**.
-- MCQ questions apply **negative marking**, MSQ does not.
-- Answer comparison is **order-independent** for multi-select questions.
-- Attempt records are **idempotent** via conflict handling.
-- Accuracy is calculated only from **attempted questions**.
+- If the session already has `status = 'completed'`, the function exits immediately:
 
-**Return Value:**
+```json
+{ "status": "already_completed" }
+```
 
-- `jsonb`
+Prevents duplicate grading.
+
+---
+
+### 2. User & Context Resolution
+
+Fetches:
+
+- `user_id`
+- `branch_id`
+- `user_version_number`
+
+from:
+
+- `topic_tests`
+- `users`
+
+This ensures:
+
+- version-safe analytics
+- correct activity mapping
+
+---
+
+### 3. Payload Iteration
+
+Loops through each question attempt in `p_payload`.
+
+---
+
+### 4. Answer Normalization
+
+- Converts JSON `"null"` → SQL `NULL`
+- Ensures skipped questions are properly handled
+
+---
+
+### 5. Question Metadata Fetch
+
+For each question:
+
+- `correct_answer`
+- `marks`
+- `question_type`
+- `subject_id`
+- `subject_name`
+
+---
+
+## **6. Grading Logic**
+
+---
+
+### A. Attempt Check
+
+Only executed if `user_answer IS NOT NULL`.
+
+- increments `attempted_count`
+
+---
+
+### B. Numerical (NAT) Grading
+
+Supports:
+
+- **exact match**
+- **multiple valid values**
+- **range check (inclusive/exclusive)**
+- **tolerance-based comparison**
+
+Scoring:
+
+- correct → full marks
+- incorrect → 0 marks
+
+---
+
+### C. MCQ / MSQ Grading
+
+- Compares **sorted arrays** (order-independent)
+
+#### MCQ:
+
+- correct → full marks
+- incorrect → **negative marking = 1/3 marks**
+
+#### MSQ:
+
+- correct → full marks
+- incorrect → **no negative marking**
+
+---
+
+## **7. User Activity Sync (NEW BEHAVIOR)**
+
+Each **attempted question** is now persisted into:
+
+### `user_question_activity`
+
+This enables:
+
+- dashboard progress tracking
+- topic-wise performance analytics
+- per-question history reconstruction
+
+### Inserted Fields:
+
+| Field                 | Description                 |
+| :-------------------- | :-------------------------- |
+| `user_id`             | Auth user                   |
+| `question_id`         | Attempted question          |
+| `subject`             | Subject name (denormalized) |
+| `subject_id`          | Subject UUID                |
+| `branch_id`           | User branch context         |
+| `was_correct`         | Evaluation result           |
+| `time_taken`          | Time spent on question      |
+| `user_version_number` | Version-scoped tracking     |
+
+### Key Rule:
+
+> Only **attempted questions** (non-NULL answers) are synced.
+
+Skipped questions are intentionally excluded.
+
+---
+
+## **8. Attempt Persistence**
+
+Each question attempt is stored in:
+
+### `topic_tests_attempts`
+
+Using:
+
+```sql
+ON CONFLICT (session_id, question_id)
+```
+
+Ensures:
+
+- idempotent updates
+- safe re-submissions within same session
+
+Stored fields:
+
+- user answer
+- correctness
+- score
+- time spent
+- status
+- review flag
+- attempt order
+
+---
+
+## **9. Score Aggregation**
+
+Tracks:
+
+- `v_total_score`
+- `v_correct_count`
+- `v_incorrect_count`
+- `v_attempted_count`
+
+Accuracy is based only on attempted questions.
+
+---
+
+## **10. Session Finalization**
+
+Updates `topic_tests`:
+
+- marks `status = 'completed'`
+- stores final score
+- stores attempt stats
+- stores remaining time
+- sets completion timestamp
+- computes accuracy:
+
+```text
+accuracy = (correct_count / attempted_count) * 100
+```
+
+---
+
+## **Key Behaviors & Guarantees:**
+
+- A session is **strictly single-grading**
+- Skipped questions do **not affect accuracy**
+- User activity is now **fully synchronized for analytics**
+- Version-aware tracking prevents historical contamination
+- MCQ negative marking applies only where appropriate
+- MSQ is always non-penalized for incorrect answers
+- Attempt data is **idempotent and conflict-safe**
+- Dashboard consistency is guaranteed via `user_question_activity` sync
+
+---
+
+## **Return Value:**
+
+### Successful grading:
 
 ```json
 {
@@ -963,7 +1127,7 @@ Processes and grades a completed topic test session by evaluating user answers, 
 }
 ```
 
-- If already completed:
+### If already completed:
 
 ```json
 {
@@ -971,22 +1135,29 @@ Processes and grades a completed topic test session by evaluating user answers, 
 }
 ```
 
-**Example Use Cases:**
+---
 
-- **Normal submission:**
-    - Grades all questions.
-    - Stores attempts and finalizes the test.
+## **Example Usage:**
 
-- **Skipped questions:**
-    - Stored with `is_correct = NULL`.
-    - Do not impact score or accuracy.
+```sql
+SELECT submit_test_grading(
+  'session-uuid',
+  '[{...}]'::jsonb,
+  120
+);
+```
 
-- **Re-submission attempt:**
-    - Immediately returns `already_completed`.
-    - Prevents duplicate grading.
+---
 
-- **Mixed question types (NAT + MCQ/MSQ):**
-    - Each evaluated using its respective grading logic.
+## **Example Frontend Call:**
+
+```typescript
+await supabase.rpc('submit_test_grading', {
+    p_session_id: sessionId,
+    p_payload: attempts,
+    p_remaining_time_seconds: remainingTime,
+});
+```
 
 ### Function: `get_exam_subject_counts(target_exams text[])`
 
@@ -1031,9 +1202,12 @@ const { data, error } = await supabase.rpc('get_exam_subject_counts', {
 
 ### Function: `get_topic_counts(p_subject_id uuid)`
 
-**Purpose:** Retrieves a granular breakdown of verified question counts for every topic associated with a specific subject. This function is primary used to power the **Topic Test** selection screen, allowing users to see exactly how many vetted questions are available for specific syllabus areas.
+**Purpose:**
+Retrieves a granular breakdown of verified question counts for every topic associated with a specific subject. This function is primarily used to power the **Topic Test** selection screen, enabling users to see both the total number of available questions and how many of those they have not yet attempted in their current user version.
 
-**Arguments:**
+---
+
+### Arguments:
 
 | Field Name     | Data Type | Description                                                                          |
 | :------------- | :-------- | :----------------------------------------------------------------------------------- |
@@ -1041,47 +1215,81 @@ const { data, error } = await supabase.rpc('get_exam_subject_counts', {
 
 ---
 
-**Logic Flow:**
+### Logic Flow:
 
-1.  **Subject Filtering**: The function queries the `questions` table, isolating only those records that match the provided `p_subject_id`.
-2.  **Data Cleaning**: It explicitly excludes any questions where the `topic` column is `NULL` to ensure the resulting list only contains valid, categorizable topics.
-3.  **Strict Verification Filter**: A mandatory filter is applied where `verified = true`. This ensures that "draft" or unvetted questions do not inflate the counts shown to the user.
-4.  **Grouping & Counting**: The results are grouped by the `topic` string. It performs a `COUNT(*)` to determine the volume of questions per topic.
-5.  **Contextual Mapping**: The original `p_subject_id` is passed back in every row as `subject_id` to assist the frontend in mapping topics back to their parent subject without extra logic.
+1. **User Version Resolution**
+    - The function first retrieves the current user's `version_number` from the `users` table using `auth.uid()`.
+    - This ensures question attempt tracking is scoped correctly per user version.
+
+2. **Subject Filtering**
+    - Queries the `questions` table and filters records by the provided `p_subject_id`.
+
+3. **Data Cleaning**
+    - Excludes questions where `topic IS NULL`, ensuring only valid syllabus topics are included.
+
+4. **Verification Filter**
+    - Only includes questions where `verified = true`, ensuring unvetted content does not affect counts.
+
+5. **Total Question Count**
+    - Groups results by `topic` and computes `COUNT(*)` to determine total verified questions per topic.
+
+6. **Unattempted Question Calculation**
+    - For each question, checks `user_question_activity` to determine whether the current user (and version) has attempted it.
+    - Uses a `NOT EXISTS` filter to count only **unattempted questions per topic**.
+
+7. **Grouping & Aggregation**
+    - Results are grouped by `q.topic` to produce per-topic summaries.
+
+8. **Contextual Mapping**
+    - The original `p_subject_id` is returned in each row as `subject_id` for frontend state mapping.
 
 ---
 
-**Key Behaviors & Guarantees:**
+### Key Behaviors & Guarantees:
 
-- **Content Integrity**: Users are prevented from starting Topic Tests on topics that have zero verified questions, as those topics will either show a count of 0 or be filtered out by the UI.
-- **Signature Stability**: By returning the `subject_id` in the result set, the function maintains backward compatibility with frontend components that expect a full relational mapping of the data.
-- **Performance Optimization**: The function utilizes indexed columns (`subject_id` and `verified`) to ensure that counts are calculated rapidly even as the `questions` table scales toward thousands of entries.
+- **Prevents Empty Tests:**
+  The inclusion of `unattempted_count` ensures the UI can prevent users from starting a Topic Test with zero available (unattempted) questions.
+
+- **Accurate Progress Tracking:**
+  Counts are scoped to both `auth.uid()` and `user_version_number`, ensuring user progress isolation across versions.
+
+- **Content Integrity:**
+  Only `verified` questions contribute to counts, maintaining dataset quality.
+
+- **Version-Safe Logic:**
+  User activity is segmented by `user_version_number`, preventing cross-version contamination of attempt history.
+
+- **Scalable Design:**
+  Relies on indexed fields (`subject_id`, `verified`, `user_id`, `question_id`) for efficient aggregation at scale.
 
 ---
 
-**Return Value:**
+### Return Value:
 
 The function returns a table with the following structure:
 
-| Column Name      | Data Type | Description                                                                  |
-| :--------------- | :-------- | :--------------------------------------------------------------------------- |
-| `topic`          | `text`    | The name of the syllabus topic (e.g., "CPU Scheduling").                     |
-| `question_count` | `bigint`  | The total number of unique, **verified** questions available for that topic. |
-| `subject_id`     | `uuid`    | The ID of the parent subject, used for state management in the application.  |
+| Column Name         | Data Type | Description                                                                 |
+| :------------------ | :-------- | :-------------------------------------------------------------------------- |
+| `topic`             | `text`    | The name of the syllabus topic (e.g., "CPU Scheduling").                    |
+| `question_count`    | `bigint`  | Total number of verified questions available for the topic.                 |
+| `unattempted_count` | `bigint`  | Number of verified questions the user has NOT attempted in current version. |
+| `subject_id`        | `uuid`    | The ID of the parent subject for frontend mapping.                          |
 
 ---
 
-**Example SQL Usage:**
+### Example SQL Usage:
 
 ```sql
--- Fetch verified topic counts for a specific subject ID
-SELECT * FROM get_topic_counts('22222222-2222-2222-2222-000000000009');
+-- Fetch topic counts with user-specific unattempted breakdown
+SELECT *
+FROM get_topic_counts('22222222-2222-2222-2222-000000000009');
 ```
 
-**Example Frontend Integration:**
+---
+
+### Example Frontend Integration:
 
 ```typescript
-//
 const { data, error } = await supabase.rpc('get_topic_counts', {
     p_subject_id: 'your-subject-uuid',
 });
