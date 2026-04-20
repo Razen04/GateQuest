@@ -168,6 +168,7 @@ const QuestionCard = ({
                 <div className="p-4 sm:p-6">
                     {/* Content Section (Text & Options) */}
                     <QuestionContent
+                        env="Practice"
                         currentQuestion={question}
                         hasOptions={hasOptions}
                         showAnswer={showAnswer}
