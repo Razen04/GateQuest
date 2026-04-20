@@ -46,6 +46,18 @@ const Layout = () => {
     const [showSidebar, setShowSidebar] = useState(window.innerWidth > 1024);
     const user = getUserProfile();
 
+    // Changes the showSidebar even if the window size is changed frequently.
+    useEffect(() => {
+        const handleResize = () => {
+            const isDesktop = window.innerWidth > 1024;
+
+            setShowSidebar(isDesktop);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // to get location for focus mode to remove mobile dock
     const location = useLocation();
     const FOCUS_PATHS = ['/topic-test'];

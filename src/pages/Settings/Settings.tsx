@@ -85,7 +85,7 @@ const Settings = () => {
                     initial="initial"
                     animate="animate"
                     variants={itemVariants}
-                    className="overflow-y-scroll h-[60vh] pb-20"
+                    className="pb-20"
                 >
                     <Outlet />
                 </motion.div>

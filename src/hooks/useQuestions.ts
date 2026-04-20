@@ -49,7 +49,11 @@ const fetchQuestionsBySubject = async (
     last_fetched_at: string | undefined,
     examId: string | undefined,
 ) => {
-    let query = supabase.from('questions').select('*').eq('subject_id', subject_id);
+    let query = supabase
+        .from('questions')
+        .select('*')
+        .eq('subject_id', subject_id)
+        .eq('verified', true);
 
     if (examId) {
         query = query.contains('metadata->exam', [examId.toUpperCase()]);
@@ -173,7 +177,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                 } else {
                     console.error(String(err)); // fallback for non-Error objects
                 }
-                toast.error('Could not load questions.');
+                toast.error('Could not load questions. Try clearing cache and fetch again.');
             } finally {
                 // Ensure the loading state is set to false in all cases (success or error).
                 if (isMounted) setIsLoading(false);

@@ -3,6 +3,8 @@ import { Check, StackIcon, CaretDown } from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Topic } from '@/hooks/topic-test/useTopicTestGenerator';
+import { EraserIcon } from '@phosphor-icons/react';
+import { ListChecksIcon } from '@phosphor-icons/react';
 
 interface TopicsSelectionProps {
     selectedSubjectId: string | null;
@@ -23,6 +25,35 @@ const TopicsSelection = ({
 }: TopicsSelectionProps) => {
     const [showAllPrimary, setShowAllPrimary] = useState(false);
     const [showMinorTopics, setShowMinorTopics] = useState(false);
+
+    // Checking if all topics are selected
+    const isAllSelected = useMemo(() => {
+        if (availableTopics.length === 0) return false;
+        return availableTopics.every((at) =>
+            selectedTopics.some((st) => st.name === at.name && st.subjectId === at.subjectId),
+        );
+    }, [availableTopics, selectedTopics]);
+
+    // Bulk selection
+    const handleSelectAll = () => {
+        if (isAllSelected) {
+            // Deselect All: Toggle only those that are currently selected
+            availableTopics.forEach((topic) => {
+                const isSelected = selectedTopics.some(
+                    (st) => st.name === topic.name && st.subjectId === topic.subjectId,
+                );
+                if (isSelected) handleTopicToggle(topic);
+            });
+        } else {
+            // Select All: Toggle only those that are NOT currently selected
+            availableTopics.forEach((topic) => {
+                const isSelected = selectedTopics.some(
+                    (st) => st.name === topic.name && st.subjectId === topic.subjectId,
+                );
+                if (!isSelected) handleTopicToggle(topic);
+            });
+        }
+    };
 
     const { primaryTopics, minorTopics } = useMemo(() => {
         return {
@@ -45,6 +76,25 @@ const TopicsSelection = ({
                     exit={{ opacity: 0, height: 0 }}
                     className="space-y-4"
                 >
+                    {!isTopicsLoading && availableTopics.length > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleSelectAll}
+                            className="h-10 px-2 font-bold uppercase tracking-tighter hover:bg-blue-50 hover:text-white dark:hover:bg-blue-500/20 bg-blue-500"
+                        >
+                            {isAllSelected ? (
+                                <span className="flex items-center gap-1">
+                                    <EraserIcon size={14} /> Deselect All
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1">
+                                    <ListChecksIcon size={14} /> Select All
+                                </span>
+                            )}
+                        </Button>
+                    )}
+
                     <div className="flex justify-between items-end">
                         <label className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
                             <StackIcon className="w-4 h-4 text-purple-500" />

@@ -27,7 +27,11 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchedRef = useRef(false);
 
     const fetchData = useCallback(async (force = false) => {
-        if (fetchedRef.current && !force) return;
+        const {
+            data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session || (fetchedRef.current && !force)) return;
         try {
             setLoading(true);
             fetchedRef.current = true;
@@ -181,6 +185,21 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [userGoal, branchSubjects, examSubjects, subjects]);
 
+    // Check if a particular subject belong to the user goal for cases when they view the question shared to them belong to different branch
+    const isSubjectInGoal = useCallback(
+        (subjectId: string) => {
+            if (!userGoal) return;
+
+            const subject = subjects.find((s) => s.id === subjectId);
+            if (subject?.is_universal) return true;
+
+            return branchSubjects.some(
+                (bs) => bs.branch_id === userGoal.branch_id && bs.subject_id === subjectId,
+            );
+        },
+        [userGoal, subjects, branchSubjects],
+    );
+
     const value = useMemo(
         () => ({
             branches,
@@ -192,6 +211,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             error,
             setInitialGoal,
             getPracticeSubjects,
+            isSubjectInGoal,
             refresh: () => fetchData(true),
         }),
         [
@@ -204,6 +224,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             error,
             setInitialGoal,
             getPracticeSubjects,
+            isSubjectInGoal,
             fetchData,
         ],
     );

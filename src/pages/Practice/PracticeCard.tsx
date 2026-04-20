@@ -65,15 +65,6 @@ const PracticeCard = () => {
     // Global contexts
     const { user, isLogin } = useAuth();
     const { settings } = useSettings();
-    // Timer Logic
-    const {
-        time: timeTaken,
-        minutes,
-        seconds,
-        isActive: isTimerActive,
-        toggle: toggleTimer,
-        reset: resetTimer,
-    } = useQuestionTimer(settings?.autoTimer, safeQuestion);
 
     // Question State (User Selection, Numerical Input)
     const {
@@ -89,6 +80,16 @@ const PracticeCard = () => {
         handleNumericalInputChange,
     } = useQuestionState(safeQuestion);
 
+    // Timer Logic
+    const {
+        time: timeTaken,
+        minutes,
+        seconds,
+        isActive: isTimerActive,
+        toggle: toggleTimer,
+        stop: stop,
+    } = useQuestionTimer(settings?.autoTimer, safeQuestion, showAnswer);
+
     // Answer Flow (Submission Logic)
     const { handleShowAnswer, handleSubmit } = useAnswerFlow({
         currentQuestion: safeQuestion,
@@ -99,7 +100,7 @@ const PracticeCard = () => {
         isLogin,
         setShowAnswer,
         setResult,
-        resetTimer,
+        stop,
         showAnswer,
     });
 
@@ -161,8 +162,10 @@ const PracticeCard = () => {
 
     // 8. Event Handlers
     const [showReportModal, setShowReportModal] = useState(false);
+    const [reportSubmitting, setReportSubmitting] = useState(false);
 
     const handleReportSubmit = async (reportType: string, reportText: string) => {
+        setReportSubmitting(true);
         const report = {
             user_id: user?.id,
             question_id: currentQuestion.id,
@@ -170,20 +173,25 @@ const PracticeCard = () => {
             report_text: reportText,
         };
 
-        const { error } = await supabase.from('question_reports').insert([report]);
-
-        if (error) {
-            if (error.code === '23505') {
-                toast.error("Already reported by you, don't spam please");
-            } else {
-                toast.error('There was an error in submitting the report.');
+        try {
+            const { error } = await supabase.from('question_reports').insert([report]);
+            if (error) {
+                if (error.code === '23505') {
+                    toast.error("Already reported by you, don't spam please");
+                } else {
+                    toast.error('There was an error in submitting the report.');
+                }
+                console.error('Error reporting question:', error);
+                return;
             }
-            console.error('Error reporting question:', error);
-        } else {
             toast.success('Thank you for making the platform great. ❤️');
+            setShowReportModal(false);
+        } catch (err) {
+            console.error(err);
+            toast.error('Unexpected error occurred.');
+        } finally {
+            setReportSubmitting(false);
         }
-
-        setShowReportModal(false);
     };
 
     // Allow sharing question to peers
@@ -277,6 +285,7 @@ const PracticeCard = () => {
                     show={showReportModal} // Ensure Modal accepts this prop
                     onClose={() => setShowReportModal(false)}
                     onSubmit={handleReportSubmit}
+                    reportSubmitting={reportSubmitting}
                 />
             )}
         </>

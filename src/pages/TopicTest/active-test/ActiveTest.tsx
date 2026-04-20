@@ -92,6 +92,14 @@ const ActiveTest = () => {
 
     const isReviewMarked = answers.isMarkedForReview(currentQ.id);
 
+    // ActiveTest.tsx logic
+    const allAttempts = Array.from(answers.answers.values());
+
+    const answeredCount = allAttempts.filter((a) => a.status === 'answered').length;
+    const markedCount = allAttempts.filter((a) => a.marked_for_review).length;
+    const visitedNotAnswered = allAttempts.filter((a) => a.status === 'viewed').length;
+    const unvisitedCount = questions.length - (answeredCount + visitedNotAnswered);
+
     return (
         <div className="flex flex-col h-full overflow-hidden text-slate-900 dark:text-slate-100">
             <TestHeader
@@ -103,6 +111,12 @@ const ActiveTest = () => {
             <div className="flex flex-1 overflow-hidden relative">
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
                     <div className="max-w-4xl mx-auto">
+                        <div className="w-fit flex gap-2 font-bold items-center mb-2">
+                            <p className="bg-blue-500 p-2">Marks: {currentQ.marks}</p>
+                            {!isMSQ && !isNAT && (
+                                <p className="bg-red-500 p-2">Negative Marks: {currentQ.marks}/3</p>
+                            )}
+                        </div>
                         {/* Render Text & Options */}
                         <QuestionContent
                             currentQuestion={currentQ}
@@ -139,9 +153,14 @@ const ActiveTest = () => {
                         currentIndex={currentIndex}
                         markedForReview={answers.isMarkedForReview}
                         isAnswered={answers.isAnswered}
+                        isVisited={answers.isVisited}
                         isOpen={true} // always open on desktop
                         onToggle={() => {}}
                         onJumpTo={(idx) => navigation.jumpTo(idx)}
+                        answeredCount={answeredCount}
+                        markedCount={markedCount}
+                        visitedNotAnswered={visitedNotAnswered}
+                        unvisitedCount={unvisitedCount}
                     />
                 </aside>
 
@@ -152,9 +171,14 @@ const ActiveTest = () => {
                         currentIndex={currentIndex}
                         markedForReview={answers.isMarkedForReview}
                         isAnswered={answers.isAnswered}
+                        isVisited={answers.isVisited}
                         isOpen={isPaletteOpen}
                         onToggle={() => setIsPaletteOpen(false)}
                         onJumpTo={(idx) => navigation.jumpTo(idx)}
+                        answeredCount={answeredCount}
+                        markedCount={markedCount}
+                        visitedNotAnswered={visitedNotAnswered}
+                        unvisitedCount={unvisitedCount}
                     />
                 </div>
             </div>

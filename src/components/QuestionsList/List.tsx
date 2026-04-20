@@ -57,7 +57,7 @@ const List = ({
                                       : [question.metadata.exam || 'GATE']
                                   )
                                       .join(' / ')
-                                      .toUpperCase()} ${question.year}`
+                                      .toUpperCase()} ${question.metadata.set} ${question.year}`
                                 : 'Year Unknown'}
                         </span>
                     </div>

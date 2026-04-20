@@ -63,7 +63,12 @@ const PracticeList = () => {
 
     // Handle any errors during the fetch.
     if (error) {
-        return <div>Failed to load questions, try again later.</div>;
+        return (
+            <div>
+                Failed to load questions, please clear cache and try again, if this does not work,
+                hop on Discord and I might help.
+            </div>
+        );
     }
 
     if (!subject) return;

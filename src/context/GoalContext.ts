@@ -21,6 +21,7 @@ interface GoalContextType {
     // Logic-derived helper
     setInitialGoal: (branchId: string, examIds: string[], silent: boolean) => Promise<void>;
     getPracticeSubjects: () => Subject[];
+    isSubjectInGoal: (subjectId: string) => boolean | undefined;
     refresh: () => Promise<void>;
 }
 

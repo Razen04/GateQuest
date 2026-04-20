@@ -55,19 +55,19 @@ interface BaseQuestion {
 }
 
 export interface NumericalQuestion extends BaseQuestion {
-    question_type: 'Numerical Answer';
+    question_type: 'numerical';
     correct_answer: NumericalAnswerSpec;
     options?: never;
 }
 
 export interface MCQQuestion extends BaseQuestion {
-    question_type: 'Multiple Choice Question';
+    question_type: 'multiple-choice';
     options: string[];
     correct_answer: number[];
 }
 
 export interface MSQQuestion extends BaseQuestion {
-    question_type: 'Multiple Select Question';
+    question_type: 'multiple-select';
     options: string[];
     correct_answer: number[];
 }
@@ -109,6 +109,7 @@ export interface Attempt {
     question_id: string;
     attempt_order: number;
     user_answer: number | number[] | null;
+    questions: Question;
     marked_for_review: boolean;
     status: string;
     is_correct: boolean;
