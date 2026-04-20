@@ -7,11 +7,14 @@ import { isMultipleSelection, isNumericalQuestion } from '@/utils/questionUtils'
 import TestHeader from './TestHeader';
 import TestControlBar from './TestControlBar';
 import QuestionPalette from './QuestionPallete';
+import { CalculatorIcon } from '@phosphor-icons/react';
+import { XIcon } from '@phosphor-icons/react';
 
 const ActiveTest = () => {
     const { navigation, answers, timer, handleNext, handlePrev, handleSubmit, questions } =
         useTest();
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+    const [showCalc, setShowCalc] = useState(false);
 
     // Derived States
     const currentIndex = navigation.currentIndex;
@@ -108,17 +111,76 @@ const ActiveTest = () => {
                 onEndTest={handleSubmit}
             />
 
+            {/*
+            <iframe
+                src="https://www.gatexplore.com/scientific-calculator/calculator.html"
+                className="w-full h-full"
+            /> */}
+
             <div className="flex flex-1 overflow-hidden relative">
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
                     <div className="max-w-4xl mx-auto">
-                        <div className="w-fit flex gap-2 font-bold items-center mb-2">
-                            <p className="bg-blue-500 p-2">Marks: {currentQ.marks}</p>
-                            {!isMSQ && !isNAT && (
-                                <p className="bg-red-500 p-2">Negative Marks: {currentQ.marks}/3</p>
-                            )}
+                        <div className="flex justify-between items-center">
+                            <div className="w-fit flex gap-2 font-bold items-center mb-2">
+                                <p className="bg-blue-500 p-2 rounded-md">
+                                    Marks: {currentQ.marks}
+                                </p>
+                                {!isMSQ && !isNAT && (
+                                    <p className="bg-red-500 p-2 rounded-md">
+                                        Negative Marks: {currentQ.marks}/3
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowCalc((prev) => !prev)}
+                                    className={`px-2 py-1 ${showCalc ? 'bg-red-500' : 'bg-blue-500'} rounded-md`}
+                                >
+                                    {showCalc ? <XIcon size={32} /> : <CalculatorIcon size={32} />}
+                                </button>
+
+                                {showCalc && (
+                                    <>
+                                        {/* BACKDROP (works for both desktop + mobile) */}
+                                        <div
+                                            className="fixed inset-0 z-40 bg-black/30"
+                                            onClick={() => setShowCalc(false)}
+                                        />
+
+                                        {/* DESKTOP */}
+                                        <div className="hidden md:block absolute right-0 mt-2 z-50">
+                                            <div
+                                                className="relative w-[475px] h-[350px] bg-white dark:bg-zinc-950 shadow-2xl rounded-lg overflow-hidden"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <iframe
+                                                    src="https://www.gatexplore.com/scientific-calculator/calculator.html"
+                                                    className="w-full h-full"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* MOBILE */}
+                                        <div className="md:hidden fixed inset-x-0 bottom-0 z-50 flex items-end">
+                                            <div
+                                                className="w-full h-[60vh] bg-white dark:bg-gray-800 rounded-t-2xl overflow-hidden relative"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <iframe
+                                                    src="https://www.gatexplore.com/scientific-calculator/calculator.html"
+                                                    className="w-full h-full"
+                                                />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
+
                         {/* Render Text & Options */}
                         <QuestionContent
+                            env="Test"
                             currentQuestion={currentQ}
                             hasOptions={!isNAT}
                             showAnswer={false}
