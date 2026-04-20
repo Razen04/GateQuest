@@ -27,19 +27,11 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         return (profle?.settings || defaultSettings) as Settings;
     });
 
-    // A generic function to toggle any boolean setting by its key.
-    const handleSettingToggle = (key: keyof Settings) => {
+    // A generic function to toggle any boolean setting by its key, or explicitly set its value.
+    const handleSettingToggle = <K extends keyof Settings>(key: K, value?: Settings[K]) => {
         setSettings((prev) => ({
             ...prev,
-            [key]: !prev[key],
-        }));
-    };
-
-    // A generic function to set any setting to a specific value (for non-boolean settings).
-    const handleSettingChange = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-        setSettings((prev) => ({
-            ...prev,
-            [key]: value,
+            [key]: value !== undefined ? value : !prev[key],
         }));
     };
 
@@ -71,7 +63,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (
-        <AppSettingContext.Provider value={{ settings, handleSettingToggle, handleSettingChange }}>
+        <AppSettingContext.Provider value={{ settings, handleSettingToggle }}>
             {children}
         </AppSettingContext.Provider>
     );

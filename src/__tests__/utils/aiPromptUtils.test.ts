@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { extractImageUrls, buildGateAIPrompt, openInAI } from './aiPromptUtils';
+import { extractImageUrls, buildGateAIPrompt, openInAI } from '@/utils/aiPromptUtils';
 import type { MCQQuestion } from '@/types/storage';
 import { toast } from 'sonner';
 
@@ -15,7 +15,7 @@ vi.mock('sonner', () => ({
 describe('aiPromptUtils', () => {
     const mockQuestionTemplate: MCQQuestion = {
         id: 'test-id',
-        question_type: 'Multiple Choice Question',
+        question_type: 'multiple-choice' as 'Multiple Choice Question', // Cast to bypass strict storage typings if not updated
         year: 2024,
         question_number: 1,
         subject: 'Computer Science',

@@ -210,8 +210,8 @@ const QuestionCard = ({
                         />
                     )}
 
-                    {/* Question Explanation (AI cached answer) */}
-                    {showAnswer && <QuestionExplanation question={question} customAiAnswer={question.answer_text} />}
+                    {/* Question Explanation */}
+                    {showAnswer && <QuestionExplanation question={question} />}
 
 
                     {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}

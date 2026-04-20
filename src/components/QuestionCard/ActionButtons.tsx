@@ -10,9 +10,6 @@ type ActionButtonsProps = {
     handleShowAnswer?: (() => void) | undefined;
     handleSubmit?: (() => void) | undefined;
     handleExplainationClick: () => void;
-    handleGenerateAIAnswer?: () => void;
-    isGeneratingAI?: boolean;
-    hasAIAnswer?: boolean;
 };
 
 const ActionButtons = ({
@@ -24,19 +21,15 @@ const ActionButtons = ({
     handleShowAnswer,
     handleSubmit,
     handleExplainationClick,
-    handleGenerateAIAnswer,
-    isGeneratingAI,
-    hasAIAnswer,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
             {/* Previous */}
             <Button
                 className={`flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${
-                        isFirstQuestion
-                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
+                    ${isFirstQuestion
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
                     }
                 `}
                 onClick={handlePrevious}
@@ -82,7 +75,7 @@ const ActionButtons = ({
                     >
                         <ChatCircle className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Explanation <span className="font-mono">[/]</span>
+                            Show Explanation <span className="font-mono">[/]</span>
                         </span>
                     </Button>
 
@@ -92,10 +85,9 @@ const ActionButtons = ({
             {/* Next */}
             <Button
                 className={`flex-1 px-2 py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${
-                        !isLastQuestion
-                            ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    ${!isLastQuestion
+                        ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                     }
                 `}
                 onClick={handleNext}

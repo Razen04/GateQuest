@@ -1,6 +1,7 @@
 import type { Question, MCQQuestion, MSQQuestion } from '@/types/storage';
 import type { AIProvider } from '@/types/Settings';
 import { toast } from 'sonner';
+import { isNumericalQuestion } from './questionUtils';
 
 // ---------------------------------------------------------------------------
 // Provider config — deep-link URL templates for each AI assistant
@@ -36,7 +37,7 @@ export const AI_PROVIDERS: Record<
     },
     grok: {
         label: 'Grok',
-        url: (q) => `https://x.com/i/grok?text=${q}`,
+        url: (q) => `https://grok.com/?q=${q}`,
         badgeBg: 'bg-zinc-900 dark:bg-white',
         btnClass: 'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 focus:ring-zinc-500',
         icon: null,
@@ -53,7 +54,7 @@ export const AI_PROVIDERS: Record<
  * Returns an empty array if there are no images.
  */
 export function extractImageUrls(questionText: string): string[] {
-    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map(m => m[1]);
+    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map(m => m[1] as string);
 }
 
 /**
@@ -71,7 +72,7 @@ function labelledOptions(options: string[]): string {
 function resolveCorrectAnswer(question: Question): string {
     const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-    if (question.question_type === 'Numerical Answer') {
+    if (isNumericalQuestion(question)) {
         const ca = question.correct_answer;
         if (ca.type === 'exact') return String(ca.value);
         if (ca.type === 'multiple') return ca.values.join(', ');
@@ -80,13 +81,18 @@ function resolveCorrectAnswer(question: Question): string {
         return 'See solution';
     }
 
-    // MCQ or MSQ — correct_answer is an array of option indices
-    const q = question as MCQQuestion | MSQQuestion;
-    if (!q.options || !Array.isArray(q.correct_answer)) return 'See solution';
+    const typeStr = question.question_type?.toLowerCase() || '';
 
-    return q.correct_answer
-        .map((idx: number) => `${labels[idx] ?? idx}) ${q.options[idx]}`)
-        .join(', ');
+    if (typeStr.includes('multiple')) {
+        const q = question as MCQQuestion | MSQQuestion;
+        if (!q.options || !Array.isArray(q.correct_answer)) return 'See solution';
+
+        return q.correct_answer
+            .map((idx: number) => `${labels[idx] ?? idx}) ${q.options[idx]}`)
+            .join(', ');
+    }
+
+    return 'See solution';
 }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +107,7 @@ function resolveCorrectAnswer(question: Question): string {
  * @param imageCount  The number of diagrams in the question. Used to format placeholders.
  */
 export function buildGateAIPrompt(question: Question, imageCount = 0): string {
-    const isMCQ = question.question_type !== 'Numerical Answer';
+    const isMCQ = question.question_type?.toLowerCase().includes('multiple-choice') ?? false;
     const q = question as MCQQuestion | MSQQuestion;
 
     // Replace markdown image syntax with a context-aware placeholder.
@@ -150,7 +156,7 @@ Keep the explanation student-friendly but thorough — suitable for someone enco
 const FALLBACK_URLS: Record<AIProvider, string> = {
     chatgpt: 'https://chatgpt.com/',
     claude:  'https://claude.ai/new',
-    grok:    'https://x.com/i/grok',
+    grok:    'https://grok.com/',
 };
 
 /**
@@ -205,7 +211,9 @@ export async function openInAI(question: Question, provider: AIProvider = 'chatg
     // Text travels via URL. If there are images, put the first one on the clipboard.
     if (hasImages) {
         try {
-            const res = await fetch(imageUrls[0]);
+            const firstImageUrl = imageUrls[0];
+            if (!firstImageUrl) throw new Error('No image url');
+            const res = await fetch(firstImageUrl);
             if (!res.ok) throw new Error('fetch failed');
             const blob = await res.blob();
 

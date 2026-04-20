@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import useTestTimer from '../useTestTimer';
+import useTestTimer from '@/hooks/test-engine/useTestTimer';
 
 describe('useTestTimer hook', () => {
     beforeEach(() => {

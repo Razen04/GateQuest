@@ -35,7 +35,7 @@ const PROVIDERS: { id: AIProvider; label: string; desc: string; colour: string; 
 // Component
 // ---------------------------------------------------------------------------
 const AppSettings = () => {
-    const { settings, handleSettingToggle, handleSettingChange } = useSettings();
+    const { settings, handleSettingToggle } = useSettings();
 
     return (
         <div className="pb-20 px-4">
@@ -75,7 +75,7 @@ const AppSettings = () => {
                             return (
                                 <button
                                     key={p.id}
-                                    onClick={() => handleSettingChange('aiProvider', p.id)}
+                                    onClick={() => handleSettingToggle('aiProvider', p.id)}
                                     className={`flex items-start gap-3 rounded-xl border-2 px-3 py-2.5 text-left transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-zinc-400 active:scale-[0.98]
                                         ${isActive
                                             ? `${p.colour} shadow-sm`

@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Attempt } from '@/types/storage';
-import useTestAnswer from '../useTestAnswer';
+import useTestAnswer from '@/hooks/test-engine/useTestAnswer';
 import { saveAttempt } from '@/storage/testSession';
 
 // mock saveAttempt
