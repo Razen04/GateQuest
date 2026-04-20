@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag, Sparkle } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button.tsx';
 
 type ActionButtonsProps = {
@@ -29,9 +29,10 @@ const ActionButtons = ({
             {/* Previous */}
             <Button
                 className={`flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${isFirstQuestion
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                        : 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
+                    ${
+                        isFirstQuestion
+                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
                     }
                 `}
                 onClick={handlePrevious}
@@ -82,16 +83,15 @@ const ActionButtons = ({
                             Show Explanation <span className="font-mono">[/]</span>
                         </span>
                     </Button>
-
-
                 </>
             )}
             {/* Next */}
             <Button
                 className={`flex-1 px-2 py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${!isLastQuestion
-                        ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    ${
+                        !isLastQuestion
+                            ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                     }
                 `}
                 onClick={handleNext}
