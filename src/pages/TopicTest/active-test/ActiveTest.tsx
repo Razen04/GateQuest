@@ -121,7 +121,7 @@ const ActiveTest = () => {
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
                     <div className="max-w-4xl mx-auto">
                         <div className="flex justify-between items-center">
-                            <div className="w-fit flex gap-2 font-bold items-center mb-2">
+                            <div className="w-fit flex gap-2 font-bold items-center mb-2 text-white">
                                 <p className="bg-blue-500 p-2 rounded-md">
                                     Marks: {currentQ.marks}
                                 </p>
@@ -135,7 +135,7 @@ const ActiveTest = () => {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowCalc((prev) => !prev)}
-                                    className={`px-2 py-1 ${showCalc ? 'bg-red-500' : 'bg-blue-500'} rounded-md`}
+                                    className={`px-2 py-1 text-white ${showCalc ? 'bg-red-500' : 'bg-blue-500'} rounded-md`}
                                 >
                                     {showCalc ? <XIcon size={32} /> : <CalculatorIcon size={32} />}
                                 </button>
