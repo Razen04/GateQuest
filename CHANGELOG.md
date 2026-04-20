@@ -1,3 +1,7 @@
+# v0.10.7 - 2026-
+
+- Images will load quickly after the first loading. Fixes [#61](https://github.com/Razen04/GateQuest/issues/61).
+
 # v0.10.6 - 2026-04-14
 
 - Topic Test has more analysis now and better layout. Fixes [#53](https://github.com/Razen04/GateQuest/issues/53).
