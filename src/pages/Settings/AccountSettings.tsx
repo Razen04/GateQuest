@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '../../helper.ts';
-import { User, UserCircle } from '@phosphor-icons/react';
+import { User } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 import { Button } from '@/components/ui/button.tsx';
 import { Input } from '@/components/ui/input.tsx';
@@ -99,10 +99,6 @@ const AccountSettings = () => {
 
     return (
         <div className="pb-20 px-4">
-            <h2 className="text-xl font-semibold mb-6 flex items-center">
-                <UserCircle className="mr-2" /> Account Settings
-            </h2>
-
             <div className="space-y-6">
                 <div className="flex items-center">
                     <div className="h-12 w-12 flex items-center justify-center p-1 mr-5 bg-gray-100 dark:bg-gray-800">
@@ -137,7 +133,7 @@ const AccountSettings = () => {
                     {user?.email ? (
                         <div className="flex flex-col gap-2">
                             <Label>Email Address</Label>
-                            <Input type="email" defaultValue={user.email} />
+                            <Input type="email" defaultValue={user.email} disabled />
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2">

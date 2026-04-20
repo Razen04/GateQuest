@@ -1,4 +1,3 @@
-import { Faders } from '@phosphor-icons/react';
 import useSettings from '../../hooks/useSettings.ts';
 import ToggleSwitch from '@/components/ui/ToggleSwitch.tsx';
 import { version, last_updated } from '../../../package.json';
@@ -10,11 +9,7 @@ const AppSettings = () => {
 
     return (
         <div className="pb-20 px-4">
-            <h2 className="text-xl font-semibold mb-6 flex items-center">
-                <Faders className="mr-2" /> App Settings
-            </h2>
-
-            <div className="space-y-4">
+            <div className="space-y-1">
                 <ToggleSwitch
                     isOn={settings.sound}
                     onToggle={() => handleSettingToggle('sound')}
