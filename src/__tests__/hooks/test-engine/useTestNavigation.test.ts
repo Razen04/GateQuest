@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import useTestNavigation from '../useTestNavigation';
+import useTestNavigation from '@/hooks/test-engine/useTestNavigation';
 
 describe('useTestNavigation hook tests', () => {
     // Test case 1

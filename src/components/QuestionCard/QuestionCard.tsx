@@ -14,6 +14,9 @@ import ActionButtons from '@/components/QuestionCard/ActionButtons';
 import QuestionBadge from '@/components/QuestionCard/QuestionBadge';
 import QuestionExplanation from './QuestionExplanation';
 import type { Question } from '@/types/storage';
+import { openInAI } from '@/utils/aiPromptUtils';
+import AskAIBanner from '@/components/QuestionCard/AskAIBanner';
+import useSettings from '@/hooks/useSettings';
 import { useGoals } from '@/hooks/useGoals';
 import Branding from '../Branding';
 import { usePresence } from '@/hooks/usePresence';
@@ -104,6 +107,13 @@ const QuestionCard = ({
 
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
+
+    const { settings } = useSettings();
+    const aiProvider = settings.aiProvider ?? 'chatgpt';
+
+    const handleAskAI = async (doubt?: string) => {
+        await openInAI(question, aiProvider, settings.aiCustomPrompt, doubt);
+    };
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -227,6 +237,8 @@ const QuestionCard = ({
 
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
+
+                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
 
                     {/* Action Buttons */}
                     <ActionButtons

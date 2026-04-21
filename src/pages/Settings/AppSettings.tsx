@@ -1,6 +1,11 @@
 import useSettings from '../../hooks/useSettings.ts';
 import ToggleSwitch from '@/components/ui/ToggleSwitch.tsx';
 import { version, last_updated } from '../../../package.json';
+import { PROVIDERS } from '@/data/ai_providers.ts';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.tsx';
+import type { AIProvider } from '@/types/Settings.ts';
+import { Label } from '@/components/ui/label.tsx';
+import AskAI from '@/components/Settings/AppSettings/AskAI.tsx';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle } = useSettings();
@@ -26,6 +31,10 @@ const AppSettings = () => {
                     onToggle={() => handleSettingToggle('darkMode')}
                     isOn={settings.darkMode}
                 />
+
+                <div className="py-3 border-t border-border-primary dark:border-border-primary-dark mt-3 pt-4">
+                    <AskAI />
+                </div>
 
                 <div className="py-3 border-t border-border-primary dark:border-border-primary-dark mt-3 pt-3">
                     <h3 className="text-lg font-medium mb-2">App Information</h3>
