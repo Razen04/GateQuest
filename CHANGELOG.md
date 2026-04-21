@@ -1,9 +1,12 @@
-# v0.10.7 - 2026-
+# v0.10.7 - 2026-04-21
 
+- Added **AskAI** feature to clear your doubts with your favorite AI for free. Look into App Settings for more info.
+- Added **GATE ME (Mechanical Engineering)** PYQs.
 - Images will load quickly after the first load. Fixes [#61](https://github.com/Razen04/GateQuest/issues/61).
 - Topic Test Bug is fixed with some new UI. Fixes [#63](https://github.com/Razen04/GateQuest/issues/63).
 - Streak Map is fixed with new UI. Fixes [#64](https://github.com/Razen04/GateQuest/issues/64).
 - Added GATE calculator in the Topic Test.
+- Small UI changes.
 
 # v0.10.6 - 2026-04-14
 
