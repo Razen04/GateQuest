@@ -91,7 +91,7 @@ BEGIN
             ELSE
               v_is_correct := (v_user_val > (v_correct_ans->>'min')::float AND v_user_val < (v_correct_ans->>'max')::float);
             END IF;
-          WHEN 'tolerance' THEN v_is_correct := (ABS(v_user_val - (v_correct_ans->>'value')::float)[118;1:3u <= (v_correct_ans->>'tolerance')::float);
+          WHEN 'tolerance' THEN v_is_correct := (ABS(v_user_val - (v_correct_ans->>'value')::float) <= (v_correct_ans->>'tolerance')::float);
           ELSE v_is_correct := false;
         END CASE;
 
