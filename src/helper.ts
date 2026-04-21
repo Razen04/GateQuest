@@ -39,6 +39,9 @@ import { PlugChargingIcon } from '@phosphor-icons/react';
 import { GaugeIcon } from '@phosphor-icons/react';
 import { CircuitryIcon } from '@phosphor-icons/react';
 import { EngineIcon } from '@phosphor-icons/react';
+import { WrenchIcon } from '@phosphor-icons/react';
+import { WavesIcon } from '@phosphor-icons/react';
+import { FactoryIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -85,6 +88,9 @@ export const SubjectIconMap: Record<string, React.ElementType> = {
     plugcharging: PlugChargingIcon,
     power: PowerIcon,
     waveform: WaveformIcon,
+    wrench: WrenchIcon,
+    waves: WavesIcon,
+    factory: FactoryIcon,
     // Add a default icon for new subjects
     default: Books,
 };

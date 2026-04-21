@@ -1,18 +1,7 @@
+import { DiscordLogoIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 
 export default function ModernLoader() {
-    const quotes: string[] = [
-        'Patience is the key.',
-        'Small progress each day adds up.',
-        'Focus on the process.',
-        'Great things take time.',
-        'Every minute(irony) counts.',
-        'Slow is smooth.',
-    ];
-
-    // Pick one random quote for this loader session
-    const idx: number = Math.floor(Math.random() * quotes.length);
-
     return (
         <div
             className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-900"
@@ -50,14 +39,22 @@ export default function ModernLoader() {
             </div>
 
             <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
                 aria-live="polite"
                 className="mt-5 max-w-xl text-center text-sm sm:text-base text-black dark:text-gray-300 px-6"
             >
-                {quotes[idx]}
+                Unable to connect? Let us know!
+                <span className="flex justify-center">
+                    <button>
+                        <a
+                            className="flex gap-2 items-center"
+                            target="_blank"
+                            href="https://discord.gg/dFmg3g52c5"
+                        >
+                            <DiscordLogoIcon className="w-4 h-4" />{' '}
+                            <h1 className="font-bold">DISCORD</h1>
+                        </a>
+                    </button>
+                </span>
             </motion.div>
         </div>
     );

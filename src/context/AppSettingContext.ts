@@ -4,7 +4,7 @@ import type { Settings } from '../types/Settings.ts';
 type AppSettingContextType =
     | {
           settings: Settings;
-          handleSettingToggle: (key: keyof Settings) => void;
+          handleSettingToggle: <K extends keyof Settings>(key: K, value?: Settings[K]) => void;
       }
     | undefined;
 

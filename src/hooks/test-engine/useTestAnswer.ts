@@ -41,7 +41,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                     attempt_order: attemptOrder,
                     user_answer: userAnswer,
                     marked_for_review: existing?.marked_for_review ?? false,
-                    status: userAnswer === null ? 'visited' : 'answered',
+                    status: userAnswer === null ? 'viewed' : 'answered',
                     is_correct: false, // graded later
                     score: 0,
                     time_spent_seconds: existing?.time_spent_seconds ?? 0,

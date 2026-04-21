@@ -68,7 +68,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                     <div
                         className={`px-4 py-1 text-xl font-mono font-bold tabular-nums transition
                 ${
-                    critical ? 'animate-pulse bg-red-950 text-red-400' : 'bg-gray-900 text-gray-100'
+                    critical
+                        ? 'animate-pulse bg-red-950 text-red-400'
+                        : 'dark:bg-gray-900 dark:text-gray-100'
                 }`}
                         aria-live="polite"
                     >

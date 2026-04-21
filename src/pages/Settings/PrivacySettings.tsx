@@ -1,4 +1,3 @@
-import { ShieldCheck } from '@phosphor-icons/react';
 import useAuth from '../../hooks/useAuth.ts';
 import useSettings from '../../hooks/useSettings.ts';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.tsx';
@@ -45,14 +44,7 @@ const PrivacySettings = () => {
     return (
         <div className="pb-20 px-4">
             <div className={`${showLogin ? 'blur-2xl' : null}`}>
-                <h2 className="text-xl font-semibold mb-6 flex items-center">
-                    <ShieldCheck className="mr-2" /> Privacy & Data
-                </h2>
-
                 <div className="space-y-2">
-                    <h1 className="text-lg text-red-500 italic">
-                        Placeholder Settings: Does not work as of now, except Logout/Login.
-                    </h1>
                     <ToggleSwitch
                         isOn={settings.shareProgress}
                         onToggle={() => handleSettingToggle('shareProgress')}

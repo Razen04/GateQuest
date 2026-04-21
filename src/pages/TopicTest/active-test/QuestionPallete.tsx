@@ -31,28 +31,27 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
     unvisitedCount,
 }) => {
     const Stats = () => (
-        <div className="grid grid-cols-2 gap-2 md:text-sm font-bold">
-            <div className="text-green-600">Answered: {answeredCount}</div>
-            <div className="text-purple-600">Marked: {markedCount}</div>
-            <div className="text-yellow-600">Visited Not Answered: {visitedNotAnswered}</div>
-            <div className="text-gray-500">Unvisited: {unvisitedCount}</div>
-        </div>
-    );
+        <div className="grid grid-cols-2 gap-2 text-sm font-medium">
+            <div className="rounded-xl bg-green-100 text-green-800 p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide">Answered</p>
+                <p className="text-xl font-semibold">{answeredCount}</p>
+            </div>
 
-    const Legend = () => (
-        <div className="flex flex-wrap gap-3 text-xs md:text-sm mt-2">
-            <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-green-500 rounded-sm" /> Answered
-            </span>
-            <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-purple-500 rounded-sm" /> Marked
-            </span>
-            <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-yellow-400 rounded-sm" /> Visited
-            </span>
-            <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-gray-400 rounded-sm" /> Unvisited
-            </span>
+            <div className="rounded-xl bg-purple-100 text-purple-800 p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide">Marked</p>
+                <p className="text-xl font-semibold">{markedCount}</p>
+            </div>
+
+            <div className="rounded-xl bg-yellow-100 text-yellow-800 p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide">Visited</p>
+                <p className="text-xl font-semibold">{visitedNotAnswered}</p>
+                <p className="text-xs text-yellow-700">Not Answered</p>
+            </div>
+
+            <div className="rounded-xl bg-gray-100 text-gray-800 p-4 shadow-sm">
+                <p className="text-xs uppercase tracking-wide">Unvisited</p>
+                <p className="text-xl font-semibold">{unvisitedCount}</p>
+            </div>
         </div>
     );
 
@@ -66,10 +65,11 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             >
                 <div className="p-6 space-y-4">
                     {' '}
-                    <h1 className="w-full text-center text-xl font-bold">Question Pallete</h1>
-                    <div className="font-bold text-center">Total: {questions.length}</div>
+                    <div className="text-center space-y-1">
+                        <h1 className="text-lg font-semibold">Question Palette</h1>
+                        <p className="text-sm">{questions.length} questions</p>
+                    </div>
                     <Stats />
-                    <Legend />
                     <div className="grid grid-cols-4 gap-2">
                         {' '}
                         {questions.map((q, idx) => {
@@ -82,7 +82,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                     key={q.id}
                                     onClick={() => onJumpTo(idx)}
                                     className={clsx(
-                                        'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200',
+                                        'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200 rounded-md',
 
                                         active && 'ring-2 ring-blue-500',
 
@@ -119,17 +119,16 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                 )}
                 style={{ height: '70vh' }}
             >
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col overflow-y-auto">
                     <div className="p-4 border-b">
                         <h1 className="w-full text-center text-xl font-bold border-b pb-4">
                             Question Palette
                         </h1>
-                        <div className="font-bold text-center mt-2">Total: {questions.length}</div>
+                        <div className="font-bold text-center m-2">Total: {questions.length}</div>
                         <Stats />
-                        <Legend />
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 pb-20">
+                    <div className="flex-1 p-4 pb-20">
                         <div className="grid grid-cols-4 gap-3 place-items-center">
                             {questions.map((q, idx) => {
                                 const answered = isAnswered(q.id);
@@ -145,7 +144,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                             onToggle();
                                         }}
                                         className={clsx(
-                                            'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200',
+                                            'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200 rounded',
 
                                             active && 'ring-2 ring-blue-500',
 

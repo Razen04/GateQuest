@@ -12,6 +12,7 @@ interface TopicsSelectionProps {
     isTopicsLoading: boolean;
     availableTopics: Topic[];
     handleTopicToggle: (topic: Topic) => void;
+    includeAttempted: boolean;
 }
 
 const MOBILE_VISIBLE_LIMIT = 12;
@@ -22,7 +23,9 @@ const TopicsSelection = ({
     isTopicsLoading,
     availableTopics,
     handleTopicToggle,
+    includeAttempted,
 }: TopicsSelectionProps) => {
+    console.log('includeAttempted: ', includeAttempted);
     const [showAllPrimary, setShowAllPrimary] = useState(false);
     const [showMinorTopics, setShowMinorTopics] = useState(false);
 
@@ -125,6 +128,17 @@ const TopicsSelection = ({
                                             t.subjectId === topic.subjectId,
                                     );
 
+                                    const displayedCount = includeAttempted
+                                        ? topic.questionCount
+                                        : topic.unattemptedCount;
+
+                                    console.debug(
+                                        '[TopicCard] includeAttempted:',
+                                        includeAttempted,
+                                    );
+                                    console.debug('[TopicCard] topic:', topic);
+                                    console.debug('[TopicCard] displayedCount:', displayedCount);
+
                                     return (
                                         <div
                                             key={`${topic.subjectName}-${topic.name}`}
@@ -141,10 +155,12 @@ const TopicsSelection = ({
                                                     {topic.name}
                                                 </p>
                                                 <p className="text-xs text-gray-400">
-                                                    {topic.questionCount} questions
+                                                    {/* Toggle the displayed count based on includeAttempted prop */}
+                                                    {includeAttempted
+                                                        ? `${topic.questionCount} total questions`
+                                                        : `${topic.unattemptedCount} available questions`}
                                                 </p>
                                             </div>
-
                                             <div
                                                 className={`w-5 h-5 border flex items-center justify-center
                           ${

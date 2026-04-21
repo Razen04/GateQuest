@@ -153,6 +153,20 @@ const MathRenderer = ({ text }: MathRendererProps) => {
     // Split text into [text|table] segments first so tables don't swallow the rest of the question
     const tableAwareSegments = splitTextAndTables(text);
 
+    // Cache the image into the Cloudinary on first load to eliminate slow loading of images (Issue #61)
+    const getCachedImageUrl = (originalUrl: string) => {
+        if (!originalUrl) return '';
+
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        // f_auto: chooses best format
+        // q_auto: reduces file size without losing visible quality
+        const params = 'f_auto,q_auto';
+
+        const encodedUrl = encodeURIComponent(originalUrl);
+
+        return `https://res.cloudinary.com/${cloudName}/image/fetch/${params}/${encodedUrl}`;
+    };
+
     return (
         <>
             {tableAwareSegments.map((outer, segIdx) => {
@@ -254,8 +268,8 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                             >
                                                 {/* ... existing image rendering code ... */}
                                                 <img
-                                                    src={segment.src}
-                                                    alt={segment.alt}
+                                                    src={getCachedImageUrl(segment.src)}
+                                                    alt={getCachedImageUrl(segment.alt)}
                                                     className="w-full h-auto object-contain mx-auto dark:invert dark:brightness-90 dark:contrast-100"
                                                     style={{ maxHeight: '50vh' }}
                                                 />

@@ -47,6 +47,8 @@ const useTestGrading = () => {
             const attempted = result.correct_count + result.incorrect_count;
 
             await updateAttempts(testId, [], attempted, result.total_score, result.correct_count);
+            // Add broadcast to update the stats in Dashboard.
+            window.dispatchEvent(new Event('STATS_UPDATED'));
 
             return {
                 totalScore: result.total_score,

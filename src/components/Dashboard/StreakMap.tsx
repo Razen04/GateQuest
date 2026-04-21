@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import AppSettingContext from '../../context/AppSettingContext.ts';
 import { ResponsiveTimeRange } from '@nivo/calendar';
@@ -18,6 +18,33 @@ const StreakMap = ({ stats }: StreakMapType) => {
     const toIso = toDate.toISOString().slice(0, 10);
     const toLabel = toDate.toLocaleDateString();
 
+    const maxCount = useMemo(
+        () => Math.max(...stats.heatmapData.map((d) => d.count), 1),
+        [stats.heatmapData],
+    );
+
+    const bucketedData = useMemo(() => {
+        return stats.heatmapData.map((d) => {
+            const normalized = d.count / maxCount;
+
+            let level = 0;
+            if (normalized > 0.8) level = 5;
+            else if (normalized > 0.6) level = 4;
+            else if (normalized > 0.4) level = 3;
+            else if (normalized > 0.2) level = 2;
+            else if (normalized > 0) level = 1;
+
+            return {
+                day: d.date,
+                value: level,
+            };
+        });
+    }, [stats.heatmapData, maxCount]);
+
+    const colors = isDark
+        ? ['#161b22', '#0e4429', '#006d32', '#26a641', '#2ea043', '#39d353']
+        : ['#ebedf0', '#c6e48b', '#7bc96f', '#40c463', '#30a14e', '#216e39'];
+
     return (
         <motion.div
             variants={itemVariants}
@@ -26,91 +53,68 @@ const StreakMap = ({ stats }: StreakMapType) => {
             className="p-6 border mb-4 shadow-sm border-border-primary dark:border-border-primary-dark"
         >
             <div className="mb-4 text-black dark:text-white">
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Streak Map</h2>
+                <h2 className="text-2xl font-bold text-gray�[118;1:3u-800 dark:text-gray-200">
+                    Streak Map
+                </h2>
+
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                     Feb 8, 2026 → {toLabel}
                 </span>
+
                 <div className="flex space-x-4">
                     <h2>
                         Longest Streak:{' '}
-                        <span className="font-bold text-blue-500">{stats?.streaks.longest}</span>
+                        <span className="font-bold text-yellow-500">{stats?.streaks.longest}</span>
                     </h2>
                     <h2>
                         Current Streak:{' '}
-                        <span className="font-bold text-purple-500">{stats?.streaks.current}</span>
+                        <span className="font-bold text-emerald-500">{stats?.streaks.current}</span>
                     </h2>
                 </div>
             </div>
+
             <div className="w-full py-8 overflow-x-auto sm:overflow-x-visible">
                 <div className="min-w-[860px] sm:min-w-0">
                     <div className="h-[100px] sm:h-[200px] md:h-[110px] lg:h-[100px] xl:h-[150px] pr-2">
                         <ResponsiveTimeRange
-                            data={stats.heatmapData.map((d) => ({
-                                day: d.date,
-                                value: d.count,
-                            }))}
+                            data={bucketedData}
                             from="2026-02-07"
                             to={toIso}
-                            emptyColor={isDark ? '#18181B' : '#F9FAFB'}
-                            colors={
-                                isDark
-                                    ? [
-                                          '#1f2937',
-                                          '#312e81',
-                                          '#4338ca',
-                                          '#4f46e5',
-                                          '#6366f1',
-                                          '#818cf8',
-                                      ] // no “zero” color
-                                    : [
-                                          '#ebedf0',
-                                          '#c7d2fe',
-                                          '#a5b4fc',
-                                          '#818cf8',
-                                          '#6366f1',
-                                          '#4f46e5',
-                                      ]
-                            }
-                            minValue={0} // start coloring from count=1
-                            maxValue={Math.max(...stats.heatmapData.map((d) => d.count))}
+                            emptyColor={isDark ? '#161b22' : '#ebedf0'}
+                            colors={colors}
+                            minValue={0}
+                            maxValue={5}
+                            tooltip={({ day }) => {
+                                const original = stats.heatmapData.find((d) => d.date === day);
+
+                                return (
+                                    <div
+                                        style={{
+                                            background: isDark ? '#111827' : '#ffffff',
+                                            padding: '8px 10px',
+                                            borderRadius: 6,
+                                            fontSize: 12,
+                                            color: isDark ? '#f9fafb' : '#111827',
+                                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                                        }}
+                                    >
+                                        <div>
+                                            <strong>{day}</strong>
+                                        </div>
+                                        <div>
+                                            Questions solved:{' '}
+                                            <strong>{original?.count ?? 0}</strong>
+                                        </div>
+                                    </div>
+                                );
+                            }}
                             theme={{
                                 text: { fill: isDark ? '#e5e7eb' : '#111827' },
-                                labels: {
-                                    text: {
-                                        fill: isDark ? '#e5e7eb' : '#111827',
-                                    },
-                                },
-                                legends: {
-                                    text: {
-                                        fill: isDark ? '#e5e7eb' : '#111827',
-                                    },
-                                },
-                                tooltip: {
-                                    container: {
-                                        background: isDark ? '#111827' : '#ffffff',
-                                        color: isDark ? '#f9fafb' : '#111827',
-                                        fontSize: 12,
-                                        borderRadius: 6,
-                                        boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                                    },
-                                },
+                                labels: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                legends: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
                             }}
                             dayBorderWidth={2}
                             dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}
-                            legends={[
-                                {
-                                    anchor: 'bottom-right',
-                                    direction: 'row',
-                                    translateY: 36,
-                                    itemCount: 5,
-                                    itemWidth: 30,
-                                    itemHeight: 14,
-                                    itemsSpacing: 4,
-                                    itemDirection: 'right-to-left',
-                                    symbolSize: 14,
-                                    itemTextColor: isDark ? '#e5e7eb' : '#111827',
-                                },
-                            ]}
                         />
                     </div>
                 </div>
