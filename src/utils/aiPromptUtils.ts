@@ -2,6 +2,7 @@ import type { Question, MCQQuestion, MSQQuestion } from '@/types/storage';
 import type { AIProvider } from '@/types/Settings';
 import { toast } from 'sonner';
 import { isNumericalQuestion } from './questionUtils';
+import { DEFAULT_TEMPLATE } from '@/data/ai_prompt_template';
 
 // ---------------------------------------------------------------------------
 // Provider config — deep-link URL templates for each AI assistant
@@ -39,11 +40,11 @@ export const AI_PROVIDERS: Record<
         label: 'Grok',
         url: (q) => `https://grok.com/?q=${q}`,
         badgeBg: 'bg-zinc-900 dark:bg-white',
-        btnClass: 'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 focus:ring-zinc-500',
+        btnClass:
+            'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 focus:ring-zinc-500',
         icon: null,
     },
 };
-
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -54,7 +55,7 @@ export const AI_PROVIDERS: Record<
  * Returns an empty array if there are no images.
  */
 export function extractImageUrls(questionText: string): string[] {
-    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map(m => m[1] as string);
+    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map((m) => m[1] as string);
 }
 
 /**
@@ -105,47 +106,60 @@ function resolveCorrectAnswer(question: Question): string {
  *
  * @param question    The GATE question object.
  * @param imageCount  The number of diagrams in the question. Used to format placeholders.
+ * @param userTemplate A custom AI prompt which the users can customize according to their liking.
  */
-export function buildGateAIPrompt(question: Question, imageCount = 0): string {
+export function buildGateAIPrompt(
+    question: Question,
+    imageCount = 0,
+    userTemplate?: string,
+    doubt?: string,
+): string {
     const isMCQ = question.question_type?.toLowerCase().includes('multiple-choice') ?? false;
     const q = question as MCQQuestion | MSQQuestion;
 
-    // Replace markdown image syntax with a context-aware placeholder.
-    let imagePlaceholder = '[Image — diagram not available in text format]';
-    if (imageCount === 1) {
-        imagePlaceholder = '[Diagram attached — refer to the pasted image]';
-    } else if (imageCount > 1) {
-        imagePlaceholder = '[Diagram attached — refer to the pasted images (the first was copied to your clipboard, the rest must be uploaded manually)]';
-    }
+    // --- Data Pre-processing (The "Necessary Defaults") ---
+    let imagePlaceholder = '[Image — diagram not available]';
+    if (imageCount === 1) imagePlaceholder = '[Diagram attached — refer to the pasted image]';
+    else if (imageCount > 1) imagePlaceholder = '[Diagrams attached — refer to pasted images]';
 
-    const cleanQuestion = question.question
-        .replace(/!\[.*?\]\(.*?\)/g, imagePlaceholder)
-        .trim();
+    const cleanQuestion = question.question.replace(/!\[.*?\]\(.*?\)/g, imagePlaceholder).trim();
 
     const optionsBlock =
-        isMCQ && q.options?.length
-            ? `\nOPTIONS:\n${labelledOptions(q.options)}\n`
-            : '';
+        isMCQ && q.options?.length ? `\nOPTIONS:\n${labelledOptions(q.options)}\n` : '';
 
     const correctAnswer = resolveCorrectAnswer(question);
 
-    const prompt = `You are an expert GATE exam tutor specialising in ${question.subject}.
+    const doubtText = doubt?.trim() || '';
+    const formattedDoubt = doubtText
+        ? `\n\nUSER'S SPECIFIC DOUBT:\n"${doubtText}"\n\nPlease ensure you address this doubt specifically in your explanation.`
+        : '';
 
-QUESTION (GATE ${question.year} | ${question.question_type}):
-${cleanQuestion}
-${optionsBlock}
-CORRECT ANSWER: ${correctAnswer}
+    // --- Template Logic ---
+    const template = userTemplate?.trim() ? userTemplate : DEFAULT_TEMPLATE;
 
-Please provide a complete explanation:
-1. Short summary — confirm why ${correctAnswer} is correct in 1-2 sentences.
-2. Step-by-step reasoning from first principles.
-3. Key concepts, theorems, or formulas used (state them explicitly).
-4. Why each wrong option is incorrect (for MCQ/MSQ questions).
-5. A quick exam tip or memory trick for this topic if applicable.
+    // Map tags to processed values
+    const replacements: Record<string, string> = {
+        '{{SUBJECT}}': question.subject || 'Engineering',
+        '{{YEAR}}': String(question.year),
+        '{{TYPE}}': question.question_type || 'General',
+        '{{QUESTION_TEXT}}': cleanQuestion,
+        '{{OPTIONS}}': optionsBlock,
+        '{{CORRECT_ANSWER}}': correctAnswer,
+        '{{DOUBT}}': formattedDoubt,
+    };
 
-Keep the explanation student-friendly but thorough — suitable for someone encountering this topic for the first time.`.trim();
+    // Replace all tags in the template
+    let finalPrompt = template;
+    Object.entries(replacements).forEach(([tag, value]) => {
+        // Use a global regex to replace all instances of the tag
+        finalPrompt = finalPrompt.split(tag).join(value);
+    });
 
-    return prompt;
+    if (doubtText && !template.includes('{{DOUBT}}')) {
+        finalPrompt += formattedDoubt;
+    }
+
+    return finalPrompt.trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -155,101 +169,112 @@ Keep the explanation student-friendly but thorough — suitable for someone enco
 /** Fallback base URLs when the encoded prompt is too long */
 const FALLBACK_URLS: Record<AIProvider, string> = {
     chatgpt: 'https://chatgpt.com/',
-    claude:  'https://claude.ai/new',
-    grok:    'https://grok.com/',
+    claude: 'https://claude.ai/new',
+    grok: 'https://grok.com/',
 };
 
 /**
- * Opens the selected AI provider in a new tab with the question pre-filled.
- *
- * Image strategy (when the question has diagrams):
- *   - The TEXT prompt travels via the `?q=` URL param — it is pre-filled
- *     directly into the AI composer without touching the clipboard.
- *   - This leaves the clipboard free to hold the IMAGE blob.
- *   - A toast instructs the user to ⌘V paste the diagram before sending.
- *
- * Long-prompt fallback (encoded length > 8 000 chars):
- *   - Text is copied to clipboard (image clipboard is skipped to avoid conflict).
- *   - The prompt includes a manual note about the diagram URL.
+ * Attempts to stitch images, but returns null if CORS prevents reading the data.
  */
-export async function openInAI(question: Question, provider: AIProvider = 'chatgpt'): Promise<void> {
-    // Add fallback in case the user has a deprecated provider (like gemini) saved in their local storage settings
-    const config   = AI_PROVIDERS[provider] || AI_PROVIDERS['chatgpt'];
+async function stitchImagesToBlob(urls: string[]): Promise<Blob | null> {
+    try {
+        const loadedImages = await Promise.all(
+            urls.map((url) => {
+                return new Promise<HTMLImageElement>((resolve, reject) => {
+                    const img = new Image();
+                    // This is the trigger: if the server doesn't support CORS,
+                    // this will cause the 'onerror' you saw.
+                    img.crossOrigin = 'anonymous';
+                    img.src = url;
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error(`CORS block on: ${url}`));
+                });
+            }),
+        );
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+
+        const spacing = 20;
+        const maxWidth = Math.max(...loadedImages.map((img) => img.width));
+        const totalHeight = loadedImages.reduce((sum, img) => sum + img.height + spacing, 0);
+
+        canvas.width = maxWidth;
+        canvas.height = totalHeight;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let currentY = 0;
+        loadedImages.forEach((img) => {
+            ctx.drawImage(img, 0, currentY);
+            currentY += img.height + spacing;
+        });
+
+        return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    } catch (error) {
+        // Log the error for debugging but don't crash the app
+        console.warn('Stitching blocked by browser security (CORS). Fallback to manual copy.');
+        return null;
+    }
+}
+
+/**
+ * Main AI Opener with robust fallback
+ */
+export async function openInAI(
+    question: Question,
+    provider: AIProvider = 'chatgpt',
+    aiCustomPrompt: string,
+    doubt?: string,
+): Promise<void> {
+    const config = AI_PROVIDERS[provider] || AI_PROVIDERS['chatgpt'];
     const fallback = FALLBACK_URLS[provider] || FALLBACK_URLS['chatgpt'];
 
     const imageUrls = extractImageUrls(question.question);
-    const imageCount = imageUrls.length;
-    const hasImages = imageCount > 0;
+    const hasImages = imageUrls.length > 0;
+    const prompt = buildGateAIPrompt(question, imageUrls.length, aiCustomPrompt, doubt);
 
-    // Build the prompt — if we have images, the placeholder tells the AI to
-    // reference the attached diagram rather than ignoring it.
-    const prompt  = buildGateAIPrompt(question, imageCount);
-    const encoded = encodeURIComponent(prompt);
+    if (hasImages) {
+        const stitchedBlob = await stitchImagesToBlob(imageUrls);
 
-    // ── LONG PROMPT FALLBACK ──────────────────────────────────────────────────
-    // Text must go to clipboard; we can't also send the image blob.
-    // Append a note about the diagram URL so the user isn't left without context.
-    if (encoded.length > 8000) {
-        const longPrompt = hasImages
-            ? `${prompt}\n\n[NOTE: This question contains ${imageCount > 1 ? 'multiple diagrams' : 'a diagram'}. Please upload ${imageCount > 1 ? 'them' : 'it'} manually from the original question page.]`
-            : prompt;
+        if (stitchedBlob) {
+            try {
+                const clipboardItem = new ClipboardItem({
+                    'text/plain': new Blob([prompt], { type: 'text/plain' }),
+                    [stitchedBlob.type]: stitchedBlob,
+                });
+                await navigator.clipboard.write([clipboardItem]);
+                window.open(fallback, '_blank', 'noopener,noreferrer');
+                toast.success(`Prompt & Diagrams copied! Just paste in ${config.label}.`);
+                return;
+            } catch (err) {
+                console.error('Clipboard write failed', err);
+            }
+        }
 
-        navigator.clipboard.writeText(longPrompt).finally(() => {
-            window.open(fallback, '_blank', 'noopener,noreferrer');
-        });
+        // --- FALLBACK: Text Only ---
+        // If we get here, CORS blocked stitching or the Clipboard API failed.
+        await navigator.clipboard.writeText(prompt);
+        window.open(fallback, '_blank', 'noopener,noreferrer');
 
         toast.info(
-            hasImages
-                ? `Prompt copied! Paste it in ${config.label}, then upload the diagram manually.`
-                : `Prompt copied to clipboard — paste it in ${config.label}.`,
-            { duration: 6000 }
+            "Prompt copied! Note: Diagrams couldn't be auto-copied. Please right-click the image and 'Copy Image' manually.",
+            { duration: 10000 },
         );
         return;
     }
 
-    // ── NORMAL PATH ───────────────────────────────────────────────────────────
-    // Text travels via URL. If there are images, put the first one on the clipboard.
-    if (hasImages) {
-        try {
-            const firstImageUrl = imageUrls[0];
-            if (!firstImageUrl) throw new Error('No image url');
-            const res = await fetch(firstImageUrl);
-            if (!res.ok) throw new Error('fetch failed');
-            const blob = await res.blob();
-
-            // ClipboardItem API — supported in all modern browsers.
-            await navigator.clipboard.write([
-                new ClipboardItem({ [blob.type]: blob }),
-            ]);
-
-            // Open the AI app — text is pre-filled from the URL.
-            window.open(config.url(encoded), '_blank', 'noopener,noreferrer');
-
-            if (imageCount > 1) {
-                toast.info(
-                    `First diagram copied! Paste it in ${config.label}. Remember to manually upload the other ${imageCount - 1} diagram(s).`,
-                    { duration: 8000 }
-                );
-            } else {
-                toast.info(
-                    `Diagram copied! Paste it (⌘V / Ctrl+V) in the ${config.label} chat before sending.`,
-                    { duration: 7000 }
-                );
-            }
-        } catch {
-            // ClipboardItem unavailable (old browser / non-HTTPS) — open anyway
-            // and tell the user to grab the image manually.
-            window.open(config.url(encoded), '_blank', 'noopener,noreferrer');
-            toast.warning(
-                `Question pre-filled in ${config.label}. Couldn't auto-copy the diagram — please upload it manually.`,
-                { duration: 7000 }
-            );
-        }
-        return;
+    // Standard Text-Only flow
+    const encoded = encodeURIComponent(prompt);
+    if (encoded.length > 8000) {
+        await navigator.clipboard.writeText(prompt);
+        window.open(fallback, '_blank', 'noopener,noreferrer');
+        toast.info('Prompt copied to clipboard!');
+    } else {
+        window.open(config.url(encoded), '_blank', 'noopener,noreferrer');
     }
-
-    // No images — just open the AI URL, no clipboard needed.
-    window.open(config.url(encoded), '_blank', 'noopener,noreferrer');
 }
 
 /** @deprecated use buildGateAIPrompt */

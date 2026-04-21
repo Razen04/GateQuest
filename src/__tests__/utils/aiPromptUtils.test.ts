@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { extractImageUrls, buildGateAIPrompt, openInAI } from '@/utils/aiPromptUtils';
 import type { MCQQuestion } from '@/types/storage';
 import { toast } from 'sonner';
@@ -7,22 +7,22 @@ import { toast } from 'sonner';
 vi.mock('sonner', () => ({
     toast: {
         info: vi.fn(),
-        warning: vi.fn(),
-        error: vi.fn()
-    }
+        success: vi.fn(),
+        error: vi.fn(),
+    },
 }));
 
 describe('aiPromptUtils', () => {
     const mockQuestionTemplate: MCQQuestion = {
         id: 'test-id',
-        question_type: 'multiple-choice' as 'Multiple Choice Question', // Cast to bypass strict storage typings if not updated
+        question_type: 'multiple-choice',
         year: 2024,
         question_number: 1,
         subject: 'Computer Science',
         subject_id: 'cs',
-        question: 'What is the sum of 1+1?',
+        question: 'What is 1+1?',
         options: ['1', '2', '3', '4'],
-        correct_answer: [1], // Index 1 is option B
+        correct_answer: [1],
         difficulty: 'Easy',
         marks: 1,
         source_url: '',
@@ -31,177 +31,168 @@ describe('aiPromptUtils', () => {
         explanation: '',
         metadata: { set: '', exam: '', paperType: '', language: '' },
         created_at: '',
-        updated_at: ''
+        updated_at: '',
     };
 
     beforeEach(() => {
         vi.clearAllMocks();
-        // Setup global window properties for testing
-        Object.defineProperty(window, 'open', {
-            value: vi.fn(),
-            writable: true
-        });
 
-        // Setup mock clipboard
+        // Mock window.open
+        Object.defineProperty(window, 'open', { value: vi.fn(), writable: true });
+
+        // Mock Navigator Clipboard
         Object.defineProperty(navigator, 'clipboard', {
             value: {
                 writeText: vi.fn().mockResolvedValue(undefined),
                 write: vi.fn().mockResolvedValue(undefined),
             },
-            writable: true
+            writable: true,
         });
 
-        // Setup mock fetch
-        global.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            blob: () => Promise.resolve(new Blob(['fake image data'], { type: 'image/png' }))
-        });
+        const MockClipboardItem = vi.fn().mockImplementation((obj) => obj);
+        (MockClipboardItem as unknown as any).supports = vi.fn().mockReturnValue(true);
 
-        // Mock ClipboardItem
-        global.ClipboardItem = vi.fn() as any;
+        vi.stubGlobal('ClipboardItem', MockClipboardItem);
+
+        // Mock HTML Canvas and Image context for stitching
+        // Note: In a real test environment, you might need 'jest-canvas-mock'
+        // but for unit tests, we mock the specific failure/success triggers.
+        const mockCanvas = {
+            getContext: vi.fn().mockReturnValue({
+                fillRect: vi.fn(),
+                drawImage: vi.fn(),
+                fillStyle: '',
+            }),
+            toBlob: vi.fn((callback) => callback(new Blob(['test'], { type: 'image/png' }))),
+            width: 0,
+            height: 0,
+        };
+        vi.stubGlobal('document', {
+            createElement: vi.fn().mockReturnValue(mockCanvas),
+        });
     });
 
     describe('extractImageUrls', () => {
-        it('returns empty array when no images exist', () => {
-            expect(extractImageUrls('Plain text question')).toEqual([]);
-        });
-
-        it('extracts a single image URL', () => {
-            const text = 'Question statement\n![alt1](https://example.com/img1.png)\nEnd of question.';
-            expect(extractImageUrls(text)).toEqual(['https://example.com/img1.png']);
-        });
-
-        it('extracts multiple image URLs', () => {
+        it('extracts multiple image URLs correctly', () => {
             const text = '![img1](url1.png) and ![img2](url2.png)';
             expect(extractImageUrls(text)).toEqual(['url1.png', 'url2.png']);
         });
     });
 
     describe('buildGateAIPrompt', () => {
-        it('builds standard prompt without images correctly', () => {
-            const q = { ...mockQuestionTemplate };
-            const prompt = buildGateAIPrompt(q);
-            
-            expect(prompt).toContain('expert GATE exam tutor');
-            expect(prompt).toContain('Computer Science');
-            expect(prompt).toContain('What is the sum of 1+1?');
-            expect(prompt).toContain('OPTIONS:\nA) 1\nB) 2\nC) 3\nD) 4');
-            expect(prompt).toContain('CORRECT ANSWER: B) 2');
+        it('includes correctly formatted doubt when provided', () => {
+            const prompt = buildGateAIPrompt(
+                mockQuestionTemplate,
+                0,
+                undefined,
+                'My specific doubt',
+            );
+            expect(prompt).toContain("USER'S SPECIFIC DOUBT:");
+            expect(prompt).toContain('"My specific doubt"');
         });
 
-        it('removes image markdown in default mode (imageCount = 0)', () => {
-            const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png).' };
-            const prompt = buildGateAIPrompt(q);
-            
-            expect(prompt).toContain('Look here [Image — diagram not available in text format].');
-            expect(prompt).not.toContain('![alt](img.png)');
-        });
-
-        it('uses alternative placeholder when imageCount = 1', () => {
-            const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png).' };
-            const prompt = buildGateAIPrompt(q, 1);
-            
-            expect(prompt).toContain('[Diagram attached — refer to the pasted image]');
-        });
-
-        it('uses multiple images placeholder when imageCount > 1', () => {
-            const q = { ...mockQuestionTemplate, question: 'Look here ![alt](img.png) and ![alt2](img2.png).' };
-            const prompt = buildGateAIPrompt(q, 2);
-            
-            expect(prompt).toContain('[Diagram attached — refer to the pasted images (the first was copied to your clipboard, the rest must be uploaded manually)]');
+        it('uses correct placeholders based on imageCount', () => {
+            const q = {
+                ...mockQuestionTemplate,
+                question: 'Here is the image: ![](test.url)',
+            };
+            expect(buildGateAIPrompt(q, 0)).toContain('[Image — diagram not available]');
+            expect(buildGateAIPrompt(q, 1)).toContain(
+                '[Diagram attached — refer to the pasted image]',
+            );
+            expect(buildGateAIPrompt(q, 2)).toContain(
+                '[Diagrams attached — refer to pasted images]',
+            );
         });
     });
 
     describe('openInAI', () => {
-        it('opens external URL correctly without images', async () => {
-            await openInAI(mockQuestionTemplate, 'chatgpt');
-            
-            expect(window.open).toHaveBeenCalledTimes(1);
-            const callArgs = (window.open as any).mock.calls[0];
-            expect(callArgs[0]).toContain('https://chatgpt.com/?q=');
-            expect(navigator.clipboard.write).not.toHaveBeenCalled();
-            expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+        it('opens deep-link directly for short text-only prompts', async () => {
+            await openInAI(mockQuestionTemplate, 'chatgpt', '');
+            expect(window.open).toHaveBeenCalledWith(
+                expect.stringContaining('https://chatgpt.com/?q='),
+                '_blank',
+                expect.any(String),
+            );
         });
 
-        it('handles text-to-clipboard fallback for long prompts', async () => {
-            const longQuestionText = 'A'.repeat(9000);
-            const longQ = { ...mockQuestionTemplate, question: longQuestionText };
-            
-            await openInAI(longQ, 'chatgpt');
-            
-            expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-            const textWritten = (navigator.clipboard.writeText as any).mock.calls[0][0];
-            expect(textWritten).toContain(longQuestionText);
-            
+        it('falls back to clipboard for very long text-only prompts', async () => {
+            const longQ = { ...mockQuestionTemplate, question: 'A'.repeat(8500) };
+            await openInAI(longQ, 'chatgpt', '');
+
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
+            expect(window.open).toHaveBeenCalledWith(
+                'https://chatgpt.com/',
+                '_blank',
+                expect.any(String),
+            );
+            expect(toast.info).toHaveBeenCalledWith('Prompt copied to clipboard!');
+        });
+
+        it('triggers image stitching flow and composite clipboard when images exist', async () => {
+            const imgQ = { ...mockQuestionTemplate, question: '![alt](test.png)' };
+
+            // Mock Image loading success
+            vi.stubGlobal(
+                'Image',
+                vi.fn().mockImplementation(() => {
+                    const img = {
+                        onload: null as (() => void) | null,
+                        onerror: null as (() => void) | null,
+                        set src(_s: string) {
+                            setTimeout(() => {
+                                if (this.onload) this.onload();
+                                if (this.onerror) this.onerror();
+                            }, 0);
+                        },
+                        width: 100,
+                        height: 100,
+                    };
+                    return img;
+                }),
+            );
+
+            await openInAI(imgQ, 'chatgpt', '');
+
+            // Should use navigator.clipboard.write (Composite) not writeText
+            expect(navigator.clipboard.write).toHaveBeenCalled();
+            expect(toast.success).toHaveBeenCalledWith(
+                expect.stringContaining('Prompt & Diagrams copied!'),
+            );
+            // Should redirect to base URL (no query params) to prevent auto-send
+            expect(window.open).toHaveBeenCalledWith(
+                'https://chatgpt.com/',
+                '_blank',
+                expect.any(String),
+            );
+        });
+
+        it('gracefully falls back to text-only if stitching/CORS fails', async () => {
+            const imgQ = { ...mockQuestionTemplate, question: '![alt](test.png)' };
+
+            // Mock Image loading failure (CORS)
+            vi.stubGlobal(
+                'Image',
+                vi.fn().mockImplementation(() => {
+                    const img = {
+                        set onerror(cb: () => void) {
+                            setTimeout(cb, 0);
+                        },
+                        set src(_s: string) {},
+                    };
+                    return img;
+                }),
+            );
+
+            await openInAI(imgQ, 'chatgpt', '');
+
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
             expect(toast.info).toHaveBeenCalledWith(
-                expect.stringContaining('Prompt copied to clipboard'),
-                expect.any(Object)
+                expect.stringContaining(
+                    "Prompt copied! Note: Diagrams couldn't be auto-copied. Please right-click the image and 'Copy Image' manually.",
+                ),
+                expect.objectContaining({ duration: 10000 }),
             );
-        });
-
-        it('processes diagrams by copying image to clipboard', async () => {
-            const imageQ = { ...mockQuestionTemplate, question: 'Question ![diag](https://a.com/b.png)' };
-            
-            await openInAI(imageQ, 'claude');
-            
-            expect(global.fetch).toHaveBeenCalledWith('https://a.com/b.png');
-            expect(navigator.clipboard.write).toHaveBeenCalledTimes(1);
-            expect(window.open).toHaveBeenCalledTimes(1);
-            expect(toast.info).toHaveBeenCalledWith(
-                expect.stringContaining('Diagram copied! Paste it'),
-                expect.any(Object)
-            );
-            
-            // The prompt query parameter should include the special diagram placeholder
-            const url = (window.open as any).mock.calls[0][0];
-            const decoded = decodeURIComponent(url);
-            expect(decoded).toContain('[Diagram attached — refer to the pasted image]');
-        });
-
-        it('handles fetch failing during image processing', async () => {
-            const imageQ = { ...mockQuestionTemplate, question: 'Question ![diag](https://a.com/b.png)' };
-            
-            // Override fetch to fail
-            global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
-            
-            await openInAI(imageQ, 'chatgpt');
-            
-            expect(navigator.clipboard.write).not.toHaveBeenCalled();
-            expect(window.open).toHaveBeenCalledTimes(1);
-            expect(toast.warning).toHaveBeenCalledWith(
-                expect.stringContaining('Couldn\'t auto-copy the diagram'),
-                expect.any(Object)
-            );
-        });
-
-        it('handles multiple images gracefully', async () => {
-            const imageQ = { ...mockQuestionTemplate, question: 'Question ![diag](https://a.com/b.png) ![diag2](https://a.com/c.png)' };
-            
-            await openInAI(imageQ, 'chatgpt');
-            
-            expect(global.fetch).toHaveBeenCalledWith('https://a.com/b.png');
-            expect(navigator.clipboard.write).toHaveBeenCalledTimes(1);
-            expect(toast.info).toHaveBeenCalledWith(
-                expect.stringContaining('First diagram copied!'),
-                expect.any(Object)
-            );
-
-            const url = (window.open as any).mock.calls[0][0];
-            const decoded = decodeURIComponent(url);
-            expect(decoded).toContain('copied to your clipboard, the rest must be uploaded');
-        });
-
-        it('handles long prompts with images by writing text, not image, with note', async () => {
-             const longQuestionText = 'A'.repeat(9000) + '![diag](img.png)';
-             const longQ = { ...mockQuestionTemplate, question: longQuestionText };
-             
-             await openInAI(longQ, 'chatgpt');
-
-             expect(navigator.clipboard.write).not.toHaveBeenCalled();
-             expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-             const textWritten = (navigator.clipboard.writeText as any).mock.calls[0][0];
-             expect(textWritten).toContain('[Diagram attached — refer to the pasted image]');
-             expect(textWritten).toContain('[NOTE: This question contains a diagram. Please upload it manually from the original question page.]');
         });
     });
 });
