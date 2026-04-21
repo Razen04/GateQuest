@@ -111,7 +111,9 @@ const QuestionCard = ({
     const { settings } = useSettings();
     const aiProvider = settings.aiProvider ?? 'chatgpt';
 
-    const handleAskAI = async () => { await openInAI(question, aiProvider); };
+    const handleAskAI = async (doubt?: string) => {
+        await openInAI(question, aiProvider, settings.aiCustomPrompt, doubt);
+    };
 
     // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
@@ -234,7 +236,6 @@ const QuestionCard = ({
 
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
-
 
                     {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
 
