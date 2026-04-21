@@ -6,6 +6,7 @@ export type Settings = {
     darkMode: boolean;
     // Which AI provider to deep-link to for question explanations
     aiProvider: AIProvider;
+    aiCustomPrompt: string;
     // Placeholder settings as of now
     shareProgress: boolean;
     dataCollection: boolean;
