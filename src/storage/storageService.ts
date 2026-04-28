@@ -1,4 +1,4 @@
-import type { Attempt, Question, QuestionSyncMetadata, TestSession } from '@/types/storage';
+import type { Attempt, Question, QuestionSyncMetadata, TestSession } from '@/shared/types/storage';
 import Dexie, { type Table } from 'dexie';
 
 // Database name should not be changed ever

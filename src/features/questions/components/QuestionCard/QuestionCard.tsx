@@ -1,0 +1,266 @@
+import React, { useEffect, useRef } from 'react';
+import { ArrowLeft } from '@phosphor-icons/react';
+
+// Types
+import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
+
+// Utils
+import { isNumericalQuestion, getCorrectAnswerText } from '../../utils/questionUtils';
+import QuestionHeader from './QuestionHeader';
+import QuestionContent from './QuestionContent';
+import ResultMessage from './ResultMessage';
+import QuestionPeerStats from './QuestionPeerStats';
+import ActionButtons from './ActionButtons';
+import QuestionBadge from './QuestionBadge';
+import QuestionExplanation from './QuestionExplanation';
+import type { Question } from '@/shared/types/storage';
+import { openInAI } from '@/shared/utils/aiPromptUtils';
+import AskAIBanner from './AskAIBanner';
+import useSettings from '@/features/settings/hooks/useSettings';
+import { useGoals } from '@/shared/hooks/useGoals';
+import Branding from '@/shared/components/Branding';
+import { usePresence } from '@/shared/hooks/usePresence';
+
+// Child Components
+
+// ----------------------------------------------------------------------
+
+type TimerProps = {
+    minutes: string;
+    seconds: string;
+    isActive: boolean;
+    onToggle: () => void;
+};
+
+type PeerStatsProps = {
+    loading: boolean;
+    message: string | null;
+    data: Database['public']['Tables']['question_peer_stats']['Row'] | null;
+};
+
+type QuestionCardProps = {
+    // Data
+    question: Question;
+    totalQuestions: number;
+    questionNumber: number;
+
+    // User State
+    userAnswerIndex: number | null;
+    selectedOptionIndices: number[];
+    numericalAnswer: number | null;
+    marked?: boolean;
+
+    // Flow State
+    showAnswer: boolean;
+    result: 'correct' | 'incorrect' | 'unattempted';
+
+    // Complex Sub-props
+    timer?: TimerProps;
+    peerStats?: PeerStatsProps;
+
+    // Handlers
+    onOptionSelect?: (index: number) => void;
+    onNumericalChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onShowAnswer?: () => void;
+    handleSubmit?: () => void;
+    onNext: () => void;
+    onPrev: () => void;
+    onReport: () => void;
+    onShare: () => void;
+    onBookmark: () => void;
+    onExplanationClick: () => void;
+    onBack: () => void;
+
+    // Navigation Flags
+    isFirst: boolean;
+    isLast: boolean;
+};
+
+const QuestionCard = ({
+    question,
+    totalQuestions,
+    questionNumber,
+    userAnswerIndex,
+    selectedOptionIndices,
+    numericalAnswer,
+    marked,
+    showAnswer,
+    result,
+    timer,
+    peerStats,
+    onOptionSelect,
+    onNumericalChange,
+    onShowAnswer,
+    handleSubmit,
+    onNext,
+    onPrev,
+    onReport,
+    onShare,
+    onBookmark,
+    onExplanationClick,
+    onBack,
+    isFirst,
+    isLast,
+}: QuestionCardProps) => {
+    const { isSubjectInGoal } = useGoals();
+    const { count } = usePresence(question.id);
+
+    const numInputRef = useRef<HTMLInputElement>(null);
+    const pageRef = useRef<HTMLDivElement>(null);
+
+    const { settings } = useSettings();
+    const aiProvider = settings.aiProvider ?? 'chatgpt';
+
+    const handleAskAI = async (doubt?: string) => {
+        await openInAI(question, aiProvider, settings.aiCustomPrompt, doubt);
+    };
+
+    // Derived: Check if options exist to conditionally render the options list
+    const hasOptions = !!(
+        question.options &&
+        Array.isArray(question.options) &&
+        question.options.length > 0
+    );
+
+    // Derived: Get correct answer text for the numerical display
+    const correctAnswerText = getCorrectAnswerText(question);
+
+    // effect to scroll to top when user go to next or previous question
+    useEffect(() => {
+        if (pageRef.current) pageRef.current.scrollTop = 0;
+    }, [questionNumber]);
+
+    // check if the question belong to the user goal
+    const isCompatible = isSubjectInGoal(question.subject_id);
+
+    return (
+        <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
+            {/* Top Back Button */}
+            <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
+                <button
+                    onClick={onBack}
+                    className="flex items-center hover:text-blue-500 transition-colors cursor-pointer focus:outline-none"
+                >
+                    <ArrowLeft className="mr-2" />
+                    <span>Back</span>
+                </button>
+            </div>
+
+            {!isCompatible && (
+                <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
+                    <p className="font-bold">Branch Mismatch</p>
+                    <p>
+                        This question belongs to a different branch. You can view it, but answering
+                        is disabled to protect your current branch progress.
+                    </p>
+                </div>
+            )}
+
+            {/* Main Card Container */}
+            <div
+                ref={pageRef}
+                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto pb-20 mt-6 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
+            >
+                {/* Header Section */}
+                <QuestionHeader
+                    questionNumber={questionNumber}
+                    totalQuestions={totalQuestions}
+                    question={question}
+                    timer={timer}
+                    onReport={onReport}
+                    onShare={onShare}
+                    onBookmark={onBookmark}
+                    marked={marked}
+                    isAnswered={showAnswer}
+                    userCount={count}
+                />
+
+                <div className="p-4 sm:p-6">
+                    {/* Content Section (Text & Options) */}
+                    <QuestionContent
+                        env="Practice"
+                        currentQuestion={question}
+                        hasOptions={hasOptions}
+                        showAnswer={showAnswer}
+                        selectedOptionIndices={selectedOptionIndices}
+                        userAnswerIndex={userAnswerIndex}
+                        onOptionSelect={onOptionSelect}
+                    />
+
+                    {/* Numerical Input Section (Conditional) */}
+                    {isNumericalQuestion(question) && onShowAnswer && (
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+                                Enter your numerical answer:
+                            </label>
+                            <input
+                                ref={numInputRef}
+                                type="number"
+                                className="w-full p-3 border border-border-primary dark:border-border-primary-dark focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-zinc-800 dark:text-white"
+                                value={numericalAnswer ?? ''}
+                                onChange={onNumericalChange}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        onShowAnswer();
+                                    }
+                                }}
+                                placeholder="Enter your answer"
+                                disabled={showAnswer}
+                            />
+                            {showAnswer && numericalAnswer === Number(correctAnswerText) && (
+                                <p className="mt-2 text-sm text-green-600">
+                                    Correct answer: {correctAnswerText}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Result Message */}
+                    {showAnswer && (
+                        <ResultMessage
+                            numericalAnswer={numericalAnswer}
+                            showAnswer={showAnswer}
+                            result={result}
+                            currentQuestion={question}
+                        />
+                    )}
+
+                    {/* Peer Statistics */}
+                    {showAnswer && (
+                        <QuestionPeerStats
+                            loading={peerStats?.loading}
+                            message={peerStats?.message}
+                            data={peerStats?.data}
+                        />
+                    )}
+
+                    {/* Question Explanation */}
+                    {showAnswer && <QuestionExplanation question={question} />}
+
+                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
+
+                    {/* Action Buttons */}
+                    <ActionButtons
+                        isFirstQuestion={isFirst}
+                        isLastQuestion={isLast}
+                        handleNext={onNext}
+                        handlePrevious={onPrev}
+                        showAnswer={showAnswer}
+                        handleShowAnswer={onShowAnswer}
+                        handleSubmit={handleSubmit}
+                        handleExplainationClick={onExplanationClick}
+                        isCompatible={isCompatible}
+                    />
+                </div>
+
+                {/* 7. Footer Badge */}
+                <QuestionBadge currentQuestion={question} />
+
+                <Branding className="mx-4 md:mx-6" />
+            </div>
+        </div>
+    );
+};
+
+export default QuestionCard;
