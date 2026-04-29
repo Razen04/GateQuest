@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
-import type { Database } from '@/shared/types/supabase.ts';
+import { supabase } from '@/shared/utils/supabaseClient';
+import type { Database } from '@/shared/types/supabase';
 import { toast } from 'sonner';
-import { compress, decompress } from 'lz-string';
+import { appStorage } from '@/storage/storageService';
 
 type Benchmark = Database['public']['Tables']['question_peer_stats']['Row'];
 
-function getNextMidnight() {
-    const now = new Date();
-    now.setHours(24, 0, 0, 0);
-    return now.getTime();
-}
+// 12 hours in milliseconds
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 export function usePeerBenchmark(questionId: string | number) {
     const [benchmarkDetails, setBenchmarkDetails] = useState<Benchmark | null>(null);
@@ -20,77 +17,66 @@ export function usePeerBenchmark(questionId: string | number) {
     useEffect(() => {
         if (!questionId || questionId == 0) return;
 
-        const fetchData = async (existingRows: Benchmark[]) => {
-            setLoading(true);
+        let isMounted = true;
+        const strQuestionId = String(questionId);
 
-            const { data, error } = await supabase
-                .from('question_peer_stats')
-                .select('*')
-                .eq('question_id', questionId);
-
-            if (error) {
-                console.error('There was an error fetching the peer benchmark details.');
-                toast.error('Unable to fetch peer benchmarks.');
-                setLoading(false);
-                return;
-            }
-
-            const newRow = data || [];
-            const match = newRow.find((d) => String(d.question_id) === String(questionId));
-
-            if (!match) {
-                setMessage('You are the first to attempt this question!');
-            } else {
-                setBenchmarkDetails(match);
-            }
-
-            const otherRows = existingRows.filter(
-                (r) => String(r.question_id) !== String(questionId),
-            );
-            const updatedCache = [...otherRows, ...newRow];
-
+        const loadBenchmark = async () => {
             try {
-                localStorage.setItem(
-                    'peer_benchmark_details',
-                    compress(JSON.stringify({ rows: updatedCache, expiry: getNextMidnight() })),
-                );
-            } catch (e) {
-                console.error('Failed to save benchmark cache', e);
-            }
+                setLoading(true);
 
-            setLoading(false);
+                // Check IndexedDB first
+                const cached = await appStorage.peer_benchmarks.get(strQuestionId);
+
+                if (cached && Date.now() - cached.fetched_at < CACHE_TTL_MS) {
+                    if (isMounted) {
+                        if (cached.data) {
+                            setBenchmarkDetails(cached.data);
+                        } else {
+                            setMessage('You are the first to attempt this question!');
+                        }
+                        setLoading(false);
+                    }
+                    return;
+                }
+
+                // Cache miss or expired: Fetch from Supabase
+                const { data, error } = await supabase
+                    .from('question_peer_stats')
+                    .select('*')
+                    .eq('question_id', questionId);
+
+                if (error) {
+                    console.error('Error fetching peer benchmark:', error);
+                    toast.error('Unable to fetch peer benchmarks.');
+                    if (isMounted) setLoading(false);
+                    return;
+                }
+
+                const match = data?.find((d) => String(d.question_id) === strQuestionId);
+
+                if (!match) {
+                    if (isMounted) setMessage('You are the first to attempt this question!');
+                } else {
+                    if (isMounted) setBenchmarkDetails(match);
+                }
+
+                await appStorage.peer_benchmarks.put({
+                    question_id: strQuestionId,
+                    data: match || null,
+                    fetched_at: Date.now(),
+                });
+            } catch (err) {
+                console.error('Failed to load benchmark:', err);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
         };
 
-        let cachedRows: Benchmark[] = [];
-        let cacheHit = false;
+        loadBenchmark();
 
-        try {
-            const cached = localStorage.getItem('peer_benchmark_details');
-            if (cached) {
-                const parsed = JSON.parse(decompress(cached));
-
-                if (parsed && Array.isArray(parsed.rows) && parsed.expiry > Date.now()) {
-                    cachedRows = parsed.rows;
-
-                    const match = cachedRows.find(
-                        (d: Benchmark) => String(d.question_id) === String(questionId),
-                    );
-
-                    if (match) {
-                        setBenchmarkDetails(match);
-                        setLoading(false);
-                        cacheHit = true;
-                    }
-                }
-            }
-        } catch (err) {
-            console.error('Cache read error, clearing:', err);
-            localStorage.removeItem('peer_benchmark_details');
-        }
-
-        if (!cacheHit) {
-            fetchData(cachedRows);
-        }
+        return () => {
+            isMounted = false;
+        };
     }, [questionId]);
 
     return { benchmarkDetails, loading, message };
