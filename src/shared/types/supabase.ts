@@ -464,7 +464,7 @@ export type Database = {
                 Row: {
                     accuracy: number | null;
                     attempted_count: number | null;
-                    branch_id: string;
+                    branch_id: string | null;
                     completed_at: string | null;
                     correct_count: number | null;
                     created_at: string | null;
@@ -481,7 +481,7 @@ export type Database = {
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id: string;
+                    branch_id?: string | null;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -498,7 +498,7 @@ export type Database = {
                 Update: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id?: string;
+                    branch_id?: string | null;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -655,7 +655,7 @@ export type Database = {
                 Row: {
                     attempt_number: number | null;
                     attempted_at: string | null;
-                    branch_id: string | null;
+                    branch_id: string;
                     id: string;
                     question_id: string | null;
                     subject: string | null;
@@ -668,7 +668,7 @@ export type Database = {
                 Insert: {
                     attempt_number?: number | null;
                     attempted_at?: string | null;
-                    branch_id?: string | null;
+                    branch_id: string;
                     id?: string;
                     question_id?: string | null;
                     subject?: string | null;
@@ -681,7 +681,7 @@ export type Database = {
                 Update: {
                     attempt_number?: number | null;
                     attempted_at?: string | null;
-                    branch_id?: string | null;
+                    branch_id?: string;
                     id?: string;
                     question_id?: string | null;
                     subject?: string | null;
@@ -766,6 +766,7 @@ export type Database = {
                     branch_id: string | null;
                     correct_count: number | null;
                     created_at: string | null;
+                    exam_tags: string[] | null;
                     expires_at: string | null;
                     generated_for: string | null;
                     id: string;
@@ -779,6 +780,7 @@ export type Database = {
                     branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
+                    exam_tags?: string[] | null;
                     expires_at?: string | null;
                     generated_for?: string | null;
                     id?: string;
@@ -792,6 +794,7 @@ export type Database = {
                     branch_id?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
+                    exam_tags?: string[] | null;
                     expires_at?: string | null;
                     generated_for?: string | null;
                     id?: string;
@@ -823,16 +826,28 @@ export type Database = {
                 Row: {
                     question_id: string | null;
                     question_rating: number | null;
+                    subject_id: string | null;
                     subject_rating: number | null;
                     total_attempts: number | null;
                 };
-                Relationships: [];
+                Relationships: [
+                    {
+                        foreignKeyName: 'user_question_activity_subject_id_fkey';
+                        columns: ['subject_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'subjects';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             v_user_cycle_stats: {
                 Row: {
                     attempt_number: number | null;
                     attempted_at: string | null;
+                    branch_id: string | null;
+                    exam_tags: string[] | null;
                     id: string | null;
+                    is_universal: boolean | null;
                     question_id: string | null;
                     subject: string | null;
                     subject_id: string | null;
@@ -842,6 +857,13 @@ export type Database = {
                     was_correct: boolean | null;
                 };
                 Relationships: [
+                    {
+                        foreignKeyName: 'user_question_activity_branch_id_fkey';
+                        columns: ['branch_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'branches';
+                        referencedColumns: ['id'];
+                    },
                     {
                         foreignKeyName: 'user_question_activity_subject_id_fkey';
                         columns: ['subject_id'];
@@ -886,7 +908,26 @@ export type Database = {
                 | {
                       Args: { p_branch_id: string; p_valid_subjects: string[] };
                       Returns: Json;
+                  }
+                | {
+                      Args: {
+                          p_branch_id: string;
+                          p_target_exams: string[];
+                          p_valid_subjects: string[];
+                      };
+                      Returns: Json;
                   };
+            get_critical_question_count: {
+                Args: { p_target_exams: string[]; p_valid_subjects: string[] };
+                Returns: number;
+            };
+            get_exam_subject_counts: {
+                Args: { target_exams: string[] };
+                Returns: {
+                    exam_specific_count: number;
+                    subject_id: string;
+                }[];
+            };
             get_topic_counts:
                 | {
                       Args: { p_subject: string };
@@ -927,6 +968,14 @@ export type Database = {
             refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
             start_weekly_revision_set: { Args: { v_set_id: string }; Returns: Json };
+            submit_test_grading: {
+                Args: {
+                    p_payload: Json;
+                    p_remaining_time_seconds: number;
+                    p_session_id: string;
+                };
+                Returns: Json;
+            };
             update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };
         };
         Enums: {
