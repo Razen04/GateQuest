@@ -1,38 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient';
-import { getUserProfile } from '@/shared/utils/helper';
 import { useNavigate } from 'react-router-dom';
 import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { RevisionQuestion } from '@/shared/types/storage';
-
-export type WeeklySet = {
-    success: boolean;
-    set_id: string; // UUID
-    start_of_week: string; // date string
-    status: 'pending' | 'started' | 'expired';
-    created_at: string; // timestamptz
-    started_at: string | null; // timestamptz
-    expires_at: string | null; // timestamptz
-    total_questions: number;
-    correct_count: number;
-    accuracy: number; // numeric(5,2)
-    questions: RevisionQuestion[];
-    message: string;
-};
-
-export type StartWeeklySetResponse = {
-    success: boolean;
-    set_id: string;
-    started_at: string | null;
-    expires_at: string | null;
-    message: string;
-};
+import useAuth from '@/shared/hooks/useAuth';
+import {
+    fetchCriticalQuestionCount,
+    fetchWeeklySet,
+    generateWeeklySet,
+    startWeeklySet,
+    type WeeklySet,
+} from '../api/smartRevision';
 
 const useSmartRevision = () => {
     // Getting the user
-    const user = getUserProfile();
+    const { user } = useAuth();
 
     const { userGoal, getPracticeSubjects } = useGoals();
     const userId = user?.id;
@@ -50,10 +33,7 @@ const useSmartRevision = () => {
         setLoading(true);
         try {
             // Call RPC to get weekly set
-            const { data, error } = await supabase
-                .rpc('get_weekly_set', { p_branch_id: userGoal?.branch_id })
-                .single()
-                .overrideTypes<WeeklySet>();
+            const { data, error } = await fetchWeeklySet(userGoal.branch_id);
 
             if (error) throw error;
 
@@ -76,16 +56,18 @@ const useSmartRevision = () => {
 
     // Generate a set
     const generateSet = useCallback(async () => {
+        if (!userGoal?.branch_id) return;
+
         setLoading(true);
         const activeSubjects = getPracticeSubjects().map((s) => s.id);
         const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
         try {
-            const { data, error } = await supabase.rpc('generate_weekly_revision_set', {
-                p_valid_subjects: activeSubjects,
-                p_target_exams: activeExams,
-                p_branch_id: userGoal?.branch_id,
-            });
+            const { data, error } = await generateWeeklySet(
+                activeSubjects,
+                activeExams,
+                userGoal?.branch_id,
+            );
 
             if (error) throw error;
             if (data?.success && data?.status === 'existing') {
@@ -113,10 +95,7 @@ const useSmartRevision = () => {
 
         setLoading(true);
         try {
-            const { data, error } = await supabase
-                .rpc('start_weekly_revision_set', { v_set_id: currentSet.set_id })
-                .single()
-                .overrideTypes<StartWeeklySetResponse>();
+            const { data, error } = await startWeeklySet(currentSet.set_id);
 
             if (error) throw error;
 
@@ -147,10 +126,10 @@ const useSmartRevision = () => {
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
             const activeExams =
                 (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
-            const { data: count, error } = await supabase.rpc('get_critical_question_count', {
-                p_valid_subjects: activeSubjects,
-                p_target_exams: activeExams,
-            });
+            const { data: count, error } = await fetchCriticalQuestionCount(
+                activeSubjects,
+                activeExams,
+            );
 
             if (error) throw error;
 
