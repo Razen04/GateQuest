@@ -68,6 +68,25 @@ const getOngoingTestSession = async (branchId?: string) => {
     return sessions;
 };
 
+const getCompletedTestSessions = async (branchId?: string) => {
+    const sessions = await db.sessions.where('status').equals('completed').toArray();
+
+    let filtered = sessions;
+    if (branchId) {
+        filtered = sessions.filter((s) => s.branch_id === branchId);
+
+        return filtered.sort((a, b) => {
+            const dateA = new Date(a.completed_at || 0).getTime();
+            const dateB = new Date(b.completed_at || 0).getTime();
+            return dateB - dateA;
+        });
+    }
+};
+
+const cacheTestSessions = async (sessions: TestSession[]) => {
+    await db.sessions.bulkPut(sessions);
+};
+
 // Saving an Attempt locally using saveAttempt method
 const saveAttempt = async (attempt: Attempt) => {
     return await db.attempts.put(attempt); // put is used for upserting
@@ -111,4 +130,6 @@ export {
     markAttemptsSynced,
     updateAttempts,
     getOngoingTestSession,
+    getCompletedTestSessions,
+    cacheTestSessions,
 };

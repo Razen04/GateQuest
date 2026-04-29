@@ -22,8 +22,9 @@ import {
     Area,
 } from 'recharts';
 import { ChartLineUpIcon } from '@phosphor-icons/react';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
+import { updateTestStatus } from '../api/topicTest';
+import { getCurrentUser } from '@/shared/api/auth';
 
 const getTestName = (completedAt?: string | null) => {
     if (!completedAt) return 'Untitled Test';
@@ -85,17 +86,11 @@ const TopicTest = () => {
 
     const handleStartTest = async () => {
         try {
-            const user = (await supabase.auth.getUser()).data.user;
+            const user = await getCurrentUser();
             if (!user) throw new Error('No user');
 
             if (activeTest?.status === 'created') {
-                const { error } = await supabase
-                    .from('topic_tests')
-                    .update({
-                        status: 'ongoing',
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', activeTest?.id);
+                const { error } = await updateTestStatus(activeTest.id, 'ongoing');
 
                 if (error) throw error;
             }

@@ -1,7 +1,7 @@
 import { getTestSession, updateAttempts } from '@/features/topic-test/services/testSession';
 import type { Attempt } from '@/shared/types/storage';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { useCallback, useState } from 'react';
+import { submitTestGrading } from '../../api/topicTest';
 
 const useTestGrading = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,11 +23,7 @@ const useTestGrading = () => {
             const remainingTime = testSession.session.remaining_time_seconds;
 
             const rpcCall = async () => {
-                const { data, error } = await supabase.rpc('submit_test_grading', {
-                    p_session_id: testId,
-                    p_payload: payload,
-                    p_remaining_time_seconds: remainingTime,
-                });
+                const { data, error } = await submitTestGrading(testId, payload, remainingTime);
 
                 if (error) {
                     if (retryCount < maxRetries) {

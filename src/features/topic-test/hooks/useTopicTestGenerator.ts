@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { useGoals } from '@/shared/hooks/useGoals';
+import { fetchTopicCounts } from '../api/topicTest';
 
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour for the cache after which we will refetch the topics
 
@@ -72,9 +72,7 @@ export const useTopicTestGenerator = ({
 
         setLoading(true);
 
-        const { data, error } = await supabase.rpc('get_topic_counts', {
-            p_subject_id: subjectId,
-        });
+        const { data, error } = await fetchTopicCounts(subjectId);
 
         console.log('Data: ', data);
 

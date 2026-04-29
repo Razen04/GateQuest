@@ -9,7 +9,6 @@ import {
     CheckCircle,
     ArrowLeft,
 } from '@phosphor-icons/react';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { Button } from '@/shared/components/ui/button';
 import PageHeader from '@/shared/components/PageHeader';
 import { toast } from 'sonner';
@@ -17,6 +16,8 @@ import type { TestSession } from '@/shared/types/storage';
 import ModernLoader from '@/shared/components/ModernLoader';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
 import { useGoals } from '@/shared/hooks/useGoals';
+import { fetchTestById, updateTestStatus } from '../api/topicTest';
+import { getCurrentUser } from '@/shared/api/auth';
 
 type InstructionRule = {
     id: string;
@@ -78,11 +79,7 @@ const TopicTestLobby = () => {
         const fetchTest = async () => {
             if (!testId) return;
 
-            const { data, error } = await supabase
-                .from('topic_tests')
-                .select('*')
-                .eq('id', testId)
-                .single();
+            const { data, error } = await fetchTestById(testId);
 
             if (error) {
                 console.error('Error fetching test:', error);
@@ -108,17 +105,11 @@ const TopicTestLobby = () => {
         setStarting(true);
 
         try {
-            const user = (await supabase.auth.getUser()).data.user;
+            const user = await getCurrentUser();
             if (!user) throw new Error('No user');
 
             if (testData.status === 'created') {
-                const { error } = await supabase
-                    .from('topic_tests')
-                    .update({
-                        status: 'ongoing',
-                        updated_at: new Date().toISOString(),
-                    })
-                    .eq('id', testId);
+                const { error } = await updateTestStatus(testId, 'ongoing');
 
                 if (error) throw error;
             }

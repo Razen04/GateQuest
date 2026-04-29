@@ -348,7 +348,7 @@ export default function TopicTestResult() {
                                                 #{attempts.indexOf(sink) + 1}
                                             </div>
                                             <p className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase">
-                                                {(sink as any).questions.topic}
+                                                {(sink as any).questions?.topic || 'Unknown Topic'}
                                             </p>
                                         </div>
                                         <p className="font-mono font-black text-rose-600">

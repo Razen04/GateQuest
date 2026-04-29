@@ -1,9 +1,9 @@
 import ModernLoader from '@/shared/components/ModernLoader';
 import { getTestSession, initializeTestSession } from '@/features/topic-test/services/testSession';
 import type { Question, TestSession } from '@/shared/types/storage';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { fetchAttemptsWithQuestions, fetchTestById } from '../api/topicTest';
 
 type AttemptWithQuestion = {
     session_id: string;
@@ -40,8 +40,17 @@ const TestReviewLayout = () => {
             try {
                 const localData = await getTestSession(testId);
 
-                if (localData && localData.session && localData.session.status === 'completed') {
-                    console.log('LocalData present', localData);
+                const hasAllQuestions = localData?.attempts?.every((attempt) =>
+                    localData.questions.some((q) => q.id === attempt.question_id),
+                );
+
+                if (
+                    localData &&
+                    localData.session &&
+                    localData.session.status === 'completed' &&
+                    localData.attempts.length > 0 &&
+                    hasAllQuestions
+                ) {
                     const mappedAttempts = localData.attempts.map((attempt) => ({
                         ...attempt,
                         questions: localData.questions.find(
@@ -53,16 +62,11 @@ const TestReviewLayout = () => {
                         setSession(localData.session);
                         setAttempts(mappedAttempts);
                         setLoading(false);
-                        return;
                     }
+                    return;
                 }
 
-                // fallback to Supabase if Dexie dosen't have the test
-                const { data: sessionData, error: sessionError } = await supabase
-                    .from('topic_tests')
-                    .select('*')
-                    .eq('id', testId)
-                    .single();
+                const { data: sessionData, error: sessionError } = await fetchTestById(testId);
 
                 if (sessionError || !sessionData) {
                     throw new Error('Test not found.');
@@ -73,12 +77,9 @@ const TestReviewLayout = () => {
                     return;
                 }
 
-                // 2. Load attempts WITH questions
-                const { data: attemptsData, error: attemptsError } = await supabase
-                    .from('topic_tests_attempts')
-                    .select('*, questions(*)')
-                    .eq('session_id', testId)
-                    .order('attempt_order', { ascending: true });
+                // Load attempts WITH questions
+                const { data: attemptsData, error: attemptsError } =
+                    await fetchAttemptsWithQuestions(testId);
 
                 if (attemptsError) {
                     throw attemptsError;
@@ -86,7 +87,7 @@ const TestReviewLayout = () => {
 
                 if (sessionData && attemptsData) {
                     const questionsToCache = attemptsData
-                        .map((a) => a.questions)
+                        .flatMap((a) => (Array.isArray(a.questions) ? a.questions : [a.questions]))
                         .filter((q): q is Question => !!q);
 
                     const pureAttemptsToCache = attemptsData.map(({ questions, ...a }) => a);
@@ -97,8 +98,6 @@ const TestReviewLayout = () => {
                 if (isMounted) {
                     setSession(sessionData);
                     setAttempts(attemptsData ?? []);
-                    console.log('sessionData: ', sessionData);
-                    console.log('attemptsData: ', attemptsData);
                 }
             } catch (err) {
                 console.error(err);

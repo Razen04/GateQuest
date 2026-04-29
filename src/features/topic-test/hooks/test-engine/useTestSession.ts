@@ -6,13 +6,13 @@ import useTestGrading from './useTestGrading';
 import type { TestData } from './useTestLoader';
 import type { Question } from '@/shared/types/storage';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/shared/utils/supabaseClient';
 import {
     getPendingAttempts,
     getTestSession,
     markAttemptsSynced,
     updateSessionTimeAndStatus,
 } from '@/features/topic-test/services/testSession';
+import { updateTestTime, upsertAttempts } from '../../api/topicTest';
 
 export interface UseTestSessionReturn {
     status: 'ready' | 'error' | 'submitting' | 'completed';
@@ -129,10 +129,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
             try {
                 // Sync remaining time to Supabase
-                await supabase
-                    .from('topic_tests')
-                    .update({ remaining_time_seconds: timerRef.current })
-                    .eq('id', testId);
+                await updateTestTime(testId, timerRef.current);
 
                 // Fetch unsynced attempts from Dexie
                 const dirtyAttempts = await getPendingAttempts();
@@ -150,7 +147,7 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                         return {
                             session_id: a.session_id,
                             question_id: a.question_id,
-                            attempt_order: finalOrder, // <--- RE-ADDED safely
+                            attempt_order: finalOrder,
                             user_answer: a.user_answer ?? null,
                             marked_for_review: a.marked_for_review ?? false,
                             status: a.status ?? 'unvisited',
@@ -158,9 +155,8 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
                             time_spent_seconds: a.time_spent_seconds,
                         };
                     });
-                    const { error } = await supabase
-                        .from('topic_tests_attempts')
-                        .upsert(payload, { onConflict: 'session_id, question_id' });
+
+                    const { error } = await upsertAttempts(payload);
 
                     if (!error) {
                         // mark attempts as synced locally
@@ -193,7 +189,6 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
     }, [timer.isExpired, status, handleSubmit]);
 
     // to save the timer value to appStorage every 5s
-
     useEffect(() => {
         if (status !== 'ready' && status !== 'submitting') return;
 

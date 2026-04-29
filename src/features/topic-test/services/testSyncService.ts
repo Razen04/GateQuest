@@ -1,4 +1,4 @@
-import { supabase } from '@/shared/utils/supabaseClient';
+import { fetchFullTestData } from '../api/topicTest';
 import { initializeTestSession } from './testSession';
 
 export const syncTestFromSupabaseToDexie = async (
@@ -7,48 +7,9 @@ export const syncTestFromSupabaseToDexie = async (
 ) => {
     if (!userId || !branchId) return;
 
-    // get the test session row
-    const { data: testSession, error: sessionError } = await supabase
-        .from('topic_tests')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('branch_id', branchId)
-        .in('status', ['ongoing', 'paused', ['created']])
-        .maybeSingle();
+    const { testSession, attempts, questions } = await fetchFullTestData(userId, branchId);
 
-    if (sessionError) {
-        console.error('Unable to get the test: ', sessionError);
-        return;
-    }
+    if (!testSession || !attempts || !questions) return;
 
-    if (!testSession) return;
-
-    const testId = testSession.id;
-
-    // get the attempts for that specific test session
-    const { data: attempts, error: attemptsError } = await supabase
-        .from('topic_tests_attempts')
-        .select('*')
-        .eq('session_id', testId);
-
-    if (attemptsError) {
-        console.error('Unable to get the attempts for the test: ', attemptsError);
-        return;
-    }
-
-    // fetch the questions
-    const questionIds = attempts.map((a) => a.question_id);
-
-    const { data: questions, error: questionsError } = await supabase
-        .from('questions')
-        .select('*')
-        .in('id', questionIds);
-
-    if (questionsError) {
-        console.error('Unable to get the questions for the test: ', questionsError);
-        return;
-    }
-
-    // initializing things into Dexie
     await initializeTestSession(testSession, attempts, questions);
 };
