@@ -16,10 +16,12 @@ type useKeyboardShortcutsProps = {
     onPrev: () => void;
     onNext: () => void;
     onShowAnswer: () => void;
+    onSubmit?: () => void;
     onExplain?: () => void;
+    hasSelection?: boolean;
 };
 export default function useKeyboardShortcuts(
-    { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,
+    { onPrev, onNext, onShowAnswer, onSubmit, onExplain, hasSelection }: useKeyboardShortcutsProps,
     deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
 ) {
     const getOptionCodeFromKey = (code: string) => {
@@ -78,7 +80,11 @@ export default function useKeyboardShortcuts(
                 case 'Enter': // 'Enter' to submit/show answer
                 case 'Space':
                     e.preventDefault();
-                    onShowAnswer?.();
+                    if (hasSelection && onSubmit) {
+                        onSubmit();
+                    } else {
+                        onShowAnswer?.();
+                    }
                     break;
                 case 'Slash': // 'E' for explanation
                     e.preventDefault();

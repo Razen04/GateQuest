@@ -11,6 +11,7 @@ type ActionButtonsProps = {
     handleSubmit?: (() => void) | undefined;
     handleExplainationClick: () => void;
     isCompatible: boolean | undefined;
+    hasSelection?: boolean;
 };
 
 const ActionButtons = ({
@@ -23,6 +24,7 @@ const ActionButtons = ({
     handleSubmit,
     handleExplainationClick,
     isCompatible,
+    hasSelection,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
@@ -56,7 +58,7 @@ const ActionButtons = ({
                     >
                         <Eye className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Submit <span className="font-mono">[⎵/↵]</span>
+                            Submit {hasSelection && <span className="font-mono">[⎵/↵]</span>}
                         </span>
                     </Button>
                     <Button
@@ -67,7 +69,7 @@ const ActionButtons = ({
                     >
                         <Flag className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Answer <span className="font-mono">[⎵/↵]</span>
+                            Show Answer {!hasSelection && <span className="font-mono">[⎵/↵]</span>}
                         </span>
                     </Button>
                 </>
