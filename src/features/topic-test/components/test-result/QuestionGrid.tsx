@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { FlagIcon } from '@phosphor-icons/react';
 import type { Attempt, Question } from '@/shared/types/storage';
+import { formatTime } from '@/shared/utils/helper';
 
 interface FullAttempt extends Attempt {
     questions: Question;
@@ -26,12 +27,6 @@ export function QuestionGrid({
     navigate: (path: string) => void;
     isTopic?: boolean;
 }) {
-    const formatTime = (secs: number) => {
-        const m = Math.floor(secs / 60);
-        const s = secs % 60;
-        return `${m}m ${Math.round(s)}s`;
-    };
-
     const avgTime = (data.totalTime / data.attempts.length).toFixed(1);
     const accuracy = ((data.correct / data.attempts.length) * 100).toFixed(0);
 

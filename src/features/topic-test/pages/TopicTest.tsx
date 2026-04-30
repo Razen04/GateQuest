@@ -8,7 +8,7 @@ import { ArrowLeftIcon } from '@phosphor-icons/react';
 import useTopicTestHubData from '@/features/topic-test/hooks/useTopicTestHubData';
 import useAuth from '@/shared/hooks/useAuth';
 import { toast } from 'sonner';
-import { getUserProfile } from '@/shared/utils/helper';
+import { formatTime, getUserProfile } from '@/shared/utils/helper';
 import ModernLoader from '@/shared/components/ModernLoader';
 import { useGoals } from '@/shared/hooks/useGoals';
 import { useMemo, useState } from 'react';
@@ -114,13 +114,6 @@ const TopicTest = () => {
 
     const onBack = () => {
         navigate('/dashboard');
-    };
-
-    // helper: format seconds to mm:ss
-    const formatTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
     // helper: map status to icon & colors

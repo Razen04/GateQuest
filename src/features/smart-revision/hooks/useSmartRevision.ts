@@ -4,7 +4,6 @@ import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { RevisionQuestion } from '@/shared/types/storage';
-import useAuth from '@/shared/hooks/useAuth';
 import {
     fetchCriticalQuestionCount,
     fetchWeeklySet,
@@ -12,10 +11,11 @@ import {
     startWeeklySet,
     type WeeklySet,
 } from '../api/smartRevision';
+import { getUserProfile } from '@/shared/utils/helper';
 
 const useSmartRevision = () => {
     // Getting the user
-    const { user } = useAuth();
+    const user = getUserProfile();
 
     const { userGoal, getPracticeSubjects } = useGoals();
     const userId = user?.id;

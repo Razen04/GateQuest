@@ -13,7 +13,6 @@ vi.mock('@/shared/utils/supabaseClient', () => ({
 // Helper for mockResolvedValue
 
 function mockRpc<T>(data: T, error: any = null) {
-    // eslint-disable-line
     return {
         data,
         error,

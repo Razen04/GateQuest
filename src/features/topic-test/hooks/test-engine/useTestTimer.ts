@@ -1,3 +1,4 @@
+import { formatTime } from '@/shared/utils/helper';
 import { useEffect, useRef, useState } from 'react';
 
 interface useTestTimerPropsType {
@@ -13,14 +14,6 @@ const useTestTimer = ({ initialSeconds, onExpire }: useTestTimerPropsType) => {
 
     const [secondsRemaining, setSecondsRemaining] = useState(initialSeconds);
     const [isExpired, setIsExpired] = useState(false);
-
-    // Helper to format time: MM:SS
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    };
 
     useEffect(() => {
         onExpireRef.current = onExpire;

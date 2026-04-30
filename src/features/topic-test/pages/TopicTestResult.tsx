@@ -20,6 +20,7 @@ import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import type { Attempt, Question, TestSession } from '@/shared/types/storage';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { QuestionGrid } from '../components/test-result/QuestionGrid';
+import { formatTime } from '@/shared/utils/helper';
 
 type OutletContext = {
     session: TestSession;
@@ -87,13 +88,7 @@ export default function TopicTestResult() {
     const navigate = useNavigate();
     const { session, attempts } = useOutletContext<OutletContext>();
 
-    const formatTime = (secs: number) => {
-        const m = Math.floor(secs / 60);
-        const s = secs % 60;
-        return `${m}m ${Math.round(s)}s`;
-    };
-
-    // 1. Unified Data Analysis Engine
+    // Unified Data Analysis Engine
     const analysis = useMemo(() => {
         const diffGroups: Record<string, GroupData> = {
             Easy: { attempts: [], totalTime: 0, correct: 0 },
