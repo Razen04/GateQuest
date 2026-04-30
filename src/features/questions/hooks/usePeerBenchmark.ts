@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient';
-import type { Database } from '@/shared/types/supabase';
 import { toast } from 'sonner';
 import { appStorage } from '@/storage/storageService';
-
-type Benchmark = Database['public']['Tables']['question_peer_stats']['Row'];
+import { fetchQuestionPeerStats, type Benchmark } from '../api/quesitons';
 
 // 12 hours in milliseconds
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
@@ -40,29 +37,24 @@ export function usePeerBenchmark(questionId: string | number) {
                 }
 
                 // Cache miss or expired: Fetch from Supabase
-                const { data, error } = await supabase
-                    .from('question_peer_stats')
-                    .select('*')
-                    .eq('question_id', questionId);
+                const { data, error } = await fetchQuestionPeerStats(strQuestionId);
 
-                if (error) {
+                if (error && error.code !== 'PGRST116') {
                     console.error('Error fetching peer benchmark:', error);
                     toast.error('Unable to fetch peer benchmarks.');
                     if (isMounted) setLoading(false);
                     return;
                 }
 
-                const match = data?.find((d) => String(d.question_id) === strQuestionId);
-
-                if (!match) {
+                if (!data) {
                     if (isMounted) setMessage('You are the first to attempt this question!');
                 } else {
-                    if (isMounted) setBenchmarkDetails(match);
+                    if (isMounted) setBenchmarkDetails(data);
                 }
 
                 await appStorage.peer_benchmarks.put({
                     question_id: strQuestionId,
-                    data: match || null,
+                    data: data || null,
                     fetched_at: Date.now(),
                 });
             } catch (err) {

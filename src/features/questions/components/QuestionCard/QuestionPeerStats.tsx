@@ -1,5 +1,6 @@
 import { SpinnerGap, ChartBar } from '@phosphor-icons/react';
 import type { Database } from '@/shared/types/supabase.ts';
+import { formatTime } from '@/shared/utils/helper';
 
 type BenchmarkData = Database['public']['Tables']['question_peer_stats']['Row'];
 
@@ -81,7 +82,7 @@ const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) =>
                             Average Time Taken
                         </span>
                         <span className="font-medium text-gray-800 dark:text-gray-200">
-                            {avg_time_seconds ? `${avg_time_seconds.toFixed(1)}s` : '-'}
+                            {avg_time_seconds ? `${formatTime(avg_time_seconds)}` : '-'}
                         </span>
                     </div>
                     <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800">
