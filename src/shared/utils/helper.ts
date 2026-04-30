@@ -291,3 +291,20 @@ export const recordAttempt = async ({ buffer, user, refresh }: recordAttemptProp
 
     toast.success('Attempt synced successfully!');
 };
+
+export const formatTime = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}m ${Math.round(s)}s`;
+};
+
+export const normalizeTag = (tag: string): string => {
+    return (
+        decodeURIComponent(tag)
+            .toLowerCase()
+            .trim()
+            .replace(/^(\/tag\/|\/)/, '')
+            .split('/')
+            .pop() || ''
+    );
+};

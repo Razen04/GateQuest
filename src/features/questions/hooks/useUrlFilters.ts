@@ -11,12 +11,14 @@ type useUrlFiltersProps = {
     topicFilter: string[];
     attemptFilter: string;
     examFilter: string[];
+    tagFilter: string[];
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
     setDifficultyFilter: React.Dispatch<React.SetStateAction<string[]>>;
     setYearFilter: React.Dispatch<React.SetStateAction<string[]>>;
     setTopicFilter: React.Dispatch<React.SetStateAction<string[]>>;
     setAttemptFilter: React.Dispatch<React.SetStateAction<string>>;
     setExamFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    setTagFilter: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 // Manages the two-way data binding between the filter state and the URL search parameters.
@@ -33,6 +35,8 @@ export default function useUrlFilters({
     setAttemptFilter,
     examFilter,
     setExamFilter,
+    tagFilter,
+    setTagFilter,
 }: useUrlFiltersProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     // A ref to ensure the initialization logic runs only once.
@@ -55,6 +59,7 @@ export default function useUrlFilters({
         setTopicFilter(getArrayParam('topic'));
         setExamFilter(getArrayParam('exam'));
         setAttemptFilter(searchParams.get('attempt') ?? 'unattempted');
+        setTagFilter(getArrayParam('tags'));
 
         // The exhaustive-deps rule is disabled because this effect is intentionally designed to run only once.
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,6 +85,7 @@ export default function useUrlFilters({
         setArrayParam('year', yearFilter);
         setArrayParam('topic', topicFilter);
         setArrayParam('exam', examFilter);
+        setArrayParam('tags', tagFilter);
 
         // Only update if the resulting query string has actually changed
         if (params.toString() !== searchParams.toString()) {
@@ -92,6 +98,7 @@ export default function useUrlFilters({
         topicFilter,
         attemptFilter,
         examFilter,
+        tagFilter,
         setSearchParams,
         searchParams,
     ]);
@@ -109,6 +116,7 @@ export default function useUrlFilters({
             year: yearFilter.length > 0 ? yearFilter.join(',') : 'all',
             topic: topicFilter.length > 0 ? topicFilter.join(',') : 'all',
             exam: examFilter.length > 0 ? examFilter.join(',') : 'all',
+            tags: tagFilter.length > 0 ? tagFilter.join(',') : 'all',
         });
         return p.toString();
     }, [
@@ -119,6 +127,7 @@ export default function useUrlFilters({
         topicFilter,
         attemptFilter,
         examFilter,
+        tagFilter,
     ]);
 
     // Expose the generated query string and the raw searchParams object.

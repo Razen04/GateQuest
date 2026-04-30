@@ -3,7 +3,7 @@
 
 import { useContext, useMemo, useState } from 'react';
 import StatsContext from '@/app/providers/StatsContext';
-import { sortQuestionsByYear } from '@/shared/utils/helper';
+import { normalizeTag, sortQuestionsByYear } from '@/shared/utils/helper';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
 
 // Type of filter mode for smart-Revision
@@ -23,6 +23,7 @@ const useFilters = (
     const [topicFilter, setTopicFilter] = useState<string[]>([]);
     const [attemptFilter, setAttemptFilter] = useState('unattempted');
     const [examFilter, setExamFilter] = useState<string[]>([]);
+    const [tagFilter, setTagFilter] = useState<string[]>([]);
 
     // Access the global stats context to get information about attempted questions.
     const { stats } = useContext(StatsContext)!;
@@ -106,7 +107,12 @@ const useFilters = (
             });
         }
 
-        // Finally, sort the filtered results by year.
+        if (tagFilter.length > 0) {
+            filtered = filtered.filter((qn) => {
+                return qn.tags?.some((tag) => tagFilter.includes(normalizeTag(tag)));
+            });
+        }
+
         return sortQuestionsByYear(filtered);
     }, [
         sourceQuestions,
@@ -118,6 +124,7 @@ const useFilters = (
         attemptedIds,
         examFilter,
         selectedQuestion,
+        tagFilter,
     ]);
 
     // Expose the filtered data and the state setters for the UI components to use.
@@ -135,6 +142,8 @@ const useFilters = (
         setAttemptFilter,
         examFilter,
         setExamFilter,
+        tagFilter,
+        setTagFilter,
     };
 };
 

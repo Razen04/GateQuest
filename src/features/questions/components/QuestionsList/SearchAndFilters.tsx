@@ -44,6 +44,9 @@ type SearchAndFiltersProps = {
     topics: string[];
     examFilter: string[];
     setExamFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    tags: string[];
+    tagFilter: string[];
+    setTagFilter: React.Dispatch<React.SetStateAction<string[]>>;
     availableExams: string[];
 };
 
@@ -64,6 +67,9 @@ const SearchAndFilters = ({
     topics,
     examFilter,
     setExamFilter,
+    tags,
+    tagFilter,
+    setTagFilter,
     availableExams,
 }: SearchAndFiltersProps) => {
     const { subject } = useParams();
@@ -231,6 +237,41 @@ const SearchAndFilters = ({
                                             {(topic) => (
                                                 <ComboboxItem key={topic} value={topic}>
                                                     {topic}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
+                            </div>
+
+                            <div>
+                                <Label className="mb-2">Tags</Label>
+                                <Combobox
+                                    items={tags}
+                                    multiple
+                                    value={tagFilter}
+                                    onValueChange={setTagFilter}
+                                >
+                                    <ComboboxChips>
+                                        <ComboboxValue>
+                                            {tagFilter.map((t) => (
+                                                <ComboboxChip
+                                                    key={t}
+                                                    showRemove
+                                                    className="max-w-[150px] truncate"
+                                                >
+                                                    {t}
+                                                </ComboboxChip>
+                                            ))}
+                                        </ComboboxValue>
+                                        <ComboboxChipsInput placeholder="Select tags" />
+                                    </ComboboxChips>
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>No tag found.</ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(tags) => (
+                                                <ComboboxItem key={tags} value={tags}>
+                                                    {tags}
                                                 </ComboboxItem>
                                             )}
                                         </ComboboxList>

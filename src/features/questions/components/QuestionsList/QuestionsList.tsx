@@ -8,6 +8,8 @@ import List from './List';
 import useUrlFilters from '@/features/questions/hooks/useUrlFilters';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
+import { notMeaningfulTags } from '@/shared/data/notMeaningfulTags';
+import { normalizeTag } from '@/shared/utils/helper';
 
 type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
@@ -54,6 +56,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setAttemptFilter,
         examFilter,
         setExamFilter,
+        tagFilter,
+        setTagFilter,
     } = useFilters(questions, subject ?? null, selectedQuestion, mode);
 
     // This ensures that when filters change, the URL updates
@@ -70,6 +74,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setAttemptFilter,
         examFilter,
         setExamFilter,
+        tagFilter,
+        setTagFilter,
     });
 
     // Pagination
@@ -95,6 +101,21 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const topics = useMemo(() => {
         const allTopics = questions.map((q) => q.topic || '').filter((t) => t.trim() !== '');
         return [...new Set(allTopics)];
+    }, [questions]);
+
+    const tags = useMemo(() => {
+        const allTags = questions.flatMap((q) => q.tags ?? []);
+
+        const uniqueCleanTags = new Set<string>();
+
+        allTags.forEach((tag) => {
+            const clean = normalizeTag(tag);
+            if (clean && !notMeaningfulTags.includes(clean)) {
+                uniqueCleanTags.add(clean);
+            }
+        });
+
+        return Array.from(uniqueCleanTags).sort();
     }, [questions]);
 
     return (
@@ -130,6 +151,9 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
                     topics={topics}
                     examFilter={examFilter}
                     setExamFilter={setExamFilter}
+                    tags={tags}
+                    tagFilter={tagFilter}
+                    setTagFilter={setTagFilter}
                     availableExams={availableExam}
                 />
 
