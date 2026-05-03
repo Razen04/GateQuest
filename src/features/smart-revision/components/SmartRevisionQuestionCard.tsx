@@ -118,14 +118,26 @@ const SmartRevisionQuestionCard = () => {
     };
 
     // Keyboard Shortcuts
+    const hasSelection = selectedOptionIndices.length > 0 || numericalAnswer !== null;
+
     useKeyboardShortcuts(
         {
             onPrev: handlePrevious,
             onNext: handleNext,
             onShowAnswer: handleShowAnswer,
+            onSubmit: handleSubmit,
             onExplain: () => onExplanationClick(),
+            hasSelection,
         },
-        [safeQuestion],
+        [
+            safeQuestion,
+            hasSelection,
+            handleShowAnswer,
+            handleSubmit,
+            handleNext,
+            handlePrevious,
+            onExplanationClick,
+        ],
     );
 
     // 7. Side Effects: Audio Handling

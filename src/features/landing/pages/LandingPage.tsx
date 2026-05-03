@@ -144,19 +144,17 @@ const AppMockup = () => {
                             <div
                                 key={i}
                                 className={`flex items-center gap-3 p-2 rounded-lg
-                                ${
-                                    option === '256'
+                                ${option === '256'
                                         ? 'bg-blue-500/10 border border-blue-500/30 ring-2 ring-blue-500/20'
                                         : 'bg-slate-100/50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
-                                }`}
+                                    }`}
                             >
                                 <div
                                     className={`w-5 h-5 rounded-full border-2
-                                    ${
-                                        option === '256'
+                                    ${option === '256'
                                             ? 'border-blue-500 bg-blue-500 flex items-center justify-center'
                                             : 'border-slate-400'
-                                    }`}
+                                        }`}
                                 >
                                     {option === '256' && (
                                         <div className="w-2 h-2 rounded-full bg-white"></div>

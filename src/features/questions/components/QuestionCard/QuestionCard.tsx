@@ -202,7 +202,11 @@ const QuestionCard = ({
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault();
-                                        onShowAnswer();
+                                        if (handleSubmit) {
+                                            handleSubmit();
+                                        } else if (onShowAnswer) {
+                                            onShowAnswer();
+                                        }
                                     }
                                 }}
                                 placeholder="Enter your answer"
@@ -251,6 +255,7 @@ const QuestionCard = ({
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
                         isCompatible={isCompatible}
+                        hasSelection={selectedOptionIndices.length > 0 || numericalAnswer !== null}
                     />
                 </div>
 
