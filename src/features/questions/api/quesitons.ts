@@ -10,3 +10,15 @@ export async function fetchQuestionPeerStats(questionId: string) {
         .eq('question_id', questionId)
         .maybeSingle();
 }
+
+type Report = {
+    user_id: string;
+    question_id: string;
+    report_type: string;
+    report_text: string;
+};
+
+// Handle report
+export const handleReport = async (report: Report) => {
+    return await supabase.from('question_reports').insert([report]);
+};
