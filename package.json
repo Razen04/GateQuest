@@ -14,7 +14,7 @@
         "format:check": "prettier --check .",
         "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
         "test": "vitest",
-        "supabase:update:types": "supabase gen types typescript --db-url 'postgresql://postgres:postgres@localhost:54322/postgres' > src/types/supabase.ts",
+        "supabase:update:types": "supabase gen types typescript --db-url 'postgresql://postgres:postgres@localhost:54322/postgres' > src/shared/types/supabase.ts",
         "//": "--- LOCAL DEV ---",
         "supabase:start": "supabase start",
         "supabase:stop": "supabase stop",
