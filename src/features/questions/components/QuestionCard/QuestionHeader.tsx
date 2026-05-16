@@ -6,7 +6,6 @@ import {
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
 import { Warning, ShareFat } from '@phosphor-icons/react';
-import { Button } from '@/shared/components/ui/button.tsx';
 import type { Question } from '@/shared/types/storage.js';
 
 type TimerProps = {
@@ -98,26 +97,6 @@ const QuestionHeader = ({
                             Marked For Review
                         </span>
                     )}
-
-                    {/* Report Button */}
-                    <Button
-                        size="icon-sm"
-                        onClick={onReport}
-                        className="rounded-none bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500 dark:text-red-50 dark:hover:bg-red-700"
-                        title="Report Question"
-                    >
-                        <Warning size={14} />
-                    </Button>
-
-                    {/* Share Button */}
-                    <Button
-                        size="icon-sm"
-                        onClick={onShare}
-                        className="rounded-none bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-500 dark:text-green-50 dark:hover:bg-green-700"
-                        title="Share Question"
-                    >
-                        <ShareFat size={14} />
-                    </Button>
                 </div>
             </div>
 
@@ -144,9 +123,32 @@ const QuestionHeader = ({
                 </div>
             </div>
 
-            <div className="flex items-center mt-1 bg-green-100 dark:bg-gray-800 w-fit text-sm gap-1.5 px-2 py-1">
-                <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                <span>{userCount ?? 1} online</span>
+            <div className="w-full flex justify-between items-center mt-1">
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500 dark:bg-gray-800">
+                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                    <span>{userCount ?? 1} online</span>
+                </div>
+                <div className="flex gap-1">
+                    {/* Report Button */}
+                    <button
+                        onClick={onReport}
+                        className="flex items-center gap-0.5 text-sm px-2 py-1 rounded-none bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-500 dark:text-red-50 dark:hover:bg-red-700"
+                        title="Report Question"
+                    >
+                        Report
+                        <Warning size={14} />
+                    </button>
+
+                    {/* Share Button */}
+                    <button
+                        onClick={onShare}
+                        className="flex items-center gap-0.5 text-sm px-2 py-1 rounded-none bg-green-100 text-green-600 hover:bg-green-200 dark:bg-green-500 dark:text-green-50 dark:hover:bg-green-700"
+                        title="Share Question"
+                    >
+                        Share
+                        <ShareFat size={14} />
+                    </button>
+                </div>
             </div>
         </div>
     );

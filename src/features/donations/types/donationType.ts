@@ -11,7 +11,7 @@ export type DonationData = {
 };
 
 export type newDonation = {
-    userId: string | null | undefined;
+    userId: string | null;
     amount: number;
     message: string | null;
     anonymous: boolean;

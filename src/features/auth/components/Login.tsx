@@ -25,7 +25,6 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
     const { handleLogin } = useAuth();
 
     return (
-        // 2. Wrap the component (or just the button area) in the Provider
         <GoogleOAuthProvider clientId="635706138983-n2tb8pl1iltjs112g2faeoq26um4hj4r.apps.googleusercontent.com">
             <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900">
                 <div className="w-full max-w-md bg-white dark:bg-zinc-900 shadow-2xl border border-border-primary dark:border-border-primary-dark p-8 flex flex-col items-center animate-fade-in">
@@ -52,12 +51,10 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                         </p>
                     </div>
 
-                    {/* 3. Replace your custom button with the official Google Login widget */}
                     <div className="flex w-full justify-center my-2">
                         <GoogleLogin
                             onSuccess={(credentialResponse) => {
                                 if (credentialResponse.credential) {
-                                    // Pass the token to AuthProvider, and close the modal if successful
                                     handleLogin(credentialResponse.credential);
                                     if (onClose) onClose();
                                 }
@@ -65,7 +62,7 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                             onError={() => {
                                 console.error('Google login widget failed');
                             }}
-                            theme="filled_blue" // You can change this to match your dark/light mode
+                            theme="filled_blue"
                             shape="rectangular"
                             text="continue_with"
                         />

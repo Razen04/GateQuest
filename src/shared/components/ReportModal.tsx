@@ -14,6 +14,7 @@ import {
 import { Textarea } from './ui/textarea';
 
 const ReportModal = ({
+    show,
     onClose,
     onSubmit,
     reportSubmitting,
@@ -38,6 +39,8 @@ const ReportModal = ({
     const handleSubmit = () => {
         onSubmit(reportType, reportText.trim() ? reportText : reportType);
     };
+
+    if (!show) return;
 
     return (
         <motion.div
