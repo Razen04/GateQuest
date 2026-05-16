@@ -78,28 +78,61 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 
 ```
 GateQuest/
-├── public/                # Static assets (logo, sounds, favicons)
+.
+├── public/                         # Static assets
+│   ├── ai_providers/               # AI provider logos
+│   ├── audio/                      # App sound effects
+│   ├── icons/                      # PWA icons & branding
+│   └── screenshots/                # app screenshots
+│
 ├── src/
-│   ├── components/        # Reusable React components
-│   ├── context/           # React Context providers
-│   ├── data/              # Static data (FAQs, subjects)
-│   ├── hooks/             # Custom React hooks
-│   ├── pages/             # Top-level page components
-│   ├── routes/            # Route definitions
-│   ├── types/             # TypeScript types and interfaces
-│   ├── utils/             # Utility functions
-│   ├── App.tsx            # Main application component
-│   ├── main.tsx           # Application entry point
-│   └── index.css          # Global and Tailwind CSS styles
-│   └── helper.ts          # Helper functions which are used throughout app
-├── supabase/              # Supabase local development configuration
-├── .github/               # GitHub-specific files (workflows, templates)
-├── .husky/                # Husky pre-commit hooks
-├── eslint.config.ts       # ESLint configuration
-├── tsconfig.json          # TypeScript configuration
-├── vite.config.ts         # Vite configuration
-├── package.json           # Project dependencies and scripts
-└── README.md              # This file
+│   ├── app/                        # App entry, layout, routing, providers
+│   │   ├── layout/                 # Navbar, sidebar, responsive layout
+│   │   ├── providers/              # Global React context providers
+│   │   └── routes/                 # Route definitions
+│   │
+│   ├── features/                   # Feature-based architecture
+│   │   ├── dashboard/              # Stats, streaks, study plan
+│   │   ├── practice/               # Practice question flow
+│   │   ├── questions/              # Question engine & renderers
+│   │   ├── smart-revision/         # Weekly smart revision system
+│   │   ├── topic-test/             # Topic-wise test engine
+│   │   ├── auth/                   # Authentication
+│   │   ├── settings/               # User/app settings
+│   │   ├── donations/              # Donation system
+│   │   ├── landing/                # Landing page
+│   │   └── about/                  # About page
+│   │
+│   ├── shared/                     # Shared reusable code
+│   │   ├── api/                    # Shared API utilities
+│   │   ├── components/             # Reusable UI components
+│   │   │   └── ui/                 # Base UI primitives
+│   │   ├── hooks/                  # Global reusable hooks
+│   │   ├── data/                   # Static configs/data/constants
+│   │   ├── types/                  # Global TypeScript types
+│   │   └── utils/                  # Shared utility functions
+│   │
+│   └── storage/                    # Local storage/repository layer
+│
+├── supabase/                       # Backend & database layer
+│   ├── migrations/                 # SQL migrations & RPC functions
+│   ├── snippets/                   # SQL experimentation snippets
+│   ├── config.toml                 # Supabase config
+│   └── seed.sql                    # Seed data
+│
+├── .github/                        # GitHub templates/config
+├── .husky/                         # Git hooks
+│
+├── README.md                       # Project documentation
+├── CONTRIBUTING.md                 # Contribution guide
+├── CODE_OF_CONDUCT.md              # Community guidelines
+├── CHANGELOG.md                    # Release history
+│
+├── package.json                    # Dependencies & scripts
+├── vite.config.ts                  # Vite configuration
+├── vitest.config.ts                # Vitest configuration
+├── eslint.config.ts                # ESLint configuration
+└── tsconfig.json                   # TypeScript configuration
 ```
 
 ## Getting Started
