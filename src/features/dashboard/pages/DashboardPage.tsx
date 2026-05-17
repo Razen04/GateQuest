@@ -24,6 +24,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu';
 import { CaretDownIcon } from '@phosphor-icons/react';
 import Branding from '@/shared/components/Branding';
+import { WebNotificationToggle } from '../components/WebNotificationToggle';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -78,6 +79,8 @@ const Dashboard = () => {
 
     return (
         <div className="p-6 pb-40 bg-gray-50 dark:bg-zinc-900 h-dvh overflow-y-scroll">
+            <WebNotificationToggle />
+
             {/* Welcome */}
             <motion.div
                 variants={containerVariants}
