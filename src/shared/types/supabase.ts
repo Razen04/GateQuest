@@ -225,6 +225,33 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            push_subscriptions: {
+                Row: {
+                    auth_key: string;
+                    created_at: string | null;
+                    endpoint: string;
+                    id: string;
+                    p256dh_key: string;
+                    user_id: string | null;
+                };
+                Insert: {
+                    auth_key: string;
+                    created_at?: string | null;
+                    endpoint: string;
+                    id?: string;
+                    p256dh_key: string;
+                    user_id?: string | null;
+                };
+                Update: {
+                    auth_key?: string;
+                    created_at?: string | null;
+                    endpoint?: string;
+                    id?: string;
+                    p256dh_key?: string;
+                    user_id?: string | null;
+                };
+                Relationships: [];
+            };
             question_peer_stats: {
                 Row: {
                     avg_time_seconds: number | null;
@@ -903,24 +930,20 @@ export type Database = {
                       };
                       Returns: Json;
                   };
-            generate_weekly_revision_set:
-                | { Args: never; Returns: Json }
-                | {
-                      Args: { p_branch_id: string; p_valid_subjects: string[] };
-                      Returns: Json;
-                  }
-                | {
-                      Args: {
-                          p_branch_id: string;
-                          p_target_exams: string[];
-                          p_valid_subjects: string[];
-                      };
-                      Returns: Json;
-                  };
-            get_critical_question_count: {
-                Args: { p_target_exams: string[]; p_valid_subjects: string[] };
-                Returns: number;
+            generate_weekly_revision_set: {
+                Args: {
+                    p_branch_id: string;
+                    p_target_exams: string[];
+                    p_valid_subjects: string[];
+                };
+                Returns: Json;
             };
+            get_critical_question_count:
+                | { Args: { p_valid_subjects: string[] }; Returns: number }
+                | {
+                      Args: { p_target_exams: string[]; p_valid_subjects: string[] };
+                      Returns: number;
+                  };
             get_exam_subject_counts: {
                 Args: { target_exams: string[] };
                 Returns: {
@@ -928,22 +951,15 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
-            get_topic_counts:
-                | {
-                      Args: { p_subject: string };
-                      Returns: {
-                          question_count: number;
-                          topic: string;
-                      }[];
-                  }
-                | {
-                      Args: { p_subject_id: string };
-                      Returns: {
-                          question_count: number;
-                          subject_id: string;
-                          topic: string;
-                      }[];
-                  };
+            get_topic_counts: {
+                Args: { p_subject_id: string };
+                Returns: {
+                    question_count: number;
+                    subject_id: string;
+                    topic: string;
+                    unattempted_count: number;
+                }[];
+            };
             get_verified_donations: {
                 Args: never;
                 Returns: {
