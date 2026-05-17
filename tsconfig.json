@@ -14,6 +14,7 @@
         "moduleResolution": "bundler",
         "target": "esnext",
         "types": [],
+        "lib": ["ESNext", "DOM", "webworker"],
         // For nodejs:
         // "lib": ["esnext"],
         // "types": ["node"],
