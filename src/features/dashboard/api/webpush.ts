@@ -30,3 +30,15 @@ export const deleteNotificationDetails = async (storedEndpoint: string): Promise
 
     if (error) throw error;
 };
+
+export const triggerWelcomeNotification = async (rawSubscriptionObject: any) => {
+    const { data, error } = await supabase.functions.invoke('welcome-notification', {
+        body: { subscription: rawSubscriptionObject },
+    });
+
+    if (error) {
+        throw new Error(`Backend welcome trigger failed: ${error.message}`);
+    }
+
+    return data;
+};

@@ -1,6 +1,10 @@
 import { urlBase64ToUint8Array } from '@/shared/utils/cryptoUtils';
 import { useEffect, useState } from 'react';
-import { deleteNotificationDetails, pushNotificationDetails } from '../api/webpush';
+import {
+    deleteNotificationDetails,
+    pushNotificationDetails,
+    triggerWelcomeNotification,
+} from '../api/webpush';
 
 // State tracking types for the internal state machine
 type PushStatus =
@@ -104,6 +108,10 @@ export const useWebPush = () => {
 
             // Securely push into your Postgres table using upsert (ignores structural duplicates)
             await pushNotificationDetails(endpoint, auth_key, p256dh_key);
+
+            // Trigger the welcome ping
+            await triggerWelcomeNotification(subscriptionJSON);
+
             setStatus('subscribed');
         } catch (err) {
             console.error('Handshake failure saving token to Supabase:', err);

@@ -26,8 +26,8 @@ self.addEventListener('push', (event) => {
         event.waitUntil(
             self.registration.showNotification(title, {
                 body: body,
-                icon: '/logo.svg',
-                badge: '/logo.svg',
+                icon: '/icons/logo.svg',
+                badge: '/icons/logo.svg',
                 vibrate: [100, 50, 100],
                 data: {
                     url: deepLinkUrl,
