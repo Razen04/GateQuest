@@ -6,6 +6,7 @@ import AppSettingContext from './AppSettingContext.ts';
 import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper.ts';
 import type { Settings } from '@/shared/types/Settings.ts';
 import useAuth from '@/shared/hooks/useAuth.ts';
+import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
 
 const defaultSettings: Settings = {
     sound: true,
@@ -14,6 +15,8 @@ const defaultSettings: Settings = {
     shareProgress: true,
     dataCollection: true,
     aiProvider: 'chatgpt',
+    aiCustomPrompt: DEFAULT_TEMPLATE,
+    notifications: false,
 };
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.

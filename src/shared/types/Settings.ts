@@ -7,6 +7,7 @@ export type Settings = {
     // Which AI provider to deep-link to for question explanations
     aiProvider: AIProvider;
     aiCustomPrompt: string;
+    notifications: boolean;
     // Placeholder settings as of now
     shareProgress: boolean;
     dataCollection: boolean;

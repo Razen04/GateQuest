@@ -5,6 +5,7 @@ import {
     pushNotificationDetails,
     triggerWelcomeNotification,
 } from '../api/webpush';
+import useSettings from '@/features/settings/hooks/useSettings';
 
 // State tracking types for the internal state machine
 type PushStatus =
@@ -19,8 +20,8 @@ type PushStatus =
 export const useWebPush = () => {
     const [status, setStatus] = useState<PushStatus>('loading');
     const [isProcessing, setIsProcessing] = useState(false);
+    const { settings, handleSettingToggle } = useSettings();
 
-    // Grab the VAPID public key from your environment variables
     const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
     useEffect(() => {
@@ -51,6 +52,7 @@ export const useWebPush = () => {
             // has the device physically blocked us in browser settings?
             if (Notification.permission === 'denied') {
                 setStatus('denied');
+                if (settings.notifications) handleSettingToggle('notifications', false);
                 return;
             }
 
@@ -61,8 +63,10 @@ export const useWebPush = () => {
 
                 if (existingSubscription) {
                     setStatus('subscribed');
+                    if (!settings.notifications) handleSettingToggle('notifications', true);
                 } else {
                     setStatus('unsubscribed');
+                    if (settings.notifications) handleSettingToggle('notifications', false);
                 }
             } catch (error) {
                 console.error('Failed to inspect push manager system state:', error);
@@ -71,7 +75,7 @@ export const useWebPush = () => {
         };
 
         determineInitialStatus();
-    }, []);
+    }, [settings.notifications, handleSettingToggle]);
 
     // Enable Notifications
     const enableNotifications = async () => {
@@ -113,8 +117,10 @@ export const useWebPush = () => {
             await triggerWelcomeNotification(subscriptionJSON);
 
             setStatus('subscribed');
+            handleSettingToggle('notifications', true);
         } catch (err) {
             console.error('Handshake failure saving token to Supabase:', err);
+            handleSettingToggle('notifications', false);
         } finally {
             setIsProcessing(false);
         }
@@ -138,6 +144,7 @@ export const useWebPush = () => {
             }
 
             setStatus('unsubscribed');
+            handleSettingToggle('notifications', false);
         } catch (err) {
             console.error('🔴 Disconnect error scrubbing token rows:', err);
         } finally {

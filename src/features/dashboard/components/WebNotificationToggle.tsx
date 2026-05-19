@@ -1,11 +1,21 @@
 import { Button } from '@/shared/components/ui/button';
 import { useWebPush } from '../hooks/useWebPush';
+import { useEffect } from 'react';
 
 export const WebNotificationToggle = () => {
     const { status, isProcessing, enableNotifications, disableNotifications, dismissWidget } =
         useWebPush();
 
-    // --- RENDER CONDITIONALS ---
+    useEffect(() => {
+        if (status === 'subscribed') {
+            const autoDismissTimer = setTimeout(() => {
+                dismissWidget();
+            }, 5000);
+
+            return () => clearTimeout(autoDismissTimer);
+        }
+    }, [status, dismissWidget]);
+
     if (status === 'loading' || status === 'dismissed' || status === 'unsupported') {
         return null; // Keep dashboard completely clean if loading, dismissed, or impossible
     }
