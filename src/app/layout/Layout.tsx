@@ -6,6 +6,7 @@ import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import type { AppUser } from '@/shared/types/AppUser';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
+import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
 
 type SyncOnUnloadProps = {
     user: AppUser | null;
@@ -13,6 +14,9 @@ type SyncOnUnloadProps = {
 
 function SyncOnUnload({ user }: SyncOnUnloadProps) {
     const { refresh } = useStudyPlan();
+
+    useSessionLogger();
+
     useEffect(() => {
         const LOCAL_KEY = `attempt_buffer_${user?.id}`;
 

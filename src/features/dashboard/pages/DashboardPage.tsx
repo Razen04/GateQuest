@@ -25,6 +25,7 @@ import {
 import { CaretDownIcon } from '@phosphor-icons/react';
 import Branding from '@/shared/components/Branding';
 import { WebNotificationToggle } from '../components/WebNotificationToggle';
+import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -100,6 +101,8 @@ const Dashboard = () => {
             </motion.div>
 
             <section className="w-full mb-4">
+                <ContinueSessionWidget />
+
                 {/* Section header */}
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-semibold uppercase tracking-wide">Smart Actions</h2>
