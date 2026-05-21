@@ -1,3 +1,9 @@
+# v0.10.8 - 2026-05-
+
+- Refactored the codebase for better maintainability.
+- Added Web Push Notifications, install the website as an app more about it in the About page. Added [#75](https://github.com/Razen04/GateQuest/issues/75).
+- Added "Continue Where You Left Off" section in dashboard, a basic feature. Added [#76](https://github.com/Razen04/GateQuest/issues/76).
+
 # v0.10.7 - 2026-04-21
 
 - Added **AskAI** feature to clear your doubts with your favorite AI for free. Look into App Settings for more info.
