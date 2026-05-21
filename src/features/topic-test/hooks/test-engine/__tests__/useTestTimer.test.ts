@@ -14,12 +14,12 @@ describe('useTestTimer hook', () => {
 
     // Test case 1
     describe('Time formatting', () => {
-        it('formats time correctly (300s -> 05:00)', () => {
+        it('formats time correctly (300s -> 5m 0s)', () => {
             const { result } = renderHook(() => {
                 return useTestTimer({ initialSeconds: 300 });
             });
 
-            expect(result.current.timeDisplay).toBe('05:00');
+            expect(result.current.timeDisplay).toBe('5m 0s');
             expect(result.current.secondsRemaining).toBe(300);
             expect(result.current.isExpired).toBe(false);
         });
@@ -37,7 +37,7 @@ describe('useTestTimer hook', () => {
                 vi.advanceTimersByTime(5000);
             });
 
-            expect(result.current.timeDisplay).toBe('00:00');
+            expect(result.current.timeDisplay).toBe('0m 0s');
             expect(result.current.secondsRemaining).toBe(0);
             expect(result.current.isExpired).toBe(true);
         });
