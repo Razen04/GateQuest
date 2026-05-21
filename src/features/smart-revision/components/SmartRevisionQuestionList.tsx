@@ -30,7 +30,7 @@ const SmartRevisionQuestionList = () => {
 
         const currentQueryString = window.location.search;
         // Navigate to the specific question URL, making sure to include the current filter query string.
-        navigate(`/revision/${rid}/${subject}/${id}?${currentQueryString}`, {
+        navigate(`/revision/${rid}/${subject}/${id}${currentQueryString}`, {
             // This is the most important part: we pass the entire filtered list in the route's state.
             // This allows the QuestionCard to render instantly without re-fetching or re-filtering.
             state: { questions: currentFilteredList },

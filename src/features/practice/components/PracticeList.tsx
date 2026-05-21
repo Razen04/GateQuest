@@ -20,7 +20,7 @@ const PracticeList = () => {
 
     // Standard React Router hooks to get our bearings.
     const navigate = useNavigate();
-    const { subject } = useParams(); // e.g., 'aptitude', 'dsa' from the URL /practice/:subject
+    const { subject, rid, qid } = useParams(); // e.g., 'aptitude', 'dsa' from the URL /practice/:subject
     // get the subject_slug uuid from the subjects present in the GoalProvider
     const { subjects } = useGoals();
     const selectedSubject = subjects.filter((s) => s.slug === subject);
@@ -42,8 +42,9 @@ const PracticeList = () => {
     // This is the crucial navigation step to the QuestionCard.
     const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
         const currentQueryString = window.location.search;
+
         // Navigate to the specific question URL, making sure to include the current filter query string.
-        navigate(`/practice/${subject}/${id}?${currentQueryString}`, {
+        navigate(`/practice/${subject}/${id}${currentQueryString}`, {
             // This is the most important part: we pass the entire filtered list in the route's state.
             // This allows the QuestionCard to render instantly without re-fetching or re-filtering.
             state: { questions: currentFilteredList },
