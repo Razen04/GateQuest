@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { ArticleIcon, GithubLogoIcon, LinkIcon, HashIcon } from '@phosphor-icons/react';
+import { ArticleIcon, GithubLogoIcon, LinkIcon, MegaphoneIcon } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { version } from '../../../package.json';
 
@@ -68,7 +68,7 @@ function Changelog() {
                             components={{
                                 h1: ({ children }) => (
                                     <h1 className="inline-flex items-center gap-1 text-xl text-blue-500 font-semibold border-b py-2">
-                                        <HashIcon className="w-4 h-4 text-red-500" />
+                                        <MegaphoneIcon className="w-4 h-4 text-red-500 rotate-y-180" />
                                         {children}
                                     </h1>
                                 ),

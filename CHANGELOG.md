@@ -1,8 +1,8 @@
-# v0.10.8 - 2026-05-
+# v0.10.8 - 2026-05-23
 
 - Refactored the codebase for better maintainability.
-- Added Web Push Notifications, install the website as an app more about it in the About page. Added [#75](https://github.com/Razen04/GateQuest/issues/75).
-- Added "Continue Where You Left Off" section in dashboard, a basic feature. Added [#76](https://github.com/Razen04/GateQuest/issues/76).
+- Added Web Push Notifications, install the website as an app more about it in the About page FAQ section and get notifications. Added [#75](https://github.com/Razen04/GateQuest/issues/75).
+- Added "Continue Where You Left Off" section in dashboard. Added [#76](https://github.com/Razen04/GateQuest/issues/76).
 
 # v0.10.7 - 2026-04-21
 

@@ -1,8 +1,8 @@
 {
     "name": "gate-prep",
     "private": true,
-    "version": "0.10.7",
-    "last_updated": "2026-04-21",
+    "version": "0.10.8",
+    "last_updated": "2026-05-23",
     "type": "module",
     "scripts": {
         "dev": "vite",
