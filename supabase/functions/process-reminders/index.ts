@@ -4,6 +4,7 @@ import { handleReportCreated } from './handlers/reportCreated.ts';
 import { handleReportResolved } from './handlers/reportResolved.ts';
 import { handleHourlyRevision } from './handlers/revisionHourly.ts';
 import { handleTopicTestReminder } from './handlers/topicTestReminder.ts';
+import { handleDonationReminder } from './handlers/donationReminder.ts';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -65,6 +66,9 @@ Deno.serve(async (req) => {
             }
             case 'weekend-topic-test': {
                 return await handleTopicTestReminder({ supabaseAdmin, corsHeaders });
+            }
+            case 'donation-reminder': {
+                return await handleDonationReminder({ supabaseAdmin, corsHeaders });
             }
             default:
                 throw new Error('Invalid task');
