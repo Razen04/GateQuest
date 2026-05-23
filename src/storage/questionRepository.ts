@@ -1,4 +1,4 @@
-import type { Question } from '@/types/storage';
+import type { Question } from '@/shared/types/storage';
 import { appStorage } from './storageService';
 const db = appStorage;
 

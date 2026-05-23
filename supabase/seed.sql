@@ -9,6 +9,11 @@
 -- Use a temporary role to bypass RLS for seeding
 SET session_replication_role = replica;
 
+delete from vault.secrets where name in ('cron_edge_function_base_url', 'cron_isolated_secret');
+
+select vault.create_secret('http://kong:8000/functions/v1', 'cron_edge_function_base_url');
+select vault.create_secret('gatequest_lcoal_cron_passphrase_123!',  'cron_isolated_secret');
+
 -------------------
 -- 1. TEST USERS --
 -------------------
