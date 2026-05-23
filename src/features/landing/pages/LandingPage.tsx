@@ -17,7 +17,6 @@ import {
     Timer,
     Trophy,
 } from '@phosphor-icons/react';
-import appLogo from '../../../../public/icons/animated_logo.svg';
 import useSettings from '@/features/settings/hooks/useSettings';
 import About from '@/features/about/pages/AboutPage';
 import { Button } from '@/shared/components/ui/button';
@@ -213,6 +212,7 @@ export default function LandingPage() {
     const navigate = useNavigate();
     const { settings, handleSettingToggle } = useSettings();
     const isDark = settings.darkMode;
+    const appLogo = '/icons/animated_logo.svg';
 
     return (
         <div className="relative w-full max-h-screen bg-slate-50 dark:bg-[#0A0A0A] text-slate-800 dark:text-white overflow-x-hidden">

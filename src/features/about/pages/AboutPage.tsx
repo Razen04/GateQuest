@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { Text, Title } from '@/shared/components/ui/typography.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card.js';
 import { Button } from '@/shared/components/ui/button.js';
-import animatedLogo from '../../../../public/icons/animated_logo.svg';
 
 type Answer =
     | {
@@ -47,6 +46,7 @@ type AboutProps = {
 
 const About = ({ landing = false }: AboutProps) => {
     const navigate = useNavigate();
+    const animatedLogo = '/icons/animated_logo.svg';
 
     return (
         <div

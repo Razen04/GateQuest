@@ -6,12 +6,12 @@ import useWindowSize from '@/shared/hooks/useWindowSize';
 import { Coffee, DiscordLogo, GithubLogo } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import Changelog from '@/shared/components/Changelog';
-import animatedLogo from '../../../public/icons/animated_logo.svg';
 
 const Navbar = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadNotifications, setUnreadNotifications] = useState(false);
     const notificationRef = useRef<HTMLDivElement | null>(null);
+    const animatedLogo = '/icons/animated_logo.svg';
 
     const { width } = useWindowSize();
 

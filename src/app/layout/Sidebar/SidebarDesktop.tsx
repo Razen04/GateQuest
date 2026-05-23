@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { SidebarItem } from './SidebarItem';
 import { Button } from '@/shared/components/ui/button';
-import animatedLogo from '../../../../public/icons/animated_logo.svg';
 import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/react';
 import { Text, Title } from '@/shared/components/ui/typography';
 import type { Tab } from './Sidebar';
@@ -25,6 +24,7 @@ export const SidebarDesktop = ({
     const location = useLocation();
     const isTopicTestAttempt = /^\/topic-test\/[^/]+\/attempt$/.test(location.pathname);
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const animatedLogo = '/icons/animated_logo.svg';
 
     const handleCollapse = useCallback(() => {
         setIsCollapsed((prev) => !prev);
