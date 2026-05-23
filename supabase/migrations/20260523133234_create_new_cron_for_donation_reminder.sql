@@ -1,6 +1,4 @@
 -- Cron to remind donation every 2 weeks at 12pm
-select cron.unschedule('donation-reminder-every-2-weeks')
-
 select cron.schedule(
 	'donation-reminder-every-2-weeks',
 	'30 6 * * 0',
