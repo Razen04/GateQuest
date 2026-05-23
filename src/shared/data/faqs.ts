@@ -67,7 +67,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS, DA, EC, EE branch as of now). I may add descriptive questions in the future.',
+                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS, DA, EC, EE, ME branch as of now). I may add descriptive questions in the future.',
             },
         ],
     },
