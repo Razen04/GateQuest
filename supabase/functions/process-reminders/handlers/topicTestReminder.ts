@@ -48,35 +48,45 @@ export const handleTopicTestReminder = async ({
     });
 
     const CHUNK_SIZE = 50;
+    const MAX_CONCURRENT_CHUNKS = 10;
     let successfulPings = 0;
+    const deadEndpoints: string[] = [];
 
+    const chunks = [];
     for (let i = 0; i < subscriptionsToNotify.length; i += CHUNK_SIZE) {
-        const chunk = subscriptionsToNotify.slice(i, i + CHUNK_SIZE);
+        chunks.push(subscriptionsToNotify.slice(i, i + CHUNK_SIZE));
+    }
 
-        const notificationPromises = chunk.map(async (sub) => {
-            const pushConfig = {
-                endpoint: sub.endpoint,
-                keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
-            };
-
+    const processChunk = async (chunk: typeof subscriptionsToNotify) => {
+        const promises = chunk.map(async (sub) => {
             try {
-                await webpush.sendNotification(pushConfig, payload);
+                await webpush.sendNotification(
+                    {
+                        endpoint: sub.endpoint,
+                        keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
+                    },
+                    payload,
+                );
                 successfulPings++;
             } catch (err) {
-                // Intercept dead tokens
                 if (err.statusCode === 410 || err.statusCode === 404) {
-                    console.warn(`Erasing dead token for user ${sub.user_id}`);
-                    await supabaseAdmin
-                        .from('push_subscriptions')
-                        .delete()
-                        .eq('endpoint', sub.endpoint);
-                } else {
-                    console.error(`Unknown push error for user ${sub.user_id}: `, err);
+                    deadEndpoints.push(sub.endpoint); // Queue for bulk deletion
                 }
             }
         });
+        await Promise.allSettled(promises);
+    };
 
-        await Promise.allSettled(notificationPromises);
+    // Execute chunks in parallel pools of 10
+    for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CHUNKS) {
+        const pool = chunks.slice(i, i + MAX_CONCURRENT_CHUNKS).map(processChunk);
+        await Promise.all(pool);
+    }
+
+    // Bulk delete all dead tokens in exactly ONE database call
+    if (deadEndpoints.length > 0) {
+        console.warn(`Bulk deleting ${deadEndpoints.length} dead tokens...`);
+        await supabaseAdmin.from('push_subscriptions').delete().in('endpoint', deadEndpoints);
     }
 
     return new Response(
