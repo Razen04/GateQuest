@@ -39,24 +39,24 @@ self.addEventListener('push', (event) => {
     }
 });
 
-// Handle banner clock and deep link routing
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const targetUrl = event.notification.data?.url || '/dashboard';
+    const targetUrl = event.notification.data?.url || '/';
+    const absoluteUrl = new URL(targetUrl, self.location.origin).href;
 
     event.waitUntil(
         self.clients
             .matchAll({ type: 'window', includeUncontrolled: true })
-            .then((windowclients) => {
-                for (const client of windowclients) {
-                    if (client.url && 'focus' in client) {
-                        return client.navigate(targetUrl).then(() => client.focus());
+            .then((windowClients) => {
+                for (const client of windowClients) {
+                    if ('focus' in client && 'navigate' in client) {
+                        return client.navigate(absoluteUrl).then(() => client.focus());
                     }
                 }
 
                 if (self.clients.openWindow) {
-                    return self.clients.openWindow(targetUrl);
+                    return self.clients.openWindow(absoluteUrl);
                 }
             }),
     );
