@@ -23,6 +23,8 @@ const defaultSettings: Settings = {
 const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isLogin } = useAuth();
 
+    const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+
     // Initialize settings state from the user's profile in localStorage.
     // If no profile exists, it falls back to a default set of settings.
     const [settings, setSettings] = useState<Settings>(() => {
@@ -38,21 +40,26 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         }));
     };
 
-    // This effect runs whenever the settings object changes.
-    // Its purpose is to persist the new settings to the user's profile.
     useEffect(() => {
         const profile = getUserProfile();
-
         if (profile) {
-            // Create an updated profile object with the new settings.
-            const updatedProfile = { ...profile, settings };
-
-            // Update the profile in localStorage.
-            updateUserProfile(updatedProfile);
-            // Sync the updated profile to the Supabase database if the user is logged in.
-            syncUserToSupabase(isLogin);
+            updateUserProfile({ ...profile, settings });
         }
-    }, [isLogin, settings]); // The dependency array ensures this runs only when settings change.
+    }, [settings]);
+
+    useEffect(() => {
+        if (!isLogin) return;
+
+        const syncTimer = setTimeout(() => {
+            setIsUpdatingSettings(true);
+
+            syncUserToSupabase(isLogin)
+                .catch((err) => console.error('Sync error:', err))
+                .finally(() => setIsUpdatingSettings(false));
+        }, 1500);
+
+        return () => clearTimeout(syncTimer);
+    }, [settings, isLogin]);
 
     // This allows Tailwind CSS's dark mode variants to work globally.
     useEffect(() => {
@@ -66,7 +73,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (
-        <AppSettingContext.Provider value={{ settings, handleSettingToggle }}>
+        <AppSettingContext.Provider value={{ settings, handleSettingToggle, isUpdatingSettings }}>
             {children}
         </AppSettingContext.Provider>
     );

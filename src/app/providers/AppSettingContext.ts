@@ -5,6 +5,7 @@ type AppSettingContextType =
     | {
           settings: Settings;
           handleSettingToggle: <K extends keyof Settings>(key: K, value?: Settings[K]) => void;
+          isUpdatingSettings: boolean;
       }
     | undefined;
 
