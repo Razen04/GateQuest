@@ -7,12 +7,14 @@
  */
 
 import { BrowserRouter as Router } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 import AppProvider from './context/AppProvider.tsx';
 import AuthProvider from './context/AuthProvider.tsx';
 import StatsProvider from './context/StatsProvider.tsx';
 import AppRoutes from './routes/AppRoutes.tsx';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { GoalProvider } from './context/GoalProvider.tsx';
+import AppErrorFallback from './components/ErrorBoundary/AppErrorFallback.tsx';
 
 /**
  * @function App
@@ -33,7 +35,9 @@ function App() {
                         {/* AppProvider manages general application settings, like sound effects. */}
                         <AppProvider>
                             {/* AppRoutes contains all the defined application routes. */}
-                            <AppRoutes />
+                            <ErrorBoundary FallbackComponent={AppErrorFallback}>
+                                <AppRoutes />
+                            </ErrorBoundary>
 
                             {/* Vercel Speed Insights */}
                             <SpeedInsights />

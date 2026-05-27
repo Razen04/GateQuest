@@ -57,6 +57,7 @@
         "radix-ui": "^1.4.3",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
+        "react-error-boundary": "^6.1.2",
         "react-katex": "^3.1.0",
         "react-markdown": "^10.1.0",
         "react-router-dom": "^7.6.0",

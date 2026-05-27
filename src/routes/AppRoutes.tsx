@@ -9,10 +9,9 @@ import LandingPage from '../pages/LandingPage.jsx';
 import Layout from '../components/Layout.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import Practice from '../pages/Practice/Practice.js';
-
 import SettingsRoutes from './SettingsRoutes.js';
 import About from '../pages/About.jsx';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth.ts';
 import DonationPage from '../pages/Donations.tsx';
 import PracticeList from '@/pages/Practice/PracticeList.tsx';
@@ -27,6 +26,8 @@ import TopicTestSessionPage from '@/pages/TopicTest/TopicTestSession.tsx';
 import TopicTestResult from '@/pages/TopicTest/TopicTestResult.tsx';
 import TestSolutionView from '@/pages/TopicTest/TestSolutionView.tsx';
 import TopicReviewLayout from '@/pages/TopicTest/TopicReviewLayout.tsx';
+import { ErrorBoundary } from 'react-error-boundary';
+import FeatureErrorFallback from '@/components/ErrorBoundary/FeatureErrorFallback.tsx';
 
 /**
  * @function AppRoutes
@@ -37,6 +38,7 @@ import TopicReviewLayout from '@/pages/TopicTest/TopicReviewLayout.tsx';
 export default function AppRoutes() {
     // isLogin and loading states are consumed from the AuthContext.
     const { isLogin, loading } = useAuth();
+    const location = useLocation();
 
     return (
         <Routes>
@@ -62,37 +64,145 @@ export default function AppRoutes() {
                         {/* The main dashboard, the first page after login. */}
                         <Route path="dashboard" element={<Dashboard />} />
                         {/* The practice section has nested routes for subjects and individual questions. */}
-                        <Route path="practice" element={<Practice />} />
-                        <Route path="practice/:subject" element={<PracticeList />} />
-                        <Route path="practice/:subject/:qid" element={<PracticeCard />} />
+
+                        <Route
+                            path="practice"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <Practice />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="practice/:subject"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <PracticeList />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="practice/:subject/:qid"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <PracticeCard />
+                                </ErrorBoundary>
+                            }
+                        />
+
                         {/* Settings routes are modularized into their own component for clarity. */}
                         <Route path="settings/*" element={<SettingsRoutes />} />
                         {/* A static 'About' page. */}
                         <Route path="about" element={<About landing={false} />} />
                         <Route path="donate" element={<DonationPage />} />
                         {/* The revision section has nested routes for revision list and individual questions. */}
-                        <Route path="revision" element={<SmartRevision />} />
-                        <Route path="revision/:rid" element={<SmartRevisionQuestionList />} />
+
+                        <Route
+                            path="revision"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <SmartRevision />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="revision/:rid"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <SmartRevisionQuestionList />
+                                </ErrorBoundary>
+                            }
+                        />
                         <Route
                             path="revision/:rid/:subject/:qid"
-                            element={<SmartRevisionQuestionCard />}
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <SmartRevisionQuestionCard />
+                                </ErrorBoundary>
+                            }
                         />
 
                         {/* Topic Test */}
-                        <Route path="topic-test" element={<TopicTest />} />
-                        <Route path="topic-test-generate" element={<TopicTestGeneratePage />} />
-                        <Route path="topic-test/:testId" element={<TopicTestLobby />} />
+                        <Route
+                            path="topic-test"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <TopicTest />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="topic-test-generate"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <TopicTestGeneratePage />
+                                </ErrorBoundary>
+                            }
+                        />
+                        <Route
+                            path="topic-test/:testId"
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <TopicTestLobby />
+                                </ErrorBoundary>
+                            }
+                        />
                         <Route
                             path="topic-test/:testId/attempt"
-                            element={<TopicTestSessionPage />}
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <TopicTestSessionPage />
+                                </ErrorBoundary>
+                            }
                         />
-                        <Route element={<TopicReviewLayout />}>
+
+                        <Route
+                            element={
+                                <ErrorBoundary
+                                    FallbackComponent={FeatureErrorFallback}
+                                    resetKeys={[location.pathname]}
+                                >
+                                    <TopicReviewLayout />
+                                </ErrorBoundary>
+                            }
+                        >
                             <Route path="topic-test-result/:testId" element={<TopicTestResult />} />
                             <Route
                                 path="topic-test-review/:testId/:questionIndex"
                                 element={<TestSolutionView />}
                             />
                         </Route>
+
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />
@@ -102,3 +212,4 @@ export default function AppRoutes() {
         </Routes>
     );
 }
+

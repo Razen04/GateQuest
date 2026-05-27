@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import TableRenderer from '../Renderers/TableRenderer.js';
@@ -316,4 +317,16 @@ const MathRenderer = ({ text }: MathRendererProps) => {
     );
 };
 
-export default MathRenderer;
+function MathRendererFallback() {
+    return <span className="text-xs italic text-red-400">[Render failed]</span>;
+}
+
+function MathRendererWithBoundary(props: MathRendererProps) {
+    return (
+        <ErrorBoundary FallbackComponent={MathRendererFallback}>
+            <MathRenderer {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default MathRendererWithBoundary;

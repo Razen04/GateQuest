@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import {
     CircleNotchIcon,
     ArrowSquareOutIcon,
@@ -134,4 +135,20 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
     );
 };
 
-export default AskAIBanner;
+function AskAIBannerFallback() {
+    return (
+        <div className="mt-5 mb-2 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-sm text-zinc-500 dark:text-zinc-400">
+            AI assistant failed to load.
+        </div>
+    );
+}
+
+function AskAIBannerWithBoundary(props: AskAIBannerProps) {
+    return (
+        <ErrorBoundary FallbackComponent={AskAIBannerFallback}>
+            <AskAIBanner {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default AskAIBannerWithBoundary;
