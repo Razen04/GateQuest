@@ -35,7 +35,14 @@ function App() {
                         {/* AppProvider manages general application settings, like sound effects. */}
                         <AppProvider>
                             {/* AppRoutes contains all the defined application routes. */}
-                            <ErrorBoundary FallbackComponent={AppErrorFallback}>
+                            <ErrorBoundary
+                                FallbackComponent={AppErrorFallback}
+                                onError={(error, info) => {
+                                    // Log to console in all environments.
+                                    // Replace with your monitoring client (e.g. Sentry.captureException) when ready.
+                                    console.error('[AppErrorBoundary]', error, info.componentStack);
+                                }}
+                            >
                                 <AppRoutes />
                             </ErrorBoundary>
 
