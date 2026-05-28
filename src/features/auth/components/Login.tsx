@@ -2,6 +2,7 @@ import { X } from '@phosphor-icons/react';
 import useAuth from '@/shared/hooks/useAuth.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { toast } from 'sonner';
 
 type LoginProp = {
     canClose?: boolean;
@@ -17,6 +18,7 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
 
         if (error) {
             console.error('Error logging in:', error.message);
+            toast.error('Error logging in');
         } else {
             window.location.reload();
         }

@@ -13,14 +13,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
-import { SignOutIcon, SignInIcon, BroomIcon } from '@phosphor-icons/react';
+import { SignOutIcon, SignInIcon, BroomIcon, TrashIcon } from '@phosphor-icons/react';
 import { getUserProfile } from '@/shared/utils/helper';
 import { toast } from 'sonner';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
     const { logout, showLogin, setShowLogin } = useAuth();
-    const { settings, handleSettingToggle } = useSettings();
+    const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();
     const user = getUserProfile();
 
     const handleClearData = async () => {
@@ -39,6 +39,23 @@ const PrivacySettings = () => {
         }
     };
 
+    // Function to handle account deleteion
+    const handleAccDelete = async () => {
+        try {
+            const { error } = await supabase.rpc('delete_account');
+
+            if (error) throw error;
+            toast.success('Account delete successfully.');
+        } catch (error) {
+            console.error('Unable to delete account: ', error);
+            toast.error('Unabel to delete account');
+            return;
+        } finally {
+            // perform logout
+            logout();
+        }
+    };
+
     return (
         <div className="pb-20 px-4">
             <div className={`${showLogin ? 'blur-2xl' : null}`}>
@@ -47,17 +64,19 @@ const PrivacySettings = () => {
                         isOn={settings.shareProgress}
                         onToggle={() => handleSettingToggle('shareProgress')}
                         label="Share My Progress & Ranking"
+                        disabled={isUpdatingSettings}
                     />
 
                     <ToggleSwitch
                         isOn={settings.dataCollection}
                         onToggle={() => handleSettingToggle('dataCollection')}
                         label="Remain Anonymous"
+                        disabled={isUpdatingSettings}
                     />
 
                     <div className="py-3 border-t border-gray-100 mt-3 pt-3">
                         <h3 className="text-base font-medium mb-4">Data Management</h3>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col md:flex-row gap-2">
                             {user && user.version_number && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -90,6 +109,38 @@ const PrivacySettings = () => {
                                     </AlertDialogContent>
                                 </AlertDialog>
                             )}
+                            {/* Account Deletion Button */}
+                            {user && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="outline">
+                                            <TrashIcon />
+                                            Delete Account
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. Deleting your account
+                                                will permanently remove your account information.
+                                                Your engagement data may be retained for community
+                                                features. You will be logged out once the deletion
+                                                process is complete.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleAccDelete()}>
+                                                Continue
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+
                             {user ? (
                                 <Button
                                     className="bg-red-600 hover:bg-red-800"
