@@ -491,7 +491,7 @@ export type Database = {
                 Row: {
                     accuracy: number | null;
                     attempted_count: number | null;
-                    branch_id: string | null;
+                    branch_id: string;
                     completed_at: string | null;
                     correct_count: number | null;
                     created_at: string | null;
@@ -508,7 +508,7 @@ export type Database = {
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id?: string | null;
+                    branch_id: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -525,7 +525,7 @@ export type Database = {
                 Update: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id?: string | null;
+                    branch_id?: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -747,6 +747,7 @@ export type Database = {
                     avatar: string | null;
                     bookmark_questions: Json | null;
                     college: string | null;
+                    deleted_at: string | null;
                     email: string | null;
                     id: string;
                     joined_at: string;
@@ -761,6 +762,7 @@ export type Database = {
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
+                    deleted_at?: string | null;
                     email?: string | null;
                     id?: string;
                     joined_at?: string;
@@ -775,6 +777,7 @@ export type Database = {
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
+                    deleted_at?: string | null;
                     email?: string | null;
                     id?: string;
                     joined_at?: string;
@@ -849,6 +852,15 @@ export type Database = {
             };
         };
         Views: {
+            active_weekend_subscriptions: {
+                Row: {
+                    auth_key: string | null;
+                    endpoint: string | null;
+                    p256dh_key: string | null;
+                    user_id: string | null;
+                };
+                Relationships: [];
+            };
             dynamic_difficulty_stats: {
                 Row: {
                     question_id: string | null;
@@ -910,26 +922,17 @@ export type Database = {
         };
         Functions: {
             clear_user_data: { Args: never; Returns: Json };
-            generate_topic_test:
-                | {
-                      Args: {
-                          p_already_attempted_questions: boolean;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_total_seconds: number;
-                      };
-                      Returns: Json;
-                  }
-                | {
-                      Args: {
-                          p_already_attempted_questions: boolean;
-                          p_branch_id: string;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_total_seconds: number;
-                      };
-                      Returns: Json;
-                  };
+            delete_account: { Args: never; Returns: undefined };
+            generate_topic_test: {
+                Args: {
+                    p_already_attempted_questions: boolean;
+                    p_branch_id: string;
+                    p_filters: Json;
+                    p_question_count: number;
+                    p_total_seconds: number;
+                };
+                Returns: Json;
+            };
             generate_weekly_revision_set: {
                 Args: {
                     p_branch_id: string;
