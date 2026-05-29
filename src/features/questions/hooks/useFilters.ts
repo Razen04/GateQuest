@@ -32,7 +32,7 @@ const useFilters = (
     // Memoize the set of attempted question IDs for the current subject.
     // This prevents recalculating this set on every render, only when stats or the subject changes.
     const attemptedIds = useMemo(() => {
-        if (!subjectStats) return new Set<string>();
+        if (!stats) return new Set<string>();
 
         const ids = new Set<string>();
 
@@ -40,24 +40,44 @@ const useFilters = (
             case 'practice': {
                 if (!subject) break;
 
-                subjectStats
-                    .filter((s) => s.subject === subject)
-                    .forEach((s) => {
-                        s.attemptedQuestionIds.forEach((id) => ids.add(id));
+                // Check if the map exists to aggregate across all active exams (GATE, ISRO, etc.)
+                if (stats.subjectStatsMap) {
+                    Object.values(stats.subjectStatsMap).forEach((examStats) => {
+                        examStats
+                            .filter((s) => s.subject === subject)
+                            .forEach((s) => {
+                                s.attemptedQuestionIds.forEach((id) => ids.add(id));
+                            });
                     });
+                } else if (stats.subjectStats) {
+                    // Fallback to legacy single array if map isn't available
+                    stats.subjectStats
+                        .filter((s) => s.subject === subject)
+                        .forEach((s) => {
+                            s.attemptedQuestionIds.forEach((id) => ids.add(id));
+                        });
+                }
                 break;
             }
 
             case 'revision': {
-                subjectStats.forEach((s) => {
-                    if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
-                });
+                if (stats.subjectStatsMap) {
+                    Object.values(stats.subjectStatsMap).forEach((examStats) => {
+                        examStats.forEach((s) => {
+                            if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
+                        });
+                    });
+                } else if (stats.subjectStats) {
+                    stats.subjectStats.forEach((s) => {
+                        if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
+                    });
+                }
                 break;
             }
         }
 
         return ids;
-    }, [subjectStats, subject, mode]);
+    }, [stats, subject, mode]);
 
     // This is the core of the hook. useMemo ensures that the filtering logic only re-runs when the source data or any of the filter dependencies change. This is crucial for performance.
     const filteredQuestions = useMemo(() => {
@@ -103,7 +123,9 @@ const useFilters = (
                 const examData = qn.metadata?.exam;
                 if (!examData) return false;
                 const exams = Array.isArray(examData) ? examData : [examData];
-                return exams.some((e) => examFilter.includes(e.toUpperCase()));
+                return exams.some((e) =>
+                    examFilter.some((f) => f.toUpperCase() === e.toUpperCase()),
+                );
             });
         }
 
