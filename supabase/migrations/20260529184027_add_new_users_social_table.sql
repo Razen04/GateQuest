@@ -7,7 +7,10 @@ create table public.users_social (
 	reddit_url text,
 	spotify_url text,
 	discord_url text,
-	linkedin_url text
+	linkedin_url text,
+	mastodon_url text,
+	youtube_url text,
+	lemmy_url text
 );
 
 -- RLS policies
