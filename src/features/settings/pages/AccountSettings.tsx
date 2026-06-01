@@ -1,10 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper';
-import { User } from '@phosphor-icons/react';
+import React, { useEffect, useMemo, useState } from 'react';
+
+import { toast } from 'sonner';
+import { CircleNotchIcon, User, UserGearIcon } from '@phosphor-icons/react';
+
 import useAuth from '@/shared/hooks/useAuth';
+import { useGoals } from '@/shared/hooks/useGoals';
+
+import { getSocialSettingsValue } from '../api/social-settings';
+
+import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper';
+
+import SocialSettingsForm from '../components/SocialSettingsForm';
+
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/shared/components/ui/dialog';
 import {
     Select,
     SelectContent,
@@ -25,17 +42,29 @@ import {
     ComboboxList,
     ComboboxValue,
 } from '@/shared/components/ui/combobox';
-import { toast } from 'sonner';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { CircleNotchIcon } from '@phosphor-icons/react';
+import SocialLinksDisplay from '../components/SocialLinksDisplay';
+
+type FormFieldProps = {
+    label: string;
+    children: React.ReactNode;
+};
+
+const FormField = ({ label, children }: FormFieldProps) => (
+    <div className="flex flex-col gap-2">
+        <Label>{label}</Label>
+        {children}
+    </div>
+);
 
 const AccountSettings = () => {
-    const user = getUserProfile();
-    const { isLogin } = useAuth();
+    const { isLogin, user, setUser } = useAuth();
 
-    const [name, setName] = useState(user?.name || '');
-    const [college, setCollege] = useState(user?.college || '');
-    const [targetYear, setTargetYear] = useState(user?.targetYear ?? 2026);
+    const localUser = getUserProfile();
+
+    const [name, setName] = useState(localUser?.name || '');
+    const [college, setCollege] = useState(localUser?.college || '');
+    const [targetYear, setTargetYear] = useState(localUser?.targetYear ?? 2027);
+    const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
 
     // Branches and Exams data
     const {
@@ -50,6 +79,23 @@ const AccountSettings = () => {
     const [tempBranch, setTempBranch] = useState<string>('');
     const [tempExams, setTempExams] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
+
+    const [openSocialSettings, setOpenSocialSettings] = useState(false);
+
+    useEffect(() => {
+        const fetchSocialLinks = async () => {
+            if (!user?.id) return;
+
+            const data = await getSocialSettingsValue(user);
+            if (data) {
+                const activeLinks = Object.fromEntries(
+                    Object.entries(data).filter(([, value]) => value !== null && value !== ''),
+                ) as Record<string, string>;
+                setSocialLinks(activeLinks);
+            }
+        };
+        fetchSocialLinks();
+    }, [user, openSocialSettings]);
 
     const availableExams = useMemo(() => {
         if (!tempBranch) return [];
@@ -84,6 +130,7 @@ const AccountSettings = () => {
         try {
             const updated = { ...user, name, college, targetYear };
             updateUserProfile(updated);
+            setUser(updated);
 
             if (tempBranch) {
                 await setInitialGoal(tempBranch, tempExams, true);
@@ -100,61 +147,77 @@ const AccountSettings = () => {
     return (
         <div className="pb-20 px-4">
             <div className="space-y-6">
-                <div className="flex items-center">
-                    <div className="h-12 w-12 flex items-center justify-center p-1 mr-5 bg-gray-100 dark:bg-gray-800">
-                        {user?.avatar ? (
-                            <img src={user?.avatar} alt="User avatar" className="w-full" />
-                        ) : (
-                            <User className="text-gray-600 dark:text-gray-300" />
-                        )}
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                        <div className="h-12 w-12 flex items-center justify-center p-1 mr-5 bg-gray-100 dark:bg-gray-800">
+                            {user?.avatar ? (
+                                <img src={user?.avatar} alt="User avatar" className="w-full" />
+                            ) : (
+                                <User className="text-gray-600 dark:text-gray-300" />
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="font-medium">
+                                {user?.name ? user.name : 'Anonymous User'}{' '}
+                                <span className="text-gray-500">• v{user?.version_number}</span>
+                            </h3>
+                            <p className="text-base text-blue-300">@{user?.username}</p>
+                            <p className="text-sm text-gray-500">{user?.targetYear} Aspirant</p>
+                            <p className="text-sm text-gray-500">{user?.college}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-medium">
-                            {user?.name ? user.name : 'Anonymous User'}{' '}
-                            <span className="text-gray-500">• v{user?.version_number}</span>
-                        </h3>
-                        <p className="text-sm text-gray-500">{user?.targetYear} Aspirant</p>
-                        <p className="text-sm text-gray-500">{user?.college}</p>
-                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 rounded-full p-2"
+                        onClick={() => setOpenSocialSettings(true)}
+                    >
+                        <UserGearIcon weight="fill" />
+                        <span className="hidden md:block">Edit Social Links</span>
+                    </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
-                        <Label>Your Name</Label>
-                        <Input
-                            type="text"
-                            placeholder="Your name"
-                            onChange={(e) => setName(e.target.value)}
-                            value={name}
-                            disabled={isSaving}
-                        />
-                    </div>
+                {/* Social Links Display */}
+                <SocialLinksDisplay links={socialLinks} />
 
-                    {user?.email ? (
-                        <div className="flex flex-col gap-2">
-                            <Label>Email Address</Label>
-                            <Input type="email" defaultValue={user.email} disabled />
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-2">
-                            <Label>Email Address</Label>
-                            <Input
-                                type="email"
-                                placeholder="your.email@example.com"
-                                disabled={isSaving}
-                            />
-                        </div>
-                    )}
-                    <div className="flex flex-col gap-2">
-                        <Label>College/University</Label>
+                <Dialog open={openSocialSettings} onOpenChange={setOpenSocialSettings}>
+                    <DialogContent className="p-4">
+                        <DialogHeader>
+                            <DialogTitle>Social Account Links</DialogTitle>{' '}
+                            <DialogDescription>
+                                Add your social media account, if you wwant people to reach out to
+                                you.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <SocialSettingsForm />
+                    </DialogContent>
+                </Dialog>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField label="Your Name">
                         <Input
-                            type="text"
-                            placeholder="Your Institution"
-                            onChange={(e) => setCollege(e.target.value)}
-                            value={college}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             disabled={isSaving}
                         />
-                    </div>
+                    </FormField>
+                    <FormField label="Email Address">
+                        <Input
+                            type="email"
+                            value={user?.email ?? ''}
+                            placeholder="your.email@example.com"
+                            disabled
+                        />
+                    </FormField>
+                    <FormField label="College/University">
+                        <Input
+                            type="text"
+                            value={college}
+                            onChange={(e) => setCollege(e.target.value)}
+                            placeholder="Your Institution"
+                            disabled={isSaving}
+                        />
+                    </FormField>
 
                     <div>
                         <Label className="block text-sm font-medium mb-1">Target Year</Label>
@@ -250,14 +313,8 @@ const AccountSettings = () => {
                     className="w-full md:w-auto min-w-[150px]"
                     disabled={isSaving || goalsLoading}
                 >
-                    {isSaving ? (
-                        <>
-                            <CircleNotchIcon className="mr-2 animate-spin" size={18} />
-                            Saving...
-                        </>
-                    ) : (
-                        'Save all changes'
-                    )}
+                    {isSaving && <CircleNotchIcon className="mr-2 animate-spin" size={18} />}
+                    {isSaving ? 'Saving...' : 'Save all changes'}
                 </Button>
             </div>
         </div>

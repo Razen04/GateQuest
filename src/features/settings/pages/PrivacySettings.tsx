@@ -14,14 +14,13 @@ import {
     AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
 import { SignOutIcon, SignInIcon, BroomIcon } from '@phosphor-icons/react';
-import { getUserProfile } from '@/shared/utils/helper';
 import { toast } from 'sonner';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
-    const { logout, showLogin, setShowLogin } = useAuth();
-    const { settings, handleSettingToggle } = useSettings();
-    const user = getUserProfile();
+    const { logout, showLogin, setShowLogin, user } = useAuth();
+    const { settings, handleSettingToggle, handleUserAnonymity, isUpdatingSettings } =
+        useSettings();
 
     const handleClearData = async () => {
         try {
@@ -47,12 +46,17 @@ const PrivacySettings = () => {
                         isOn={settings.shareProgress}
                         onToggle={() => handleSettingToggle('shareProgress')}
                         label="Share My Progress & Ranking"
+                        disabled={isUpdatingSettings}
                     />
 
                     <ToggleSwitch
-                        isOn={settings.dataCollection}
-                        onToggle={() => handleSettingToggle('dataCollection')}
-                        label="Remain Anonymous"
+                        isOn={user?.is_public ?? false}
+                        onToggle={() => {
+                            if (!user) return;
+                            handleUserAnonymity(!user.is_public);
+                        }}
+                        label="Make Profile Public"
+                        disabled={!user || isUpdatingSettings}
                     />
 
                     <div className="py-3 border-t border-gray-100 mt-3 pt-3">
