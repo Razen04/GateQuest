@@ -1,6 +1,4 @@
 // This file provides authentication context for the application.
-// It manages user state, handles login/logout with Supabase, and synchronizes the user's profile with the database upon authentication.
-
 import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
@@ -11,17 +9,14 @@ import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import { appStorage } from '@/storage/storageService.ts';
 
 // The AuthProvider component handles all authentication logic.
-// It exposes the user object, login/logout functions, and loading state to its children.
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
-    // This state controls the visibility of a login modal/dialog.
     const [showLogin, setShowLogin] = useState(false);
-    // We need the updateStats function from StatsContext to refresh stats after login.
+    const [needsUsername, setNeedsUsername] = useState(false);
     const { refresh } = useStudyPlan();
     const userIdRef = useRef<string | null>(null);
 
-    // True if a user object exists (includes guests, not just logged-in users).
     const isLogin = !!user && user.id !== '1';
 
     useEffect(() => {
@@ -59,6 +54,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 if (!error && data) {
                     // Ensure profile fields have default values to prevent runtime errors.
                     const profile = {
+                        ...supaUser,
                         ...data[0],
                         bookmark_questions: data[0].bookmark_questions || [],
                         college: data[0].college || '',
@@ -75,11 +71,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                             ...data[0].settings,
                         },
                     };
-                    // Store the user profile in localStorage for quick access elsewhere in the app.
                     localStorage.setItem('gate_user_profile', JSON.stringify(profile));
-                    // Trigger a stats update now that we have a logged-in user.
+
+                    if (supaUser.id !== '1' && !profile.username) {
+                        setNeedsUsername(true);
+                    } else {
+                        setNeedsUsername(false);
+                    }
+
                     refresh();
-                    setUser(supaUser);
+                    setUser(profile);
                 }
             } else {
                 // If there's no session, clear the user state and local storage.
@@ -177,12 +178,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         <AuthContext.Provider
             value={{
                 user,
+                setUser,
                 handleLogin,
                 logout,
                 isLogin,
                 loading,
                 showLogin,
                 setShowLogin,
+                needsUsername,
+                setNeedsUsername,
             }}
         >
             {children}
