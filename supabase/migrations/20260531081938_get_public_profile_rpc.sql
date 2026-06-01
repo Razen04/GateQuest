@@ -32,7 +32,10 @@ begin
         reddit_url,
         spotify_url,
         discord_url,
-        linkedin_url
+        linkedin_url,
+				mastodon_url,
+				youtube_url,
+				lemmy_url
     into v_socials
     from public.users_social
     where user_id = v_target_user.id;
@@ -50,7 +53,10 @@ begin
                 'reddit', v_socials.reddit_url,
                 'spotify', v_socials.spotify_url,
                 'discord', v_socials.discord_url,
-                'linkedin', v_socials.linkedin_url
+                'linkedin', v_socials.linkedin_url,
+								'mastodon', v_socials.mastodon_url,
+								'youtube', v_socials.youtube_url,
+								'lemmy', v_socials.lemmy_url
             )
         )
     );

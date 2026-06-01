@@ -273,7 +273,7 @@ declare
     v_final_json jsonb;
 begin
     -- the trust fall (internal version lookup)
-    select version_number, total_xp, college, target_year
+    select version_number, total_xp, college, "targetYear"
     into v_user_data
     from public.users
     where id = p_user_id;
@@ -301,7 +301,7 @@ begin
         'profile', jsonb_build_object(
             'total_xp', coalesce(v_user_data.total_xp, 0),
             'college', v_user_data.college,
-            'target_year', v_user_data.target_year,
+            'target_year', v_user_data."targetYear",
             'current_version', v_user_data.version_number
         ),
 
