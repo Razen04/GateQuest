@@ -1,25 +1,13 @@
-// This file provides a context for managing and calculating all user-related statistics.
-// It fetches user activity from Supabase and computes metrics like progress, accuracy, study streaks for heatmap, and a personalized study plan.
-
 import React, { useEffect, useState, useCallback } from 'react';
 import StatsContext from './StatsContext.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
-import { differenceInCalendarDays, parseISO, startOfDay, format } from 'date-fns';
 import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
-import type { Database } from '@/shared/types/supabase.ts';
 import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/shared/utils/helper.ts';
 import { useGoals } from '@/shared/hooks/useGoals.js';
 
-type UserQuestionActivity = Database['public']['Tables']['user_question_activity']['Row'] & {
-    subject_id?: string;
-    exam_tags?: string[];
-};
-
 // The StatsProvider component orchestrates fetching and processing user activity data.
-// It exposes the calculated stats, loading state, and an update function to its children.
 const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // Holds all computed statistics and the loading state.
     const [stats, setStats] = useState<Stats>({
         progress: 0,
         accuracy: 0,
@@ -43,7 +31,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
     const [loading, setLoading] = useState(true);
     const { currentSet, fetchCurrentSet } = useSmartRevision();
-
     const { userGoal } = useGoals();
 
     const updateStats = useCallback(async () => {
@@ -74,98 +61,62 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 setLoading(false);
                 return;
             }
-            console.log('Data: ', data);
 
             // ==========================================
             // STEP 2: Extract RPC Data
             // ==========================================
             const activeExams = (userGoal.target_exams as string[]).map((e) => e.toLowerCase());
-            const primaryExam = activeExams[0] || 'gate'; // Fallback to 'gate'
+            const primaryExam = activeExams[0] || 'gate';
 
-            // Get the specific stats for their primary selected exam
             const primaryExamStats = data.exam_stats[primaryExam] || {
                 overall_accuracy: 0,
                 overall_attempted: 0,
-                overall_total: 0,
+                total_available: 0,
                 subjects: [],
             };
 
-            // Reconstruct the Subject Stats Map for the UI
+            // Reconstruct the Subject Stats Map (Now includes backend progress, icons, and colors!)
             const newSubjectStatsMap: Record<string, SubjectStat[]> = {};
             activeExams.forEach((exam) => {
                 newSubjectStatsMap[exam.toUpperCase()] = data.exam_stats[exam]?.subjects || [];
             });
 
-            // Set default subject stats for Practice.tsx fallback
             const defaultSubjectStats = newSubjectStatsMap[primaryExam.toUpperCase()] || [];
             localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
 
-            // Extract Today's Attempts from the Heatmap
-            const todayStr = format(new Date(), 'yyyy-MM-dd');
-            const todayHeatmapNode = data.heatmap.find((day: any) => day.date === todayStr);
-            const todayUniqueAttemptCount = todayHeatmapNode ? todayHeatmapNode.count : 0;
-
             // ==========================================
-            // STEP 3: Time-Based Local Math (Study Plan)
+            // STEP 3: Map Global State directly from Backend
             // ==========================================
-            const GATE_EXAM_DATE = '2027-02-08';
-            const QUESTIONS_COMPLETION_DATE = '2027-02-15';
-            const now = new Date();
-
-            let rawDaysLeft = Math.max(
-                0,
-                differenceInCalendarDays(startOfDay(parseISO(GATE_EXAM_DATE)), startOfDay(now)),
-            );
-            let rawDaysBeforeComplete = Math.max(
-                0,
-                differenceInCalendarDays(
-                    startOfDay(parseISO(QUESTIONS_COMPLETION_DATE)),
-                    startOfDay(now),
-                ),
-            );
-
-            const totalQuestions = primaryExamStats.overall_total || 0;
+            const totalQuestions = primaryExamStats.total_available || 0;
             const uniqueAttemptCount = primaryExamStats.overall_attempted || 0;
             const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
-
-            const dailyQuestionTarget =
-                rawDaysBeforeComplete > 0
-                    ? Math.ceil(remainingQuestions / rawDaysBeforeComplete)
-                    : remainingQuestions;
-
             const overallUniqueProgressPercent =
                 totalQuestions > 0 ? Math.round((uniqueAttemptCount / totalQuestions) * 100) : 0;
 
-            const todayProgressPercent =
-                dailyQuestionTarget > 0
-                    ? Math.round((todayUniqueAttemptCount / dailyQuestionTarget) * 100)
-                    : 0;
+            const dbStats = data.dashboard_stats;
 
-            // ==========================================
-            // STEP 4: Update Global State
-            // ==========================================
             setStats({
                 progress: overallUniqueProgressPercent,
                 accuracy: primaryExamStats.overall_accuracy || 0,
                 subjectStats: defaultSubjectStats,
                 subjectStatsMap: newSubjectStatsMap,
-                question: new Set(), // Stripped out to save memory, assuming RPC handles uniqueness
+                question: new Set(),
                 heatmapData: data.heatmap,
                 streaks: {
                     current: data.streaks.study_current || 0,
                     longest: data.streaks.study_longest || 0,
                 },
+                // All of this is now instantly fed by your powerful RPC
                 studyPlan: {
                     totalQuestions,
                     uniqueAttemptCount,
                     remainingQuestions,
-                    daysLeft: rawDaysLeft,
-                    dailyQuestionTarget,
-                    todayUniqueAttemptCount,
+                    daysLeft: dbStats.days_left,
+                    dailyQuestionTarget: dbStats.daily_question_target,
+                    todayUniqueAttemptCount: dbStats.today_unique_attempt_count,
                     progressPercent: overallUniqueProgressPercent,
-                    todayProgressPercent,
-                    isTargetMetToday:
-                        dailyQuestionTarget > 0 && todayUniqueAttemptCount >= dailyQuestionTarget,
+                    todayProgressPercent: dbStats.today_progress_percent,
+                    isTargetMetToday: dbStats.is_target_met_today,
                 },
             });
         } catch (err) {
@@ -181,19 +132,12 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             setLoading(false);
             return;
         }
-
         updateStats();
     }, [currentSet?.set_id, userGoal, updateStats]);
 
-    // Listener Effect: Waits for the "Signal" from Dashboard
     useEffect(() => {
-        const handleRevisionUpdate = () => {
-            fetchCurrentSet();
-        };
-
-        const handleStatsUpdate = () => {
-            updateStats();
-        };
+        const handleRevisionUpdate = () => fetchCurrentSet();
+        const handleStatsUpdate = () => updateStats();
 
         window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
         window.addEventListener('STATS_UPDATED', handleStatsUpdate);
@@ -203,7 +147,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         };
     }, [fetchCurrentSet, updateStats]);
 
-    // The context provider makes the stats, loading state, and update function available to child components.
     return (
         <StatsContext.Provider value={{ stats, loading, updateStats }}>
             {children}
