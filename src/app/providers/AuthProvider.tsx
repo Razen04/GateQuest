@@ -4,11 +4,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { getUserProfile } from '@/shared/utils/helper.ts';
 import { toast } from 'sonner';
 import type { AppUser } from '@/shared/types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import { appStorage } from '@/storage/storageService.ts';
+
+// Maximum time (ms) to wait for the initial Supabase session before falling
+// back to the locally cached profile. Adjust here if needed — do not inline.
+const SESSION_TIMEOUT_MS = 8_000;
 
 // The AuthProvider component handles all authentication logic.
 // It exposes the user object, login/logout functions, and loading state to its children.
@@ -89,22 +94,59 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             setLoading(false);
         };
-
-        // This function attempts to get the initial session, retrying a few times.
-        // This can help with race conditions where the app initializes before the Supabase client.
+        // Attempts to get the initial session with a bounded timeout that covers
+        // the entire flow: getSession() AND the Supabase upsert inside handleSession.
+        // Both are network calls; either one can hang indefinitely when offline.
+        //
+        // A closure-level `cancelled` flag is checked after each awaited step so
+        // the retry loop exits immediately once the timeout fires — no extra
+        // getSession() calls are made in the background.
+        //
+        // On timeout: the cached AppUser profile is restored from localStorage so
+        // the routing layer reaches /dashboard instead of the landing page.
+        // userIdRef is intentionally left unset so that the existing
+        // onAuthStateChange listener re-runs handleSession in full (upsert + fresh
+        // setUser) once connectivity is restored automatically.
         const initSession = async () => {
+            let cancelled = false;
+
+            const timeoutId = setTimeout(() => {
+                cancelled = true;
+                const cachedProfile = getUserProfile();
+                if (
+                    cachedProfile &&
+                    'id' in cachedProfile &&
+                    cachedProfile.id &&
+                    cachedProfile.id !== '1'
+                ) {
+                    setUser(cachedProfile);
+                }
+                setLoading(false);
+            }, SESSION_TIMEOUT_MS);
+
             for (let i = 0; i < 5; i++) {
+                if (cancelled) break;
+
                 const {
                     data: { session },
                 } = await supabase.auth.getSession();
+
+                // Timeout may have fired while getSession() was pending;
+                // bail out before any further state writes.
+                if (cancelled) break;
+
                 if (session) {
                     await handleSession(session);
-                    return; // Exit once the session is handled.
+                    break; // handleSession calls setLoading(false) internally.
                 }
+
                 await new Promise((r) => setTimeout(r, 500)); // Wait before retrying.
             }
-            // If no session is found after retries, stop the loading state.
-            setLoading(false);
+
+            // Cancel the pending timer (no-op if it already fired) and unblock
+            // the loading state for the no-session / first-time-user path.
+            clearTimeout(timeoutId);
+            if (!cancelled) setLoading(false);
         };
 
         initSession();
