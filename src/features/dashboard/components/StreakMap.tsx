@@ -42,7 +42,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
     }, [stats.heatmapData, maxCount]);
 
     const colors = isDark
-        ? ['#161b22', '#0e4429', '#006d32', '#26a641', '#2ea043', '#39d353']
+        ? ['rgba(255,255,255,0.06)', '#064e3b', '#047857', '#10b981', '#34d399', '#6ee7b7']
         : ['#ebedf0', '#c6e48b', '#7bc96f', '#40c463', '#30a14e', '#216e39'];
 
     return (
@@ -50,37 +50,34 @@ const StreakMap = ({ stats }: StreakMapType) => {
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="p-6 border mb-4 shadow-sm border-border-primary dark:border-border-primary-dark"
+            className="relative mb-4 overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06]"
         >
-            <div className="mb-4 text-black dark:text-white">
-                <h2 className="text-2xl font-bold text-gray�[118;1:3u-800 dark:text-gray-200">
-                    Streak Map
-                </h2>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5" />
 
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Feb 8, 2026 → {toLabel}
-                </span>
+            <div className="relative mb-4">
+                <span className="text-sm text-muted-foreground">Feb 8, 2026 → {toLabel}</span>
 
-                <div className="flex space-x-4">
-                    <h2>
-                        Longest Streak:{' '}
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="rounded-xl border border-yellow-400/20 bg-yellow-500/10 px-3 py-1.5 text-sm backdrop-blur-md">
+                        <span className="text-muted-foreground">Longest:</span>{' '}
                         <span className="font-bold text-yellow-500">{stats?.streaks.longest}</span>
-                    </h2>
-                    <h2>
-                        Current Streak:{' '}
+                    </div>
+
+                    <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-sm backdrop-blur-md">
+                        <span className="text-muted-foreground">Current:</span>{' '}
                         <span className="font-bold text-emerald-500">{stats?.streaks.current}</span>
-                    </h2>
+                    </div>
                 </div>
             </div>
 
-            <div className="w-full py-8 overflow-x-auto sm:overflow-x-visible">
+            <div className="relative w-full overflow-x-auto no-scrollbar">
                 <div className="min-w-[860px] sm:min-w-0">
-                    <div className="h-[100px] sm:h-[200px] md:h-[110px] lg:h-[100px] xl:h-[150px] pr-2">
+                    <div className="h-[110px] sm:h-[150px] pr-2">
                         <ResponsiveTimeRange
                             data={bucketedData}
                             from="2026-02-07"
                             to={toIso}
-                            emptyColor={isDark ? '#161b22' : '#ebedf0'}
+                            emptyColor={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}
                             colors={colors}
                             minValue={0}
                             maxValue={5}
@@ -90,17 +87,22 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                 return (
                                     <div
                                         style={{
-                                            background: isDark ? '#111827' : '#ffffff',
+                                            background: isDark
+                                                ? 'rgba(24,24,27,0.3)'
+                                                : 'rgba(255,255,255,0.8)',
+                                            backdropFilter: 'blur(20px)',
                                             padding: '8px 10px',
-                                            borderRadius: 6,
+                                            borderRadius: 12,
                                             fontSize: 12,
                                             color: isDark ? '#f9fafb' : '#111827',
-                                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
                                         }}
                                     >
                                         <div>
                                             <strong>{day}</strong>
                                         </div>
+
                                         <div>
                                             Questions solved:{' '}
                                             <strong>{original?.count ?? 0}</strong>
@@ -109,12 +111,22 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                 );
                             }}
                             theme={{
-                                text: { fill: isDark ? '#e5e7eb' : '#111827' },
-                                labels: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
-                                legends: { text: { fill: isDark ? '#e5e7eb' : '#111827' } },
+                                text: {
+                                    fill: isDark ? '#e5e7eb' : '#111827',
+                                },
+                                labels: {
+                                    text: {
+                                        fill: isDark ? '#e5e7eb' : '#111827',
+                                    },
+                                },
+                                legends: {
+                                    text: {
+                                        fill: isDark ? '#e5e7eb' : '#111827',
+                                    },
+                                },
                             }}
                             dayBorderWidth={2}
-                            dayBorderColor={isDark ? '#18181B' : '#F9FAFB'}
+                            dayBorderColor={isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}
                         />
                     </div>
                 </div>

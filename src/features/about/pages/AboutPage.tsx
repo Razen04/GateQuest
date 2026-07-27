@@ -85,22 +85,34 @@ const About = ({ landing = false }: AboutProps) => {
                 className="max-w-5xl mx-auto grid md:grid-cols-2 gap-5 my-20"
             >
                 <motion.div variants={fadeInUp}>
-                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-md border border-transparent dark:border-zinc-800 h-[265px]">
-                        <CardHeader className="flex items-center">
+                    <Card
+                        className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/20 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06] h-full
+                        "
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent dark:from-white/10" />
+
+                        <CardHeader className="relative flex items-center">
                             <Book size={30} className="mr-3 text-blue-500" />
                             <CardTitle className="text-3xl font-bold">Why GATEQuest?</CardTitle>
                         </CardHeader>
-                        <CardContent>
+
+                        <CardContent className="relative">
                             <Text className="text-gray-700 dark:text-gray-300 leading-relaxed">
                                 There are many websites great for GATE prep out there like GO or
-                                Examside but the UI felt less modern to me. I wanted to provided a
+                                Examside but the UI felt less modern to me. I wanted to provide a
                                 clean, distraction-free UI so here it is.
                             </Text>
                         </CardContent>
                     </Card>
                 </motion.div>
+
                 <motion.div variants={fadeInUp}>
-                    <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded-md border border-transparent dark:border-zinc-800">
+                    <Card
+                        className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/20 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06] h-full
+                        "
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent dark:from-white/10" />
+
                         <CardHeader className="flex items-center">
                             <Heart size={30} className="mr-3 text-red-500" />
                             <Title className="text-3xl font-bold">Join Me</Title>

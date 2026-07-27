@@ -157,7 +157,7 @@ const Practice = () => {
                 className="flex-1 px-6"
             >
                 {/* Subject Grid - Simplified */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-40">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-40">
                     {filteredSubjects.map((subject) => {
                         const stat = subjectStats.find((s) => s.subject === subject.slug);
                         const progress = stat ? stat.progress : 0;
@@ -167,10 +167,11 @@ const Practice = () => {
 
                         return (
                             <motion.div variants={fadeInUp} key={subject.id}>
-                                <Card className="rounded-md flex flex-col h-full">
-                                    <CardHeader className="flex items-start rounded-md">
+                                <Card className="relative overflow-hidden rounded-2xl flex flex-col h-full bg-white/20 dark:bg-white/[0.06] backdrop-blur-xl backdrop-saturate-150 border border-white/20 dark:border-white/10 shadow-[0_6px_24px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5">
+                                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+                                    <CardHeader className="relative flex items-start rounded-2xl">
                                         <div
-                                            className={`p-3 shadow-sm ${getBackgroundColor(subject.theme_color)} mr-3`}
+                                            className={`p-3 shadow-sm rounded-2xl border border-white/10 ${getBackgroundColor(subject.theme_color)} mr-3`}
                                         >
                                             <SubjectIcon className="h-6 w-6" />
                                         </div>
@@ -181,7 +182,13 @@ const Practice = () => {
                                                 </CardTitle>
                                                 <Badge
                                                     variant="secondary"
-                                                    className={`text-[10px] font-bold ${subject.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : subject.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}
+                                                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium border border-white/20 backdrop-blur-md ${
+                                                        subject.difficulty === 'Easy'
+                                                            ? 'bg-green-500/15 text-green-700 dark:text-green-300'
+                                                            : subject.difficulty === 'Medium'
+                                                              ? 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-300'
+                                                              : 'bg-red-500/15 text-red-700 dark:text-red-300'
+                                                    }`}
                                                 >
                                                     {subject.difficulty}
                                                 </Badge>

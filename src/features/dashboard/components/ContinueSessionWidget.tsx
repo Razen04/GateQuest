@@ -198,51 +198,57 @@ export const ContinueSessionWidget = () => {
 
     return (
         <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide mb-1">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 Continue Where You Left Off
             </h2>
 
             <div
                 onClick={handleResume}
-                className={`relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-4 sm:p-5 mb-6 cursor-pointer shadow-sm transition-all duration-200 group ${hoverBorderClass}`}
+                className={`group relative mb-6 cursor-pointer overflow-hidden rounded-2xl border border-white/20 bg-white/20 p-3.5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/10 dark:bg-white/[0.06] ${hoverBorderClass}`}
             >
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 pl-2">
-                    <div className="flex items-center gap-4">
+                {/* Glass reflection */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
                         <div
-                            className={`flex-shrink-0 p-2.5 rounded-lg border border-transparent transition-colors ${iconBgClass}`}
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 backdrop-blur-md ${iconBgClass}`}
                         >
-                            <Icon className={`w-5 h-5 ${iconColorClass}`} />
+                            <Icon className={`h-5 w-5 ${iconColorClass}`} />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-2 mb-0.5">
+
+                        <div className="min-w-0">
+                            <div className="mb-1 flex items-center gap-2">
                                 <span
-                                    className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${badgeClass}`}
+                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md ${badgeClass}`}
                                 >
                                     {badgeText}
                                 </span>
                             </div>
-                            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">
+
+                            <h3 className="truncate text-sm font-semibold leading-tight text-zinc-900 transition-colors dark:text-zinc-50">
                                 {cardTitle}
                             </h3>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+
+                            <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
                                 {cardSubtitle}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center">
-                        <button className="flex items-center gap-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-sm hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/30 px-3 py-1.5 text-sm font-medium text-zinc-900 shadow-sm backdrop-blur-md transition-all hover:bg-white/50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
                             Resume
-                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                            <ArrowRightIcon className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                             onClick={handleClear}
-                            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            className="rounded-xl p-2 text-zinc-400 transition-all hover:bg-white/20 hover:text-zinc-700 dark:hover:text-zinc-300"
                             title="Dismiss session"
                             aria-label="Dismiss session"
                         >
-                            <XIcon className="w-4 h-4" />
+                            <XIcon className="h-4 w-4" />
                         </button>
                     </div>
                 </div>

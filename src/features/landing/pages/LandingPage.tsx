@@ -81,12 +81,12 @@ const AppMockup = () => {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="w-full max-w-md sm:max-w-2xl lg:max-w-3xl mx-auto mt-12 z-10 pb-20"
         >
-            <div className="relative flex flex-col border border-slate-200 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/50 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 backdrop-blur-xl min-h-[420px]">
+            <div className="relative flex flex-col rounded-3xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl backdrop-saturate-150 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 min-h-[420px] overflow-hidden">
                 {/* Browser Header */}
-                <div className="flex items-center gap-1.5 px-3 py-2 border-b border-slate-200 dark:border-slate-700/50">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/20 dark:bg-white/5 backdrop-blur-xl">
+                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
                 </div>
 
                 {/* App Content */}
@@ -99,35 +99,35 @@ const AppMockup = () => {
                         <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
                             <Button
                                 size="icon"
-                                className="h-6 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                                className="h-6 w-8 rounded-full bg-blue-500/80 dark:bg-blue-600/80 backdrop-blur-xl border border-white/20 shadow-sm"
                             >
                                 <Bookmark size={14} className="text-white" />
                             </Button>
 
                             <Button
                                 size="icon"
-                                className="h-6 w-8 bg-blue-500 dark:bg-blue-600 rounded-full"
+                                className="h-6 w-8 rounded-full bg-blue-500/80 dark:bg-blue-600/80 backdrop-blur-xl border border-white/20 shadow-sm"
                             >
                                 <Timer size={14} className="text-white" />
                             </Button>
 
                             <Badge
                                 variant="secondary"
-                                className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                className="bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 backdrop-blur-xl"
                             >
                                 Easy
                             </Badge>
 
                             <Badge
                                 variant="secondary"
-                                className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 backdrop-blur-xl"
                             >
                                 GATE 2024
                             </Badge>
 
                             <Badge
                                 variant="secondary"
-                                className="bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400"
+                                className="bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 backdrop-blur-xl"
                             >
                                 MCQ
                             </Badge>
@@ -142,20 +142,10 @@ const AppMockup = () => {
                         {['254', '256', '65,534'].map((option, i) => (
                             <div
                                 key={i}
-                                className={`flex items-center gap-3 p-2 rounded-lg
-                                ${
-                                    option === '256'
-                                        ? 'bg-blue-500/10 border border-blue-500/30 ring-2 ring-blue-500/20'
-                                        : 'bg-slate-100/50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'
-                                }`}
+                                className={`flex items-center gap-3 p-2 rounded-xl border backdrop-blur-xl transition-all ${option === '256' ? 'bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20' : 'bg-white/20 dark:bg-white/5 border-white/20 dark:border-white/10'}`}
                             >
                                 <div
-                                    className={`w-5 h-5 rounded-full border-2
-                                    ${
-                                        option === '256'
-                                            ? 'border-blue-500 bg-blue-500 flex items-center justify-center'
-                                            : 'border-slate-400'
-                                    }`}
+                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${option === '256' ? 'border-blue-500 bg-blue-500' : 'border-slate-400'}`}
                                 >
                                     {option === '256' && (
                                         <div className="w-2 h-2 rounded-full bg-white"></div>
@@ -174,26 +164,26 @@ const AppMockup = () => {
                         {
                             label: 'Previous',
                             icon: ArrowLeft,
-                            bg: 'bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-white',
+                            bg: 'bg-white/30 text-slate-600 dark:bg-white/10 dark:text-white border border-white/20',
                         },
                         {
                             label: 'Submit',
                             icon: Eye,
-                            bg: 'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-700',
+                            bg: 'bg-blue-500/80 text-white border border-blue-400/30',
                         },
                         {
                             label: 'Surrender',
                             icon: Flag,
-                            bg: 'bg-violet-500 text-white dark:bg-violet-300 dark:text-violet-700',
+                            bg: 'bg-violet-500/80 text-white border border-violet-400/30',
                         },
                         {
                             label: 'Next',
                             icon: ArrowRight,
-                            bg: 'bg-slate-200 text-slate-600 dark:bg-gray-700 dark:text-white',
+                            bg: 'bg-white/30 text-slate-600 dark:bg-white/10 dark:text-white border border-white/20',
                         },
                     ].map((btn, i) => (
                         <Button
-                            className={`${btn.bg} flex-1 flex items-center justify-center gap-1`}
+                            className={`${btn.bg} flex-1 flex items-center justify-center gap-1 rounded-xl backdrop-blur-xl shadow-sm hover:scale-[1.02] transition-all`}
                             size="lg"
                             key={i}
                         >
@@ -224,33 +214,35 @@ export default function LandingPage() {
                     backgroundSize: '24px 24px',
                 }}
             />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[600px] -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(37,99,235,0.3)_0%,_rgba(10,10,10,0)_60%)] z-0"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[600px] -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(37,99,235,0.3)_0%,_rgba(10,10,10,0)_60%)] z-0" />
 
             <div className="relative z-10 flex flex-col min-h-screen">
-                <header className="sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-20 py-4 bg-white/20 dark:bg-slate-900/50 backdrop-blur-lg border-b border-slate-200 dark:border-slate-300/10">
+                <header className="sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-20 py-4 bg-white/30 dark:bg-slate-900/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/20 dark:border-white/10 shadow-sm">
                     <div className="flex items-center gap-3">
                         <img src={appLogo} alt="GATEQuest Logo" className="w-9 h-9" />
                     </div>
+
                     <nav className="hidden md:flex gap-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
                         <Button
                             variant="ghost"
                             asChild
-                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white/20 dark:hover:bg-white/10"
                         >
                             <a href="#features">Features</a>
                         </Button>
                         <Button
                             variant="ghost"
                             asChild
-                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white/20 dark:hover:bg-white/10"
                         >
                             <a href="#about">About</a>
                         </Button>
                     </nav>
+
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full text-slate-500 hover:bg-slate-200 dark:hover:bg-gray-800"
+                        className="rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-xl border border-white/20 text-slate-500 hover:bg-white/40 dark:hover:bg-white/20"
                         onClick={() => handleSettingToggle('darkMode')}
                     >
                         {isDark ? <Moon size={20} /> : <Sun size={20} />}
@@ -269,6 +261,7 @@ export default function LandingPage() {
                                 GATE Performance
                             </span>
                         </h1>
+
                         <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10">
                             The open-source platform with a massive question bank, real-time
                             analytics, and a modern, distraction-free interface.
@@ -277,14 +270,16 @@ export default function LandingPage() {
                         <Button
                             size="lg"
                             onClick={() => navigate('/dashboard')}
-                            className="rounded-none"
+                            className="rounded-xl bg-white/30 dark:bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/50 dark:hover:bg-white/20 transition-all"
                         >
                             Start Practicing Now <ArrowRight weight="bold" />
                         </Button>
                     </motion.div>
                 </main>
+
                 <AppMockup />
-                <div className="bg-white dark:bg-[#0A0A0A]">
+
+                <div className="bg-white/40 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl">
                     <section id="features" className="w-full max-w-7xl mx-auto py-20 px-4">
                         <div className="text-center mb-16">
                             <h2 className="text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-100">
@@ -295,6 +290,7 @@ export default function LandingPage() {
                                 your GATE preparation.
                             </p>
                         </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                             {features.map((f, i) => (
                                 <motion.div
@@ -304,22 +300,25 @@ export default function LandingPage() {
                                     transition={{ duration: 0.3, delay: i * 0.05 }}
                                     viewport={{ once: true, amount: 0.7 }}
                                 >
-                                    <Card className="group relative h-full bg-white/5 dark:bg-slate-500/5 border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 rounded-none">
+                                    <Card className="group relative h-full bg-white/20 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
                                         <div
                                             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden dark:block"
                                             style={{
                                                 background:
-                                                    'radial-gradient(300px circle at center, rgba(37, 99, 235, 0.1), transparent)',
+                                                    'radial-gradient(300px circle at center, rgba(37,99,235,0.1), transparent)',
                                             }}
                                         />
+
                                         <CardHeader>
-                                            <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 text-white mb-4">
+                                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white mb-4 shadow-lg">
                                                 <f.icon size={28} weight="bold" />
                                             </div>
+
                                             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
                                                 {f.title}
                                             </CardTitle>
                                         </CardHeader>
+
                                         <CardContent>
                                             <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                                                 {f.desc}
@@ -330,11 +329,12 @@ export default function LandingPage() {
                             ))}
                         </div>
                     </section>
+
                     <section id="about">
                         <About landing={true} />
                     </section>
 
-                    <footer className="w-full py-6 text-center text-sm text-slate-500 dark:text-slate-500 border-t border-slate-200 dark:border-slate-300/10 mt-12">
+                    <footer className="w-full py-6 text-center text-sm text-slate-500 dark:text-slate-500 border-t border-white/20 dark:border-white/10 mt-12 backdrop-blur-xl">
                         &copy; {new Date().getFullYear()} GATEQuest. All Rights Reserved.
                     </footer>
                 </div>

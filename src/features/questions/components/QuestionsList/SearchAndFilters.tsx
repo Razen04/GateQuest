@@ -76,19 +76,25 @@ const SearchAndFilters = ({
     const { getPracticeSubjects } = useGoals();
 
     const currentSubject = getPracticeSubjects().find((s) => s.slug === subject);
-
     const displayExams = currentSubject?.is_universal ? ['GATE', 'ISRO'] : availableExams;
-
     const difficulties = ['Easy', 'Medium', 'Hard'];
+
+    const glass =
+        'bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5 rounded-2xl';
+
+    const inputGlass =
+        'bg-white/50 dark:bg-zinc-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-400 transition-all';
+
     return (
-        <div className="p-2 sm:p-4 mb-4 sm:mb-6 border border-border-primary dark:border-border-primary-dark">
+        <div className={`p-2 sm:p-4 mb-4 sm:mb-6 ${glass}`}>
             <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
                 <div className="flex-1 relative">
                     <MagnifyingGlass className="absolute left-3 top-2.5 text-gray-400" />
+
                     <Input
                         type="text"
                         placeholder="Search questions..."
-                        className="w-full pl-10 rounded-md pr-2 sm:pr-4 py-2 border border-border-primary dark:border-border-primary-dark focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className={`w-full pl-10 pr-2 sm:pr-4 py-2 ${inputGlass}`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -97,12 +103,14 @@ const SearchAndFilters = ({
                 <Button
                     variant="ghost"
                     onClick={() => setShowFilters(!showFilters)}
-                    className="px-2 sm:px-4 py-2 w-fit"
+                    className="px-2 sm:px-4 py-2 w-fit rounded-xl hover:bg-white/30 dark:hover:bg-zinc-800/50"
                 >
-                    <Funnel className="mr-2" weight={`${showFilters ? 'fill' : 'duotone'}`} />
+                    <Funnel className="mr-2" weight={showFilters ? 'fill' : 'duotone'} />
                     <span>Filter</span>
                     <CaretDown
-                        className={`ml-2 transition-transform ${showFilters ? 'transform rotate-180 duration-500' : 'duration-500'}`}
+                        className={`ml-2 transition-transform duration-500 ${
+                            showFilters ? 'rotate-180' : ''
+                        }`}
                     />
                 </Button>
             </div>
@@ -113,188 +121,111 @@ const SearchAndFilters = ({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="mt-2 sm:mt-4 pt-2 sm:pt-4 border-t border-gray-100 dark:border-zinc-700 overflow-hidden overflow-y-scroll"
+                        className="mt-4 pt-4 border-t border-white/20 dark:border-white/10 overflow-hidden overflow-y-scroll"
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div>
-                                <Label className="mb-2">Exams</Label>
-                                <Combobox
-                                    items={displayExams}
-                                    multiple
-                                    value={examFilter}
-                                    onValueChange={setExamFilter}
-                                >
-                                    <ComboboxChips>
-                                        <ComboboxValue>
-                                            {examFilter.map((e) => (
-                                                <ComboboxChip key={e} showRemove>
-                                                    {e.toUpperCase()}
-                                                </ComboboxChip>
-                                            ))}
-                                        </ComboboxValue>
-                                        <ComboboxChipsInput placeholder="Select exams" />
-                                    </ComboboxChips>
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>No exams found.</ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(exam) => (
-                                                <ComboboxItem key={exam} value={exam}>
-                                                    {exam.toUpperCase()}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {[
+                                {
+                                    label: 'Exams',
+                                    items: displayExams,
+                                    value: examFilter,
+                                    setter: setExamFilter,
+                                    placeholder: 'Select exams',
+                                    render: (v: string) => v.toUpperCase(),
+                                },
+                                {
+                                    label: 'Difficulty',
+                                    items: difficulties,
+                                    value: difficultyFilter,
+                                    setter: setDifficultyFilter,
+                                    placeholder: 'Select difficulties',
+                                    render: (v: string) => v,
+                                },
+                                {
+                                    label: 'Years',
+                                    items: years,
+                                    value: yearFilter,
+                                    setter: setYearFilter,
+                                    placeholder: 'Select years',
+                                    render: (v: string) => v,
+                                },
+                                {
+                                    label: 'Topics',
+                                    items: topics,
+                                    value: topicFilter,
+                                    setter: setTopicFilter,
+                                    placeholder: 'Select topics',
+                                    render: (v: string) => v,
+                                },
+                                {
+                                    label: 'Tags',
+                                    items: tags,
+                                    value: tagFilter,
+                                    setter: setTagFilter,
+                                    placeholder: 'Select tags',
+                                    render: (v: string) => v,
+                                },
+                            ].map((filter) => (
+                                <div key={filter.label} className={`${glass} p-3`}>
+                                    <Label className="mb-2">{filter.label}</Label>
 
-                            <div>
-                                <Label className="mb-2">Difficulty</Label>
-                                <Combobox
-                                    items={difficulties}
-                                    multiple
-                                    value={difficultyFilter}
-                                    onValueChange={setDifficultyFilter}
-                                >
-                                    <ComboboxChips>
-                                        <ComboboxValue>
-                                            {difficultyFilter.map((d) => (
-                                                <ComboboxChip key={d} showRemove>
-                                                    {d}
-                                                </ComboboxChip>
-                                            ))}
-                                        </ComboboxValue>
-                                        <ComboboxChipsInput placeholder="Select difficulties" />
-                                    </ComboboxChips>
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>No difficulties found.</ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(diff) => (
-                                                <ComboboxItem key={diff} value={diff}>
-                                                    {diff}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </div>
+                                    <Combobox
+                                        items={filter.items}
+                                        multiple
+                                        value={filter.value}
+                                        onValueChange={filter.setter}
+                                    >
+                                        <ComboboxChips>
+                                            <ComboboxValue>
+                                                {filter.value.map((item) => (
+                                                    <ComboboxChip
+                                                        key={item}
+                                                        showRemove
+                                                        className="max-w-[150px] truncate"
+                                                    >
+                                                        {filter.render(item)}
+                                                    </ComboboxChip>
+                                                ))}
+                                            </ComboboxValue>
 
-                            <div>
-                                <Label className="mb-2">Years</Label>
-                                <Combobox
-                                    items={years}
-                                    multiple
-                                    value={yearFilter}
-                                    onValueChange={setYearFilter}
-                                >
-                                    <ComboboxChips>
-                                        <ComboboxValue>
-                                            {yearFilter.map((y) => (
-                                                <ComboboxChip key={y} showRemove>
-                                                    {y}
-                                                </ComboboxChip>
-                                            ))}
-                                        </ComboboxValue>
-                                        <ComboboxChipsInput placeholder="Select years" />
-                                    </ComboboxChips>
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>No years found.</ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(year) => (
-                                                <ComboboxItem key={year} value={year}>
-                                                    {year}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </div>
+                                            <ComboboxChipsInput placeholder={filter.placeholder} />
+                                        </ComboboxChips>
 
-                            <div>
-                                <Label className="mb-2">Topics</Label>
-                                <Combobox
-                                    items={topics}
-                                    multiple
-                                    value={topicFilter}
-                                    onValueChange={setTopicFilter}
-                                >
-                                    <ComboboxChips>
-                                        <ComboboxValue>
-                                            {topicFilter.map((t) => (
-                                                <ComboboxChip
-                                                    key={t}
-                                                    showRemove
-                                                    className="max-w-[150px] truncate"
-                                                >
-                                                    {t}
-                                                </ComboboxChip>
-                                            ))}
-                                        </ComboboxValue>
-                                        <ComboboxChipsInput placeholder="Select topics" />
-                                    </ComboboxChips>
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>No topics found.</ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(topic) => (
-                                                <ComboboxItem key={topic} value={topic}>
-                                                    {topic}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </div>
+                                        <ComboboxContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20">
+                                            <ComboboxEmpty>
+                                                No {filter.label.toLowerCase()} found.
+                                            </ComboboxEmpty>
 
-                            <div>
-                                <Label className="mb-2">Tags</Label>
-                                <Combobox
-                                    items={tags}
-                                    multiple
-                                    value={tagFilter}
-                                    onValueChange={setTagFilter}
-                                >
-                                    <ComboboxChips>
-                                        <ComboboxValue>
-                                            {tagFilter.map((t) => (
-                                                <ComboboxChip
-                                                    key={t}
-                                                    showRemove
-                                                    className="max-w-[150px] truncate"
-                                                >
-                                                    {t}
-                                                </ComboboxChip>
-                                            ))}
-                                        </ComboboxValue>
-                                        <ComboboxChipsInput placeholder="Select tags" />
-                                    </ComboboxChips>
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>No tag found.</ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(tags) => (
-                                                <ComboboxItem key={tags} value={tags}>
-                                                    {tags}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </div>
+                                            <ComboboxList>
+                                                {(item) => (
+                                                    <ComboboxItem key={item} value={item}>
+                                                        {filter.render(item)}
+                                                    </ComboboxItem>
+                                                )}
+                                            </ComboboxList>
+                                        </ComboboxContent>
+                                    </Combobox>
+                                </div>
+                            ))}
 
-                            <div>
+                            <div className={`${glass} p-3`}>
                                 <Label className="mb-2">Type of questions</Label>
-                                <Select
-                                    value={attemptFilter}
-                                    onValueChange={(e) => setAttemptFilter(e)}
-                                >
-                                    <SelectTrigger className="w-full rounded-md">
+
+                                <Select value={attemptFilter} onValueChange={setAttemptFilter}>
+                                    <SelectTrigger className={`${inputGlass} w-full`}>
                                         <SelectValue placeholder="Select a type" />
                                     </SelectTrigger>
-                                    <SelectContent>
+
+                                    <SelectContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20">
                                         <SelectGroup>
                                             <SelectLabel>Type of question</SelectLabel>
+
                                             <SelectItem value="all">All</SelectItem>
+
                                             <SelectItem value="attempted">
                                                 Attempted Questions
                                             </SelectItem>
+
                                             <SelectItem value="unattempted">
                                                 Unattempted Questions
                                             </SelectItem>

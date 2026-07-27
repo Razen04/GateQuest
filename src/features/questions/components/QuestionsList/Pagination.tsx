@@ -10,25 +10,27 @@ type PaginationProps = {
 
 const Pagination = ({ currentPage, setCurrentPage, totalPages }: PaginationProps) => {
     return (
-        <div className="flex justify-between items-center w-full py-2 mt-2">
+        <div className="flex justify-between items-center w-full py-3 mt-3 rounded-2xl bg-white/30 dark:bg-zinc-900/30 backdrop-blur-xl shadow-lg">
             <Button
                 variant="ghost"
                 size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="rounded-md disabled:opacity-50 w-20"
+                className="w-20 rounded-xl bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-all disabled:opacity-40"
             >
                 <ArrowLeft />
             </Button>
-            <span className="text-sm">
+
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 Page {currentPage} of {totalPages}
             </span>
+
             <Button
                 variant="ghost"
                 size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className=" rounded-md disabled:opacity-50 w-20"
+                className="w-20 rounded-xl bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-all disabled:opacity-40"
             >
                 <ArrowRight />
             </Button>

@@ -17,49 +17,48 @@ import { SignOutIcon, SignInIcon, BroomIcon, TrashIcon } from '@phosphor-icons/r
 import { getUserProfile } from '@/shared/utils/helper';
 import { toast } from 'sonner';
 import { supabase } from '@/shared/utils/supabaseClient';
+import type { Settings } from '@/shared/types/Settings';
 
 const PrivacySettings = () => {
     const { logout, showLogin, setShowLogin } = useAuth();
     const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();
     const user = getUserProfile();
+    const userSettings = user?.settings as Settings | undefined;
 
     const handleClearData = async () => {
         try {
             const { data, error } = await supabase.rpc('clear_user_data');
-
             if (error) throw error;
-            toast.success(`Data cleared. Starting Profile Version ${data.version}.`);
+
+            const result = data as { version?: number } | null;
+
+            toast.success(`Data cleared. Starting Profile Version ${result?.version ?? ''}.`);
+            logout();
         } catch (error) {
             console.error('Unable to clear data: ', error);
             toast.error('Unable to clear data.');
-            return;
-        } finally {
-            // perform logout
-            logout();
         }
     };
 
-    // Function to handle account deleteion
     const handleAccDelete = async () => {
         try {
             const { error } = await supabase.rpc('delete_account');
-
             if (error) throw error;
-            toast.success('Account delete successfully.');
+
+            toast.success('Account deleted successfully.');
+            logout();
         } catch (error) {
             console.error('Unable to delete account: ', error);
-            toast.error('Unabel to delete account');
-            return;
-        } finally {
-            // perform logout
-            logout();
+            toast.error('Unable to delete account.');
         }
     };
 
+    const isMaxVersionsReached = (user?.version_number ?? 0) >= 5;
+
     return (
-        <div className="pb-20 px-4">
-            <div className={`${showLogin ? 'blur-2xl' : null}`}>
-                <div className="space-y-2">
+        <div className="pb-16 px-3 sm:px-4">
+            <div className={showLogin ? 'blur-2xl' : undefined}>
+                <div className="space-y-1">
                     <ToggleSwitch
                         isOn={settings.shareProgress}
                         onToggle={() => handleSettingToggle('shareProgress')}
@@ -74,34 +73,39 @@ const PrivacySettings = () => {
                         disabled={isUpdatingSettings}
                     />
 
-                    <div className="py-3 border-t border-gray-100 mt-3 pt-3">
-                        <h3 className="text-base font-medium mb-4">Data Management</h3>
-                        <div className="flex flex-col md:flex-row gap-2">
-                            {user && user.version_number && (
+                    <div className="border-t border-gray-100 dark:border-zinc-800 mt-3 pt-3">
+                        <h3 className="text-base font-semibold mb-3">Data Management</h3>
+
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            {user && user.version_number !== undefined && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="outline">
+                                        <Button variant="outline" className="flex-1">
                                             <BroomIcon />
                                             Clear Data
                                         </Button>
                                     </AlertDialogTrigger>
+
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
                                                 Are you absolutely sure?
                                             </AlertDialogTitle>
+
                                             <AlertDialogDescription>
                                                 This action cannot be undone. This will permanently
-                                                clear your data and this can only be performed at
-                                                max 5 times. You have used {user.version_number}/5
-                                                already. You will be logout after this.
+                                                clear your data and can only be performed up to 5
+                                                times. You have used {user.version_number}/5
+                                                already. You will be logged out after this.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
+
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
+
                                             <AlertDialogAction
-                                                onClick={() => handleClearData()}
-                                                disabled={user?.version_number >= 5}
+                                                onClick={handleClearData}
+                                                disabled={isMaxVersionsReached}
                                             >
                                                 Continue
                                             </AlertDialogAction>
@@ -109,20 +113,22 @@ const PrivacySettings = () => {
                                     </AlertDialogContent>
                                 </AlertDialog>
                             )}
-                            {/* Account Deletion Button */}
-                            {user && (
+
+                            {userSettings?.is_beta && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="outline">
+                                        <Button variant="outline" className="flex-1">
                                             <TrashIcon />
                                             Delete Account
                                         </Button>
                                     </AlertDialogTrigger>
+
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>
                                                 Are you absolutely sure?
                                             </AlertDialogTitle>
+
                                             <AlertDialogDescription>
                                                 This action cannot be undone. Deleting your account
                                                 will permanently remove your account information.
@@ -131,9 +137,11 @@ const PrivacySettings = () => {
                                                 process is complete.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
+
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleAccDelete()}>
+
+                                            <AlertDialogAction onClick={handleAccDelete}>
                                                 Continue
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -143,14 +151,14 @@ const PrivacySettings = () => {
 
                             {user ? (
                                 <Button
-                                    className="bg-red-600 hover:bg-red-800"
+                                    className="flex-1 bg-red-600 hover:bg-red-800"
                                     onClick={() => logout()}
                                 >
                                     <SignOutIcon />
                                     Logout
                                 </Button>
                             ) : (
-                                <Button onClick={() => setShowLogin(true)}>
+                                <Button className="flex-1" onClick={() => setShowLogin(true)}>
                                     <SignInIcon />
                                     Login
                                 </Button>

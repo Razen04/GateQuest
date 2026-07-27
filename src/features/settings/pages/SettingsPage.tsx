@@ -38,28 +38,29 @@ const Settings = () => {
             activeIcon: <User size={20} weight="fill" />,
         },
         {
-            id: 'privacy',
-            label: 'Privacy & Data',
-            icon: <ShieldCheck size={20} weight="duotone" />,
-            activeIcon: <ShieldCheck size={20} weight="fill" />,
-        },
-        {
             id: 'app-settings',
             label: 'App Settings',
             icon: <Faders size={20} weight="duotone" />,
             activeIcon: <Faders size={20} weight="fill" />,
         },
+        {
+            id: 'privacy',
+            label: 'Privacy & Data',
+            icon: <ShieldCheck size={20} weight="duotone" />,
+            activeIcon: <ShieldCheck size={20} weight="fill" />,
+        },
     ];
 
     return (
-        <div className="relative pb-10">
+        <div className="relative pb-8">
             {showLogin && (
-                <div className="w-full h-screen flex z-50 items-center justify-center bg-transparent bg-opacity-30">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
                     <Login onClose={() => setShowLogin(false)} />
                 </div>
             )}
+
             <div
-                className={`p-6 min-h-[100dvh] transition-colors duration-50 ${showLogin ? 'blur-2xl' : ''}`}
+                className={`p-6 sm:px-4 pb-16 min-h-[100dvh] transition-all duration-200 ${showLogin ? 'blur-2xl' : ''}`}
             >
                 {/* Header Section */}
                 <PageHeader
@@ -69,10 +70,10 @@ const Settings = () => {
                 />
 
                 {/* Settings Tabs Navigation */}
-                <div>
+                <div className="mt-4">
                     <AnimatedTabs tabs={tabs} activeTab={activeTab} onChange={navigate} />
 
-                    <div className="mt-6">
+                    <div className="mt-4">
                         {activeTab === 'general' && <div>General content…</div>}
                         {activeTab === 'appearance' && <div>Appearance content…</div>}
                         {activeTab === 'advanced' && <div>Advanced settings…</div>}
@@ -84,7 +85,7 @@ const Settings = () => {
                     initial="initial"
                     animate="animate"
                     variants={itemVariants}
-                    className="pb-20"
+                    className="pb-16 mt-2"
                 >
                     <Outlet />
                 </motion.div>

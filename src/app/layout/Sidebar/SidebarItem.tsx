@@ -12,6 +12,12 @@ type SidebarItemProps = {
     animation: Variants;
 };
 
+const spring = {
+    type: 'spring' as const,
+    stiffness: 380,
+    damping: 32,
+};
+
 export const SidebarItem = ({
     index,
     name,
@@ -24,56 +30,40 @@ export const SidebarItem = ({
 }: SidebarItemProps) => {
     return (
         <motion.button
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-                delay: 0.1 * index,
-                duration: 0.5,
-            }}
+            transition={{ delay: index * 0.06, duration: 0.35 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onClick}
-            className={`relative w-full z-10 flex items-center px-4 py-3 my-2 cursor-pointer group transition-all duration-300 rounded-xl ${
-                isActive
-                    ? 'text-white'
-                    : `${isCollapsed ? '' : 'hover:bg-gray-200 dark:hover:bg-gray-700'} dark:text-white`
-            } ${isCollapsed ? 'justify-center' : ''}`}
+            className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-colors duration-200 ${isCollapsed ? 'justify-center' : ''} ${isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
+            {isActive && !isCollapsed && (
+                <motion.div
+                    layoutId="active-sidebar-tab"
+                    transition={spring}
+                    className="absolute inset-0 rounded-xl -z-10 bg-white/35 dark:bg-white/10 backdrop-blur-2xl border border-white/20 shadow-[0_4px_16px_rgba(0,0,0,0.08)] before:absolute before:inset-[1px] before:rounded-[11px] before:bg-gradient-to-b before:from-white/30 before:to-transparent before:pointer-events-none"
+                />
+            )}
+
             <div
-                className={`p-2 rounded-lg ${
-                    isActive
-                        ? `bg-gradient-to-br from-blue-500 to-blue-600`
-                        : 'bg-gray-100 group-hover:bg-gray-200 dark:bg-gray-700 dark:group-hover:bg-gray-700'
-                }`}
+                className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${isActive ? 'bg-white/30 dark:bg-white/10 border border-white/15' : 'bg-black/5 dark:bg-white/5 group-hover:bg-black/8 dark:group-hover:bg-white/8'}`}
             >
                 <motion.div
-                    className={`text-lg rounded-xl ${
-                        isActive ? 'text-white' : 'text-text-primary dark:text-text-primary-dark'
-                    }`}
                     variants={animation}
                     animate={isActive ? 'active' : 'inactive'}
+                    transition={{ duration: 0.2 }}
+                    className={`flex items-center justify-center text-lg ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
                 >
                     {isActive ? activeIcon : icon}
                 </motion.div>
             </div>
-            <span
-                className={`ml-3 text-base whitespace-nowrap transition-all duration-300 rounded-xl ${
-                    isActive
-                        ? 'font-bold'
-                        : 'text-gray-700 group-hover:text-gray-900 dark:text-gray-200 dark:group-hover:text-gray-200'
-                } ${isCollapsed ? 'hidden' : ''}`}
-            >
-                {name}
-            </span>
 
-            {isActive && !isCollapsed && (
-                <motion.div
-                    layoutId="active-sidebar-tab"
-                    className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl"
-                    transition={{
-                        type: 'spring',
-                        stiffness: 300,
-                        damping: 30,
-                    }}
-                />
+            {!isCollapsed && (
+                <span
+                    className={`truncate text-sm font-medium transition-colors duration-200 ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}
+                >
+                    {name}
+                </span>
             )}
         </motion.button>
     );

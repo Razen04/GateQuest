@@ -91,7 +91,7 @@ const TopicTestGeneratePage = () => {
     const onBack = () => navigate('/topic-test');
 
     return (
-        <div className="max-h-screen overflow-y-auto flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="h-dvh overflow-y-auto flex flex-col text-slate-900 dark:text-slate-100">
             <div className="p-6">
                 <button
                     onClick={onBack}
@@ -123,6 +123,7 @@ const TopicTestGeneratePage = () => {
                         ))}
                     </div>
                 )}
+
                 <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
                     <BookIcon className="w-4 h-4 text-blue-500" />
                     Select Subject

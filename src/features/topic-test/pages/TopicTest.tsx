@@ -154,7 +154,7 @@ const TopicTest = () => {
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 hover:text-blue-500 transition-colors cursor-pointer focus:outline-none"
+                    className="flex items-center mb-4 rounded-xl px-3 py-2 border border-white/20 bg-white/10 dark:bg-white/[0.05] backdrop-blur-xl hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
                 >
                     <ArrowLeftIcon className="mr-2" />
                     <span>Back</span>
@@ -181,17 +181,15 @@ const TopicTest = () => {
                                 </h3>
                             </div>
 
-                            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-5 text-white shadow-lg relative overflow-hidden group">
+                            <div className="bg-gradient-to-br from-blue-500/80 to-blue-700/80 backdrop-blur-2xl border border-white/20 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden">
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="text-blue-100 text-sm truncate max-w-52 md:max-w-3xl">
-                                                {activeTest.topics?.length
-                                                    ? activeTest.topics.join(', ')
-                                                    : 'No Topics'}
-                                            </h3>
-                                        </div>
-                                        <div className="bg-white/20 backdrop-blur-md px-3 py-1 flex items-center gap-2 text-xs font-mono">
+                                        <h3 className="text-blue-100 text-sm truncate max-w-52 md:max-w-3xl">
+                                            {activeTest.topics?.length
+                                                ? activeTest.topics.join(', ')
+                                                : 'No Topics'}
+                                        </h3>
+                                        <div className="bg-white/20 backdrop-blur-md rounded-xl px-3 py-1 flex items-center gap-2 text-xs font-mono">
                                             <Timer weight="fill" />
                                             {formatTime(activeTest.remaining_time_seconds ?? 0)}
                                         </div>
@@ -209,20 +207,17 @@ const TopicTest = () => {
 
                                         {activeTest.status === 'ongoing' ? (
                                             <Button
-                                                onClick={() => handleResume()}
-                                                className="bg-white text-blue-500"
+                                                onClick={handleResume}
+                                                className="bg-white/90 text-blue-600 rounded-xl backdrop-blur-xl"
                                             >
-                                                {' '}
-                                                Resume
-                                                <Play weight="fill" />
+                                                Resume <Play weight="fill" />
                                             </Button>
                                         ) : (
                                             <Button
-                                                onClick={() => handleStartTest()}
-                                                className="bg-white text-blue-500"
+                                                onClick={handleStartTest}
+                                                className="bg-white/90 text-blue-600 rounded-xl backdrop-blur-xl"
                                             >
-                                                Start
-                                                <Play weight="fill" />
+                                                Start <Play weight="fill" />
                                             </Button>
                                         )}
                                     </div>
@@ -237,15 +232,14 @@ const TopicTest = () => {
                                 </h3>
                             </div>
 
-                            <div className="bg-gray-100 dark:bg-gray-800 p-5 shadow-lg relative overflow-hidden group text-center">
-                                <div className="relative z-10 flex flex-col items-center gap-4">
+                            <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-5 shadow-xl text-center">
+                                <div className="flex flex-col items-center gap-4">
                                     <p className="text-gray-700 dark:text-gray-200 text-sm">
                                         You currently have no ongoing or paused test sessions.
                                     </p>
-
                                     <Button
                                         onClick={handleGenerateNew}
-                                        className="bg-blue-600 text-white hover:bg-blue-700"
+                                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-xl"
                                     >
                                         Start a New Test <Plus weight="bold" className="ml-2" />
                                     </Button>
@@ -261,31 +255,23 @@ const TopicTest = () => {
                             Progress Trends
                         </h3>
 
-                        <div className="flex bg-zinc-100 dark:bg-zinc-900 p-2">
+                        <div className="flex rounded-xl bg-white/20 dark:bg-white/[0.05] border border-white/20 backdrop-blur-xl p-1">
                             <button
                                 onClick={() => setViewMode('accuracy')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${
-                                    viewMode === 'accuracy'
-                                        ? 'bg-white dark:bg-zinc-800 shadow-sm text-blue-500'
-                                        : 'text-slate-500'
-                                }`}
+                                className={`px-3 py-2 rounded-lg text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
                             >
                                 Accuracy
                             </button>
                             <button
                                 onClick={() => setViewMode('score')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${
-                                    viewMode === 'score'
-                                        ? 'bg-white dark:bg-zinc-800 shadow-sm text-blue-500'
-                                        : 'text-slate-500'
-                                }`}
+                                className={`px-3 py-2 rounded-lg text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
                             >
                                 Performance %
                             </button>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 h-64 shadow-sm">
+                    <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-4 h-64 shadow-xl">
                         {chartData.length > 1 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData}>
@@ -334,7 +320,7 @@ const TopicTest = () => {
                                         contentStyle={{
                                             backgroundColor: '#1e293b',
                                             border: 'none',
-                                            borderRadius: '8px',
+                                            borderRadius: '12px',
                                             fontSize: '12px',
                                             color: '#f8fafc',
                                         }}
@@ -386,11 +372,12 @@ const TopicTest = () => {
                                     Math.ceil(test.total_questions * 2.77) * 60 -
                                         test.remaining_time_seconds,
                                 );
+
                                 return (
                                     <div
                                         key={test.id}
                                         onClick={() => navigate(`/topic-test-result/${test.id}`)}
-                                        className="bg-white my-2 dark:bg-zinc-900 border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer group"
+                                        className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl p-4 my-2 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div
@@ -398,12 +385,10 @@ const TopicTest = () => {
                                             >
                                                 {icon}
                                             </div>
-
                                             <div>
                                                 <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                                                     {testName}
                                                 </h3>
-
                                                 <h4 className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
                                                     Time taken:{' '}
                                                     {test.total_questions &&
@@ -416,21 +401,11 @@ const TopicTest = () => {
 
                                         <div className="text-right">
                                             <div
-                                                className={`text-lg font-bold ${
-                                                    test.accuracy !== undefined
-                                                        ? test.accuracy >= 80
-                                                            ? 'text-green-600 dark:text-green-400'
-                                                            : test.accuracy < 40
-                                                              ? 'text-red-500 dark:text-red-400'
-                                                              : 'text-yellow-600 dark:text-yellow-400'
-                                                        : 'text-gray-500 dark:text-gray-400'
-                                                }`}
+                                                className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-green-600 dark:text-green-400' : test.accuracy < 40 ? 'text-red-500 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400') : 'text-gray-500 dark:text-gray-400'}`}
                                             >
                                                 {test.accuracy?.toFixed(2) ?? 0}%
                                             </div>
-                                            <p className="text-xs text-slate-400">
-                                                {`${test.score?.toFixed(2)}/${test.total_marks}`}
-                                            </p>
+                                            <p className="text-xs text-slate-400">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
                                         </div>
                                     </div>
                                 );

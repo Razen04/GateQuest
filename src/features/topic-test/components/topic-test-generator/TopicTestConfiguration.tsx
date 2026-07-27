@@ -33,7 +33,7 @@ const TopicTestConfiguration = ({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 mt-4 p-6 shadow-sm space-y-6"
+                    className="mt-4 space-y-6 rounded-3xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
                 >
                     <div>
                         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
@@ -44,15 +44,13 @@ const TopicTestConfiguration = ({
                             {visibleTopics.map((topic) => (
                                 <span
                                     key={`${topic.subjectName}-${topic.name}`}
-                                    className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium
-                    bg-blue-50 text-blue-700 border border-blue-200
-                    dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-blue-200/40 dark:border-blue-400/20 bg-blue-500/10 backdrop-blur-xl px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300"
                                 >
                                     <span className="opacity-70">{topic.subjectName}:</span>
                                     {topic.name}
                                     <button
                                         onClick={() => onRemoveTopic(topic.name)}
-                                        className="hover:text-red-500 transition-colors"
+                                        className="transition-colors hover:text-red-500"
                                     >
                                         <X weight="bold" />
                                     </button>
@@ -60,22 +58,22 @@ const TopicTestConfiguration = ({
                             ))}
 
                             {hiddenCount > 0 && (
-                                <span className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400">
+                                <span className="rounded-xl border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                                     +{hiddenCount} more
                                 </span>
                             )}
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-100 dark:border-zinc-800" />
+                    <div className="border-t border-white/20 dark:border-white/10" />
 
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide flex items-center gap-2">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
                         <Funnel className="w-4 h-4 text-orange-500" />
                         Step 3: Configure
                     </h3>
 
                     <div>
-                        <label className="text-sm text-gray-500 mb-3 block font-medium">
+                        <label className="block text-sm font-medium text-gray-500 mb-3">
                             Number of Questions
                         </label>
 
@@ -84,14 +82,7 @@ const TopicTestConfiguration = ({
                                 <Button
                                     key={opt}
                                     onClick={() => setQuestionLimit(opt)}
-                                    className={`
-                    px-4 py-2 text-sm font-medium transition-all
-                    ${
-                        questionLimit === opt
-                            ? 'bg-blue-700 dark:bg-blue text-white dark:text-white shadow'
-                            : 'bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700'
-                    }
-                  `}
+                                    className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${questionLimit === opt ? 'bg-blue-600/90 text-white shadow-lg backdrop-blur-xl' : 'bg-white/30 dark:bg-white/10 text-gray-600 dark:text-gray-400 border border-white/20 hover:bg-white/50 dark:hover:bg-white/20'}`}
                                 >
                                     {opt === 65 ? 'Max Available' : opt}
                                 </Button>
@@ -99,7 +90,7 @@ const TopicTestConfiguration = ({
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                    <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
                         <div>
                             <p className="text-sm font-medium">Include Attempted Questions</p>
                             <span className="text-xs text-gray-400">

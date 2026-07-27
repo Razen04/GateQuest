@@ -6,14 +6,18 @@ import StudyPlan from '../components/StudyPlan';
 import StreakMap from '../components/StreakMap';
 import StatCard from '../components/StatCard';
 import SubjectStats from '../components/SubjectStats';
-import { ChartLine, Medal } from '@phosphor-icons/react';
+import {
+    ChartLine,
+    Medal,
+    LightningIcon,
+    ArrowClockwiseIcon,
+    CaretDownIcon,
+} from '@phosphor-icons/react';
 import { containerVariants } from '@/shared/utils/motionVariants';
 import useAuth from '@/shared/hooks/useAuth';
 import useStats from '../hooks/useStats';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button';
-import { LightningIcon } from '@phosphor-icons/react';
-import { ArrowClockwiseIcon } from '@phosphor-icons/react';
 import { useGoals } from '@/shared/hooks/useGoals';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -22,7 +26,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { CaretDownIcon } from '@phosphor-icons/react';
 import Branding from '@/shared/components/Branding';
 import { WebNotificationToggle } from '../components/WebNotificationToggle';
 import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
@@ -34,30 +37,30 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { userGoal } = useGoals();
 
-    const activeExams = useMemo(() => {
-        return (userGoal?.target_exams as string[]) || [];
-    }, [userGoal?.target_exams]);
+    const activeExams = useMemo(
+        () => (userGoal?.target_exams as string[]) || [],
+        [userGoal?.target_exams],
+    );
 
     const [selectedExam, setSelectedExam] = useState(activeExams[0] || '');
 
     useEffect(() => {
-        const firstExam = activeExams[0];
-        if (firstExam && !selectedExam) {
-            setSelectedExam(firstExam);
+        if (activeExams[0] && !selectedExam) {
+            setSelectedExam(activeExams[0]);
         }
-    }, [selectedExam, activeExams]);
+    }, [activeExams, selectedExam]);
 
-    const currentSubjectStats = useMemo(() => {
-        return stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [];
-    }, [stats?.subjectStatsMap, selectedExam]);
+    const currentSubjectStats = useMemo(
+        () => stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [],
+        [stats?.subjectStatsMap, selectedExam],
+    );
 
     useEffect(() => {
-        if (currentSubjectStats.length > 0) {
+        if (currentSubjectStats.length) {
             localStorage.setItem('subjectStats', JSON.stringify(currentSubjectStats));
         }
     }, [currentSubjectStats]);
 
-    // Handle loading
     if (loading) {
         return (
             <div className="w-full flex justify-center items-center text-gray-600">
@@ -66,11 +69,9 @@ const Dashboard = () => {
         );
     }
 
-    // If not logged in
     if (!isLogin) {
         return (
             <div className="flex justify-center items-center w-full h-full">
-                {/* Sidebar will be rendered by Layout, so just render Login centered in content area */}
                 <div className="flex-1 flex justify-center items-center min-h-[60vh]">
                     <Login canClose={false} />
                 </div>
@@ -79,10 +80,9 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="p-6 pb-40 bg-gray-50 dark:bg-zinc-900 h-dvh overflow-y-scroll">
+        <div className="p-6 pb-40 h-dvh overflow-y-scroll bg-gradient-to-br from-white via-blue-50/40 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
             <WebNotificationToggle />
 
-            {/* Welcome */}
             <motion.div
                 variants={containerVariants}
                 initial="initial"
@@ -95,55 +95,46 @@ const Dashboard = () => {
                         {user?.name}
                     </span>
                 </h1>
+
                 <p className="text-gray-600 dark:text-gray-400">
                     Your preparation journey is {stats?.progress}% complete. Keep going!
                 </p>
             </motion.div>
 
-            <section className="w-full mb-4">
+            <section className="w-full mb-5">
                 <ContinueSessionWidget />
 
-                {/* Section header */}
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold uppercase tracking-wide">Smart Actions</h2>
-                </div>
+                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
+                    Smart Actions
+                </h2>
 
-                {/* Action buttons */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                     <Button
                         onClick={() => navigate('/topic-test')}
-                        aria-label="Start topic test"
-                        className="flex items-center gap-3 font-semibold px-6 py-6 shadow-md
-                       hover:bg-blue-50 hover:shadow-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
-                       transition-all duration-200"
+                        className="flex items-center gap-3 font-semibold px-6 py-6 rounded-2xl border border-white/20 bg-white/40 dark:bg-white/10 backdrop-blur-xl shadow-lg hover:bg-white/60 dark:hover:bg-white/20 transition-all"
                     >
                         <LightningIcon size={22} weight="bold" />
-                        <span>Topic Test</span>
+                        Topic Test
                     </Button>
 
                     <Button
                         onClick={() => navigate('/revision')}
-                        aria-label="Start smart revision"
-                        className="flex items-center gap-3 font-semibold px-6 py-6 shadow-md
-                       hover:bg-blue-50 hover:shadow-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2
-                       transition-all duration-200"
+                        className="flex items-center gap-3 font-semibold px-6 py-6 rounded-2xl border border-white/20 bg-white/40 dark:bg-white/10 backdrop-blur-xl shadow-lg hover:bg-white/60 dark:hover:bg-white/20 transition-all"
                     >
                         <ArrowClockwiseIcon size={22} weight="bold" />
-                        <span>Smart Revision</span>
+                        Smart Revision
                     </Button>
                 </div>
             </section>
 
-            {/* Stats */}
-            <div>
-                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide">Overview</h2>
+            <section>
+                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">Overview</h2>
+
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-2 mb-4"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5"
                 >
                     <StatCard
                         icon={ChartLine}
@@ -161,41 +152,57 @@ const Dashboard = () => {
                         bgColor="bg-purple-50"
                     />
                 </motion.div>
-            </div>
+            </section>
 
-            {/*Study Plan component*/}
-            <StudyPlan />
+            <section className="mb-5">
+                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">Study Plan</h2>
+                <StudyPlan />
+            </section>
 
-            {/* Streak Map component*/}
-            {!statsLoading && stats?.heatmapData?.length > 0 && <StreakMap stats={stats} />}
+            {!statsLoading && stats?.heatmapData?.length > 0 && (
+                <div>
+                    {' '}
+                    <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
+                        Streak Map
+                    </h2>
+                    <StreakMap stats={stats} />
+                </div>
+            )}
 
-            {/* Subject Stats (Contextual - With Dropdown) */}
-            <div className="w-full mt-8 mb-4">
-                {/* Exam Switcher */}
+            <section className="mt-6 mb-4">
                 {activeExams.length > 1 && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
-                                className="flex items-center gap-2 border-blue-200 dark:border-zinc-700"
+                                className="group rounded-xl border border-white/20 bg-white/30 dark:bg-white/10 backdrop-blur-xl shadow-md"
                             >
-                                <span className="font-bold text-blue-600 dark:text-blue-400">
+                                <span className="font-semibold text-blue-600 dark:text-blue-400">
                                     {selectedExam.toUpperCase()}
                                 </span>
-                                <CaretDownIcon size={14} weight="bold" />
+
+                                <CaretDownIcon
+                                    size={14}
+                                    weight="bold"
+                                    className="ml-2 transition-transform group-data-[state=open]:rotate-180"
+                                />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
+
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-40 rounded-xl border border-white/20 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-xl"
+                        >
                             {activeExams.map((exam) => (
                                 <DropdownMenuItem
                                     key={exam}
                                     onClick={() => setSelectedExam(exam)}
-                                    className={
+                                    className={`rounded-lg ${
                                         selectedExam === exam
-                                            ? 'bg-blue-50 dark:bg-zinc-800 font-bold'
+                                            ? 'bg-blue-500/10 text-blue-600 font-semibold'
                                             : ''
-                                    }
+                                    }`}
                                 >
                                     {exam.toUpperCase()}
                                 </DropdownMenuItem>
@@ -203,12 +210,18 @@ const Dashboard = () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )}
-            </div>
+            </section>
 
             {currentSubjectStats.length > 0 ? (
-                <SubjectStats subjectStats={currentSubjectStats} />
+                <div>
+                    <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
+                        Subject Stats
+                    </h2>
+
+                    <SubjectStats subjectStats={currentSubjectStats} />
+                </div>
             ) : (
-                <div className="p-12 text-center border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-lg">
+                <div className="p-12 text-center rounded-3xl border border-dashed border-white/20 bg-white/30 dark:bg-white/5 backdrop-blur-xl">
                     <p className="text-gray-500">No data found for {selectedExam} subjects.</p>
                 </div>
             )}

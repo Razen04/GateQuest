@@ -98,28 +98,33 @@ const AccountSettings = () => {
     };
 
     return (
-        <div className="pb-20 px-4">
-            <div className="space-y-6">
-                <div className="flex items-center">
-                    <div className="h-12 w-12 flex items-center justify-center p-1 mr-5 bg-gray-100 dark:bg-gray-800">
+        <div className="pb-16 px-3 sm:px-4">
+            <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden">
                         {user?.avatar ? (
-                            <img src={user?.avatar} alt="User avatar" className="w-full" />
+                            <img
+                                src={user?.avatar}
+                                alt="User avatar"
+                                className="w-full h-full object-cover"
+                            />
                         ) : (
                             <User className="text-gray-600 dark:text-gray-300" />
                         )}
                     </div>
-                    <div>
-                        <h3 className="font-medium">
+
+                    <div className="min-w-0">
+                        <h3 className="font-medium text-sm truncate">
                             {user?.name ? user.name : 'Anonymous User'}{' '}
                             <span className="text-gray-500">• v{user?.version_number}</span>
                         </h3>
-                        <p className="text-sm text-gray-500">{user?.targetYear} Aspirant</p>
-                        <p className="text-sm text-gray-500">{user?.college}</p>
+                        <p className="text-xs text-gray-500">{user?.targetYear} Aspirant</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.college}</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
                         <Label>Your Name</Label>
                         <Input
                             type="text"
@@ -130,22 +135,17 @@ const AccountSettings = () => {
                         />
                     </div>
 
-                    {user?.email ? (
-                        <div className="flex flex-col gap-2">
-                            <Label>Email Address</Label>
-                            <Input type="email" defaultValue={user.email} disabled />
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-2">
-                            <Label>Email Address</Label>
-                            <Input
-                                type="email"
-                                placeholder="your.email@example.com"
-                                disabled={isSaving}
-                            />
-                        </div>
-                    )}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-1.5">
+                        <Label>Email Address</Label>
+                        <Input
+                            type="email"
+                            defaultValue={user?.email || ''}
+                            placeholder="your.email@example.com"
+                            disabled
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
                         <Label>College/University</Label>
                         <Input
                             type="text"
@@ -157,7 +157,7 @@ const AccountSettings = () => {
                     </div>
 
                     <div>
-                        <Label className="block text-sm font-medium mb-1">Target Year</Label>
+                        <Label className="block text-sm mb-1">Target Year</Label>
                         <Select
                             onValueChange={(e) => setTargetYear(Number(e))}
                             value={String(targetYear)}
@@ -176,9 +176,8 @@ const AccountSettings = () => {
                         </Select>
                     </div>
 
-                    {/* Subject Selection and Exams */}
                     <div>
-                        <Label className="block text-sm font-medium mb-1">Branch</Label>
+                        <Label className="block text-sm mb-1">Branch</Label>
                         <Select
                             value={tempBranch}
                             onValueChange={handleBranchChange}
@@ -191,6 +190,7 @@ const AccountSettings = () => {
                                     }
                                 />
                             </SelectTrigger>
+
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Branches</SelectLabel>
@@ -205,7 +205,8 @@ const AccountSettings = () => {
                     </div>
 
                     <div>
-                        <Label className="block text-sm font-medium mb-1">Exams</Label>
+                        <Label className="block text-sm mb-1">Exams</Label>
+
                         <Combobox
                             items={availableExams}
                             multiple
@@ -226,10 +227,13 @@ const AccountSettings = () => {
                                         );
                                     })}
                                 </ComboboxValue>
+
                                 <ComboboxChipsInput placeholder="Add exams" />
                             </ComboboxChips>
+
                             <ComboboxContent>
                                 <ComboboxEmpty>No items found.</ComboboxEmpty>
+
                                 <ComboboxList>
                                     {(exam) => (
                                         <ComboboxItem key={exam.id} value={exam.id}>
@@ -239,8 +243,9 @@ const AccountSettings = () => {
                                 </ComboboxList>
                             </ComboboxContent>
                         </Combobox>
+
                         <p className="text-xs text-muted-foreground mt-1">
-                            Selecting multiple exams will merge their subjects in your practice tab.
+                            Multiple exams merge subjects in your practice tab.
                         </p>
                     </div>
                 </div>

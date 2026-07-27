@@ -82,7 +82,7 @@ const TopicsSelection = ({
                             variant="ghost"
                             size="sm"
                             onClick={handleSelectAll}
-                            className="h-10 px-2 font-bold uppercase tracking-tighter hover:bg-blue-50 hover:text-white dark:hover:bg-blue-500/20 bg-blue-500"
+                            className="h-10 px-3 rounded-xl font-bold uppercase tracking-tighter bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-500/80"
                         >
                             {isAllSelected ? (
                                 <span className="flex items-center gap-1">
@@ -97,12 +97,12 @@ const TopicsSelection = ({
                     )}
 
                     <div className="flex justify-between items-end">
-                        <label className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                        <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
                             <StackIcon className="w-4 h-4 text-purple-500" />
                             Step 2: Select Topics
                         </label>
 
-                        <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400">
+                        <span className="rounded-xl border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                             {selectedTopics.length} selected
                         </span>
                     </div>
@@ -112,7 +112,7 @@ const TopicsSelection = ({
                             {[...Array(6)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="h-14 bg-gray-200 dark:bg-zinc-800 animate-pulse"
+                                    className="h-14 rounded-xl bg-gray-200 dark:bg-zinc-800 animate-pulse"
                                 />
                             ))}
                         </div>
@@ -126,46 +126,25 @@ const TopicsSelection = ({
                                             t.subjectId === topic.subjectId,
                                     );
 
-                                    const displayedCount = includeAttempted
-                                        ? topic.questionCount
-                                        : topic.unattemptedCount;
-
-                                    console.debug(
-                                        '[TopicCard] includeAttempted:',
-                                        includeAttempted,
-                                    );
-                                    console.debug('[TopicCard] topic:', topic);
-                                    console.debug('[TopicCard] displayedCount:', displayedCount);
-
                                     return (
                                         <div
                                             key={`${topic.subjectName}-${topic.name}`}
                                             onClick={() => handleTopicToggle(topic)}
-                                            className={`p-3 border cursor-pointer transition-all select-none flex items-center justify-between
-                        ${
-                            isSelected
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                                : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 hover:border-blue-300'
-                        }`}
+                                            className={`rounded-2xl border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10 hover:border-blue-300'}`}
                                         >
                                             <div>
                                                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                                                     {topic.name}
                                                 </p>
                                                 <p className="text-xs text-gray-400">
-                                                    {/* Toggle the displayed count based on includeAttempted prop */}
                                                     {includeAttempted
                                                         ? `${topic.questionCount} total questions`
                                                         : `${topic.unattemptedCount} available questions`}
                                                 </p>
                                             </div>
+
                                             <div
-                                                className={`w-5 h-5 border flex items-center justify-center
-                          ${
-                              isSelected
-                                  ? 'bg-blue-500 border-blue-500 text-white'
-                                  : 'border-gray-300 dark:border-zinc-700'
-                          }`}
+                                                className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 dark:border-zinc-700'}`}
                                             >
                                                 <Check className="w-3 h-3" strokeWidth={3} />
                                             </div>
@@ -195,9 +174,7 @@ const TopicsSelection = ({
                                     >
                                         Other topics ({minorTopics.length})
                                         <CaretDown
-                                            className={`transition-transform ${
-                                                showMinorTopics ? 'rotate-180' : ''
-                                            }`}
+                                            className={`transition-transform ${showMinorTopics ? 'rotate-180' : ''}`}
                                         />
                                     </Button>
 
@@ -220,12 +197,7 @@ const TopicsSelection = ({
                                                         <div
                                                             key={`${topic.subjectName}-${topic.name}`}
                                                             onClick={() => handleTopicToggle(topic)}
-                                                            className={`p-2 border text-sm cursor-pointer flex justify-between items-center
-                                ${
-                                    isSelected
-                                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                                        : 'border-gray-200 dark:border-zinc-800'
-                                }`}
+                                                            className={`rounded-xl border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10'}`}
                                                         >
                                                             <div>
                                                                 <span>{topic.name}: </span>
@@ -235,11 +207,7 @@ const TopicsSelection = ({
                                                             </div>
 
                                                             <Check
-                                                                className={`w-3 h-3 ${
-                                                                    isSelected
-                                                                        ? 'text-blue-600'
-                                                                        : 'text-transparent'
-                                                                }`}
+                                                                className={`w-3 h-3 ${isSelected ? 'text-blue-600' : 'text-transparent'}`}
                                                             />
                                                         </div>
                                                     );
