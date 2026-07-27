@@ -44,14 +44,15 @@ const AppSettings = () => {
     };
 
     return (
-        <div className="pb-20 px-4">
-            <div className="space-y-1">
+        <div className="pb-16 px-3 sm:px-4">
+            <div className="space-y-0.5">
                 <ToggleSwitch
                     isOn={settings.sound}
                     onToggle={() => handleSettingToggle('sound')}
                     label="Sound Effects"
                     disabled={isLoading}
                 />
+
                 <ToggleSwitch
                     label="Auto Timer"
                     onToggle={() => handleSettingToggle('autoTimer')}
@@ -73,20 +74,28 @@ const AppSettings = () => {
                     disabled={isLoading}
                 />
 
-                <div className="py-3 border-t border-border-primary dark:border-border-primary-dark mt-3 pt-4">
+                <ToggleSwitch
+                    label="Enable Beta Updates (Dangerous)"
+                    onToggle={() => handleSettingToggle('is_beta')}
+                    isOn={settings.is_beta}
+                    disabled={isLoading}
+                />
+
+                <div className="border-t border-border-primary dark:border-border-primary-dark mt-3 pt-3">
                     <AskAI />
                 </div>
 
-                <div className="py-3 border-t border-border-primary dark:border-border-primary-dark mt-3 pt-3">
-                    <h3 className="text-lg font-medium mb-2">App Information</h3>
+                <div className="border-t border-border-primary dark:border-border-primary-dark mt-3 pt-3">
+                    <h3 className="text-base font-semibold mb-2">App Information</h3>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5 text-sm">
                         <div className="flex justify-between items-center">
-                            <span>Version</span>
+                            <span className="text-muted-foreground">Version</span>
                             <span>{APP_VERSION}</span>
                         </div>
+
                         <div className="flex justify-between items-center">
-                            <span>Last Updated</span>
+                            <span className="text-muted-foreground">Last Updated</span>
                             <span>{APP_LAST_UPDATED_AT}</span>
                         </div>
                     </div>

@@ -1,6 +1,3 @@
-// This file provides authentication context for the application.
-// It manages user state, handles login/logout with Supabase, and synchronizes the user's profile with the database upon authentication.
-
 import React, { useEffect, useRef, useState } from 'react';
 import AuthContext from './AuthContext.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
@@ -10,121 +7,122 @@ import type { Session } from '@supabase/supabase-js';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import { appStorage } from '@/storage/storageService.ts';
 
-// The AuthProvider component handles all authentication logic.
-// It exposes the user object, login/logout functions, and loading state to its children.
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
-    // This state controls the visibility of a login modal/dialog.
     const [showLogin, setShowLogin] = useState(false);
-    // We need the updateStats function from StatsContext to refresh stats after login.
     const { refresh } = useStudyPlan();
     const userIdRef = useRef<string | null>(null);
+    const refreshRef = useRef(refresh);
 
-    // True if a user object exists (includes guests, not just logged-in users).
     const isLogin = !!user && user.id !== '1';
 
+    // Keep ref up to date without re-subscribing the effect
     useEffect(() => {
-        // Processes a Supabase session to set the user state and sync their profile.
+        refreshRef.current = refresh;
+    }, [refresh]);
+
+    useEffect(() => {
+        let isMounted = true;
+
         const handleSession = async (session: Session | null) => {
             const supaUser = session?.user || null;
 
-            if (supaUser && userIdRef.current === supaUser.id) {
-                setLoading(false);
+            if (!supaUser) {
+                userIdRef.current = null;
+                setUser(null);
+                localStorage.removeItem('gate_user_profile');
+                if (isMounted) setLoading(false);
                 return;
             }
 
-            if (supaUser) {
-                userIdRef.current = supaUser.id;
-                // If a user session exists, we 'upsert' their profile.
-                // This creates a profile if it doesn't exist or updates it if it does.
-                const { data, error } = await supabase
+            if (userIdRef.current === supaUser.id && user) {
+                if (isMounted) setLoading(false);
+                return;
+            }
+
+            userIdRef.current = supaUser.id;
+
+            // 1. Fetch existing profile first to avoid overwriting user progress (e.g. total_xp)
+            const { data: existingUser } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', supaUser.id)
+                .maybeSingle();
+
+            let finalProfile = existingUser;
+
+            // 2. If profile doesn't exist, create it with default values
+            if (!existingUser) {
+                const newProfile = {
+                    id: supaUser.id,
+                    email: supaUser.email ?? null,
+                    name: supaUser.user_metadata?.full_name || '',
+                    avatar: supaUser.user_metadata?.avatar_url ?? null,
+                    show_name: true,
+                    total_xp: 0,
+                    settings: {
+                        sound: true,
+                        autoTimer: true,
+                        darkMode: true,
+                        is_beta: false,
+                    },
+                };
+
+                const { data: insertedData, error } = await supabase
                     .from('users')
-                    .upsert({
-                        id: supaUser.id,
-                        email: supaUser.email,
-                        name: supaUser.user_metadata.full_name,
-                        avatar: supaUser.user_metadata.avatar_url,
-                        // Sensible defaults for a new user profile.
-                        show_name: true,
-                        total_xp: 0,
-                        settings: {
-                            sound: true,
-                            autoTimer: true,
-                            darkMode: true,
-                        },
-                    })
-                    .select(); // .select() returns the created/updated profile data.
+                    .insert(newProfile)
+                    .select()
+                    .single();
 
-                if (!error && data) {
-                    // Ensure profile fields have default values to prevent runtime errors.
-                    const profile = {
-                        ...data[0],
-                        bookmark_questions: data[0].bookmark_questions || [],
-                        college: data[0].college || '',
-                        targetYear: data[0].targetYear || 2026,
-                        version_number: data[0].version_number || 1,
-                        settings: {
-                            ...{
-                                sound: true,
-                                autoTimer: true,
-                                darkMode: true,
-                                shareProgress: false,
-                                dataCollection: false,
-                            },
-                            ...data[0].settings,
-                        },
-                    };
-                    // Store the user profile in localStorage for quick access elsewhere in the app.
-                    localStorage.setItem('gate_user_profile', JSON.stringify(profile));
-                    // Trigger a stats update now that we have a logged-in user.
-                    refresh();
-                    setUser(supaUser);
-                }
-            } else {
-                // If there's no session, clear the user state and local storage.
-                setUser(null);
-                localStorage.removeItem('gate_user_profile');
+                if (!error) finalProfile = insertedData;
             }
 
-            setLoading(false);
-        };
+            if (finalProfile && isMounted) {
+                const rawSettings =
+                    typeof finalProfile.settings === 'object' && finalProfile.settings !== null
+                        ? (finalProfile.settings as Record<string, boolean>)
+                        : {};
 
-        // This function attempts to get the initial session, retrying a few times.
-        // This can help with race conditions where the app initializes before the Supabase client.
-        const initSession = async () => {
-            for (let i = 0; i < 5; i++) {
-                const {
-                    data: { session },
-                } = await supabase.auth.getSession();
-                if (session) {
-                    await handleSession(session);
-                    return; // Exit once the session is handled.
-                }
-                await new Promise((r) => setTimeout(r, 500)); // Wait before retrying.
+                const profile = {
+                    ...finalProfile,
+                    bookmark_questions: finalProfile.bookmark_questions || [],
+                    college: finalProfile.college || '',
+                    targetYear: finalProfile.targetYear || 2027,
+                    version_number: finalProfile.version_number || 1,
+                    settings: {
+                        sound: true,
+                        autoTimer: true,
+                        darkMode: true,
+                        is_beta: false,
+                        shareProgress: false,
+                        dataCollection: false,
+                        ...rawSettings,
+                    },
+                };
+
+                localStorage.setItem('gate_user_profile', JSON.stringify(profile));
+                refreshRef.current();
+                setUser(profile as unknown as AppUser);
             }
-            // If no session is found after retries, stop the loading state.
-            setLoading(false);
+
+            if (isMounted) setLoading(false);
         };
 
-        initSession();
-
-        // Listen for changes in the authentication state (e.g., login, logout).
-        const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            // Reset the initialized flag to allow the handler to process the new session state.
+        // Rely on onAuthStateChange for session initialization & updates
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
             handleSession(session);
         });
 
-        // Cleanup the listener when the component unmounts to prevent memory leaks.
-        return () => listener?.subscription.unsubscribe();
+        return () => {
+            isMounted = false;
+            listener?.subscription.unsubscribe();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // The empty dependency array ensures this effect runs only once on mount.
+    }, []);
 
-    // Initiates the Google OAuth login flow provided by Supabase.
-    // Processes the token after the user clicks the Google button in your UI
     const handleLogin = async (credential: string) => {
-        // This sends the token to Supabase via your unblocked Cloudflare proxy
-        const { data, error } = await supabase.auth.signInWithIdToken({
+        const { error } = await supabase.auth.signInWithIdToken({
             provider: 'google',
             token: credential,
         });
@@ -133,7 +131,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             console.error('Auth error:', error.message);
             toast.error('Failed to log in');
         } else {
-            setShowLogin(false); // Close your modal on success
+            setShowLogin(false);
         }
     };
 
@@ -147,11 +145,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         ];
 
         try {
-            staleKeys.forEach((k) => {
-                if (k) {
-                    localStorage.removeItem(k);
-                }
-            });
+            staleKeys.forEach((k) => localStorage.removeItem(k));
         } catch (e) {
             console.warn('⚠️ localStorage clearing error:', e);
         }
@@ -164,7 +158,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         }
     };
 
-    // Signs the user out and reloads the page to ensure a clean state.
     const logout = async () => {
         await supabase.auth.signOut();
         await clearStaleData();
@@ -172,7 +165,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         window.location.reload();
     };
 
-    // The context provider makes all auth-related state and functions available to child components.
     return (
         <AuthContext.Provider
             value={{

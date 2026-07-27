@@ -14,6 +14,7 @@ type GuestUser = {
     show_name?: boolean | null;
     targetYear?: number | null;
     total_xp?: number | null;
+    deleted_at: string | null;
 };
 
 export type AppUser = User | GuestUser;

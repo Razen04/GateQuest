@@ -17,6 +17,7 @@ const defaultSettings: Settings = {
     aiProvider: 'chatgpt',
     aiCustomPrompt: DEFAULT_TEMPLATE,
     notifications: false,
+    is_beta: false,
 };
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.
