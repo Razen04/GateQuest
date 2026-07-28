@@ -11,6 +11,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(false);
+    const [needsUsername, setNeedsUsername] = useState(false);
+
     const { refresh } = useStudyPlan();
     const userIdRef = useRef<string | null>(null);
     const refreshRef = useRef(refresh);
@@ -31,6 +33,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             if (!supaUser) {
                 userIdRef.current = null;
                 setUser(null);
+                setNeedsUsername(false);
                 localStorage.removeItem('gate_user_profile');
                 if (isMounted) setLoading(false);
                 return;
@@ -101,6 +104,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                     },
                 };
 
+                // Check username condition
+                if (supaUser.id !== '1' && !profile.username) {
+                    setNeedsUsername(true);
+                } else {
+                    setNeedsUsername(false);
+                }
+
                 localStorage.setItem('gate_user_profile', JSON.stringify(profile));
                 refreshRef.current();
                 setUser(profile as unknown as AppUser);
@@ -169,12 +179,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         <AuthContext.Provider
             value={{
                 user,
+                setUser,
                 handleLogin,
                 logout,
                 isLogin,
                 loading,
                 showLogin,
                 setShowLogin,
+                needsUsername,
+                setNeedsUsername,
             }}
         >
             {children}
