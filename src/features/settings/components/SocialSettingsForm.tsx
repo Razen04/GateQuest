@@ -17,7 +17,11 @@ import {
 } from '@phosphor-icons/react';
 import { getSocialSettingsValue, handleUpdateSocialSettings } from '../api/social-settings';
 
-export default function SocialSettingsForm() {
+interface SocialSettingsFormProps {
+    onSuccess?: () => void;
+}
+
+export default function SocialSettingsForm({ onSuccess }: SocialSettingsFormProps) {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -70,6 +74,7 @@ export default function SocialSettingsForm() {
             toast.error('Failed to save social links.');
         } else {
             toast.success('Social links updated successfully!');
+            onSuccess?.();
         }
         setIsSaving(false);
     };

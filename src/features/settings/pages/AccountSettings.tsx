@@ -189,7 +189,7 @@ const AccountSettings = () => {
                                 you.
                             </DialogDescription>
                         </DialogHeader>
-                        <SocialSettingsForm />
+                        <SocialSettingsForm onSuccess={() => setOpenSocialSettings(false)} />
                     </DialogContent>
                 </Dialog>
 
