@@ -50,6 +50,7 @@ Stores public profile information for authenticated users. This table is linked 
 | `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                          |
 | `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                             |
 | `version_number`     | `integer`     | `DEFAULT 1`                                     | Used for versioning or schema updates related to user settings Clear Data feature. |
+| `deleted_at`         | `timestamptz` | `DEFAULT NULL`                                  | Used when the user deletes their account to store the date and time of deletion    |
 
 **Row Level Security (RLS) Policies:**
 
@@ -1351,4 +1352,112 @@ SELECT get_critical_question_count(
         '22222222-2222-2222-2222-000000000002'
     ]::uuid[]
 );
+```
+
+---
+
+### Function: `delete_account()`
+
+**Purpose:** Permanently removes a user's account from the authentication system while preserving required historical and engagement-related data. The function performs a controlled account deletion workflow by removing personal and engagement-specific data that is no longer useful after account closure, anonymising remaining user records, and maintaining necessary audit/history records without retaining personally identifiable information.
+
+This function is used to support user-initiated account deletion while complying with data minimisation requirements.
+
+**Logic Flow:**
+
+1. **Authentication & Target User Retrieval**:
+    - The function identifies the currently authenticated user using `auth.uid()`.
+    - If no authenticated user exists, the function raises a `Not authenticated` exception and stops execution.
+    - The authenticated user's UUID is stored as the target account identifier for all subsequent operations.
+
+2. **Removal of User-Specific Engagement Data**:
+    - Deletes records from tables that contain user-generated or temporary engagement data which does not provide long-term analytical value after account deletion.
+
+    The following data is permanently removed:
+    - **Topic Tests**:
+        - Deletes all records from `topic_tests` associated with the user.
+        - Removes generated test sessions and their related user-specific test data.
+
+    - **Weekly Revision Sets**:
+        - Deletes generated revision sets from `weekly_revision_set`.
+        - Removes personalised revision schedules created for the user.
+
+    - **Incorrect Question Queue**:
+        - Deletes all records from `user_incorrect_queue`.
+        - Removes the user's spaced-repetition mistake tracking data.
+
+    - **Push Subscriptions**:
+        - Deletes all registered push notification subscriptions from `push_subscriptions`.
+        - Prevents future notifications from being delivered to the deleted account.
+
+    - **User Goals**:
+        - Deletes records from `user_goals`.
+        - Removes the user's selected academic goals, branches, and practice preferences.
+
+3. **Preservation of Donation History**:
+    - Donation records are retained for historical.
+    - The `user_id` field is set to `NULL` for all donations associated with the deleted account.
+    - This removes the identity relationship while preserving donation records.
+
+4. **User Data Anonymisation**:
+    - Updates the user's record in the `users` table instead of deleting it.
+    - The following personal information is replaced or cleared:
+
+| Field                | New Value                           | Purpose                                                 |
+| :------------------- | :---------------------------------- | :------------------------------------------------------ |
+| `name`               | `"Deleted Account"`                 | Removes the user's identity                             |
+| `email`              | `deleted_<user_id>anonymised@local` | Removes the original email while maintaining uniqueness |
+| `avatar`             | `NULL`                              | Removes profile image data                              |
+| `settings`           | `{}`                                | Clears stored preferences                               |
+| `bookmark_questions` | `{}`                                | Removes saved question references                       |
+| `deleted_at`         | Current timestamp                   | Marks the account as deleted                            |
+
+This allows internal references from historical data to remain valid while ensuring no personally identifiable information remains.
+
+5. **Preservation of Historical Activity Data**:
+    - Certain records are intentionally preserved because they contribute to platform analytics and historical insights.
+    - These records remain linked to the anonymised user identity.
+
+    Preserved tables:
+    - `user_question_activity`:
+        - Existing activity records remain available.
+        - They continue referencing the anonymised user record for engagement analytics.
+
+    - `question_reports` :
+        - Existing reports remain linked to the anonymised user so they can still be fixed.
+
+6. **Authentication Account Removal**:
+    - Deletes the user's record from `auth.users`.
+    - Removes access credentials and prevents future authentication using the deleted account so that they can signup again with the same credential into a new account.
+
+**Key Behaviors & Guarantees:**
+
+- **Complete Account Removal**:
+    - The user's authentication identity is removed permanently from the system.
+
+- **Privacy Protection Through Anonymisation**:
+    - Personal information is removed while preserving necessary historical records.
+
+- **Data Minimisation**:
+    - Temporary and engagement-specific data is deleted when it no longer provides value.
+
+- **Historical Integrity Preservation**:
+    - Donation records, user activity, and reports remain available without retaining personal identity.
+
+- **Safe Deletion Ordering**:
+    - User-generated and dependent data is removed before deleting the authentication record to avoid orphaned references.
+
+- **Authentication Safety**:
+    - The function can only execute for the currently authenticated user and cannot delete another user's account.
+
+**Return Value:**
+
+Returns `void`.
+
+The function completes silently when account deletion succeeds. If the user is not authenticated, it raises an exception.
+
+**Example SQL Usage:**
+
+```sql
+-- Delete the currently authenticated user's account
+SELECT delete_account();
 ```
