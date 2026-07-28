@@ -14,7 +14,7 @@ import { doesUsernameExists, handleUsernameSubmittion } from './api/usernameChec
 import { RESERVED_WORDS } from './data/reservedWords';
 
 export function UsernameModal() {
-    const { user, needsUsername, setNeedsUsername } = useAuth();
+    const { user, setUser, needsUsername, setNeedsUsername } = useAuth();
     const [username, setUsername] = useState('');
     const [isChecking, setIsChecking] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,12 +74,18 @@ export function UsernameModal() {
             return;
         }
 
+        const updatedUser = { ...user, username };
+
         const stored = localStorage.getItem('gate_user_profile');
         if (stored) {
             const profile = JSON.parse(stored);
             profile.username = username;
             localStorage.setItem('gate_user_profile', JSON.stringify(profile));
+        } else {
+            localStorage.setItem('gate_user_profile', JSON.stringify(updatedUser));
         }
+
+        setUser(updatedUser);
 
         toast.success(`Welcome to GATEQuest, @${username}!`);
         setNeedsUsername(false);
