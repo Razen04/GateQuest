@@ -5,9 +5,9 @@ import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
 import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
 import { getUserProfile } from '@/shared/utils/helper.ts';
 import { useGoals } from '@/shared/hooks/useGoals.js';
+import type { DashboardResponse } from '@/shared/types/StatsType.js';
 
-// The StatsProvider component orchestrates fetching and processing user activity data.
-const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [stats, setStats] = useState<Stats>({
         progress: 0,
         accuracy: 0,
@@ -36,14 +36,7 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const updateStats = useCallback(async () => {
         const user = getUserProfile();
 
-        // 1. Basic Validation
-        if (
-            !user ||
-            user.id === '1' ||
-            user.version_number === undefined ||
-            !userGoal ||
-            !userGoal.target_exams
-        ) {
+        if (!user || user.id === '1' || user.version_number === undefined) {
             setLoading(false);
             return;
         }
@@ -51,9 +44,6 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         setLoading(true);
 
         try {
-            // ==========================================
-            // STEP 1: The Single Database Call
-            // ==========================================
             const { data, error } = await supabase.rpc('get_my_dashboard');
 
             if (error || !data) {
@@ -62,61 +52,75 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 return;
             }
 
-            // ==========================================
-            // STEP 2: Extract RPC Data
-            // ==========================================
-            const activeExams = (userGoal.target_exams as string[]).map((e) => e.toLowerCase());
+            const dashboardData = data as unknown as DashboardResponse;
+            console.log('Dashboard Data: ', dashboardData);
+
+            // Normalize active exams array
+            const rawTargetExams = userGoal?.target_exams || ['gate'];
+            const activeExams = rawTargetExams.map((e) => e.toLowerCase());
             const primaryExam = activeExams[0] || 'gate';
 
-            const primaryExamStats = data.exam_stats[primaryExam] || {
+            // Case-insensitive lookup helper for exam_stats JSON keys from DB
+            const findExamStats = (examName: string) => {
+                const keys = Object.keys(dashboardData.exam_stats || {});
+                const matchKey = keys.find((k) => k.toLowerCase() === examName.toLowerCase());
+                return matchKey ? dashboardData.exam_stats[matchKey] : null;
+            };
+
+            const primaryExamStats = findExamStats(primaryExam) || {
                 overall_accuracy: 0,
                 overall_attempted: 0,
                 total_available: 0,
                 subjects: [],
             };
 
-            // Reconstruct the Subject Stats Map (Now includes backend progress, icons, and colors!)
+            // Reconstruct Subject Stats Map for all targeted exams
             const newSubjectStatsMap: Record<string, SubjectStat[]> = {};
             activeExams.forEach((exam) => {
-                newSubjectStatsMap[exam.toUpperCase()] = data.exam_stats[exam]?.subjects || [];
+                const examData = findExamStats(exam);
+                const upperKey = exam.toUpperCase();
+                newSubjectStatsMap[upperKey] = examData?.subjects || [];
             });
 
-            const defaultSubjectStats = newSubjectStatsMap[primaryExam.toUpperCase()] || [];
-            localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
+            const defaultSubjectStats = primaryExamStats.subjects || [];
 
-            // ==========================================
-            // STEP 3: Map Global State directly from Backend
-            // ==========================================
+            // Persist to local storage
+            try {
+                localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
+            } catch (e) {
+                console.warn('Failed to save subjectStats to localStorage', e);
+            }
+
+            // Global Metrics
             const totalQuestions = primaryExamStats.total_available || 0;
             const uniqueAttemptCount = primaryExamStats.overall_attempted || 0;
             const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
             const overallUniqueProgressPercent =
                 totalQuestions > 0 ? Math.round((uniqueAttemptCount / totalQuestions) * 100) : 0;
 
-            const dbStats = data.dashboard_stats;
+            const dbStats = dashboardData.dashboard_stats || {};
 
             setStats({
                 progress: overallUniqueProgressPercent,
                 accuracy: primaryExamStats.overall_accuracy || 0,
-                subjectStats: defaultSubjectStats,
+                subjectStats: defaultSubjectStats, // Ensures SubjectStats component updates dynamically
                 subjectStatsMap: newSubjectStatsMap,
                 question: new Set(),
-                heatmapData: data.heatmap,
+                heatmapData: dashboardData.heatmap || [],
                 streaks: {
-                    current: data.streaks.study_current || 0,
-                    longest: data.streaks.study_longest || 0,
+                    current: dashboardData.streaks?.study_current || 0,
+                    longest: dashboardData.streaks?.study_longest || 0,
                 },
-                // All of this is now instantly fed by your powerful RPC
                 studyPlan: {
                     totalQuestions,
                     uniqueAttemptCount,
                     remainingQuestions,
-                    daysLeft: dbStats.days_left,
-                    dailyQuestionTarget: dbStats.daily_question_target,
-                    todayUniqueAttemptCount: dbStats.today_unique_attempt_count,
+                    daysLeft: dbStats.days_left || 0,
+                    dailyQuestionTarget: dbStats.daily_question_target || 0,
+                    todayUniqueAttemptCount: dbStats.today_unique_attempt_count || 0,
                     progressPercent: overallUniqueProgressPercent,
-                    todayProgressPercent: dbStats.today_progress_percent,
-                    isTargetMetToday: dbStats.is_target_met_today,
+                    todayProgressPercent: dbStats.today_progress_percent || 0,
+                    isTargetMetToday: dbStats.is_target_met_today || false,
                 },
             });
         } catch (err) {
@@ -126,15 +130,17 @@ const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         }
     }, [userGoal]);
 
+    // Initial trigger
     useEffect(() => {
-        let u = getUserProfile();
+        const u = getUserProfile();
         if (!u || u.id === '1') {
             setLoading(false);
             return;
         }
         updateStats();
-    }, [currentSet?.set_id, userGoal, updateStats]);
+    }, [currentSet?.set_id, updateStats]);
 
+    // Global Event Handlers
     useEffect(() => {
         const handleRevisionUpdate = () => fetchCurrentSet();
         const handleStatsUpdate = () => updateStats();
