@@ -145,64 +145,71 @@ declare
     v_primary_exam text;
     v_exam_total_available int := 0;
 begin
-    -- Get user goals safely
-    select lower(branch_id), lower(nullif(jsonb_array_elements_text(target_exams), ''))
+    -- 1. Safe target exam and branch extraction
+    select 
+        lower(branch_id), 
+        lower(target_exams->>0) -- Safely grabs the first target exam
     into v_branch_id, v_primary_exam
     from public.user_goals
     where user_id = p_user_id and is_active = true
     limit 1;
 
-    if v_primary_exam is null or v_branch_id is null then
+    if v_primary_exam is null then
         return '{}'::jsonb;
     end if;
 
-    -- Calculate Total Available Questions
-    select coalesce(sum(s.question_count), 0)::int
-    into v_exam_total_available
-    from public.branch_subjects bs
-    join public.exams_subjects es on bs.subject_id = es.subject_id
-    join public.subjects s on s.id = bs.subject_id
-    where lower(bs.branch_id) = v_branch_id and lower(es.exams_id) = v_primary_exam;
-
-    -- Build Subject Array & Aggregates
-    with subject_activity as (
+    -- 2. Get distinct valid subjects for this exam (including common subjects like Aptitude)
+    with exam_subjects_list as (
+        select distinct s.id, s.name, s.slug, s.icon_name, s.theme_color, s.question_count
+        from public.subjects s
+        join public.exams_subjects es on es.subject_id = s.id
+        left join public.branch_subjects bs on bs.subject_id = s.id
+        where lower(es.exams_id) = v_primary_exam
+          and (
+              bs.branch_id is null 
+              or lower(bs.branch_id) = coalesce(v_branch_id, lower(bs.branch_id))
+          )
+    ),
+    -- 3. Calculate attempts per subject
+    subject_activity as (
         select
             q.subject_id,
             count(distinct uqa.question_id)::int as attempted,
-            sum(case when uqa.was_correct then 1 else 0 end)::int as correct,
-            -- Safe division for activity accuracy
-            coalesce(round(sum(case when uqa.was_correct then 1 else 0 end) * 100.0 / nullif(count(uqa.id), 0)), 0)::int as accuracy
+            sum(case when uqa.was_correct then 1 else 0 end)::int as correct
         from public.user_question_activity uqa
         join public.questions q on uqa.question_id = q.id
         where uqa.user_id = p_user_id and uqa.user_version_number = p_version_number
         group by q.subject_id
     ),
+    -- 4. Build JSON Array & Calculate Totals
     subject_agg as (
-        select jsonb_agg(
-            jsonb_build_object(
-                'subject_name', s.name,
-                'subject_slug', s.slug,
-                'icon_name', s.icon_name,
-                'theme_color', s.theme_color,
-                'attempted', coalesce(sa.attempted, 0),
-                'correct', coalesce(sa.correct, 0),
-                'accuracy', coalesce(sa.accuracy, 0),
-                'total_available', coalesce(s.question_count, 0),
-                -- Safe division guarding against s.question_count = 0 or NULL
-                'progress', case 
-                    when coalesce(s.question_count, 0) > 0 
-                    then least(100, round(coalesce(sa.attempted, 0) * 100.0 / nullif(s.question_count, 0)))::int 
-                    else 0 
-                end 
-            )
-        ) as subjects_array,
-        sum(coalesce(sa.attempted, 0))::int as overall_attempted,
-        sum(coalesce(sa.correct, 0))::int as overall_correct
-        from public.branch_subjects bs
-        join public.exams_subjects es on bs.subject_id = es.subject_id
-        join public.subjects s on s.id = bs.subject_id
-        left join subject_activity sa on s.id = sa.subject_id
-        where bs.branch_id = v_branch_id and lower(es.exams_id) = v_primary_exam
+        select 
+            jsonb_agg(
+                jsonb_build_object(
+                    'subject_name', esl.name,
+                    'subject_slug', esl.slug,
+                    'icon_name', esl.icon_name,
+                    'theme_color', esl.theme_color,
+                    'attempted', coalesce(sa.attempted, 0),
+                    'correct', coalesce(sa.correct, 0),
+                    'accuracy', case 
+                        when coalesce(sa.attempted, 0) > 0 
+                        then round(coalesce(sa.correct, 0) * 100.0 / sa.attempted)::int 
+                        else 0 
+                    end,
+                    'total_available', coalesce(esl.question_count, 0),
+                    'progress', case 
+                        when coalesce(esl.question_count, 0) > 0 
+                        then least(100, round(coalesce(sa.attempted, 0) * 100.0 / esl.question_count))::int 
+                        else 0 
+                    end
+                )
+            ) as subjects_array,
+            sum(coalesce(esl.question_count, 0))::int as total_available,
+            sum(coalesce(sa.attempted, 0))::int as overall_attempted,
+            sum(coalesce(sa.correct, 0))::int as overall_correct
+        from exam_subjects_list esl
+        left join subject_activity sa on esl.id = sa.subject_id
     )
     select jsonb_build_object(
         v_primary_exam, jsonb_build_object(
@@ -212,7 +219,7 @@ begin
                 then round(coalesce(overall_correct, 0) * 100.0 / nullif(overall_attempted, 0))::int 
                 else 0 
             end,
-            'total_available', v_exam_total_available,
+            'total_available', coalesce(total_available, 0),
             'subjects', coalesce(subjects_array, '[]'::jsonb)
         )
     ) into final_json
@@ -221,7 +228,6 @@ begin
     return coalesce(final_json, '{}'::jsonb);
 end;
 $$;
-
 
 -- GLOBAL STATS HELPER
 create or replace function internal_calc_global_stats(p_user_id uuid, p_version_number int)
