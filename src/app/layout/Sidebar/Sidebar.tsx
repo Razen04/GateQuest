@@ -1,15 +1,15 @@
 import React, { type JSX } from 'react';
 import { type Variants } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ChartPieSlice, BookOpen, Gear, Info } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { ChartPieSlice, BookOpen, Gear, Info, UserCircleDashedIcon } from '@phosphor-icons/react';
 import useWindowSize from '@/shared/hooks/useWindowSize';
 import MobileDock from './MobileDock';
-import { SidebarDesktop } from './SidebarDesktop';
 import ModernLoader from '@/shared/components/ModernLoader';
+import useAuth from '@/shared/hooks/useAuth';
 
 type SidebarProp = {
-    showSidebar: boolean;
-    setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    showSidebar?: boolean;
+    setShowSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
     hideMobileNavigation: boolean;
 };
 
@@ -19,57 +19,22 @@ export type Tab = {
     icon: JSX.Element;
     activeIcon: JSX.Element;
     path: string;
-    animation: Variants;
+    animation?: Variants;
 };
 
-const Sidebar = ({ showSidebar, setShowSidebar, hideMobileNavigation }: SidebarProp) => {
+const Sidebar = ({ hideMobileNavigation }: SidebarProp) => {
     const navigate = useNavigate();
-    const location = useLocation();
-
     const { width } = useWindowSize();
 
-    // Icon animations
-    const iconAnimations = {
-        dashboard: {
-            inactive: { rotate: 0, scale: 1 },
-            active: {
-                rotate: -45,
-                scale: 1.1,
-                transition: { type: 'spring', stiffness: 300, damping: 15 },
-            },
-        },
-        practice: {
-            inactive: { rotateY: 0, transition: { duration: 0.3 } },
-            active: {
-                rotateY: 360,
-                transition: { duration: 0.7, ease: 'easeInOut' },
-            },
-        },
-        settings: {
-            inactive: { rotate: 0, transition: { duration: 0.4 } },
-            active: {
-                rotate: 360,
-                transition: { duration: 0.6, ease: 'linear' },
-            },
-        },
-        about: {
-            inactive: { rotateY: 0, transition: { duration: 0.3 } },
-            active: {
-                rotateY: 360,
-                transition: { duration: 0.5, ease: 'easeInOut' },
-            },
-        },
-    };
+    const { user } = useAuth();
 
-    // Tabs data
-    const tabs = [
+    const tabs: Tab[] = [
         {
             id: 1,
             name: 'Dashboard',
             icon: <ChartPieSlice weight="duotone" />,
             activeIcon: <ChartPieSlice weight="fill" />,
             path: '/dashboard',
-            animation: iconAnimations.dashboard,
         },
         {
             id: 2,
@@ -77,57 +42,49 @@ const Sidebar = ({ showSidebar, setShowSidebar, hideMobileNavigation }: SidebarP
             icon: <BookOpen size={20} weight="duotone" />,
             activeIcon: <BookOpen size={20} weight="fill" />,
             path: '/practice',
-            animation: iconAnimations.practice,
         },
+        // NOTE: This is currently in beta.
         {
             id: 3,
+            name: 'Profile',
+            path: `/u/${user?.username}`,
+            icon: <UserCircleDashedIcon size={18} weight="duotone" />,
+            activeIcon: <UserCircleDashedIcon size={18} weight="fill" />,
+        },
+        {
+            id: 4,
             name: 'Settings',
             icon: <Gear size={20} weight="duotone" />,
             activeIcon: <Gear size={20} weight="fill" />,
             path: '/settings',
-            animation: iconAnimations.settings,
         },
         {
-            id: 4,
+            id: 5,
             name: 'About',
             icon: <Info size={20} weight="duotone" />,
             activeIcon: <Info size={20} weight="fill" />,
             path: '/about',
-            animation: iconAnimations.about,
         },
     ];
 
-    // Handle tab click with navigation
     const handleTabClick = (path: string) => {
         navigate(path);
-        if (showSidebar) {
-            setShowSidebar(false);
-        }
     };
 
     if (width === undefined) {
         return <ModernLoader />;
     }
 
-    // Mobile: bottom navbar, Desktop: sidebar
     const isMobile: boolean = width < 1024;
 
+    // Mobile Dock for Mobile Viewport
     if (isMobile) {
         if (hideMobileNavigation) return null;
-
-        // Bottom dock for mobile
         return <MobileDock tabs={tabs} handleTabClick={handleTabClick} />;
     }
 
-    // Desktop sidebar
-    return (
-        <SidebarDesktop
-            showSidebar={showSidebar}
-            tabs={tabs}
-            locationPath={location}
-            navigate={navigate}
-        />
-    );
+    // No desktop sidebar rendered (Top Bar takes over)
+    return null;
 };
 
 export default Sidebar;

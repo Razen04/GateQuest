@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar/Sidebar.tsx';
 import Navbar from './Navbar.tsx';
@@ -15,7 +15,6 @@ type SyncOnUnloadProps = {
 
 function SyncOnUnload({ user }: SyncOnUnloadProps) {
     const { refresh } = useStudyPlan();
-
     useSessionLogger();
 
     useEffect(() => {
@@ -25,12 +24,9 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
             const buffer = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
 
             if (user?.id && buffer.length > 0) {
-                // Avoid toast and UI in unload
                 try {
                     await supabase.from('user_question_activity').insert(buffer);
-
-                    refresh(); // safe to call
-
+                    refresh();
                     localStorage.removeItem(LOCAL_KEY);
                 } catch (err) {
                     console.error('Sync failed during unload: ', err);
@@ -39,7 +35,6 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
-
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
@@ -49,23 +44,9 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
 }
 
 const Layout = () => {
-    const [showSidebar, setShowSidebar] = useState(window.innerWidth > 1024);
     const user = getUserProfile();
-
-    // Changes the showSidebar even if the window size is changed frequently.
-    useEffect(() => {
-        const handleResize = () => {
-            const isDesktop = window.innerWidth > 1024;
-
-            setShowSidebar(isDesktop);
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // to get location for focus mode to remove mobile dock
     const location = useLocation();
+
     const FOCUS_PATHS = ['/topic-test'];
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
@@ -74,26 +55,22 @@ const Layout = () => {
     );
 
     return (
-        <div className="flex h-dvh transition-colors duration-500">
+        <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
+            {/* Desktop & Mobile Header */}
+            <Navbar />
+
+            {/* Main Content Area */}
+            <main className="flex-1 overflow-y-auto overflow-x-hidden">
+                <SyncOnUnload user={user} />
+                <Outlet />
+            </main>
+
+            {/* Mobile Dock Handler */}
             <Sidebar
-                showSidebar={showSidebar}
-                setShowSidebar={setShowSidebar}
+                showSidebar={false}
+                setShowSidebar={() => {}}
                 hideMobileNavigation={hideMobileNavigation}
             />
-            <div className="flex-1 flex flex-grow flex-col overflow-x-hidden">
-                <Navbar />
-                <main className="h-full overflow-y-auto overflow-x-hidden flex-1 dark:bg-zinc-900">
-                    <SyncOnUnload user={user} />
-                    <Outlet />
-                </main>
-            </div>
-
-            {showSidebar && (
-                <div
-                    className="fixed inset-0 bg-transparent bg-opacity-40 z-0 lg:hidden"
-                    onClick={() => setShowSidebar(false)}
-                />
-            )}
 
             <UsernameModal />
         </div>
