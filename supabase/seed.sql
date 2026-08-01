@@ -14,110 +14,18 @@ delete from vault.secrets where name in ('cron_edge_function_base_url', 'cron_is
 select vault.create_secret('http://kong:8000/functions/v1', 'cron_edge_function_base_url');
 select vault.create_secret('gatequest_lcoal_cron_passphrase_123!',  'cron_isolated_secret');
 
--------------------
--- 1. TEST USERS --
--------------------
-
-
--- This is the final, corrected block for auth.users
-INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at,
-  recovery_sent_at,
-  last_sign_in_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  created_at,
-  updated_at,
-  confirmation_token,
-  email_change,
-  email_change_sent_at,
-  email_change_token_new,
-  recovery_token
-)
-VALUES (
-  '00000000-0000-0000-0000-000000000000'::uuid,
-  '00000000-0000-0000-0000-000000000001'::uuid,
-  'authenticated',
-  'authenticated',
-  'test@example.com',
-  crypt('password', gen_salt('bf')), -- The new, correct password hash
-  now(), -- email_confirmed_at
-  now(), -- recovery_sent_at
-  now(), -- last_sign_in_at
-  '{"provider":"email","providers":["email"]}',
-  '{"name":"Test User"}',
-  now(), -- created_at
-  now(), -- updated_at
-  '',    -- confirmation_token
-  '',    -- email_change
-  now(), -- email_change_sent_at
-  '',    -- email_change_token_new
-  ''     -- recovery_token
-);
-
--- Create a corresponding user profile in the public schema
-INSERT INTO public.users (id, name, email, college, "targetYear", version_number)
-VALUES
-('00000000-0000-0000-0000-000000000001'::uuid, 'Test User', 'test@example.com', 'GATEQuest University', 2027, 1);
-
-
-------------------------------
--- 4. QUESTION PEER STATS  --
-------------------------------
---
--- This part populates the peer stats table based on the activity we just created.
--- We do this by calling the `refresh_question_peer_stats` function that exists in the database.
--- NOTE: We are seeding the stats with only one user's data, so "peer stats" will just be this user's stats.
--- As more developers use their local instance and add to this seed file, the stats will become more diverse.
---
-
--- First, we need to populate the stats table with initial rows for the questions that have activity.
--- This ensures the function has rows to update.
-INSERT INTO public.question_peer_stats (question_id, correct_attempts, wrong_attempts, total_attempts)
-SELECT DISTINCT question_id::uuid, 0, 0, 0 from public.user_question_activity
-ON CONFLICT (question_id) DO NOTHING;
-
--- Now, call the function to calculate and update the stats.
--- This is the recommended way to keep aggregate data fresh.
-SELECT refresh_question_peer_stats();
-
-
-------------------------------
--- 5. DOANTIONS --
-------------------------------
-INSERT INTO donations (user_id, anonymous, message, suggested_amount, actual_amount, utr, verified)
-VALUES
-('00000000-0000-0000-0000-000000000001'::uuid, FALSE, 'Keep up the great work!', 50.00, 50.00, 'UTR12345', TRUE);
-
-INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
-VALUES
-(TRUE, NULL, 100.00, 100.00, 'UTR12346', FALSE);
-
-INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
-VALUES
-(FALSE, 'Happy to support!', 75.50, 75.50, 'UTR12347', TRUE);
-
-INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
-VALUES
-(FALSE, 'Love this project ❤️', 200.00, 200.00, 'UTR12348', TRUE);
-
-INSERT INTO donations (anonymous, message, suggested_amount, actual_amount, utr, verified)
-VALUES
-(TRUE, NULL, 150.00, 150.00, 'UTR12349', FALSE);
-
 -- =====================================================
 -- CLEAN SEED (Safe for repeated runs)
 -- =====================================================
-
--- Optional: clear in dependency order
 truncate table exams_subjects cascade;
 truncate table branch_subjects cascade;
 truncate table user_goals cascade;
 truncate table subjects cascade;
 truncate table exams cascade;
 truncate table branches cascade;
-
+-- Also truncate any other tables that depend on these, e.g., questions,
+-- but note that questions are referenced by many tables; we want to keep them.
+-- You might add: truncate table questions cascade; if you want a full reset.
 
 -- =====================================================
 -- BRANCHES
@@ -144,12 +52,12 @@ on conflict (id) do nothing;
 -- =====================================================
 
 insert into subjects (id, slug, name, icon_name, theme_color, question_count, category, is_universal) values
-('11111111-1111-1111-1111-111111111111', 'eng-maths', 'Engineering Mathematics', 'calculator', 'red', 0, 'maths', true),
-('22222222-2222-2222-2222-222222222222', 'aptitude', 'General Aptitude', 'brain', 'green', 0, 'general', true),
-('33333333-3333-3333-3333-333333333333', 'dsa', 'Data Structures & Algorithms', 'database', 'blue', 0, 'core', false),
-('44444444-4444-4444-4444-444444444444', 'os', 'Operating Systems', 'cpu', 'purple', 0, 'core', false),
-('55555555-5555-5555-5555-555555555555', 'thermo', 'Thermodynamics', 'flame', 'cyan', 0, 'core', false),
-('66666666-6666-6666-6666-666666666666', 'power-systems', 'Power Systems', 'zap', 'teal', 0, 'core', false)
+('11111111-1111-1111-1111-111111111111', 'eng-maths', 'Engineering Mathematics', 'calculator', 'red', 10, 'maths', true),
+('22222222-2222-2222-2222-222222222222', 'aptitude', 'General Aptitude', 'brain', 'green', 20, 'general', true),
+('33333333-3333-3333-3333-333333333333', 'dsa', 'Data Structures & Algorithms', 'database', 'blue', 390, 'core', false),
+('44444444-4444-4444-4444-444444444444', 'os', 'Operating Systems', 'cpu', 'purple', 1000, 'core', false),
+('55555555-5555-5555-5555-555555555555', 'thermo', 'Thermodynamics', 'flame', 'cyan', 400, 'core', false),
+('66666666-6666-6666-6666-666666666666', 'power-systems', 'Power Systems', 'zap', 'teal', 500, 'core', false)
 on conflict (slug) do nothing;
 
 -- =====================================================
@@ -667,7 +575,7 @@ VALUES
  'Thermodynamics',
  '55555555-5555-5555-5555-555555555555',
  'Specific Heats', 2020,
- 'numeical',
+ 'numerical',
  'ese_official', true, 'seed_script',
  ARRAY['thermo','gas-properties'],
  '{"exam":"ese"}'::jsonb,
@@ -761,3 +669,716 @@ VALUES
 ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000002', '22222222-2222-2222-2222-222222222222', 'cs', 'Aptitude', true, 1),
 ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000003', '22222222-2222-2222-2222-222222222222', 'cs', 'Aptitude', true, 1),
 ('00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', '22222222-2222-2222-2222-222222222222', 'cs', 'Aptitude', false, 1);
+
+-------------------
+-- 1. TEST USERS --
+-------------------
+
+
+-- This is the final, corrected block for auth.users
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at,
+  recovery_sent_at,
+  last_sign_in_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_sent_at,
+  email_change_token_new,
+  recovery_token
+)
+VALUES (
+  '00000000-0000-0000-0000-000000000000'::uuid,
+  '00000000-0000-0000-0000-000000000001'::uuid,
+  'authenticated',
+  'authenticated',
+  'test@example.com',
+  crypt('password', gen_salt('bf')), -- The new, correct password hash
+  now(), -- email_confirmed_at
+  now(), -- recovery_sent_at
+  now(), -- last_sign_in_at
+  '{"provider":"email","providers":["email"]}',
+  '{"name":"Test User"}',
+  now(), -- created_at
+  now(), -- updated_at
+  '',    -- confirmation_token
+  '',    -- email_change
+  now(), -- email_change_sent_at
+  '',    -- email_change_token_new
+  ''     -- recovery_token
+);
+
+-- Create a corresponding user profile in the public schema
+INSERT INTO public.users (id, name, email, college, "targetYear", version_number)
+VALUES
+('00000000-0000-0000-0000-000000000001'::uuid, 'Test User', 'test@example.com', 'GATEQuest University', 2027, 1);
+
+-------------------
+-- 2. TEN MORE USERS --
+-------------------
+
+-- We'll use deterministic UUIDs from ...002 to ...011
+-- Each user gets an auth.users entry and a public.users profile.
+-- Passwords are all 'password' (hashed).
+-- Goals are inserted for each user.
+
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at,
+  recovery_sent_at,
+  last_sign_in_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_sent_at,
+  email_change_token_new,
+  recovery_token
+)
+VALUES
+  -- User 2 (CS, 2025)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000002'::uuid,
+    'authenticated', 'authenticated',
+    'user2@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Alice Johnson"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 3 (ME, 2026)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000003'::uuid,
+    'authenticated', 'authenticated',
+    'user3@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Bob Smith"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 4 (EE, 2027)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000004'::uuid,
+    'authenticated', 'authenticated',
+    'user4@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Carol White"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 5 (CS, 2025)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000005'::uuid,
+    'authenticated', 'authenticated',
+    'user5@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"David Brown"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 6 (ME, 2028)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000006'::uuid,
+    'authenticated', 'authenticated',
+    'user6@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Eva Martinez"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 7 (EE, 2026)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000007'::uuid,
+    'authenticated', 'authenticated',
+    'user7@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Frank Wilson"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 8 (CS, 2027)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000008'::uuid,
+    'authenticated', 'authenticated',
+    'user8@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Grace Lee"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 9 (ME, 2025)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000009'::uuid,
+    'authenticated', 'authenticated',
+    'user9@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Henry Taylor"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 10 (EE, 2028)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000010'::uuid,
+    'authenticated', 'authenticated',
+    'user10@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Irene Davis"}',
+    now(), now(), '', '', now(), '', ''
+  ),
+  -- User 11 (CS, 2026)
+  (
+    '00000000-0000-0000-0000-000000000000'::uuid,
+    '00000000-0000-0000-0000-000000000011'::uuid,
+    'authenticated', 'authenticated',
+    'user11@example.com',
+    crypt('password', gen_salt('bf')),
+    now(), now(), now(),
+    '{"provider":"email","providers":["email"]}',
+    '{"name":"Jack Miller"}',
+    now(), now(), '', '', now(), '', ''
+  )
+ON CONFLICT (id) DO NOTHING;
+
+-- Public profiles for each user
+INSERT INTO public.users (id, name, email, college, "targetYear", version_number)
+VALUES
+  ('00000000-0000-0000-0000-000000000002'::uuid, 'Alice Johnson', 'user2@example.com', 'MIT', 2026, 1),
+  ('00000000-0000-0000-0000-000000000003'::uuid, 'Bob Smith',     'user3@example.com', 'Stanford', 2026, 1),
+  ('00000000-0000-0000-0000-000000000004'::uuid, 'Carol White',   'user4@example.com', 'Berkeley', 2027, 1),
+  ('00000000-0000-0000-0000-000000000005'::uuid, 'David Brown',   'user5@example.com', 'CMU', 2028, 1),
+  ('00000000-0000-0000-0000-000000000006'::uuid, 'Eva Martinez',  'user6@example.com', 'Caltech', 2028, 1),
+  ('00000000-0000-0000-0000-000000000007'::uuid, 'Frank Wilson',  'user7@example.com', 'Georgia Tech', 2026, 1),
+  ('00000000-0000-0000-0000-000000000008'::uuid, 'Grace Lee',     'user8@example.com', 'UIUC', 2027, 1),
+  ('00000000-0000-0000-0000-000000000009'::uuid, 'Henry Taylor',  'user9@example.com', 'Purdue', 2027, 1),
+  ('00000000-0000-0000-0000-000000000010'::uuid, 'Irene Davis',   'user10@example.com', 'Texas A&M', 2028, 1),
+  ('00000000-0000-0000-0000-000000000011'::uuid, 'Jack Miller',   'user11@example.com', 'UCLA', 2026, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- Goals for each new user (active, with branch and target exams)
+INSERT INTO user_goals (id, user_id, branch_id, target_exams, is_active)
+VALUES
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000002'::uuid, 'cs', '["gate","isro"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000003'::uuid, 'me', '["gate","ese"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000004'::uuid, 'ee', '["gate","isro","ese"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000005'::uuid, 'cs', '["gate"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000006'::uuid, 'me', '["ese"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000007'::uuid, 'ee', '["gate","isro"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000008'::uuid, 'cs', '["gate","ese"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000009'::uuid, 'me', '["gate"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000010'::uuid, 'ee', '["ese","isro"]', true),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000011'::uuid, 'cs', '["isro","ese"]', true)
+ON CONFLICT (user_id, branch_id) DO NOTHING;
+
+-- ============================================================
+--  GENERATE ACTIVITY, PEER STATS, REVISION QUEUE & WEEKLY SETS
+-- ============================================================
+
+DO $$
+DECLARE
+  user_record RECORD;
+  question_record RECORD;
+  attempt_chance TEXT;
+  correct_prob FLOAT;
+  is_correct BOOLEAN;
+  v_time_taken INT;
+  attempt_id INT;
+  question_list UUID[] := ARRAY(
+    SELECT id FROM public.questions
+  );
+  selected_questions UUID[];
+  q UUID;
+  incorrect_qs UUID[];
+  v_set_id UUID;
+  set_date DATE;
+  set_questions UUID[];
+  q_for_set UUID;
+  q_count INT;
+  i INT;
+  user_goal_branch TEXT;
+BEGIN
+  -- For each user
+  FOR user_record IN SELECT id, (SELECT branch_id FROM user_goals WHERE user_id = users.id AND is_active = true LIMIT 1) AS branch_id FROM public.users LOOP
+    -- Skip if no active goal (shouldn't happen)
+    IF user_record.branch_id IS NULL THEN
+      CONTINUE;
+    END IF;
+
+    -- Randomly select which questions this user attempts (about 60-80%)
+    SELECT ARRAY_AGG(id) INTO selected_questions
+    FROM (
+      SELECT id FROM public.questions
+      WHERE random() < 0.7  -- 70% chance to attempt a question
+      LIMIT 25  -- but cap to avoid too many
+    ) t;
+
+    -- If no questions selected, pick at least 5 random ones
+    IF array_length(selected_questions, 1) IS NULL OR array_length(selected_questions, 1) < 5 THEN
+      SELECT ARRAY_AGG(id) INTO selected_questions
+      FROM public.questions
+      ORDER BY random()
+      LIMIT 5;
+    END IF;
+
+    -- Insert attempts for each selected question
+    FOREACH q IN ARRAY selected_questions
+    LOOP
+      -- Get difficulty of the question to set correctness probability
+      SELECT difficulty INTO attempt_chance FROM public.questions WHERE id = q;
+      -- Map difficulty to probability: Easy → 0.8, Medium → 0.6, Hard → 0.4, else 0.5
+      CASE attempt_chance
+        WHEN 'Easy' THEN correct_prob := 0.8;
+        WHEN 'Medium' THEN correct_prob := 0.6;
+        WHEN 'Hard' THEN correct_prob := 0.4;
+        ELSE correct_prob := 0.5;
+      END CASE;
+      -- Randomly decide correctness
+      is_correct := (random() < correct_prob);
+      -- Random time 5–120 seconds
+      v_time_taken := floor(random() * 115 + 5)::INT;
+
+      -- Insert attempt (use ON CONFLICT to avoid duplicates if already present)
+      INSERT INTO public.user_question_activity (
+        user_id, question_id, subject_id, branch_id, subject, was_correct, time_taken, attempted_at, attempt_number, user_version_number
+      )
+      SELECT
+        user_record.id,
+        q,
+        (SELECT subject_id FROM public.questions WHERE id = q),
+        user_record.branch_id,
+        (SELECT subject FROM public.questions WHERE id = q),
+        is_correct,
+        v_time_taken,
+        now() - (random() * interval '30 days'), -- spread over last 30 days
+        -- attempt_number: if already exists, increment
+        COALESCE(
+          (SELECT max(attempt_number) + 1 FROM public.user_question_activity WHERE user_id = user_record.id AND question_id = q),
+          1
+        ),
+        1
+      WHERE NOT EXISTS (
+        SELECT 1 FROM public.user_question_activity
+        WHERE user_id = user_record.id AND question_id = q AND attempt_number = 1
+      );
+
+      -- If the attempt was wrong, store question for later insertion into incorrect queue
+      IF NOT is_correct THEN
+        incorrect_qs := array_append(incorrect_qs, q);
+      END IF;
+    END LOOP;
+
+    -- -- -- -- -- -- -- -- -- -- -- --
+    -- INSERT INTO USER INCORRECT QUEUE
+    -- -- -- -- -- -- -- -- -- -- -- --
+    FOREACH q IN ARRAY incorrect_qs
+    LOOP
+      INSERT INTO public.user_incorrect_queue (user_id, question_id, added_at, box, next_review_at)
+      VALUES (
+        user_record.id,
+        q,
+        now(),
+        1,  -- box 1: critical
+        now() + (random() * interval '5 days') -- review within next 5 days
+      )
+      ON CONFLICT (user_id, question_id) DO NOTHING;
+    END LOOP;
+
+    -- -- -- -- -- -- -- -- -- -- -- --
+    -- CREATE WEEKLY REVISION SETS (2 per user)
+    -- -- -- -- -- -- -- -- -- -- -- --
+    FOR i IN 1..2 LOOP
+      -- Generate a past start_of_week (e.g., 1 and 2 weeks ago)
+      set_date := CURRENT_DATE - (i * 7) - (EXTRACT(DOW FROM CURRENT_DATE)::INT - 1); -- Monday of that week
+
+      -- Create the set
+      INSERT INTO public.weekly_revision_set (
+        id, generated_for, branch_id, start_of_week, status, created_at, total_questions, correct_count, accuracy
+      )
+      VALUES (
+        gen_random_uuid(),
+        user_record.id,
+        user_record.branch_id,
+        set_date,
+        'expired',  -- mark as completed for simplicity
+        now() - (i * interval '7 days'),
+        0,  -- will update later
+        0,
+        0
+      )
+      RETURNING id INTO v_set_id;
+
+      -- Now select 5–10 questions for this set:
+      --   - Mix: some from incorrect_qs (if any), some from correct attempts, some never attempted
+      -- We'll pick up to 3 from incorrect, 3 from correct, and fill with random from all questions.
+      SELECT ARRAY_AGG(id) INTO set_questions
+      FROM (
+        (SELECT id FROM public.questions WHERE id = ANY(incorrect_qs) ORDER BY random() LIMIT 3)
+        UNION ALL
+        (SELECT id FROM public.user_question_activity
+          WHERE user_id = user_record.id AND was_correct = true AND question_id != ALL(incorrect_qs)
+          ORDER BY random() LIMIT 3)
+        UNION ALL
+        (SELECT id FROM public.questions WHERE id NOT IN (
+          SELECT question_id FROM public.user_question_activity WHERE user_id = user_record.id
+        ) ORDER BY random() LIMIT 3)
+        LIMIT 10
+      ) t;
+
+      -- If still less than 5, fill with random from all questions
+      IF array_length(set_questions, 1) < 5 THEN
+        SELECT ARRAY_AGG(id) INTO set_questions
+        FROM (
+          SELECT id FROM public.questions
+          WHERE id NOT IN (SELECT unnest(set_questions))
+          ORDER BY random()
+          LIMIT 5 - array_length(set_questions, 1)
+        ) t;
+      END IF;
+
+      -- Insert revision_set_questions
+      FOREACH q_for_set IN ARRAY set_questions
+      LOOP
+        -- Determine if the user attempted this question; if so, get the correctness and time
+        INSERT INTO public.revision_set_questions (set_id, question_id, is_correct, time_spent_seconds)
+        SELECT
+          v_set_id,
+          q_for_set,
+          (SELECT was_correct FROM public.user_question_activity
+           WHERE user_id = user_record.id AND question_id = q_for_set
+           ORDER BY attempted_at DESC LIMIT 1),
+          (SELECT time_taken FROM public.user_question_activity
+           WHERE user_id = user_record.id AND question_id = q_for_set
+           ORDER BY attempted_at DESC LIMIT 1)
+        ON CONFLICT (set_id, question_id) DO NOTHING;
+
+        -- Update set totals (increment total_questions)
+        UPDATE public.weekly_revision_set
+        SET total_questions = total_questions + 1,
+            correct_count = correct_count + CASE
+              WHEN (SELECT was_correct FROM public.user_question_activity
+                    WHERE user_id = user_record.id AND question_id = q_for_set
+                    ORDER BY attempted_at DESC LIMIT 1) THEN 1 ELSE 0 END
+        WHERE id = v_set_id;
+      END LOOP;
+
+      -- Recalculate accuracy for the set
+      UPDATE public.weekly_revision_set
+      SET accuracy = CASE WHEN total_questions > 0 THEN correct_count::FLOAT / total_questions ELSE 0 END
+      WHERE id = v_set_id;
+    END LOOP;
+
+    -- Reset incorrect_qs for next user
+    incorrect_qs := '{}';
+  END LOOP;
+
+  -- Finally, refresh the peer stats
+  PERFORM refresh_question_peer_stats();
+
+END $$;
+
+-- ============================================================
+--  TOPIC TESTS & BOOKMARKS
+-- ============================================================
+
+DO $$
+DECLARE
+  user_record RECORD;
+  test_count INT;
+  test_status TEXT;
+  test_id UUID;
+  q_count INT;
+  question_pool UUID[];
+  q UUID;
+  i INT;
+  answer_choice INT;
+  selected_answer JSONB;
+  is_correct BOOLEAN;
+  time_spent INT;
+  attempt_status TEXT;
+  total_q INT := 0;
+  correct_q INT := 0;
+  total_score INT := 0;
+  bookmarked_qs UUID[] := '{}';
+  bookmarks_to_add UUID[];
+  q_temp UUID;
+BEGIN
+  FOR user_record IN SELECT id, (SELECT branch_id FROM user_goals WHERE user_id = users.id AND is_active = true LIMIT 1) AS branch_id FROM public.users LOOP
+    IF user_record.branch_id IS NULL THEN
+      CONTINUE;
+    END IF;
+
+    -- Determine how many tests: 2 or 3
+    test_count := 2 + floor(random() * 2)::INT; -- 2 or 3
+
+    FOR i IN 1..test_count LOOP
+      -- Random status: first test completed, others mixed
+      IF i = 1 THEN
+        test_status := 'completed';
+      ELSIF i = 2 AND random() < 0.5 THEN
+        test_status := 'ongoing';
+      ELSE
+        test_status := 'completed';
+      END IF;
+
+      -- Select 5–10 questions for this test
+      -- Prefer questions the user attempted, but also include some never attempted
+      WITH attempted_qs AS (
+        SELECT DISTINCT question_id AS id FROM public.user_question_activity WHERE user_id = user_record.id
+      ),
+      all_qs AS (
+        SELECT id FROM public.questions
+      )
+      SELECT ARRAY_AGG(id) INTO question_pool
+      FROM (
+        (SELECT id FROM attempted_qs ORDER BY random() LIMIT 7)
+        UNION ALL
+        (SELECT id FROM all_qs WHERE id NOT IN (SELECT id FROM attempted_qs) ORDER BY random() LIMIT 3)
+        LIMIT 10
+      ) t;
+
+      -- If pool is less than 5, fill with random from all questions
+      IF array_length(question_pool, 1) < 5 THEN
+        SELECT ARRAY_AGG(id) INTO question_pool
+        FROM (
+          SELECT id FROM public.questions
+          WHERE id NOT IN (SELECT unnest(question_pool))
+          ORDER BY random()
+          LIMIT 5 - array_length(question_pool, 1)
+        ) t;
+      END IF;
+
+      -- Create the topic test session
+      INSERT INTO public.topic_tests (
+        id, user_id, branch_id, topics, created_at, updated_at, status,
+        remaining_time_seconds
+      )
+      VALUES (
+        gen_random_uuid(),
+        user_record.id,
+        user_record.branch_id,
+        ARRAY['aptitude', 'dsa'],  -- dummy topic list, could be random
+        now() - (random() * interval '10 days'),
+        now(),
+        test_status,
+        floor(random() * 900 + 600)::INT  -- 10-25 minutes remaining
+      )
+      RETURNING id INTO test_id;
+
+      -- Insert attempts for each question in the pool
+      total_q := 0;
+      correct_q := 0;
+      total_score := 0;
+
+      FOREACH q IN ARRAY question_pool
+      LOOP
+        -- Determine status: unvisited, viewed, or answered
+        -- For completed tests, most should be answered; for ongoing, mix
+        IF test_status = 'completed' THEN
+          IF random() < 0.1 THEN
+            attempt_status := 'unvisited';
+          ELSIF random() < 0.2 THEN
+            attempt_status := 'viewed';
+          ELSE
+            attempt_status := 'answered';
+          END IF;
+        ELSE  -- ongoing
+          IF random() < 0.3 THEN
+            attempt_status := 'unvisited';
+          ELSIF random() < 0.5 THEN
+            attempt_status := 'viewed';
+          ELSE
+            attempt_status := 'answered';
+          END IF;
+        END IF;
+
+        -- If answered, generate a user answer and correctness
+        IF attempt_status = 'answered' THEN
+          -- For MCQ, pick a random option index
+          SELECT floor(random() * array_length(options, 1))::INT INTO answer_choice
+          FROM public.questions WHERE id = q;
+          selected_answer := to_jsonb(ARRAY[answer_choice]);
+          -- Determine correctness based on stored correct_answer (simplified)
+          -- We'll use a random correctness based on difficulty (same as earlier)
+          -- But also reflect actual user's previous performance? For demo, random.
+          is_correct := (random() < 0.6);  -- 60% chance correct
+          time_spent := floor(random() * 60 + 5)::INT;  -- 5-65 seconds
+        ELSE
+          selected_answer := NULL;
+          is_correct := NULL;
+          time_spent := 0;
+        END IF;
+
+        INSERT INTO public.topic_tests_attempts (
+          session_id, question_id, attempt_order, user_answer, marked_for_review,
+          is_correct, score, time_spent_seconds, status
+        )
+        VALUES (
+          test_id,
+          q,
+          array_position(question_pool, q),
+          selected_answer,
+          random() < 0.1,  -- 10% marked for review
+          is_correct,
+          CASE WHEN is_correct THEN 1 ELSE 0 END,
+          time_spent,
+          attempt_status
+        );
+
+        -- Aggregate totals for test summary
+        total_q := total_q + 1;
+        IF is_correct THEN
+          correct_q := correct_q + 1;
+          total_score := total_score + 1;  -- assuming each question is 1 mark
+        END IF;
+      END LOOP;
+
+      -- Update the test summary fields
+      UPDATE public.topic_tests
+      SET total_questions = total_q,
+          correct_count = correct_q,
+          attempted_count = (SELECT COUNT(*) FROM public.topic_tests_attempts WHERE session_id = test_id AND status = 'answered'),
+          score = total_score,
+          accuracy = CASE WHEN total_q > 0 THEN correct_q::FLOAT / total_q ELSE 0 END,
+          total_marks = total_q,
+          completed_at = CASE WHEN test_status = 'completed' THEN now() ELSE NULL END
+      WHERE id = test_id;
+
+    END LOOP;
+
+    -- -- -- -- -- -- -- -- -- -- -- --
+    -- BOOKMARKS: 5–10 per user
+    -- -- -- -- -- -- -- -- -- -- -- --
+    -- Select up to 10 unique questions from the user's attempted questions and some not attempted
+    WITH attempted_qs AS (
+      SELECT DISTINCT question_id AS id FROM public.user_question_activity WHERE user_id = user_record.id
+    ),
+    all_qs AS (
+      SELECT id FROM public.questions
+    )
+    SELECT ARRAY_AGG(id) INTO bookmarks_to_add
+    FROM (
+      (SELECT id FROM attempted_qs ORDER BY random() LIMIT 6)
+      UNION ALL
+      (SELECT id FROM all_qs WHERE id NOT IN (SELECT id FROM attempted_qs) ORDER BY random() LIMIT 4)
+      LIMIT 10
+    ) t;
+
+  END LOOP;
+END $$;
+
+-- ============================================================
+--  ADDITIONAL DONATIONS, SOCIAL PROFILES, NOTIFICATIONS & REPORTS
+-- ============================================================
+
+DO $$
+DECLARE
+  user_ids UUID[] := ARRAY(
+    SELECT id FROM public.users
+  );
+  v_user_id UUID;
+  question_ids UUID[] := ARRAY(
+    SELECT id FROM public.questions
+  );
+  q_id UUID;
+  donation_amount DECIMAL;
+  random_message TEXT;
+  utr_suffix INT := 50000;
+  platform_url TEXT;
+  report_type TEXT;
+  report_status TEXT;
+BEGIN
+  -- -- -- -- -- -- -- -- -- -- -- --
+  -- 9. ADD MORE DONATIONS
+  -- -- -- -- -- -- -- -- -- -- -- --
+  -- Insert 10 additional donations, mix of anonymous and linked
+  FOR i IN 1..10 LOOP
+    -- Pick a random user (or NULL for anonymous)
+    IF random() < 0.4 THEN
+      v_user_id := NULL;  -- anonymous
+    ELSE
+      v_user_id := user_ids[floor(random() * array_length(user_ids, 1) + 1)];
+    END IF;
+
+    donation_amount := floor(random() * 500 + 10)::DECIMAL; -- $10–$510
+    random_message := CASE floor(random() * 5)::INT
+      WHEN 0 THEN 'Keep up the great work!'
+      WHEN 1 THEN 'This platform is amazing!'
+      WHEN 2 THEN 'Helping students achieve their dreams 💪'
+      WHEN 3 THEN 'Best resource for GATE preparation'
+      ELSE 'Thank you for this service!'
+    END;
+
+    INSERT INTO public.donations (
+      user_id, anonymous, message, suggested_amount, actual_amount, utr, verified, created_at
+    )
+    VALUES (
+      v_user_id,
+      CASE WHEN v_user_id IS NULL THEN TRUE ELSE FALSE END,  -- anonymous if no user
+      CASE WHEN random() < 0.3 THEN NULL ELSE random_message END, -- 30% no message
+      donation_amount,
+      donation_amount + floor(random() * 20)::DECIMAL,  -- actual slightly different
+      'UTR' || (utr_suffix + i)::TEXT,
+      random() < 0.7,  -- 70% verified
+      now() - (random() * interval '30 days')
+    )
+    ON CONFLICT (utr) DO NOTHING;
+  END LOOP;
+
+
+  -- -- -- -- -- -- -- -- -- -- -- --
+  -- 10. SOCIAL PROFILES FOR ALL USERS
+  -- -- -- -- -- -- -- -- -- -- -- --
+  FOREACH v_user_id IN ARRAY user_ids
+  LOOP
+    platform_url := 'https://github.com/user_' || replace(v_user_id::TEXT, '-', '');
+    INSERT INTO public.users_social (
+      user_id, github_url, x_url, linkedin_url, youtube_url
+    )
+    VALUES (
+      v_user_id,
+      platform_url,
+      'https://x.com/user_' || left(replace(v_user_id::TEXT, '-', ''), 8),
+      'https://linkedin.com/in/user_' || left(replace(v_user_id::TEXT, '-', ''), 8),
+      'https://youtube.com/c/user_' || left(replace(v_user_id::TEXT, '-', ''), 6)
+    )
+    ON CONFLICT (user_id) DO NOTHING;
+  END LOOP;
+
+
+  -- -- -- -- -- -- -- -- -- -- -- --
+  -- 11. NOTIFICATIONS (global)
+  -- -- -- -- -- -- -- -- -- -- -- --
+  INSERT INTO public.notifications (created_at, title, message, type, active)
+  VALUES
+    (now() - interval '2 days', 'Welcome to GATEQuest!', 'Start your preparation journey with our personalized study plans.', 'onboarding', true),
+    (now() - interval '5 days', 'New Questions Added!', 'We have added 50 new questions in DSA and Operating Systems.', 'content_update', true),
+    (now() - interval '10 days', 'Weekly Revision Set Ready', 'Your weekly revision set for this week is now available.', 'revision', true),
+    (now() - interval '1 day', 'Feature Update: Topic Tests', 'You can now create custom topic tests from any subject.', 'feature', true),
+    (now() - interval '3 hours', 'Donation Milestone', 'We have reached ₹50,000 in donations! Thank you for your support.', 'community', true)
+  ON CONFLICT (id) DO NOTHING;  -- id is auto-generated, no conflict normally
+
+END $$;

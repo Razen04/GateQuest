@@ -26,6 +26,7 @@ import TopicTestResult from '@/features/topic-test/pages/TopicTestResult';
 import TestSolutionView from '@/features/topic-test/components/TestSolutionView';
 import TopicReviewLayout from '@/features/topic-test/components/TopicReviewLayout';
 import Practice from '@/features/practice/pages/PracticePage';
+import ProfilePage from '@/features/profile/ProfilePage';
 
 /**
  * @function AppRoutes
@@ -92,6 +93,7 @@ export default function AppRoutes() {
                                 element={<TestSolutionView />}
                             />
                         </Route>
+                        <Route path="/u/:username" element={<ProfilePage />} />
                         {/* A catch-all route to handle undefined paths within the app. */}
                         {/* It redirects the user to the root to prevent 404 errors. */}
                         <Route path="*" element={<Navigate to="/" />} />

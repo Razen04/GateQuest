@@ -161,12 +161,28 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     // A check to ensure there is a valid user to sync.
     if (!isLogin) return; // don’t even try until login is true
     const user = getUserProfile();
+
     if (!user?.id) {
         console.warn('User missing id');
         return;
     }
 
-    const { error } = await supabase.from('users').update(user).eq('id', user.id);
+    // 1. Create a clean payload with strictly database columns.
+    // We use `?? null` to satisfy TypeScript's strict optional property types.
+    const dbPayload = {
+        name: user.name ?? null,
+        avatar: user.avatar ?? null,
+        college: user.college ?? null,
+        targetYear: user.targetYear || null, // Fallback chain
+        settings: user.settings ?? {}, // Assuming settings is a JSONB object, default to {}
+        show_name: user.show_name ?? true,
+        username: user.username ?? null,
+        is_public: user.is_public ?? false,
+    };
+
+    // 2. Send only the clean payload to the database
+    const { error } = await supabase.from('users').update(dbPayload).eq('id', user.id);
+
     if (error) {
         console.error('Sync failed', error);
         toast.error('Profile update failed, try again later.');

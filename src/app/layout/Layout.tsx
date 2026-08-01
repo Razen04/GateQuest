@@ -7,6 +7,7 @@ import { supabase } from '@/shared/utils/supabaseClient';
 import type { AppUser } from '@/shared/types/AppUser';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
+import { UsernameModal } from './UsernameModal.tsx';
 
 type SyncOnUnloadProps = {
     user: AppUser | null;
@@ -93,6 +94,8 @@ const Layout = () => {
                     onClick={() => setShowSidebar(false)}
                 />
             )}
+
+            <UsernameModal />
         </div>
     );
 };

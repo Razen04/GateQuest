@@ -7,6 +7,8 @@ import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/
 import type { Settings } from '@/shared/types/Settings.ts';
 import useAuth from '@/shared/hooks/useAuth.ts';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { getCurrentUser } from '@/shared/api/auth.ts';
 
 const defaultSettings: Settings = {
     sound: true,
@@ -22,7 +24,7 @@ const defaultSettings: Settings = {
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.
 const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isLogin } = useAuth();
+    const { isLogin, user, setUser } = useAuth();
 
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
@@ -41,12 +43,30 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         }));
     };
 
+    // function to handle updating is_public for user anonymity
+    const handleUserAnonymity = async (isPublic: boolean) => {
+        const user = await getCurrentUser();
+        if (!user?.id) return;
+
+        const { error } = await supabase
+            .from('users')
+            .update({ is_public: isPublic })
+            .eq('id', user.id);
+
+        if (error) throw error;
+
+        setUser((prev) => ({
+            ...prev,
+            is_public: isPublic,
+        }));
+    };
+
     useEffect(() => {
         const profile = getUserProfile();
         if (profile) {
             updateUserProfile({ ...profile, settings });
         }
-    }, [settings]);
+    }, [settings, user]);
 
     useEffect(() => {
         if (!isLogin) return;
@@ -74,7 +94,14 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (
-        <AppSettingContext.Provider value={{ settings, handleSettingToggle, isUpdatingSettings }}>
+        <AppSettingContext.Provider
+            value={{
+                settings,
+                handleSettingToggle,
+                handleUserAnonymity,
+                isUpdatingSettings,
+            }}
+        >
             {children}
         </AppSettingContext.Provider>
     );
