@@ -80,10 +80,10 @@ const SearchAndFilters = ({
     const difficulties = ['Easy', 'Medium', 'Hard'];
 
     const glass =
-        'bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5 rounded-2xl';
+        'bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5';
 
     const inputGlass =
-        'bg-white/50 dark:bg-zinc-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-400 transition-all';
+        'bg-white/50 dark:bg-zinc-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 focus:ring-2 focus:ring-blue-400 transition-all';
 
     return (
         <div className={`p-2 sm:p-4 mb-4 sm:mb-6 ${glass}`}>
@@ -94,7 +94,7 @@ const SearchAndFilters = ({
                     <Input
                         type="text"
                         placeholder="Search questions..."
-                        className={`w-full pl-10 pr-2 sm:pr-4 py-2 ${inputGlass}`}
+                        className={`w-full pl-10 pr-2 sm:pr-4 py-2 rounded-none ${inputGlass}`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -103,7 +103,7 @@ const SearchAndFilters = ({
                 <Button
                     variant="ghost"
                     onClick={() => setShowFilters(!showFilters)}
-                    className="px-2 sm:px-4 py-2 w-fit rounded-xl hover:bg-white/30 dark:hover:bg-zinc-800/50"
+                    className="px-2 sm:px-4 py-2 w-fit hover:bg-white/30 dark:hover:bg-zinc-800/50 rounded-none"
                 >
                     <Funnel className="mr-2" weight={showFilters ? 'fill' : 'duotone'} />
                     <span>Filter</span>
@@ -175,30 +175,37 @@ const SearchAndFilters = ({
                                         value={filter.value}
                                         onValueChange={filter.setter}
                                     >
-                                        <ComboboxChips>
+                                        <ComboboxChips className="rounded-none">
                                             <ComboboxValue>
                                                 {filter.value.map((item) => (
                                                     <ComboboxChip
                                                         key={item}
                                                         showRemove
-                                                        className="max-w-[150px] truncate"
+                                                        className="max-w-[150px] truncate rounded-none"
                                                     >
                                                         {filter.render(item)}
                                                     </ComboboxChip>
                                                 ))}
                                             </ComboboxValue>
 
-                                            <ComboboxChipsInput placeholder={filter.placeholder} />
+                                            <ComboboxChipsInput
+                                                placeholder={filter.placeholder}
+                                                className="rounded-none"
+                                            />
                                         </ComboboxChips>
 
-                                        <ComboboxContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20">
+                                        <ComboboxContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 rounded-none border border-white/20">
                                             <ComboboxEmpty>
                                                 No {filter.label.toLowerCase()} found.
                                             </ComboboxEmpty>
 
-                                            <ComboboxList>
+                                            <ComboboxList className="rounded-none">
                                                 {(item) => (
-                                                    <ComboboxItem key={item} value={item}>
+                                                    <ComboboxItem
+                                                        key={item}
+                                                        value={item}
+                                                        className="rounded-none"
+                                                    >
                                                         {filter.render(item)}
                                                     </ComboboxItem>
                                                 )}
@@ -208,25 +215,33 @@ const SearchAndFilters = ({
                                 </div>
                             ))}
 
-                            <div className={`${glass} p-3`}>
+                            <div className={`${glass} p-3 rounded-none`}>
                                 <Label className="mb-2">Type of questions</Label>
 
                                 <Select value={attemptFilter} onValueChange={setAttemptFilter}>
-                                    <SelectTrigger className={`${inputGlass} w-full`}>
-                                        <SelectValue placeholder="Select a type" />
+                                    <SelectTrigger className={`${inputGlass} w-full rounded-none`}>
+                                        <SelectValue
+                                            placeholder="Select a type"
+                                            className="rounded-none"
+                                        />
                                     </SelectTrigger>
 
-                                    <SelectContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20">
+                                    <SelectContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20 rounded-none">
                                         <SelectGroup>
                                             <SelectLabel>Type of question</SelectLabel>
 
-                                            <SelectItem value="all">All</SelectItem>
+                                            <SelectItem value="all" className="rounded-none">
+                                                All
+                                            </SelectItem>
 
-                                            <SelectItem value="attempted">
+                                            <SelectItem value="attempted" className="rounded-none">
                                                 Attempted Questions
                                             </SelectItem>
 
-                                            <SelectItem value="unattempted">
+                                            <SelectItem
+                                                value="unattempted"
+                                                className="rounded-none"
+                                            >
                                                 Unattempted Questions
                                             </SelectItem>
                                         </SelectGroup>

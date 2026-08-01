@@ -178,6 +178,7 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
         show_name: user.show_name ?? true,
         username: user.username ?? null,
         is_public: user.is_public ?? false,
+        about: user?.about ?? null,
     };
 
     // 2. Send only the clean payload to the database

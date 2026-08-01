@@ -7,7 +7,7 @@ type ResultMessageProps = {
     showAnswer: boolean;
     result: string;
     currentQuestion: Question;
-    numericalAnswer: number;
+    numericalAnswer: number | null;
 };
 
 const ResultMessage = ({

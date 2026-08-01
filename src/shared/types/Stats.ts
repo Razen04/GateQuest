@@ -13,8 +13,10 @@ export interface SubjectStat {
 }
 
 export interface Streaks {
-    current: number;
-    longest: number;
+    study_current: number;
+    study_longest: number;
+    learning_current: number;
+    learning_longest: number;
 }
 
 export interface Heatmap {

@@ -1,21 +1,23 @@
-import { motion } from 'framer-motion';
 import React, { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 
-interface TabItem {
+export interface TabItem {
     id: string;
     label: string;
     icon?: React.ReactNode;
     activeIcon?: React.ReactNode;
+    badge?: string | number;
 }
 
 interface AnimatedTabsProps {
     tabs: TabItem[];
     activeTab: string;
     onChange: (id: string) => void;
+    className?: string;
 }
 
-const AnimatedTabs: React.FC<AnimatedTabsProps> = ({ tabs, activeTab, onChange }) => {
+const AnimatedTabs: React.FC<AnimatedTabsProps> = ({ tabs, activeTab, onChange, className }) => {
     const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
     useEffect(() => {
@@ -27,42 +29,91 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({ tabs, activeTab, onChange }
     }, [activeTab]);
 
     return (
-        <div className="md:max-w-fit max-w-full overflow-hidden">
-            <nav className="relative rounded-2xl bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/15 shadow-[0_8px_30px_rgba(0,0,0,0.12)] before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-b before:from-white/20 before:to-transparent before:pointer-events-none">
-                <div className="relative flex max-w-full overflow-x-auto no-scrollbar gap-1 p-1.5">
+        <div className={cn('relative w-full overflow-hidden no-scrollbar p-1', className)}>
+            <nav className="relative border border-slate-900/10 bg-slate-950/5 p-1.5 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/40 dark:shadow-[0_8px_32px_rgba(0,0,0,0.36)]">
+                <div className="relative flex items-center gap-1.5 overflow-x-auto">
                     {tabs.map((tab) => {
                         const isActive = tab.id === activeTab;
+                        const iconToDisplay = isActive ? (tab.activeIcon ?? tab.icon) : tab.icon;
 
                         return (
                             <motion.button
-                                whileTap={{ scale: 0.97 }}
-                                whileHover={{ scale: 1.02 }}
                                 key={tab.id}
                                 ref={(el) => {
                                     tabRefs.current[tab.id] = el;
                                 }}
                                 onClick={() => onChange(tab.id)}
+                                whileTap={{ scale: 0.96 }}
                                 className={cn(
-                                    'relative z-10 flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-300',
+                                    'group relative z-10 flex shrink-0 items-center gap-2.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors duration-200 outline-none select-none',
+                                    'font-["Space_Grotesk",sans-serif]',
                                     isActive
-                                        ? 'text-foreground'
-                                        : 'text-muted-foreground hover:text-foreground',
+                                        ? 'text-slate-900 dark:text-white'
+                                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                                 )}
                             >
-                                {tab.icon && (
-                                    <span className="relative z-10">
-                                        {isActive ? (tab.activeIcon ?? tab.icon) : tab.icon}
+                                {/* Animated Icon Wrapper */}
+                                {iconToDisplay && (
+                                    <span className="relative z-10 flex items-center justify-center">
+                                        <AnimatePresence mode="wait" initial={false}>
+                                            <motion.span
+                                                key={
+                                                    isActive
+                                                        ? `${tab.id}-active`
+                                                        : `${tab.id}-inactive`
+                                                }
+                                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
+                                                transition={{ duration: 0.15 }}
+                                                className={cn(
+                                                    'transition-colors duration-200',
+                                                    isActive
+                                                        ? 'text-[#2A5CFF] dark:text-blue-400'
+                                                        : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300',
+                                                )}
+                                            >
+                                                {iconToDisplay}
+                                            </motion.span>
+                                        </AnimatePresence>
                                     </span>
                                 )}
 
+                                {/* Label */}
                                 <span className="relative z-10">{tab.label}</span>
 
+                                {/* Optional Badge */}
+                                {tab.badge !== undefined && (
+                                    <span
+                                        className={cn(
+                                            'relative z-10 px-2 py-0.5 font-["JetBrains_Mono",monospace] text-[10px] font-bold transition-colors',
+                                            isActive
+                                                ? 'bg-[#2A5CFF]/15 text-[#2A5CFF] dark:bg-blue-400/20 dark:text-blue-300'
+                                                : 'bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-400',
+                                        )}
+                                    >
+                                        {tab.badge}
+                                    </span>
+                                )}
+
+                                {/* Active Glass Floating Pill */}
                                 {isActive && (
                                     <motion.div
-                                        layoutId="glass-tab"
-                                        transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-                                        className="absolute inset-0 -z-10 rounded-xl bg-white/35 dark:bg-white/10 backdrop-blur-2xl border border-white/30 shadow-[0_4px_20px_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.18)] before:absolute before:inset-[1px] before:rounded-[11px] before:bg-gradient-to-b before:from-white/40 before:to-white/5 before:pointer-events-none"
-                                    />
+                                        layoutId="active-nav-pill"
+                                        transition={{
+                                            type: 'spring',
+                                            stiffness: 400,
+                                            damping: 30,
+                                            mass: 0.8,
+                                        }}
+                                        className="absolute inset-0 -z-10 border border-slate-900/10 bg-white shadow-md dark:border-white/20 dark:bg-white/10 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
+                                    >
+                                        {/* Subtle Top Inner Edge Highlight */}
+                                        <div className="absolute inset-x-2 top-0 h-[1px] bg-gradient-to-r from-transparent via-slate-900/20 to-transparent dark:via-white/40" />
+
+                                        {/* Blue Ambient Underglow */}
+                                        <div className="absolute inset-0 -z-10 bg-[#2A5CFF]/10 blur-md dark:bg-blue-500/20" />
+                                    </motion.div>
                                 )}
                             </motion.button>
                         );

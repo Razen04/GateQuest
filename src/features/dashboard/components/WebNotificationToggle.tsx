@@ -21,7 +21,7 @@ export const WebNotificationToggle = () => {
     }
 
     return (
-        <div className="flex flex-col mb-2 sm:flex-row sm:items-center justify-between rounded-lg border p-4 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 gap-4 transition-all">
+        <div className="flex flex-col mb-2 sm:flex-row sm:items-center justify-between border p-4 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 gap-4 transition-all">
             <div className="space-y-1">
                 <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
                     {status === 'subscribed'
@@ -43,7 +43,7 @@ export const WebNotificationToggle = () => {
 
             <div className="flex items-center gap-2 self-end sm:self-center">
                 {status === 'ios-tab' ? (
-                    <div className="rounded bg-amber-50 dark:bg-amber-950/30 p-2 text-[11px] text-amber-700 dark:text-amber-400 border border-amber-200/40">
+                    <div className="bg-amber-50 dark:bg-amber-950/30 p-2 text-[11px] text-amber-700 dark:text-amber-400 border border-amber-200/40">
                         📲 Tap <strong className="font-semibold">Share</strong> then{' '}
                         <strong className="font-semibold">Add to Home Screen</strong> to unlock
                         streak alerts.
@@ -54,7 +54,7 @@ export const WebNotificationToggle = () => {
                         size="sm"
                         onClick={disableNotifications}
                         disabled={isProcessing}
-                        className="text-xs text-red-500 hover:text-red-600 dark:border-zinc-800"
+                        className="rounded-none text-xs text-red-500 hover:text-red-600 dark:border-zinc-800"
                     >
                         Disable Alerts
                     </Button>
@@ -63,7 +63,7 @@ export const WebNotificationToggle = () => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="text-xs text-zinc-400 hover:text-zinc-500"
+                            className="text-xs rounded-none text-zinc-400 hover:text-zinc-500"
                             onClick={dismissWidget}
                             disabled={isProcessing}
                         >
@@ -73,7 +73,7 @@ export const WebNotificationToggle = () => {
                             size="sm"
                             onClick={enableNotifications}
                             disabled={status === 'denied' || isProcessing}
-                            className="text-xs font-medium"
+                            className="text-xs font-medium rounded-none"
                         >
                             {isProcessing ? 'Connecting...' : 'Enable Notifications'}
                         </Button>

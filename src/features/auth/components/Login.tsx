@@ -29,12 +29,12 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
     return (
         <GoogleOAuthProvider clientId="635706138983-n2tb8pl1iltjs112g2faeoq26um4hj4r.apps.googleusercontent.com">
             <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50/70 via-white/60 to-purple-100/70 dark:from-zinc-900/70 dark:via-zinc-800/60 dark:to-zinc-900/70 backdrop-blur-3xl">
-                <div className="w-full max-w-md bg-white/40 dark:bg-zinc-900/40 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border border-white/30 dark:border-white/10 p-8 flex flex-col items-center animate-fade-in rounded-3xl">
+                <div className="w-full max-w-md bg-white/40 dark:bg-zinc-900/40 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border border-white/30 dark:border-white/10 p-8 flex flex-col items-center animate-fade-in">
                     {canClose && (
                         <button
                             aria-label="Close"
                             onClick={onClose}
-                            className="p-2 rounded-full hover:bg-red-500/20 dark:hover:bg-red-500/30 absolute right-3 top-3 cursor-pointer font-bold text-lg transition-all backdrop-blur-xl"
+                            className="p-2 hover:bg-red-500/20 dark:hover:bg-red-500/30 absolute right-3 top-3 cursor-pointer font-bold text-lg transition-all backdrop-blur-xl"
                         >
                             <X className="text-zinc-400 font-bold text-2xl hover:text-black dark:hover:text-white transition-colors" />
                         </button>
@@ -73,15 +73,17 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                     </div>
 
                     {import.meta.env.DEV && (
-                        <div className="mt-5 border border-red-400/50 bg-red-500/10 backdrop-blur-xl rounded-2xl p-3 w-full">
-                            <h3 className="text-white text-center font-semibold">Dev Tools</h3>
-                            <p className="text-white text-center mb-2 text-sm">
+                        <div className="mt-5 border border-red-400/50 bg-red-500/10 backdrop-blur-xl p-3 w-full">
+                            <h3 className="text-black dark:text-white text-center font-semibold">
+                                Dev Tools
+                            </h3>
+                            <p className="text-black dark:text-white text-center mb-2 text-sm">
                                 Login as `test@example.com`
                             </p>
 
                             <button
                                 onClick={handleDevLogin}
-                                className="w-full bg-red-500/80 hover:bg-red-600 text-white rounded-xl p-2 cursor-pointer transition-all backdrop-blur-xl shadow-sm"
+                                className="w-full bg-red-500/80 hover:bg-red-600 text-white p-2 cursor-pointer transition-all backdrop-blur-xl shadow-sm"
                             >
                                 Log In (Local Dev)
                             </button>

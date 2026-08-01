@@ -150,11 +150,11 @@ const TopicTest = () => {
     };
 
     return (
-        <div className="max-h-dvh pb-40 flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="max-h-dvh pb-40 flex flex-col text-slate-900 dark:text-slate-100 max-w-7xl mx-auto">
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 rounded-xl px-3 py-2 border border-white/20 bg-white/10 dark:bg-white/[0.05] backdrop-blur-xl hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
+                    className="flex items-center mb-4 px-3 py-2 border border-white/20 bg-white/10 dark:bg-white/[0.05] backdrop-blur-xl hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
                 >
                     <ArrowLeftIcon className="mr-2" />
                     <span>Back</span>
@@ -181,7 +181,7 @@ const TopicTest = () => {
                                 </h3>
                             </div>
 
-                            <div className="bg-gradient-to-br from-blue-500/80 to-blue-700/80 backdrop-blur-2xl border border-white/20 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden">
+                            <div className="bg-gradient-to-br from-blue-500/80 to-blue-700/80 backdrop-blur-2xl border border-white/20 p-5 text-white shadow-xl relative overflow-hidden">
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-4">
                                         <h3 className="text-blue-100 text-sm truncate max-w-52 md:max-w-3xl">
@@ -189,7 +189,7 @@ const TopicTest = () => {
                                                 ? activeTest.topics.join(', ')
                                                 : 'No Topics'}
                                         </h3>
-                                        <div className="bg-white/20 backdrop-blur-md rounded-xl px-3 py-1 flex items-center gap-2 text-xs font-mono">
+                                        <div className="bg-white/20 backdrop-blur-md px-3 py-1 flex items-center gap-2 text-xs font-mono">
                                             <Timer weight="fill" />
                                             {formatTime(activeTest.remaining_time_seconds ?? 0)}
                                         </div>
@@ -208,14 +208,14 @@ const TopicTest = () => {
                                         {activeTest.status === 'ongoing' ? (
                                             <Button
                                                 onClick={handleResume}
-                                                className="bg-white/90 text-blue-600 rounded-xl backdrop-blur-xl"
+                                                className="bg-white/90 text-blue-600 hover:bg-blue-100 rounded-none backdrop-blur-xl"
                                             >
                                                 Resume <Play weight="fill" />
                                             </Button>
                                         ) : (
                                             <Button
                                                 onClick={handleStartTest}
-                                                className="bg-white/90 text-blue-600 rounded-xl backdrop-blur-xl"
+                                                className="bg-white/90 text-blue-600 rounded-none backdrop-blur-xl"
                                             >
                                                 Start <Play weight="fill" />
                                             </Button>
@@ -232,14 +232,14 @@ const TopicTest = () => {
                                 </h3>
                             </div>
 
-                            <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-5 shadow-xl text-center">
+                            <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 p-5 shadow-xl text-center">
                                 <div className="flex flex-col items-center gap-4">
                                     <p className="text-gray-700 dark:text-gray-200 text-sm">
                                         You currently have no ongoing or paused test sessions.
                                     </p>
                                     <Button
                                         onClick={handleGenerateNew}
-                                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-xl"
+                                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-none"
                                     >
                                         Start a New Test <Plus weight="bold" className="ml-2" />
                                     </Button>
@@ -255,23 +255,23 @@ const TopicTest = () => {
                             Progress Trends
                         </h3>
 
-                        <div className="flex rounded-xl bg-white/20 dark:bg-white/[0.05] border border-white/20 backdrop-blur-xl p-1">
+                        <div className="flex bg-white/20 dark:bg-white/[0.05] border border-white/20 backdrop-blur-xl p-1">
                             <button
                                 onClick={() => setViewMode('accuracy')}
-                                className={`px-3 py-2 rounded-lg text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
                             >
                                 Accuracy
                             </button>
                             <button
                                 onClick={() => setViewMode('score')}
-                                className={`px-3 py-2 rounded-lg text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
                             >
                                 Performance %
                             </button>
                         </div>
                     </div>
 
-                    <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded-2xl p-4 h-64 shadow-xl">
+                    <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 p-4 h-64 shadow-xl">
                         {chartData.length > 1 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData}>
@@ -377,11 +377,11 @@ const TopicTest = () => {
                                     <div
                                         key={test.id}
                                         onClick={() => navigate(`/topic-test-result/${test.id}`)}
-                                        className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl p-4 my-2 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer"
+                                        className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-xl border border-white/20 dark:border-white/10 p-4 my-2 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div
-                                                className={`p-2 rounded-full ${bg} ${text} ${darkBg} ${darkText}`}
+                                                className={`p-2 ${bg} ${text} ${darkBg} ${darkText}`}
                                             >
                                                 {icon}
                                             </div>

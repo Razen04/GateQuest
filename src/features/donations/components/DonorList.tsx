@@ -13,7 +13,7 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
             {donations.map((donation) => (
                 <li
                     key={donation.donation_id}
-                    className="relative overflow-hidden flex items-start gap-3 rounded-2xl p-3 border border-white/20 bg-white/10 backdrop-blur-xl backdrop-saturate-150 dark:bg-white/[0.06] dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/[0.1] hover:-translate-y-0.5"
+                    className="relative overflow-hidden flex items-start gap-3 p-3 border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-white/[0.06] dark:border-white/10 transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/[0.1] hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
 
@@ -52,7 +52,7 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                                 </div>
                             </div>
 
-                            <span className="flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold border border-emerald-400/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <span className="flex-shrink-0 px-2.5 py-1 text-xs font-semibold border border-emerald-400/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                 ₹{donation.actual_amount}
                             </span>
                         </div>

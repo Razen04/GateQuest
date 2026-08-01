@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { CaretDown, CaretUp } from '@phosphor-icons/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CaretDown, CaretUp, ArrowRight, CurrencyInr, Info, EyeSlash } from '@phosphor-icons/react';
 import instructions from '@/shared/data/donationInstructions.ts';
 import ToggleSwitch from '@/shared/components/ToggleSwitch.tsx';
 import { Button } from '@/shared/components/ui/button.tsx';
@@ -17,6 +18,8 @@ type DonationBoxProps = {
     setShowQR: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+const presetAmounts = [50, 169, 569];
+
 const DonationBox: React.FC<DonationBoxProps> = ({
     setStep,
     amount,
@@ -27,122 +30,176 @@ const DonationBox: React.FC<DonationBoxProps> = ({
     setAnonymous,
     setShowQR,
 }) => {
-    const [instructionOpen, setInstructionOpen] = useState<boolean>(true); // if the instruction is opened or not
-
+    const [instructionOpen, setInstructionOpen] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // Donation amount buttons
-    const presetAmounts = [20, 69, 169];
-
-    // Handle QR generation step
     const handleGenerateQR = () => {
-        const finalAmount = amount;
-        if (!finalAmount) return alert('Select or enter an amount!');
+        if (!amount || amount <= 0)
+            return alert('Please enter or select a valid contribution amount!');
 
         containerRef?.current?.scrollTo({ behavior: 'smooth' });
-
-        setAmount(finalAmount);
+        setAmount(amount);
         setShowQR(true);
         setStep('utr');
     };
 
     return (
-        <div ref={containerRef} className="space-y-4">
-            <h2 className="text-3xl font-bold bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent scroll-smooth">
-                Donation Form
-            </h2>
+        <div ref={containerRef} className="space-y-6">
+            {/* Header Title */}
+            <div>
+                <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
+                    TERMINAL // STEP 01
+                </p>
+                <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Configure Contribution
+                </h2>
+            </div>
 
-            {/* How to donate */}
-            <div className="relative overflow-hidden rounded-2xl p-4 border border-white/20 bg-white/10 backdrop-blur-xl backdrop-saturate-150 dark:bg-white/[0.06] dark:border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+            {/* Collapsible Guidelines / Instructions */}
+            <div className="overflow-hidden border border-slate-900/10 bg-slate-50/50 transition-all dark:border-white/10 dark:bg-white/[0.02]">
+                <button
+                    type="button"
+                    onClick={() => setInstructionOpen(!instructionOpen)}
+                    className="flex w-full items-center justify-between p-4 text-left transition hover:bg-slate-100/50 dark:hover:bg-white/[0.03]"
+                >
+                    <div className="flex items-center gap-2.5">
+                        <Info size={18} className="text-[#2A5CFF]" />
+                        <span className="font-['Space_Grotesk',sans-serif] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            Protocol Instructions & Verification Guidelines
+                        </span>
+                    </div>
+                    <div className="bg-slate-200/50 p-1 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                        {instructionOpen ? <CaretUp size={14} /> : <CaretDown size={14} />}
+                    </div>
+                </button>
 
-                <div className="relative flex justify-between items-center">
-                    <h3 className="text-red-600 dark:text-red-400 font-semibold text-sm">
-                        How to Donate? Please read this carefully.
-                    </h3>
+                <AnimatePresence>
+                    {instructionOpen && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            className="border-t border-slate-900/10 p-4 pt-3 dark:border-white/10"
+                        >
+                            <ol className="space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                                {instructions.map((item, idx) => (
+                                    <li key={idx} className="flex gap-2.5">
+                                        <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold text-[#2A5CFF]">
+                                            0{idx + 1}.
+                                        </span>
+                                        <div>
+                                            <p>{item.text}</p>
+                                            {item.sub && (
+                                                <ul className="mt-1.5 space-y-1 pl-2">
+                                                    {item.sub.map((sub, subIdx) => (
+                                                        <li
+                                                            key={subIdx}
+                                                            className="text-[11px] text-slate-500 dark:text-slate-400"
+                                                        >
+                                                            &bull; {sub.text}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ol>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
 
-                    <Button
-                        onClick={() => setInstructionOpen(!instructionOpen)}
-                        variant="ghost"
-                        className="rounded-full p-2 hover:bg-white/20 dark:hover:bg-white/10"
-                    >
-                        {instructionOpen ? <CaretUp size={18} /> : <CaretDown size={18} />}
-                    </Button>
+            {/* Select Amount Grid */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <label className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Select Amount (INR)
+                    </label>
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-400">
+                        INSTANT UPI RECEPTION
+                    </span>
                 </div>
 
-                {instructionOpen && (
-                    <ol className="relative mt-3 list-decimal list-inside space-y-2 text-sm text-muted-foreground">
-                        {instructions.map((item, idx) => (
-                            <li key={idx}>
-                                {item.text}
+                <div className="grid grid-cols-3 gap-2.5">
+                    {presetAmounts.map((amt) => {
+                        const isSelected = amount === amt;
+                        return (
+                            <button
+                                key={amt}
+                                type="button"
+                                onClick={() => setAmount(amt)}
+                                className={`group relative flex items-center justify-center border py-3 font-['JetBrains_Mono',monospace] text-base font-bold transition-all ${
+                                    isSelected
+                                        ? 'border-[#2A5CFF] bg-[#2A5CFF] text-white shadow-md shadow-[#2A5CFF]/20'
+                                        : 'border-slate-900/10 bg-white hover:border-slate-300 dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:hover:border-white/30'
+                                }`}
+                            >
+                                ₹{amt}
+                            </button>
+                        );
+                    })}
+                </div>
 
-                                {item.sub && (
-                                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
-                                        {item.sub.map((sub, subIdx) => (
-                                            <li key={subIdx}>{sub.text}</li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </li>
-                        ))}
-                    </ol>
+                {/* Custom Amount Input */}
+                <div className="relative">
+                    <CurrencyInr
+                        size={18}
+                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <Input
+                        type="number"
+                        placeholder="Enter custom amount"
+                        value={amount || ''}
+                        onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                        className="h-11 rounded-none border-slate-900/10 bg-white pl-10 font-['JetBrains_Mono',monospace] text-sm font-semibold text-slate-900 transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
+                    />
+                </div>
+
+                {amount && amount > 0 && amount < 50 && (
+                    <p className="mt-2 text-sm font-medium text-red-500">
+                        ₹50 minimum. I'd genuinely rather you keep ₹{amount} than donate it. 😭
+                    </p>
                 )}
             </div>
 
-            {/* Anonymous toggle */}
-            <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-white/[0.06] p-3">
-                <ToggleSwitch
-                    label="Remain Anonymous"
-                    onToggle={() => setAnonymous(!anonymous)}
-                    isOn={anonymous}
+            {/* Optional Note / Message */}
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <label className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Public Message (Optional)
+                    </label>
+                    <span className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-400">
+                        {(message || '').length}/100
+                    </span>
+                </div>
+                <Textarea
+                    placeholder="Leave a encouraging note or feedback..."
+                    maxLength={100}
+                    value={message || ''}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="min-h-24 resize-none rounded-none border-slate-900/10 bg-white font-['Fraunces',serif] text-sm text-slate-900 transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
                 />
             </div>
 
-            {/* Optional Message */}
-            <Textarea
-                placeholder="Optional message (max 100 chars)"
-                maxLength={100}
-                value={message ? message : ''}
-                onChange={(e) => setMessage(e.target.value)}
-                className="rounded-2xl border-white/20 bg-white/10 backdrop-blur-xl dark:bg-white/[0.06] min-h-24"
+            {/* Anonymous Toggle Option */}
+            <ToggleSwitch
+                icon={<EyeSlash size={20} />}
+                title="Anonymous Contribution"
+                description="Hide your profile details on the public patron log"
+                isOn={anonymous}
+                onToggle={() => setAnonymous(!anonymous)}
             />
 
-            {/* Donation Amount */}
-            <div className="space-y-3">
-                <span className="font-medium text-sm text-muted-foreground">Choose Amount</span>
-
-                <div className="flex gap-2">
-                    {presetAmounts.map((amt) => (
-                        <Button
-                            key={amt}
-                            type="button"
-                            onClick={() => setAmount(amt)}
-                            className={`flex-1 rounded-xl transition-all ${
-                                amount === amt
-                                    ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg'
-                                    : 'bg-white/10 dark:bg-white/[0.06] border border-white/20 hover:bg-white/20 dark:hover:bg-white/10'
-                            }`}
-                        >
-                            ₹{amt}
-                        </Button>
-                    ))}
-                </div>
-
-                <Input
-                    type="number"
-                    placeholder="Custom amount"
-                    value={amount || ''}
-                    onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                    className="rounded-2xl bg-white/10 border-white/20 backdrop-blur-xl dark:bg-white/[0.06]"
-                />
-            </div>
-
-            {/* Generate QR */}
+            {/* Submit & Generate QR CTA */}
             <Button
+                type="button"
                 onClick={handleGenerateQR}
-                className="w-full rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-700 shadow-lg"
+                className="group relative flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] text-sm font-bold text-white transition-all hover:bg-[#2A5CFF]/90 hover:shadow-lg hover:shadow-[#2A5CFF]/25 active:scale-[0.99]"
             >
-                Generate QR + Link
+                Generate Dynamic QR Code
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Button>
         </div>
     );

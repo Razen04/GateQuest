@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { UserMinus, LockKey, ArrowLeft, House } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
+import { glassPanel } from '../styles/profileTheme';
 
 interface ProfileErrorProps {
     message?: string | null;
@@ -8,84 +9,60 @@ interface ProfileErrorProps {
 
 export default function ProfileError({ message }: ProfileErrorProps) {
     const navigate = useNavigate();
-
-    // Determine the state based on the exact Postgres exception message
     const isPrivate = message === 'This profile is private.';
 
-    // Dynamically set the content
     const Icon = isPrivate ? LockKey : UserMinus;
-    const titleText = isPrivate ? 'Profile is Private' : 'Profile not found';
+    const titleText = isPrivate ? 'Profile is private' : 'Profile not found';
     const descriptionText = isPrivate
         ? 'This user has chosen to keep their study progress and activity history hidden from the public.'
         : 'The username might be misspelled, or the user may have changed their handle or deleted their account.';
+    const accent = isPrivate ? '#FF9F43' : '#3E8EFF';
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 text-center font-['Plus_Jakarta_Sans',sans-serif]">
-            {/* Soft background ambient glow (Changes color if private) */}
-            <div
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[120px] pointer-events-none ${
-                    isPrivate
-                        ? 'bg-amber-500/10 dark:bg-amber-500/5'
-                        : 'bg-blue-500/10 dark:bg-blue-500/5'
-                }`}
-            />
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-white px-4 font-['Plus_Jakarta_Sans',sans-serif] dark:from-[#06070A] dark:via-[#0A0D12] dark:to-[#0F1218]">
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div
+                    className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 blur-[140px]"
+                    style={{ backgroundColor: `${accent}20` }}
+                />
+            </div>
 
             <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 0.99, y: 0 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="max-w-md w-full flex flex-col items-center z-10"
+                initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.35 }}
+                className="relative z-10 w-full max-w-md"
             >
-                {/* Abstract Premium Visual Component */}
-                <div className="relative flex items-center justify-center w-24 h-24 mb-8">
-                    {/* Pulsing outer decorative ring */}
-                    <motion.div
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-                        className="absolute inset-0 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40 shadow-sm"
-                    />
-
-                    {/* Dotted geometric target accent */}
-                    <div className="absolute inset-2 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700" />
-
-                    {/* Inner high-contrast container */}
-                    <div className="absolute inset-4 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
-                        <Icon
-                            size={28}
-                            className="text-slate-400 dark:text-slate-500"
-                            weight="duotone"
-                        />
+                <div className={`${glassPanel} p-8`}>
+                    <div className="relative mx-auto mb-8 flex h-24 w-24 items-center justify-center border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/[0.06]">
+                        <Icon size={30} weight="duotone" style={{ color: accent }} />
                     </div>
-                </div>
 
-                {/* Typography Block */}
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-tight mb-3">
-                    {titleText}
-                </h2>
+                    <div className="text-center">
+                        <h2 className="font-['Sora',sans-serif] text-2xl font-bold text-slate-900 dark:text-white">
+                            {titleText}
+                        </h2>
+                        <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-white/60">
+                            {descriptionText}
+                        </p>
+                    </div>
 
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8 max-w-[340px]">
-                    {descriptionText}
-                </p>
-
-                {/* Styled Action Button Row */}
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-                    {/* Primary Button: Go Back */}
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 dark:bg-slate-50 text-slate-50 dark:text-slate-900 text-sm font-medium hover:bg-slate-800 dark:hover:bg-slate-200 h-10 px-5 w-full sm:w-auto shadow-sm transition-all active:scale-[0.98]"
-                    >
-                        <ArrowLeft size={16} weight="bold" />
-                        Go Back
-                    </button>
-
-                    {/* Secondary Button: Return Home */}
-                    <button
-                        onClick={() => navigate('/')}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/60 h-10 px-5 w-full sm:w-auto shadow-sm transition-all active:scale-[0.98]"
-                    >
-                        <House size={16} />
-                        Return Dashboard
-                    </button>
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="inline-flex h-11 items-center justify-center gap-2 border border-white/60 bg-white/50 px-5 text-sm font-medium text-slate-800 transition-all hover:bg-white/70 active:scale-[0.98] dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                        >
+                            <ArrowLeft size={16} />
+                            Go back
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="inline-flex h-11 items-center justify-center gap-2 border border-white/50 bg-white/30 px-5 text-sm font-medium text-slate-700 transition-all hover:bg-white/50 active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.05] dark:text-white/80 dark:hover:bg-white/10"
+                        >
+                            <House size={16} />
+                            Return dashboard
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </div>

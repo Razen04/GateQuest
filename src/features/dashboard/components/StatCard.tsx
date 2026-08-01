@@ -24,13 +24,13 @@ const StatCard = ({
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/20 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06]"
+            className="relative overflow-hidden border border-black/10 bg-white/20 p-4 backdrop-blur-xl backdrop-saturate-150 dark:border-white/10 dark:bg-white/[0.06]"
         >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
 
             <div className="relative flex items-center">
                 <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/20 backdrop-blur-md mr-3 ${bgColor}`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center border border-white/20 backdrop-blur-md mr-3 ${bgColor}`}
                 >
                     <Icon className={`h-6 w-6 ${iconColor}`} />
                 </div>
@@ -44,9 +44,9 @@ const StatCard = ({
                         <span className={`text-xl font-bold ${textColor}`}>{value}</span>
                     </div>
 
-                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+                    <div className="mt-2 h-1.5 w-full overflow-hidden bg-black/10 dark:bg-white/10">
                         <div
-                            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out"
+                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out"
                             style={{ width: value }}
                         />
                     </div>

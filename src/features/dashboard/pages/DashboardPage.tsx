@@ -1,34 +1,40 @@
-import { motion } from 'framer-motion';
-import Login from '@/features/auth/components/Login';
-import { getUserProfile } from '@/shared/utils/helper';
-import ModernLoader from '@/shared/components/ModernLoader';
-import StudyPlan from '../components/StudyPlan';
-import StreakMap from '../components/StreakMap';
-import StatCard from '../components/StatCard';
-import SubjectStats from '../components/SubjectStats';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     ChartLine,
     Medal,
     LightningIcon,
     ArrowClockwiseIcon,
     CaretDownIcon,
+    Compass,
 } from '@phosphor-icons/react';
-import { containerVariants } from '@/shared/utils/motionVariants';
+
+// Hooks & Utilities
 import useAuth from '@/shared/hooks/useAuth';
 import useStats from '../hooks/useStats';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/shared/components/ui/button';
 import { useGoals } from '@/shared/hooks/useGoals';
-import { useEffect, useMemo, useState } from 'react';
+import { getUserProfile } from '@/shared/utils/helper';
+import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+
+// UI Components
+import Login from '@/features/auth/components/Login';
+import ModernLoader from '@/shared/components/ModernLoader';
+import StudyPlan from '../components/StudyPlan';
+import StreakMap from '../components/StreakMap';
+import StatCard from '../components/StatCard';
+import SubjectStats from '../components/SubjectStats';
+import Branding from '@/shared/components/Branding';
+import { WebNotificationToggle } from '../components/WebNotificationToggle';
+import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import { Button } from '@/shared/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import Branding from '@/shared/components/Branding';
-import { WebNotificationToggle } from '../components/WebNotificationToggle';
-import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import { ArrowRightIcon } from '@phosphor-icons/react';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -63,7 +69,7 @@ const Dashboard = () => {
 
     if (loading) {
         return (
-            <div className="w-full flex justify-center items-center text-gray-600">
+            <div className="w-full h-dvh flex justify-center items-center bg-slate-50 dark:bg-zinc-950">
                 <ModernLoader />
             </div>
         );
@@ -71,162 +77,247 @@ const Dashboard = () => {
 
     if (!isLogin) {
         return (
-            <div className="flex justify-center items-center w-full h-full">
-                <div className="flex-1 flex justify-center items-center min-h-[60vh]">
+            <div className="flex justify-center items-center w-full min-h-dvh bg-slate-50 dark:bg-zinc-950">
+                <div className="flex-1 flex justify-center items-center p-4">
                     <Login canClose={false} />
                 </div>
             </div>
         );
     }
 
+    const userProgress = stats?.progress || 0;
+    const userAccuracy = stats?.accuracy || 0;
+
     return (
-        <div className="p-6 pb-40 h-dvh overflow-y-scroll bg-gradient-to-br from-white via-blue-50/40 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+        <div className="min-h-dvh pb-32 px-4 sm:px-8 pt-6 max-w-7xl mx-auto space-y-8 select-none">
             <WebNotificationToggle />
 
+            {/* HERO BENTO ROW */}
             <motion.div
                 variants={containerVariants}
                 initial="initial"
                 animate="animate"
-                className="mb-8"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch"
             >
-                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-                    Welcome back,{' '}
-                    <span className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
-                        {user?.name}
-                    </span>
-                </h1>
-
-                <p className="text-gray-600 dark:text-gray-400">
-                    Your preparation journey is {stats?.progress}% complete. Keep going!
-                </p>
-            </motion.div>
-
-            <section className="w-full mb-5">
-                <ContinueSessionWidget />
-
-                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
-                    Smart Actions
-                </h2>
-
-                <div className="grid grid-cols-2 gap-3">
-                    <Button
-                        onClick={() => navigate('/topic-test')}
-                        className="flex items-center gap-3 font-semibold px-6 py-6 rounded-2xl border border-white/20 bg-white/40 dark:bg-white/10 backdrop-blur-xl shadow-lg hover:bg-white/60 dark:hover:bg-white/20 transition-all"
-                    >
-                        <LightningIcon size={22} weight="bold" />
-                        Topic Test
-                    </Button>
-
-                    <Button
-                        onClick={() => navigate('/revision')}
-                        className="flex items-center gap-3 font-semibold px-6 py-6 rounded-2xl border border-white/20 bg-white/40 dark:bg-white/10 backdrop-blur-xl shadow-lg hover:bg-white/60 dark:hover:bg-white/20 transition-all"
-                    >
-                        <ArrowClockwiseIcon size={22} weight="bold" />
-                        Smart Revision
-                    </Button>
-                </div>
-            </section>
-
-            <section>
-                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">Overview</h2>
-
+                {/* Greeting Hero Card */}
                 <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5"
+                    variants={itemVariants}
+                    className="lg:col-span-8 relative overflow-hidden border border-slate-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900/80 p-6 sm:p-8 shadow-sm flex flex-col justify-between"
+                >
+                    {/* Subtle Top Inner Glow */}
+                    <div className="pointer-events-none absolute -top-24 -right-24 h-60 w-60 bg-blue-500/10 blur-3xl dark:bg-blue-600/15" />
+
+                    <div className="relative z-10 space-y-2">
+                        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white font-['Space_Grotesk',sans-serif]">
+                            Welcome back,{' '}
+                            <span className="bg-blue-500 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-300">
+                                {user?.name || 'Scholar'}
+                            </span>
+                        </h1>
+
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-xl font-normal leading-relaxed">
+                            You've completed{' '}
+                            <span className="font-semibold text-slate-900 dark:text-white">
+                                {userProgress}%
+                            </span>{' '}
+                            of your target syllabus. Stay focused on your weak areas today.
+                        </p>
+                    </div>
+
+                    {/* Integrated Quick Progress Bar */}
+                    <div className="relative z-10 mt-6 pt-6 border-t border-slate-100 dark:border-zinc-800/80 flex items-center gap-4">
+                        <div className="flex-1 space-y-1.5">
+                            <div className="flex justify-between text-xs font-medium text-slate-500 dark:text-zinc-400 font-mono">
+                                <span>SYLLABUS COVERAGE</span>
+                                <span>{userProgress}%</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${userProgress}%` }}
+                                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                                    className="h-full bg-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Stat Highlights Bento */}
+                <motion.div
+                    variants={itemVariants}
+                    className="lg:col-span-4 grid grid-cols-1 gap-4"
                 >
                     <StatCard
                         icon={ChartLine}
                         title="Overall Progress"
-                        value={`${stats?.progress}%`}
-                        iconColor="text-blue-500"
-                        bgColor="bg-blue-50"
+                        value={`${userProgress}%`}
+                        iconColor="text-blue-600 dark:text-blue-400"
+                        bgColor="bg-blue-500/10"
                     />
 
                     <StatCard
                         icon={Medal}
-                        title="Overall Accuracy"
-                        value={`${stats?.accuracy}%`}
-                        iconColor="text-purple-500"
-                        bgColor="bg-purple-50"
+                        title="Accuracy Rate"
+                        value={`${userAccuracy}%`}
+                        iconColor="text-indigo-600 dark:text-indigo-400"
+                        bgColor="bg-indigo-500/10"
                     />
                 </motion.div>
+            </motion.div>
+
+            {/* SMART ACTIONS SECTION */}
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono flex items-center gap-2">
+                        <Compass size={14} weight="bold" />
+                        <span>Smart Actions</span>
+                    </h2>
+                </div>
+
+                <ContinueSessionWidget />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Topic Test */}
+                    <motion.div
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="group relative cursor-pointer overflow-hidden border border-slate-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900 p-5 shadow-sm hover:border-blue-500/40 hover:shadow-md transition-all duration-200 flex items-center justify-between"
+                        onClick={() => navigate('/topic-test')}
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 group-hover:scale-105 transition-transform">
+                                <LightningIcon size={24} weight="bold" />
+                            </div>
+                            <div>
+                                <h3 className="font-['Space_Grotesk',sans-serif] font-bold text-slate-900 dark:text-white text-base">
+                                    Topic Test
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                                    Target specific subject topics
+                                </p>
+                            </div>
+                        </div>
+                        <span className="hidden sm:inline-block border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[10px] text-slate-400 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-500">
+                            <ArrowRightIcon />
+                        </span>
+                    </motion.div>
+
+                    {/* Smart Revision */}
+                    <motion.div
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="group relative cursor-pointer overflow-hidden border border-slate-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900 p-5 shadow-sm hover:border-indigo-500/40 hover:shadow-md transition-all duration-200 flex items-center justify-between"
+                        onClick={() => navigate('/revision')}
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400 group-hover:scale-105 transition-transform">
+                                <ArrowClockwiseIcon size={24} weight="bold" />
+                            </div>
+                            <div>
+                                <h3 className="font-['Space_Grotesk',sans-serif] font-bold text-slate-900 dark:text-white text-base">
+                                    Smart Revision
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                                    Weak area practice
+                                </p>
+                            </div>
+                        </div>
+                        <span className="hidden sm:inline-block border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[10px] text-slate-400 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-500">
+                            <ArrowRightIcon />
+                        </span>
+                    </motion.div>
+                </div>
             </section>
 
-            <section className="mb-5">
-                <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">Study Plan</h2>
+            {/* STUDY PLAN SECTION */}
+            <section className="space-y-3">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
+                    Target Study Roadmap
+                </h2>
                 <StudyPlan />
             </section>
 
+            {/* STREAK MAP SECTION */}
             {!statsLoading && stats?.heatmapData?.length > 0 && (
-                <div>
-                    {' '}
-                    <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
-                        Streak Map
+                <section className="space-y-3">
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
+                        Consistency & Activity Heatmap
                     </h2>
                     <StreakMap stats={stats} />
-                </div>
+                </section>
             )}
 
-            <section className="mt-6 mb-4">
-                {activeExams.length > 1 && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="group rounded-xl border border-white/20 bg-white/30 dark:bg-white/10 backdrop-blur-xl shadow-md"
-                            >
-                                <span className="font-semibold text-blue-600 dark:text-blue-400">
-                                    {selectedExam.toUpperCase()}
-                                </span>
+            {/* SUBJECT ANALYTICS WITH EXAM SWITCHER */}
+            <section className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200/80 dark:border-zinc-800">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
+                            Subject Performance Overview
+                        </h2>
+                    </div>
 
-                                <CaretDownIcon
-                                    size={14}
-                                    weight="bold"
-                                    className="ml-2 transition-transform group-data-[state=open]:rotate-180"
-                                />
-                            </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent
-                            align="end"
-                            className="w-40 rounded-xl border border-white/20 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-xl"
-                        >
-                            {activeExams.map((exam) => (
-                                <DropdownMenuItem
-                                    key={exam}
-                                    onClick={() => setSelectedExam(exam)}
-                                    className={`rounded-lg ${
-                                        selectedExam === exam
-                                            ? 'bg-blue-500/10 text-blue-600 font-semibold'
-                                            : ''
-                                    }`}
+                    {/* Active Exam Switcher Dropdown */}
+                    {activeExams.length > 1 && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 gap-2 rounded-none border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800"
                                 >
-                                    {exam.toUpperCase()}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                                    <span className="text-blue-600 dark:text-blue-400">EXAM:</span>
+                                    <span>{selectedExam.toUpperCase()}</span>
+                                    <CaretDownIcon size={12} weight="bold" />
+                                </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                                align="end"
+                                className="w-44 rounded-none border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl"
+                            >
+                                {activeExams.map((exam) => (
+                                    <DropdownMenuItem
+                                        key={exam}
+                                        onClick={() => setSelectedExam(exam)}
+                                        className={`text-xs font-mono font-semibold rounded-none cursor-pointer ${
+                                            selectedExam === exam
+                                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                                : 'text-slate-600 dark:text-zinc-400'
+                                        }`}
+                                    >
+                                        {exam.toUpperCase()}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
+
+                {/* Subject Stats Grid */}
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={selectedExam}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {currentSubjectStats.length > 0 ? (
+                            <SubjectStats subjectStats={currentSubjectStats} />
+                        ) : (
+                            <div className="p-12 text-center border border-dashed border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/30">
+                                <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
+                                    No activity data logged yet for {selectedExam.toUpperCase()}.
+                                </p>
+                            </div>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
             </section>
 
-            {currentSubjectStats.length > 0 ? (
-                <div>
-                    <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
-                        Subject Stats
-                    </h2>
-
-                    <SubjectStats subjectStats={currentSubjectStats} />
-                </div>
-            ) : (
-                <div className="p-12 text-center rounded-3xl border border-dashed border-white/20 bg-white/30 dark:bg-white/5 backdrop-blur-xl">
-                    <p className="text-gray-500">No data found for {selectedExam} subjects.</p>
-                </div>
-            )}
-
-            <Branding className="mt-4 w-full" />
+            {/* Branding Footer */}
+            <Branding className="w-full opacity-60 hover:opacity-100 transition-opacity" />
         </div>
     );
 };

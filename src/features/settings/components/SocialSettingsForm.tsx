@@ -158,13 +158,14 @@ export default function SocialSettingsForm({ onSuccess }: SocialSettingsFormProp
                             type={'inputType' in field ? field.inputType : 'url'}
                             defaultValue={field.value}
                             placeholder={'placeholder' in field ? field.placeholder : 'https://'}
+                            className="rounded-none"
                         />
                     </div>
                 ))}
             </div>
 
             <div className="pt-4 border-t flex justify-end">
-                <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
+                <Button type="submit" disabled={isSaving} className="w-full sm:w-auto rounded-none">
                     {isSaving ? 'Saving...' : 'Save Socials'}
                 </Button>
             </div>

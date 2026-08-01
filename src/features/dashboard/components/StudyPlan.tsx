@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import ModernLoader from '@/shared/components/ModernLoader';
+import { useExamCountdown } from '../hooks/useExamCountdown';
 
 interface StudyPlanData {
     loading: boolean;
     todayUniqueAttemptCount: number;
     dailyQuestionTarget: number;
-    daysLeft: number;
     isTargetMetToday: boolean;
     todayProgressPercent: number;
 }
@@ -17,10 +17,11 @@ const StudyPlan = () => {
         loading,
         todayUniqueAttemptCount,
         dailyQuestionTarget,
-        daysLeft,
         isTargetMetToday,
         todayProgressPercent,
     }: StudyPlanData = useStudyPlan();
+
+    const { days, hours, minutes, seconds } = useExamCountdown('2027-02-08T09:00:00');
 
     if (loading) {
         return <ModernLoader />;
@@ -35,13 +36,19 @@ const StudyPlan = () => {
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="relative mx-auto mb-4 overflow-hidden rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06]"
+            className="relative border border-white/20 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-sm p-4 overflow-visible"
         >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5" />
 
             <div className="relative">
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                    {daysLeft} day{daysLeft === 1 ? '' : 's'} left until exam
+                <p className="mt-0.5 flex items-center gap-2 font-['JetBrains_Mono'] text-sm text-muted-foreground">
+                    <span>{days} days</span>
+                    <span>:</span>
+                    <span>{String(hours).padStart(2, '0')} hours</span>
+                    <span>:</span>
+                    <span>{String(minutes).padStart(2, '0')} minutes</span>
+                    <span>:</span>
+                    <span>{String(seconds).padStart(2, '0')} seconds</span>
                 </p>
 
                 <div>
@@ -55,14 +62,14 @@ const StudyPlan = () => {
                         </span>
                     </div>
 
-                    <div className="h-2.5 w-full overflow-hidden rounded-full border border-white/10 bg-black/10 dark:bg-white/10">
+                    <div className="h-2.5 w-full overflow-hidden border border-white/10 bg-black/10 dark:bg-white/10">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{
                                 width: `${Math.min(100, todayProgressPercent)}%`,
                             }}
                             transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className={`h-full rounded-full ${
+                            className={`h-full ${
                                 isTargetMetToday
                                     ? 'bg-gradient-to-r from-blue-400 to-blue-600'
                                     : 'bg-gradient-to-r from-blue-200 to-blue-500'
@@ -85,7 +92,7 @@ const StudyPlan = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className={`mt-5 rounded-xl border p-3 text-center text-sm font-medium backdrop-blur-md ${
+                    className={`mt-5 border p-3 text-center text-sm font-medium backdrop-blur-md ${
                         isTargetMetToday
                             ? 'border-green-400/20 bg-green-500/10 text-green-700 dark:text-green-300'
                             : 'border-yellow-400/20 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300'

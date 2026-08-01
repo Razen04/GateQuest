@@ -37,7 +37,7 @@ const List = ({
                     key={index}
                     variants={fadeInUp}
                     onClick={() => handleQuestionClick(question.id)}
-                    className="cursor-pointer rounded-2xl border border-white/20 bg-white/20 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-xl hover:bg-white/30 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition-all"
+                    className="cursor-pointer border border-white/20 bg-white/20 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-xl hover:bg-white/30 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition-all"
                 >
                     <h3 className="font-medium mb-3 text-sm md:text-base text-gray-800 dark:text-gray-200">
                         <MathRenderer text={getQuestionDisplayText(question)} />
@@ -45,7 +45,7 @@ const List = ({
 
                     <div className="flex justify-between items-center text-xs">
                         <span
-                            className={`rounded-lg font-bold md:font-normal px-2 py-1 backdrop-blur-md border border-white/20 ${getDifficultyClassNames(
+                            className={`font-bold md:font-normal px-2 py-1 backdrop-blur-md border border-white/20 ${getDifficultyClassNames(
                                 question.difficulty,
                             )}`}
                         >

@@ -33,13 +33,13 @@ function Changelog() {
                 <motion.button
                     aria-label="Changelog"
                     whileTap={{ scale: 0.95 }}
-                    className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 md:p-1.5"
+                    className="flex h-8 items-center gap-1.5 px-2.5 text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-all"
                 >
                     <ArticleIcon size={20} />
                 </motion.button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-3xl rounded-3xl border border-white/30 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl">
+            <DialogContent className="max-w-3xl rounded-none border border-white/30 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl">
                 <DialogHeader className="py-5">
                     <DialogTitle className="flex items-center justify-center">
                         <motion.span
@@ -61,7 +61,7 @@ function Changelog() {
                     </DialogTitle>
                 </DialogHeader>
 
-                <ScrollArea className="h-[60vh] pr-4 rounded-2xl bg-white/20 dark:bg-white/[0.03] backdrop-blur-xl backdrop-saturate-150 p-4">
+                <ScrollArea className="h-[60vh] pr-4 bg-white/20 dark:bg-white/[0.03] backdrop-blur-xl backdrop-saturate-150 p-4">
                     <article className="prose prose-neutral dark:prose-invert max-w-none">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
@@ -81,7 +81,7 @@ function Changelog() {
                                             href={href}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-primary italic bg-blue-500/10 hover:bg-blue-500/20 backdrop-blur-md transition-colors"
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-primary italic bg-blue-500/10 hover:bg-blue-500/20 backdrop-blur-md transition-colors"
                                         >
                                             {children}
                                             {isGithubLink ? (

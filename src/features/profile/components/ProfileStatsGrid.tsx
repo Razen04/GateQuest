@@ -1,5 +1,6 @@
 import { BookOpen, Target, Fire, Lightning } from '@phosphor-icons/react';
 import type { ProfileData } from '../types/profile';
+import { glassPanel, palette } from '../styles/profileTheme';
 
 interface ProfileStatsGridProps {
     globalStats: ProfileData['global_stats'];
@@ -9,70 +10,62 @@ interface ProfileStatsGridProps {
 export default function ProfileStatsGrid({ globalStats, streaks }: ProfileStatsGridProps) {
     const metrics = [
         {
-            icon: <BookOpen size={15} weight="duotone" />,
-            label: 'Questions Solved',
+            icon: <BookOpen size={17} weight="duotone" />,
+            color: palette.photon,
+            label: 'Solved',
             value: globalStats.total_unique_solved.toLocaleString('en-IN'),
-            subtext: `Total Attempts: ${globalStats.total_attempts}`, // 👈 Utilized total_attempts
-            primary: true,
+            subtext: `${globalStats.total_attempts} attempts`,
         },
         {
-            icon: <Target size={15} weight="duotone" />,
+            icon: <Target size={17} weight="duotone" />,
+            color: palette.mint,
             label: 'Accuracy',
             value: `${globalStats.overall_accuracy}%`,
-            subtext: 'Across all modules',
-            primary: false,
+            subtext: 'all modules',
         },
         {
-            icon: <Fire size={15} weight="duotone" />,
-            label: 'Study Streak',
+            icon: <Fire size={17} weight="duotone" />,
+            color: palette.ember,
+            label: 'Study streak',
             value: `${streaks.study_current}d`,
-            subtext: `Longest: ${streaks.study_longest}d`, // 👈 Clear secondary metric row
-            primary: false,
+            subtext: `best ${streaks.study_longest}d`,
         },
         {
-            icon: <Lightning size={15} weight="duotone" />, // 👈 Using Lightning for learning streak
-            label: 'Learning Streak',
-            value: `${streaks.learning_current}d`, // 👈 Utilized learning_current
-            subtext: `Longest: ${streaks.learning_longest}d`, // 👈 Utilized learning_longest
-            primary: false,
+            icon: <Lightning size={17} weight="duotone" />,
+            color: palette.violet,
+            label: 'Learning streak',
+            value: `${streaks.learning_current}d`,
+            subtext: `best ${streaks.learning_longest}d`,
         },
     ];
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {metrics.map(({ icon, label, value, subtext, primary }) => (
-                <div
-                    key={label}
-                    className={`rounded-md border shadow-sm p-4 flex flex-col gap-1.5 transition-all ${
-                        primary
-                            ? 'bg-blue-500 dark:bg-blue-600 border-blue-400 dark:border-blue-500'
-                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
-                    }`}
-                >
-                    <span
-                        className={primary ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'}
-                    >
-                        {icon}
-                    </span>
-                    <span
-                        className={`text-xl font-bold leading-none ${primary ? 'text-white' : 'text-slate-800 dark:text-slate-100'}`}
-                    >
-                        {value}
-                    </span>
-                    <div className="flex flex-col">
-                        <span
-                            className={`text-[10px] uppercase tracking-wider font-semibold ${primary ? 'text-blue-100' : 'text-slate-400 dark:text-slate-500'}`}
+        <div className={glassPanel}>
+            <div className="divide-y divide-slate-900/5 dark:divide-white/10">
+                {metrics.map(({ icon, color, label, value, subtext }) => (
+                    <div key={label} className="flex items-center gap-3 px-5 py-4">
+                        <div
+                            className="flex h-9 w-9 shrink-0 items-center justify-center"
+                            style={{ backgroundColor: `${color}1A`, color }}
                         >
-                            {label}
-                        </span>
-                        <span
-                            className={`text-[10px] mt-0.5 font-medium ${primary ? 'text-blue-200/80' : 'text-slate-400 dark:text-slate-500'}`}
-                        >
-                            {subtext}
+                            {icon}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-white/45">
+                                {label}
+                            </p>
+                            <p className="mt-0.5 font-['JetBrains_Mono',monospace] text-sm text-slate-400 dark:text-white/35">
+                                {subtext}
+                            </p>
+                        </div>
+
+                        <span className="font-['Sora',sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                            {value}
                         </span>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }

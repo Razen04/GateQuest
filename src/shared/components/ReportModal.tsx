@@ -77,14 +77,14 @@ const ReportModal = ({
 
                 {/* Dropdown */}
                 <Select value={reportType} onValueChange={(value) => setReportType(value)}>
-                    <SelectTrigger className="w-full mb-2 rounded-md">
+                    <SelectTrigger className="w-full mb-2 rounded-none">
                         <SelectValue placeholder="Report Type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-none">
                         <SelectGroup>
                             <SelectLabel>Select a reason</SelectLabel>
                             {reasons.map((r, i) => (
-                                <SelectItem key={i} value={r}>
+                                <SelectItem key={i} value={r} className="rounded-none">
                                     {r}
                                 </SelectItem>
                             ))}
@@ -93,7 +93,7 @@ const ReportModal = ({
                 </Select>
 
                 <Textarea
-                    className="w-full rounded-md"
+                    className="w-full rounded-none"
                     placeholder="Please describe the issue..."
                     value={reportText}
                     onChange={(e) => setReportText(e.target.value)}
@@ -103,14 +103,14 @@ const ReportModal = ({
                 <div className="mt-4 flex justify-end gap-2">
                     <Button
                         onClick={onClose}
-                        className="rounded-md text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
+                        className="rounded-none text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
                         disabled={!reportType || !reportText.trim() || reportSubmitting}
-                        className="rounded-md text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                        className="rounded-none text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                     >
                         Submit
                     </Button>

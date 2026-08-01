@@ -1,9 +1,20 @@
 import { motion } from 'framer-motion';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
-import type { SubjectStat } from '@/shared/types/Stats.ts';
-import { useGoals } from '@/shared/hooks/useGoals.ts';
 import type React from 'react';
+import { useGoals } from '@/shared/hooks/useGoals';
+
+// Using the exact structure returned by your new RPC
+type SubjectStat = {
+    subject_name: string;
+    subject_slug: string;
+    icon_name: string;
+    theme_color: string;
+    attempted: number;
+    accuracy: number;
+    total_available: number;
+    progress: number;
+};
 
 type SubjectStatsPropsType = {
     subjectStats: SubjectStat[];
@@ -20,21 +31,23 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
             initial="initial"
             animate="animate"
         >
-            <motion.div className="relative overflow-hidden rounded-2xl backdrop-blur-xl backdrop-saturate-150">
+            <motion.div className="relative overflow-hidden">
                 <div className="relative overflow-x-auto no-scrollbar">
                     <div className="flex gap-3 px-1 pb-1">
                         {subjectStats?.map((subject, index) => {
                             const progress = Number(subject.progress) || 0;
                             const accuracy = Number(subject.accuracy) || 0;
 
-                            const subjectMeta = subjects.find((s) => s.slug === subject.subject);
+                            const subjectMeta = subjects.find(
+                                (s) => s.slug === subject.subject_slug,
+                            );
 
                             const SubjectIcon = SubjectIconMap[
                                 subjectMeta?.icon_name || 'default'
                             ] as React.ElementType;
 
                             const questionCount =
-                                subject.totalAvailable || subjectMeta?.question_count;
+                                subject.total_available || subjectMeta?.question_count;
 
                             const bgClass = getBackgroundColor(subjectMeta?.theme_color as string);
 
@@ -46,17 +59,17 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                         stiffness: 300,
                                         damping: 25,
                                     }}
-                                    className="min-w-[240px] rounded-2xl border border-white/20 bg-white/20 p-4 backdrop-blur-xl shadow-[0_6px_20px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-white/[0.05]"
+                                    className="min-w-[240px] border border-black/10 bg-white/40 backdrop-blue-2xl shadow-sm p-4 dark:border-white/10 dark:bg-white/[0.05]"
                                 >
                                     <div className="mb-3 flex items-center gap-3">
                                         <div
-                                            className={`flex h-10 w-10 items-center justify-center rounded-xl ${bgClass}`}
+                                            className={`flex h-10 w-10 items-center justify-center ${bgClass}`}
                                         >
-                                            <SubjectIcon className="h-5 w-5 text-white" />
+                                            <SubjectIcon className="h-5 w-5 dark:text-white text-black" />
                                         </div>
 
                                         <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">
-                                            {subject.subjectName}
+                                            {subject.subject_name}
                                         </h3>
                                     </div>
 
@@ -67,9 +80,9 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                                 <span>{progress}%</span>
                                             </div>
 
-                                            <div className="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+                                            <div className="h-2 overflow-hidden bg-black/10 dark:bg-white/10">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
+                                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-600"
                                                     style={{
                                                         width: `${progress}%`,
                                                     }}
@@ -83,9 +96,9 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                                 <span>{accuracy}%</span>
                                             </div>
 
-                                            <div className="h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+                                            <div className="h-2 overflow-hidden bg-black/10 dark:bg-white/10">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600"
+                                                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600"
                                                     style={{
                                                         width: `${accuracy}%`,
                                                     }}

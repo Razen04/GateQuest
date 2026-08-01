@@ -94,7 +94,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="absolute right-0 top-5 mt-3 w-80 overflow-hidden rounded-2xl border border-white/20 bg-white/20 backdrop-blur-2xl backdrop-saturate-150 dark:bg-black/20 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.18)] z-50"
+                    className="absolute right-0 top-5 mt-3 w-80 overflow-hidden border border-white/20 bg-white/20 backdrop-blur-2xl backdrop-saturate-150 dark:bg-black/20 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.18)] z-50"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -109,7 +109,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
                         <button
                             onClick={() => markAllAsRead(notifications)}
-                            className="rounded-full p-1.5 text-blue-500 hover:bg-white/20 dark:hover:bg-white/10 transition-colors"
+                            className="p-1.5 text-blue-500 hover:bg-white/20 dark:hover:bg-white/10 transition-colors"
                         >
                             <CheckSquareOffset size={20} />
                         </button>
@@ -124,10 +124,10 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                                 return (
                                     <div
                                         key={notification.id}
-                                        className="group flex items-start gap-3 rounded-xl p-3 border border-transparent hover:border-white/20 hover:bg-white/20 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
+                                        className="group flex items-start gap-3 p-3 border border-transparent hover:border-white/20 hover:bg-white/20 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
                                     >
                                         {/* Icon */}
-                                        <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-white/20 dark:bg-white/[0.08] border border-white/20">
+                                        <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 bg-white/20 dark:bg-white/[0.08] border border-white/20">
                                             {getNotificationIcon(notification)}
                                         </div>
 
@@ -151,7 +151,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
                                         {!isRead && (
                                             <span
-                                                className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"
+                                                className="mt-1.5 h-2 w-2 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"
                                                 title="Unread notification"
                                             />
                                         )}

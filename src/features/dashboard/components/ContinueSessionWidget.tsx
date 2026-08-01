@@ -204,7 +204,7 @@ export const ContinueSessionWidget = () => {
 
             <div
                 onClick={handleResume}
-                className={`group relative mb-6 cursor-pointer overflow-hidden rounded-2xl border border-white/20 bg-white/20 p-3.5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/10 dark:bg-white/[0.06] ${hoverBorderClass}`}
+                className={`group relative mb-6 cursor-pointer overflow-hidden border border-white/20 bg-white/20 p-3.5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/10 dark:bg-white/[0.06] ${hoverBorderClass}`}
             >
                 {/* Glass reflection */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
@@ -212,7 +212,7 @@ export const ContinueSessionWidget = () => {
                 <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
                         <div
-                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 backdrop-blur-md ${iconBgClass}`}
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center border border-white/10 backdrop-blur-md ${iconBgClass}`}
                         >
                             <Icon className={`h-5 w-5 ${iconColorClass}`} />
                         </div>
@@ -220,7 +220,7 @@ export const ContinueSessionWidget = () => {
                         <div className="min-w-0">
                             <div className="mb-1 flex items-center gap-2">
                                 <span
-                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md ${badgeClass}`}
+                                    className={`border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md ${badgeClass}`}
                                 >
                                     {badgeText}
                                 </span>
@@ -237,14 +237,14 @@ export const ContinueSessionWidget = () => {
                     </div>
 
                     <div className="flex items-center gap-2 self-end sm:self-center">
-                        <button className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/30 px-3 py-1.5 text-sm font-medium text-zinc-900 shadow-sm backdrop-blur-md transition-all hover:bg-white/50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
+                        <button className="flex items-center gap-1.5 border border-white/20 bg-white/30 px-3 py-1.5 text-sm font-medium text-zinc-900 shadow-sm backdrop-blur-md transition-all hover:bg-white/50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
                             Resume
                             <ArrowRightIcon className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                             onClick={handleClear}
-                            className="rounded-xl p-2 text-zinc-400 transition-all hover:bg-white/20 hover:text-zinc-700 dark:hover:text-zinc-300"
+                            className="p-2 text-zinc-400 transition-all hover:bg-white/20 hover:text-zinc-700 dark:hover:text-zinc-300"
                             title="Dismiss session"
                             aria-label="Dismiss session"
                         >

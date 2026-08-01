@@ -1,344 +1,393 @@
-import { useNavigate } from 'react-router-dom';
+import type React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft,
     ArrowRight,
-    Bookmark,
     Brain,
-    ChartPieSlice,
-    Cloud,
-    DeviceMobile,
-    Eye,
-    Flag,
+    ChartLineUp,
+    Fingerprint,
     Lightning,
-    Moon,
-    PuzzlePiece,
-    Sun,
+    SealCheck,
     Timer,
-    Trophy,
+    ArrowUpRight,
 } from '@phosphor-icons/react';
-import useSettings from '@/features/settings/hooks/useSettings';
-import About from '@/features/about/pages/AboutPage';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 
-// --- DATA: Features list ---
-const features = [
+import { Button } from '@/shared/components/ui/button';
+import About from '@/features/about/pages/AboutPage';
+import animatedLogo from '../../../../public/icons/logo.svg';
+import useAuth from '@/shared/hooks/useAuth';
+import { SunIcon } from '@phosphor-icons/react';
+import { MoonIcon } from '@phosphor-icons/react';
+import useSettings from '@/features/settings/hooks/useSettings';
+import type { Settings } from '@/shared/types/Settings';
+
+const signal = '#2A5CFF';
+
+const evidence = [
     {
+        id: 'EXHIBIT-01',
         icon: Brain,
-        title: 'Master Every Topic',
-        desc: 'Practice thousands of questions sorted by subject and topic to strengthen your skills comprehensively.',
+        title: 'Weaknesses stop hiding in plain sight',
+        finding:
+            'Every wrong answer becomes a signal. Topics that repeatedly cost marks surface automatically before exam day.',
+        proof: 'Subject Accuracy Tracking',
+        status: 'IDENTIFIED',
     },
     {
-        icon: ChartPieSlice,
-        title: 'Track Your Progress',
-        desc: 'See your streaks, accuracy, and performance at a glance to keep improving every day.',
+        id: 'EXHIBIT-02',
+        icon: ChartLineUp,
+        title: 'Progress leaves a verifiable trail',
+        finding:
+            'Your preparation is not measured by hours spent at a desk, but by lost marks recovered under pressure.',
+        proof: 'Performance History',
+        status: 'TRACKED',
     },
     {
+        id: 'EXHIBIT-03',
         icon: Lightning,
-        title: 'Fast & Focused',
-        desc: 'A smooth, distraction-free interface lets you solve problems quickly and efficiently.',
+        title: 'Speed becomes a muscle memory',
+        finding:
+            'Timed sessions recreate the cognitive friction and pressure where preparation actually matters.',
+        proof: 'Exam Simulation Engine',
+        status: 'ACTIVE',
     },
     {
-        icon: Cloud,
-        title: 'Sync Across Devices',
-        desc: 'Your progress, bookmarks, and settings follow you wherever you go—phone, tablet, or desktop.',
-    },
-    {
-        icon: DeviceMobile,
-        title: 'Responsive Design',
-        desc: "Enjoy a seamless experience whether you're on desktop or mobile, with intuitive navigation everywhere.",
-    },
-    {
-        icon: Bookmark,
-        title: 'Save Important Questions',
-        desc: 'Bookmark questions for review later, so you never lose track of key topics.',
-    },
-    {
+        id: 'EXHIBIT-04',
         icon: Timer,
-        title: 'Timed Challenges',
-        desc: 'Enable timers to boost your speed and accuracy.',
-    },
-    {
-        icon: Trophy,
-        title: 'Gamified Streaks',
-        desc: 'Track your longest streaks and achievements to make learning more motivating and fun.',
-    },
-    {
-        icon: PuzzlePiece,
-        title: 'Organized Learning',
-        desc: 'Questions are neatly displayed in cards with easy filtering, pagination, and clear layouts.',
+        title: 'Consistency transforms into evidence',
+        finding:
+            'Every practice session adds another indisputable entry to your preparation history.',
+        proof: 'Daily Activity Logs',
+        status: 'BUILDING',
     },
 ];
 
-// --- COMPONENT: App Mockup with a simple initial animation ---
-const AppMockup = () => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-md sm:max-w-2xl lg:max-w-3xl mx-auto mt-12 z-10 pb-20"
+// Drawn Underline Highlight
+const HighlightScribble = ({ children }: { children: React.ReactNode }) => (
+    <span className="relative inline-block">
+        {children}
+        <motion.svg
+            viewBox="0 0 280 18"
+            className="pointer-events-none absolute -bottom-1 left-0 h-4 w-full"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
         >
-            <div className="relative flex flex-col rounded-3xl border border-white/20 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl backdrop-saturate-150 p-2 sm:p-4 md:p-6 shadow-2xl shadow-blue-600/10 min-h-[420px] overflow-hidden">
-                {/* Browser Header */}
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/20 dark:bg-white/5 backdrop-blur-xl">
-                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-sm"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm"></div>
-                </div>
+            <motion.path
+                d="M 6 12 Q 140 2 274 10"
+                fill="none"
+                stroke={signal}
+                strokeWidth={4}
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
+            />
+        </motion.svg>
+    </span>
+);
 
-                {/* App Content */}
-                <div className="p-4 sm:p-6 md:p-8 text-left flex-1">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-                        <p className="text-sm sm:text-base font-medium text-blue-500 dark:text-blue-400">
-                            Question 1 of 162
+// Kinetic Rubber Stamp
+const ClassifiedStamp = () => (
+    <motion.div
+        initial={{ scale: 2.2, rotate: 18, opacity: 0 }}
+        whileInView={{ scale: 1, rotate: -7, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ type: 'spring', stiffness: 200, damping: 14 }}
+        className="flex h-24 w-24 items-center justify-center border-2 border-[#E23744] text-center text-[#E23744] sm:h-28 sm:w-28 rounded-full"
+    >
+        <div>
+            <SealCheck size={30} weight="fill" className="mx-auto" />
+            <p className="mt-1 font-['JetBrains_Mono',monospace] text-[8px] font-extrabold tracking-[0.25em]">
+                CLASSIFIED
+            </p>
+        </div>
+    </motion.div>
+);
+
+// Background Watermark Text
+const WatermarkText = () => (
+    <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -z-0 overflow-hidden opacity-[0.035] dark:opacity-[0.05]"
+    >
+        <div className="flex -rotate-5 whitespace-nowrap font-['Space_Grotesk',sans-serif] text-[10vw] font-black leading-none text-slate-900 dark:text-white">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <span key={i} className="mr-12">
+                    EVIDENCE
+                </span>
+            ))}
+        </div>
+    </div>
+);
+
+const NavigationMenu = ({
+    dark,
+    toggle,
+}: {
+    dark: boolean;
+    toggle: (setting: Settings) => void;
+}) => {
+    return (
+        <nav className="sticky top-0 z-50 bg-[#F4F5F1]/50 dark:bg-[#0B0C10]/50 backdrop-blur-3xl">
+            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+                <div className="flex items-center gap-3">
+                    <img src={animatedLogo} alt="GateQuest" className="h-9 w-9" />
+
+                    <div className="leading-none">
+                        <p className="text-sm font-bold tracking-tight">
+                            <span className="text-blue-500">GATE</span>Quest
                         </p>
 
-                        <div className="flex flex-wrap gap-1 sm:gap-2 items-center">
-                            <Button
-                                size="icon"
-                                className="h-6 w-8 rounded-full bg-blue-500/80 dark:bg-blue-600/80 backdrop-blur-xl border border-white/20 shadow-sm"
-                            >
-                                <Bookmark size={14} className="text-white" />
-                            </Button>
-
-                            <Button
-                                size="icon"
-                                className="h-6 w-8 rounded-full bg-blue-500/80 dark:bg-blue-600/80 backdrop-blur-xl border border-white/20 shadow-sm"
-                            >
-                                <Timer size={14} className="text-white" />
-                            </Button>
-
-                            <Badge
-                                variant="secondary"
-                                className="bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 backdrop-blur-xl"
-                            >
-                                Easy
-                            </Badge>
-
-                            <Badge
-                                variant="secondary"
-                                className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 backdrop-blur-xl"
-                            >
-                                GATE 2024
-                            </Badge>
-
-                            <Badge
-                                variant="secondary"
-                                className="bg-teal-500/10 text-teal-700 dark:text-teal-400 border border-teal-500/20 backdrop-blur-xl"
-                            >
-                                MCQ
-                            </Badge>
-                        </div>
-                    </div>
-
-                    <h3 className="mt-4 text-sm sm:text-lg md:text-xl text-slate-800 dark:text-slate-100">
-                        Q. What is the maximum number of hosts in a Class C network?
-                    </h3>
-
-                    <div className="mt-4 space-y-2 text-slate-600 dark:text-slate-300">
-                        {['254', '256', '65,534'].map((option, i) => (
-                            <div
-                                key={i}
-                                className={`flex items-center gap-3 p-2 rounded-xl border backdrop-blur-xl transition-all ${option === '256' ? 'bg-blue-500/10 border-blue-500/30 ring-2 ring-blue-500/20' : 'bg-white/20 dark:bg-white/5 border-white/20 dark:border-white/10'}`}
-                            >
-                                <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${option === '256' ? 'border-blue-500 bg-blue-500' : 'border-slate-400'}`}
-                                >
-                                    {option === '256' && (
-                                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                                    )}
-                                </div>
-
-                                <span>{option}</span>
-                            </div>
-                        ))}
+                        <p className="text-[8px] uppercase text-slate-500 font-bold">Good Luck</p>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex flex-row gap-2 w-full px-4 pb-3 text-xs sm:text-sm md:text-base mt-auto">
+                {/* Dossier Index */}
+                <div className="hidden items-center gap-8 lg:flex">
                     {[
-                        {
-                            label: 'Previous',
-                            icon: ArrowLeft,
-                            bg: 'bg-white/30 text-slate-600 dark:bg-white/10 dark:text-white border border-white/20',
-                        },
-                        {
-                            label: 'Submit',
-                            icon: Eye,
-                            bg: 'bg-blue-500/80 text-white border border-blue-400/30',
-                        },
-                        {
-                            label: 'Surrender',
-                            icon: Flag,
-                            bg: 'bg-violet-500/80 text-white border border-violet-400/30',
-                        },
-                        {
-                            label: 'Next',
-                            icon: ArrowRight,
-                            bg: 'bg-white/30 text-slate-600 dark:bg-white/10 dark:text-white border border-white/20',
-                        },
-                    ].map((btn, i) => (
-                        <Button
-                            className={`${btn.bg} flex-1 flex items-center justify-center gap-1 rounded-xl backdrop-blur-xl shadow-sm hover:scale-[1.02] transition-all`}
-                            size="lg"
-                            key={i}
-                        >
-                            <btn.icon size={16} />
-                            <span className="hidden sm:inline">{btn.label}</span>
-                        </Button>
+                        ['01', 'File', '#hero'],
+                        ['02', 'Evidence', '#evidence'],
+                        ['03', 'Report', '#report'],
+                        ['04', 'Maintainer', '#about'],
+                    ].map(([no, label, href]) => (
+                        <a key={label} href={href} className="group">
+                            <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.25em] text-slate-400 transition-colors group-hover:text-[#2A5CFF]">
+                                {no}
+                            </div>
+
+                            <div className="mt-1 font-['Space_Grotesk'] text-sm font-semibold text-slate-700 transition-colors group-hover:text-[#2A5CFF] dark:text-white/80">
+                                {label}
+                            </div>
+                        </a>
                     ))}
                 </div>
+
+                {/* Theme */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full border border-slate-900/10 bg-white/40 hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
+                    onClick={() => toggle('darkMode')}
+                >
+                    {dark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+                </Button>
             </div>
-        </motion.div>
+        </nav>
     );
 };
 
-// --- COMPONENT: Main Landing Page ---
 export default function LandingPage() {
-    const navigate = useNavigate();
     const { settings, handleSettingToggle } = useSettings();
     const isDark = settings.darkMode;
-    const appLogo = '/icons/animated_logo.svg';
+
+    const navigate = useNavigate();
 
     return (
-        <div className="relative w-full max-h-screen bg-slate-50 dark:bg-[#0A0A0A] text-slate-800 dark:text-white overflow-x-hidden">
-            <div
-                className="absolute inset-0 z-0 opacity-40 dark:opacity-40"
-                style={{
-                    backgroundImage:
-                        'radial-gradient(circle at 1px 1px, #334155 1px, transparent 0)',
-                    backgroundSize: '24px 24px',
-                }}
-            />
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[600px] -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(37,99,235,0.3)_0%,_rgba(10,10,10,0)_60%)] z-0" />
+        <main className="relative h-dvh w-full overflow-x-hidden bg-[#F4F5F1] font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:bg-[#0B0C10] dark:text-slate-200">
+            <NavigationMenu dark={isDark} toggle={handleSettingToggle} />
+            <WatermarkText />
 
-            <div className="relative z-10 flex flex-col min-h-screen">
-                <header className="sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-20 py-4 bg-white/30 dark:bg-slate-900/40 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/20 dark:border-white/10 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <img src={appLogo} alt="GATEQuest Logo" className="w-9 h-9" />
-                    </div>
-
-                    <nav className="hidden md:flex gap-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
-                        <Button
-                            variant="ghost"
-                            asChild
-                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white/20 dark:hover:bg-white/10"
-                        >
-                            <a href="#features">Features</a>
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            asChild
-                            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-white/20 dark:hover:bg-white/10"
-                        >
-                            <a href="#about">About</a>
-                        </Button>
-                    </nav>
-
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-xl border border-white/20 text-slate-500 hover:bg-white/40 dark:hover:bg-white/20"
-                        onClick={() => handleSettingToggle('darkMode')}
-                    >
-                        {isDark ? <Moon size={20} /> : <Sun size={20} />}
-                    </Button>
-                </header>
-
-                <main className="h-screen flex-grow flex flex-col items-center justify-start text-center px-4 pt-24 pb-20 sm:pt-32 sm:pb-28">
+            <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 sm:px-8">
+                {/* HERO */}
+                <section className="py-12 sm:py-16" id="hero">
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
+                        initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7 }}
+                        className="relative overflow-hidden border border-white/10 bg-[#F4F5F1] dark:bg-[#12151B] p-6 text-white dark:text-black shadow-2xl sm:p-12"
                     >
-                        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold mb-6 tracking-tight max-w-5xl">
-                            Precision Practice for Peak <br />
-                            <span className="bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent">
-                                GATE Performance
-                            </span>
-                        </h1>
+                        <div className="pointer-events-none absolute -right-12 -top-12 opacity-10">
+                            <Fingerprint size={280} fill={isDark ? 'white' : 'black'} />
+                        </div>
 
-                        <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10">
-                            The open-source platform with a massive question bank, real-time
-                            analytics, and a modern, distraction-free interface.
-                        </p>
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#2A5CFF]">
+                                    DOSSIER // GQ-2027
+                                </p>
+                                <p className="mt-1 font-['JetBrains_Mono',monospace] text-xs dark:text-white/40 text-black/40">
+                                    STATUS: OPEN INVESTIGATION
+                                </p>
+                            </div>
+                            <ClassifiedStamp />
+                        </div>
 
-                        <Button
-                            size="lg"
-                            onClick={() => navigate('/dashboard')}
-                            className="rounded-xl bg-white/30 dark:bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg hover:bg-white/50 dark:hover:bg-white/20 transition-all"
-                        >
-                            Start Practicing Now <ArrowRight weight="bold" />
-                        </Button>
-                    </motion.div>
-                </main>
+                        <div className="mt-10 max-w-3xl">
+                            <h1 className="font-['Space_Grotesk',sans-serif] text-[clamp(2.5rem,7vw,5rem)] font-black leading-[0.95] tracking-tight text-black dark:text-white">
+                                Your preparation
+                                <br />
+                                has a{' '}
+                                <span className="font-['Fraunces',serif] font-normal italic text-[#2A5CFF]">
+                                    paper trail.
+                                </span>
+                            </h1>
 
-                <AppMockup />
-
-                <div className="bg-white/40 dark:bg-[#0A0A0A]/80 backdrop-blur-2xl">
-                    <section id="features" className="w-full max-w-7xl mx-auto py-20 px-4">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl sm:text-5xl font-bold text-slate-800 dark:text-slate-100">
-                                An Arsenal of Features
-                            </h2>
-                            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                                We've built the tools you need to analyze, adapt, and accelerate
-                                your GATE preparation.
+                            <p className="mt-6 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-black/70 dark:text-white/70">
+                                Every solved question. Every unhandled topic. Every recovered mark.{' '}
+                                <HighlightScribble>GATEQuest</HighlightScribble> converts invisible
+                                study hours into concrete evidence.
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {features.map((f, i) => (
+                        <div className="mt-10 flex flex-wrap items-center gap-6">
+                            <Button
+                                onClick={() => navigate('/practice')}
+                                className="h-12 bg-[#2A5CFF] px-7 font-['Space_Grotesk',sans-serif] rounded-none font-bold text-white transition-all hover:bg-[#2A5CFF]/90 hover:shadow-lg"
+                            >
+                                Open Candidate File
+                                <ArrowRight size={18} className="ml-1" />
+                            </Button>
+                        </div>
+
+                        <div className="mt-12 border-t border-white/10 pt-8">
+                            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+                                {[
+                                    ['QUESTION BANK', '10,000+'],
+                                    ['SYLLABUS COVERAGE', '140 TOPICS (IDK)'],
+                                    ['MOCK PRECISION', '99.99999999% GATE REGIME'],
+                                ].map(([label, val]) => (
+                                    <div key={label}>
+                                        <p className="font-['JetBrains_Mono',monospace] text-[9px] uppercase tracking-widest text-black/40 dark:text-white/40">
+                                            {label}
+                                        </p>
+                                        <p className="mt-1 font-['Space_Grotesk',sans-serif] text-xl font-bold text-black dark:text-white">
+                                            {val}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                </section>
+
+                {/* ── SECTION 01: Evidence Log Transcripts ── */}
+                <section
+                    id="evidence"
+                    className="border-t border-slate-900/10 py-16 dark:border-white/10 sm:py-24"
+                >
+                    <header className="mb-12">
+                        <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#2A5CFF]">
+                            EXHIBIT A // SYSTEM PROOF
+                        </p>
+                        <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black tracking-tight sm:text-5xl">
+                            Preparation leaves fingerprints.
+                        </h2>
+                    </header>
+
+                    <div className="divide-y divide-slate-900/10 border-y border-slate-900/10 dark:divide-white/10 dark:border-white/10">
+                        {evidence.map((item, idx) => {
+                            const Icon = item.icon;
+                            return (
                                 <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 15 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.3, delay: i * 0.05 }}
-                                    viewport={{ once: true, amount: 0.7 }}
+                                    viewport={{ once: true, amount: 0.3 }}
+                                    transition={{ duration: 0.4, delay: idx * 0.08 }}
+                                    className="group grid gap-4 py-8 sm:grid-cols-[100px_1fr_auto] sm:items-center"
                                 >
-                                    <Card className="group relative h-full bg-white/20 dark:bg-white/5 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 dark:border-white/10 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl">
-                                        <div
-                                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden dark:block"
-                                            style={{
-                                                background:
-                                                    'radial-gradient(300px circle at center, rgba(37,99,235,0.1), transparent)',
-                                            }}
-                                        />
+                                    <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-400 dark:text-white/30">
+                                        {item.id}
+                                    </span>
 
-                                        <CardHeader>
-                                            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white mb-4 shadow-lg">
-                                                <f.icon size={28} weight="bold" />
-                                            </div>
+                                    <div>
+                                        <div className="flex items-center gap-3">
+                                            <Icon size={20} className="text-[#2A5CFF]" />
+                                            <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold">
+                                                {item.title}
+                                            </h3>
+                                        </div>
+                                        <p className="mt-2 max-w-2xl font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/60">
+                                            {item.finding}
+                                        </p>
+                                    </div>
 
-                                            <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
-                                                {f.title}
-                                            </CardTitle>
-                                        </CardHeader>
-
-                                        <CardContent>
-                                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                                                {f.desc}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
+                                    <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+                                        <span className="border border-[#1FAA6D]/30 px-3 py-1 font-['JetBrains_Mono',monospace] text-[9px] font-bold tracking-widest text-[#1FAA6D]">
+                                            {item.status}
+                                        </span>
+                                        <span className="font-['JetBrains_Mono',monospace] text-[10px] uppercase text-slate-400">
+                                            {item.proof}
+                                        </span>
+                                    </div>
                                 </motion.div>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* ── SECTION 02: Correction Ledger Transcripts ── */}
+                <section
+                    id="report"
+                    className="border-t border-slate-900/10 py-16 dark:border-white/10 sm:py-24"
+                >
+                    <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+                        <div>
+                            <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#E23744]">
+                                EXHIBIT B // MARKS RECOVERY
+                            </p>
+                            <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black sm:text-4xl">
+                                Recovering lost accuracy
+                            </h2>
+                            <p className="mt-4 font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60">
+                                Systematic error logging catches repetitive conceptual traps long
+                                before they cost marks on final exam day.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {[
+                                {
+                                    subject: 'Engineering Mathematics',
+                                    before: '42%',
+                                    after: '81%',
+                                },
+                                { subject: 'Network Theory', before: '55%', after: '89%' },
+                                {
+                                    subject: 'Data Structures & Algo',
+                                    before: '48%',
+                                    after: '85%',
+                                },
+                                { subject: 'Operating Systems', before: '38%', after: '79%' },
+                            ].map(({ subject, before, after }) => (
+                                <div
+                                    key={subject}
+                                    className="relative border border-slate-900/10 bg-white/60 p-6 backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03]"
+                                >
+                                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        {subject}
+                                    </span>
+                                    <div className="mt-4 flex items-center justify-between">
+                                        <div>
+                                            <p className="font-['JetBrains_Mono',monospace] text-[9px] text-slate-400">
+                                                BEFORE
+                                            </p>
+                                            <p className="text-2xl font-black text-[#E23744] line-through">
+                                                {before}
+                                            </p>
+                                        </div>
+                                        <ArrowUpRight size={20} className="text-slate-400" />
+                                        <div className="text-right">
+                                            <p className="font-['JetBrains_Mono',monospace] text-[9px] text-slate-400">
+                                                RECOVERED
+                                            </p>
+                                            <p className="text-2xl font-black text-[#1FAA6D]">
+                                                {after}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
-                    </section>
-
-                    <section id="about">
-                        <About landing={true} />
-                    </section>
-
-                    <footer className="w-full py-6 text-center text-sm text-slate-500 dark:text-slate-500 border-t border-white/20 dark:border-white/10 mt-12 backdrop-blur-xl">
-                        &copy; {new Date().getFullYear()} GATEQuest. All Rights Reserved.
-                    </footer>
-                </div>
+                    </div>
+                </section>
             </div>
-        </div>
+
+            <div id="about">
+                <About landing={true} />
+            </div>
+        </main>
     );
 }
