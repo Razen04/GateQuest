@@ -11,6 +11,7 @@ type ActionButtonsProps = {
     handleSubmit?: (() => void) | undefined;
     handleExplainationClick: () => void;
     isCompatible: boolean | undefined;
+    hasSelection: boolean;
 };
 
 const ActionButtons = ({
@@ -23,6 +24,7 @@ const ActionButtons = ({
     handleSubmit,
     handleExplainationClick,
     isCompatible,
+    hasSelection,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
@@ -52,11 +54,11 @@ const ActionButtons = ({
                         className="flex-1 px-2 py-3 bg-blue-100 text-blue-700 text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"
                         onClick={() => handleSubmit()}
                         title="Submit"
-                        disabled={!isCompatible}
+                        disabled={!isCompatible || !hasSelection}
                     >
                         <Eye className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Submit <span className="font-mono">[⎵/↵]</span>
+                            Submit{hasSelection && <span className="font-mono"> [⎵/↵]</span>}
                         </span>
                     </Button>
                     <Button
@@ -67,7 +69,7 @@ const ActionButtons = ({
                     >
                         <Flag className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Answer <span className="font-mono">[⎵/↵]</span>
+                            Show Answer{!hasSelection && <span className="font-mono"> [⎵/↵]</span>}
                         </span>
                     </Button>
                 </>
