@@ -14,7 +14,12 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         subjectStats: [],
         subjectStatsMap: {},
         question: new Set(),
-        streaks: { current: 0, longest: 0 },
+        streaks: {
+            study_current: 0,
+            study_longest: 0,
+            learning_longest: 0,
+            learning_current: 0,
+        },
         heatmapData: [],
         studyPlan: {
             totalQuestions: 0,
@@ -108,8 +113,10 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 question: new Set(),
                 heatmapData: dashboardData.heatmap || [],
                 streaks: {
-                    current: dashboardData.streaks?.study_current || 0,
-                    longest: dashboardData.streaks?.study_longest || 0,
+                    learning_current: dashboardData.streaks?.learning_current || 0,
+                    learning_longest: dashboardData.streaks?.learning_longest || 0,
+                    study_current: dashboardData.streaks?.study_current || 0,
+                    study_longest: dashboardData.streaks?.study_longest || 0,
                 },
                 studyPlan: {
                     totalQuestions,
