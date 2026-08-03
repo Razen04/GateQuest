@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { handleBookmark } from '@/features/questions/utils/questionUtils';
 
 import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
 import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
@@ -173,10 +172,6 @@ export const useQuestionController = ({
         }
     };
 
-    const onToggleBookmark = () => {
-        handleBookmark(isLogin, safeQuestion.id, safeQuestion.subject);
-    };
-
     const onExplanationClick = () => {
         const url = mode === 'practice' ? safeQuestion.source_url : safeQuestion.explanation;
         if (url) window.open(url, '_blank');
@@ -206,6 +201,7 @@ export const useQuestionController = ({
             totalQuestions: questions.length,
             questionNumber:
                 questions.findIndex((q) => String(q.id) === String(safeQuestion.id)) + 1,
+            subjectSlug: subjectSlug,
             userAnswerIndex,
             selectedOptionIndices,
             numericalAnswer,
@@ -230,7 +226,6 @@ export const useQuestionController = ({
             onPrev: handlePrevious,
             onReport: () => setShowReportModal(true),
             onShare: onShareClick,
-            onBookmark: onToggleBookmark,
             onExplanationClick,
             onBack: handleBack,
             isFirst,

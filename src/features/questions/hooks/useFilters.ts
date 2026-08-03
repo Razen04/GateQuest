@@ -9,6 +9,8 @@ import { supabase } from '@/shared/utils/supabaseClient';
 // Type of filter mode for smart-Revision
 type FilterMode = 'practice' | 'revision';
 
+type AttemptFilterMode = 'all' | 'attempted' | 'unattempted' | 'bookmarked';
+
 // The main hook function that encapsulates all filtering logic.
 const useFilters = (
     sourceQuestions: Question[] | RevisionQuestion[],
@@ -21,11 +23,12 @@ const useFilters = (
     const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
     const [yearFilter, setYearFilter] = useState<string[]>([]);
     const [topicFilter, setTopicFilter] = useState<string[]>([]);
-    const [attemptFilter, setAttemptFilter] = useState('unattempted');
+    const [attemptFilter, setAttemptFilter] = useState<AttemptFilterMode>('unattempted');
     const [examFilter, setExamFilter] = useState<string[]>([]);
     const [tagFilter, setTagFilter] = useState<string[]>([]);
 
     const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
+    const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
 
     // Fetch attempted question IDs on mount/change & listen for updates
     useEffect(() => {
@@ -51,6 +54,32 @@ const useFilters = (
         window.addEventListener('STATS_UPDATED', fetchAttemptedIds);
         return () => window.removeEventListener('STATS_UPDATED', fetchAttemptedIds);
     }, [subject, mode]);
+
+    // Fetch bookmarked question IDs when needed & listen for updates
+    useEffect(() => {
+        async function fetchBookmarkedIds() {
+            if (!subject && mode === 'practice') return;
+
+            const { data, error } = await supabase.rpc('get_user_bookmarks', {
+                p_subject_slug: subject,
+            });
+
+            if (!error && data) {
+                setBookmarkedIds(
+                    new Set(data.map((row: { question_id: string }) => row.question_id)),
+                );
+            }
+        }
+
+        // Fetch bookmarks immediately if bookmarked filter is active
+        if (attemptFilter === 'bookmarked') {
+            fetchBookmarkedIds();
+        }
+
+        // Refetch bookmarks whenever a bookmark action occurs anywhere in the app
+        window.addEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+        return () => window.removeEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+    }, [subject, mode, attemptFilter]);
 
     // Core filtering logic
     const filteredQuestions = useMemo(() => {
@@ -84,9 +113,14 @@ const useFilters = (
         // Apply filter for attempted/unattempted questions.
         if (attemptFilter && attemptFilter !== 'all') {
             filtered = filtered.filter((qn) => {
-                const isAttempted = attemptedIds.has(qn.id);
-                // Ensures currently active question remains visible even if attempted
                 const isActive = qn.id === selectedQuestion;
+                const isAttempted = attemptedIds.has(qn.id);
+
+                if (attemptFilter === 'bookmarked') {
+                    return bookmarkedIds.has(qn.id) || isActive;
+                }
+
+                // Ensures currently active question remains visible even if attempted
                 return attemptFilter === 'attempted' ? isAttempted : !isAttempted || isActive;
             });
         }
@@ -118,6 +152,7 @@ const useFilters = (
         examFilter,
         selectedQuestion,
         tagFilter,
+        bookmarkedIds,
     ]);
 
     // Expose the filtered data and state setters to UI components

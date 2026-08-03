@@ -43,6 +43,7 @@ type QuestionCardProps = {
     question: Question;
     totalQuestions: number;
     questionNumber: number;
+    subjectSlug: string | undefined;
 
     // User State
     userAnswerIndex: number | null;
@@ -67,7 +68,6 @@ type QuestionCardProps = {
     onPrev: () => void;
     onReport: () => void;
     onShare: () => void;
-    onBookmark: () => void;
     onExplanationClick: () => void;
     onBack: () => void;
 
@@ -96,7 +96,7 @@ const QuestionCard = ({
     onPrev,
     onReport,
     onShare,
-    onBookmark,
+    subjectSlug,
     onExplanationClick,
     onBack,
     isFirst,
@@ -169,10 +169,10 @@ const QuestionCard = ({
                     timer={timer}
                     onReport={onReport}
                     onShare={onShare}
-                    onBookmark={onBookmark}
                     marked={marked}
                     isAnswered={showAnswer}
                     userCount={count}
+                    subjectSlug={subjectSlug}
                 />
 
                 <div className="p-4 sm:p-6">

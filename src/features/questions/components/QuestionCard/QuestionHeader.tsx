@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import {
     getDifficultyClassNames,
     getQuestionTypeText,
@@ -5,8 +7,19 @@ import {
 } from '../../utils/questionUtils.js';
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
-import { Warning, ShareFat, Dot, Eye, Flag } from '@phosphor-icons/react';
+import { Warning, ShareFat, Dot, Eye, Flag, Trash, Check } from '@phosphor-icons/react';
 import type { Question } from '@/shared/types/storage.js';
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/shared/components/ui/dialog';
+import { Button } from '@/shared/components/ui/button';
+import { Textarea } from '@/shared/components/ui/textarea';
+import useBookmark from '../../hooks/useBookmark';
 
 type TimerProps = {
     minutes: string;
@@ -19,10 +32,10 @@ type QuestionHeaderProps = {
     questionNumber: number;
     totalQuestions: number;
     question: Question;
+    subjectSlug: string | undefined;
     timer?: TimerProps | undefined;
     onReport: () => void;
     onShare: () => void;
-    onBookmark: () => void;
     marked?: boolean | undefined;
     isAnswered: boolean;
     userCount: number | undefined;
@@ -36,14 +49,84 @@ const QuestionHeader = ({
     questionNumber,
     totalQuestions,
     question,
+    subjectSlug,
     timer,
     onReport,
     onShare,
-    onBookmark,
     marked,
     isAnswered,
     userCount,
 }: QuestionHeaderProps) => {
+    const { bookmarksMap, fetchBookmarks, toggleBookmark, updateBookmarkNote, loading } =
+        useBookmark();
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [noteText, setNoteText] = useState('');
+
+    const currentBookmark = bookmarksMap[question.id];
+    const isBookmarked = Boolean(currentBookmark);
+
+    // Fetch bookmarks for this subject when header mounts or subject changes
+    useEffect(() => {
+        if (subjectSlug) {
+            fetchBookmarks(subjectSlug);
+        }
+    }, [subjectSlug, question.id, fetchBookmarks]);
+
+    // Keep textarea state in sync with existing bookmark note when modal opens
+    useEffect(() => {
+        if (isDialogOpen) {
+            setNoteText(currentBookmark?.notes || '');
+        }
+    }, [isDialogOpen, currentBookmark]);
+
+    const handleSaveBookmark = async () => {
+        if (noteText.length > 100 || !subjectSlug) return;
+
+        try {
+            if (isBookmarked) {
+                await updateBookmarkNote({
+                    subjectSlug,
+                    questionId: question.id,
+                    ...(noteText.trim() ? { note: noteText.trim() } : {}),
+                });
+                toast.success('Bookmark note updated');
+            } else {
+                await toggleBookmark({
+                    subjectSlug,
+                    questionId: question.id,
+                    ...(noteText.trim() ? { note: noteText.trim() } : {}),
+                });
+                toast.success('Question bookmarked');
+            }
+
+            window.dispatchEvent(new Event('BOOKMARKS_UPDATED'));
+            setIsDialogOpen(false);
+        } catch (err) {
+            console.error('Failed to save bookmark:', err);
+            toast.error('Failed to save bookmark. Please try again.');
+        }
+    };
+
+    const handleRemoveBookmark = async () => {
+        if (!subjectSlug) return;
+
+        try {
+            if (isBookmarked) {
+                await toggleBookmark({
+                    subjectSlug,
+                    questionId: question.id,
+                });
+                window.dispatchEvent(new Event('BOOKMARKS_UPDATED'));
+                toast.success('Bookmark removed');
+            }
+            setIsDialogOpen(false);
+        } catch (err) {
+            console.error('Failed to remove bookmark:', err);
+            toast.error('Failed to remove bookmark. Please try again.');
+        }
+    };
+
     const getDifficultyDisplayText = () => {
         if (!question.difficulty) return 'Unknown';
 
@@ -110,7 +193,11 @@ const QuestionHeader = ({
 
                 {/* Right controls */}
                 <div className="flex flex-wrap items-center gap-2">
-                    <QuestionBookmark onClick={onBookmark} />
+                    <QuestionBookmark
+                        onClick={() => setIsDialogOpen(true)}
+                        isBookmarked={isBookmarked}
+                        hasNote={Boolean(currentBookmark?.notes)}
+                    />
 
                     {timer && (
                         <QuestionTimer
@@ -165,6 +252,73 @@ const QuestionHeader = ({
                     </button>
                 </div>
             </div>
+
+            {/* Bookmark Note Modal */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="sm:max-w-[425px] rounded-none">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {isBookmarked ? 'Edit Bookmark Note' : 'Add Bookmark'}
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="grid gap-3 py-2">
+                        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                            Notes (Optional - Max 100 characters)
+                        </label>
+                        <Textarea
+                            placeholder="Add key revision formula, error insight, or notes..."
+                            value={noteText}
+                            onChange={(e) => setNoteText(e.target.value)}
+                            maxLength={100}
+                            rows={3}
+                            className="resize-none rounded-none"
+                        />
+                        <div className="flex justify-end text-xs text-slate-400">
+                            {noteText.length}/100
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex flex-row justify-between items-center sm:justify-between gap-2">
+                        {isBookmarked ? (
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleRemoveBookmark}
+                                disabled={loading}
+                                className="flex items-center gap-1 rounded-none"
+                            >
+                                <Trash size={14} /> Remove
+                            </Button>
+                        ) : (
+                            <div />
+                        )}
+
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsDialogOpen(false)}
+                                disabled={loading}
+                                className="rounded-none"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                onClick={handleSaveBookmark}
+                                disabled={loading || noteText.length > 100}
+                                className="flex items-center gap-1 rounded-none text-white"
+                            >
+                                <Check size={14} /> Save
+                            </Button>
+                        </div>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -4,11 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/shared/utils/supabaseClient';
 import useAuth from '@/shared/hooks/useAuth';
 import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
-import {
-    handleBookmark,
-    isMultipleSelection,
-    isNumericalQuestion,
-} from '@/features/questions/utils/questionUtils';
+import { isMultipleSelection, isNumericalQuestion } from '@/features/questions/utils/questionUtils';
 
 import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
 import ReportModal from '@/shared/components/ReportModal';
@@ -21,7 +17,7 @@ const TestSolutionView = () => {
 
     const { attempts } = useOutletContext();
     const navigate = useNavigate();
-    const { user, isLogin } = useAuth();
+    const { user } = useAuth();
 
     const [showReportModal, setShowReportModal] = useState(false);
 
@@ -29,6 +25,7 @@ const TestSolutionView = () => {
     const currentIndex = parseInt(questionIndex || '0', 10);
     const currentAttempt = attempts[currentIndex];
     const currentQuestion = currentAttempt?.questions;
+    const subjectSlug = currentQuestion.subject;
 
     if (!currentAttempt) {
         toast.error('No question present.');
@@ -129,10 +126,6 @@ const TestSolutionView = () => {
         }
     };
 
-    const onToggleBookmark = () => {
-        handleBookmark(isLogin, safeQuestion.id, safeQuestion.subject);
-    };
-
     const handleExplanation = () => {
         if (currentQuestion?.source_url) {
             window.open(currentQuestion.source_url, '_blank');
@@ -145,6 +138,7 @@ const TestSolutionView = () => {
                 question={currentQuestion}
                 totalQuestions={attempts.length}
                 questionNumber={currentIndex + 1}
+                subjectSlug={subjectSlug}
                 userAnswerIndex={normalizedProps?.userAnswerIndex ?? null}
                 selectedOptionIndices={normalizedProps?.selectedOptionIndices ?? []}
                 numericalAnswer={normalizedProps?.numericalAnswer ?? null}
@@ -163,7 +157,6 @@ const TestSolutionView = () => {
                 onBack={handleBack}
                 onReport={() => setShowReportModal(true)}
                 onShare={handleShare}
-                onBookmark={onToggleBookmark}
                 isFirst={currentIndex === 0}
                 isLast={currentIndex === attempts.length - 1}
             />

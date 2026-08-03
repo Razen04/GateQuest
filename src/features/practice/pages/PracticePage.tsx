@@ -75,10 +75,6 @@ const Practice = () => {
             label: 'Aptitude',
             id: 'aptitude',
         },
-        {
-            label: 'Bookmarked Questions',
-            id: 'bookmarked',
-        },
     ];
 
     // Load subject stats

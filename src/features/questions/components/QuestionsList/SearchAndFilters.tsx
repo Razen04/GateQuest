@@ -244,6 +244,10 @@ const SearchAndFilters = ({
                                             >
                                                 Unattempted Questions
                                             </SelectItem>
+
+                                            <SelectItem value="bookmarked" className="rounded-none">
+                                                Bookmarked Questions
+                                            </SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
