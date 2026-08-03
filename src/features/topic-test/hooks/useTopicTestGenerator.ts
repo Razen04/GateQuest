@@ -74,8 +74,6 @@ export const useTopicTestGenerator = ({
 
         const { data, error } = await fetchTopicCounts(subjectId);
 
-        console.log('Data: ', data);
-
         if (error) {
             console.error(error);
             setAvailableTopics([]);
@@ -87,8 +85,6 @@ export const useTopicTestGenerator = ({
                 questionCount: t.question_count,
                 unattemptedCount: t.unattempted_count,
             }));
-
-            console.log('Topics: ', topics);
 
             setAvailableTopics(topics);
             writeCache(subjectId, topics);

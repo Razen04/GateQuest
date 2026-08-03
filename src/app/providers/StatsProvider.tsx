@@ -58,7 +58,6 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
 
             const dashboardData = data as unknown as DashboardResponse;
-            console.log('Dashboard Data: ', dashboardData);
 
             // Normalize active exams array
             const rawTargetExams = userGoal?.target_exams || ['gate'];

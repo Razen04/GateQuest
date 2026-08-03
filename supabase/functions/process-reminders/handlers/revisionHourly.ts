@@ -12,10 +12,6 @@ export const handleHourlyRevision = async ({ supabaseAdmin, corsHeaders }: Revis
     const twentyThreeHoursAgo = new Date(now.getTime() - 23 * 60 * 60 * 1000).toISOString();
     const twentyTwoHoursAgo = new Date(now.getTime() - 22 * 60 * 60 * 1000).toISOString();
 
-    console.log(
-        `Auditing weekly sets started between ${twentyThreeHoursAgo} to ${twentyTwoHoursAgo}`,
-    );
-
     const { data: expiringSets, error: setQueryError } = await supabaseAdmin
         .from('weekly_revision_set')
         .select('generated_for')

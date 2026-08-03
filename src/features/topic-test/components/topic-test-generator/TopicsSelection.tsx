@@ -23,7 +23,6 @@ const TopicsSelection = ({
     handleTopicToggle,
     includeAttempted,
 }: TopicsSelectionProps) => {
-    console.log('includeAttempted: ', includeAttempted);
     const [showAllPrimary, setShowAllPrimary] = useState(false);
     const [showMinorTopics, setShowMinorTopics] = useState(false);
 
