@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/Razen04/GateQuest">
-    <img src="/icons/animated_logo.svg" alt="GATEQuest Logo" width="120" />
+    <img src="public/icons/animated_logo.svg" alt="GATEQuest Logo" width="120" />
   </a>
   <h1 align="center">GATEQuest</h1>
   <p align="center">
