@@ -13,7 +13,7 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
-        "test": "vitest",
+        "test": "supabase test db && vitest",
         "supabase:update:types": "supabase gen types typescript --db-url 'postgresql://postgres:postgres@localhost:54322/postgres' > src/shared/types/supabase.ts",
         "//": "--- LOCAL DEV ---",
         "supabase:start": "supabase start",

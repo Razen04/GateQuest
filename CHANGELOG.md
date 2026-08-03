@@ -1,10 +1,11 @@
-# v0.10.9 - 2026-08- (Latest)
+# v0.10.9 - 2026-08-XX (Latest)
 
-- **Fresh New Look** — GATEQuest has received a complete visual refresh with a cleaner, more modern interface.
-- **Faster Dashboard** — Optimized how dashboard data is fetched, resulting in noticeably faster load times. Fixes [#81](https://github.com/Razen04/GateQuest/issues/81).
-- **Beta Updates** — You can now opt into beta builds from [**App Settings**](/settings/app-settings). Beta releases may contain unfinished features or bugs, so enable them only if you're comfortable testing them.
-- **Profile Section** — Introduced a new **Profile** section. It's currently in beta and will continue to receive improvements. Implements [#47](https://github.com/Razen04/GateQuest/issues/47).
-- **Account Deletion** — Added support for **soft deletion**, allowing you to delete your account safely. This feature is currently in beta. Implements [#80](https://github.com/Razen04/GateQuest/issues/80).
+- **Fresh New Look** — GATEQuest has been redesigned with a cleaner, more modern interface.
+- **Enhanced Question Bookmarks** — Bookmarks now support optional notes (up to 100 characters). You can add, edit, or remove notes at any time and filter your practice list to show only bookmarked questions. Your existing bookmarks are preserved. Implements [#85](https://github.com/Razen04/GateQuest/discussions/85) and [#17](https://github.com/Razen04/GateQuest/issues/17).
+- **Faster Dashboard** — Optimized dashboard data loading for noticeably faster performance. Fixes [#81](https://github.com/Razen04/GateQuest/issues/81).
+- **Beta Updates** — You can now opt into beta builds from **App Settings**. Beta releases may include unfinished features or bugs, so enable them only if you're comfortable testing pre-release software.
+- **Profile Section** — Added a new **Profile** section. It's currently in beta and will continue to evolve with future updates. Implements [#47](https://github.com/Razen04/GateQuest/issues/47).
+- **Account Deletion** — Added support for soft account deletion, allowing you to safely delete your account. This feature is currently in beta. Implements [#80](https://github.com/Razen04/GateQuest/issues/80).
 
 # v0.10.8 - 2026-05-23
 

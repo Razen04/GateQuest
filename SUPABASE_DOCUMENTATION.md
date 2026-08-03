@@ -25,6 +25,7 @@ The database is designed around a few core concepts. Understanding their relatio
 - **`donations`**: Stores the donations which are done via the app.
 - **`topic_tests`**: Stores user test sessions, including selected topics, test state, timing, and final performance summary.
 - **`topic_tests_attempts`**: Stores per-question data for each test session, including user answers, time spent, and status.
+- **`question_bookmarks`**: Stores user question bookmarks with notes attach for later revisions.
 
 ---
 
@@ -518,6 +519,66 @@ Stores donation records submitted by users or guests, including amounts, message
   `FOR INSERT TO public`
 - **Select:** Anyone can read donations.  
   `FOR SELECT TO public`
+
+## `question_bookmarks`
+
+Stores the questions that users have bookmarked for quick access. Each bookmark belongs to a single user and can optionally include a short personal note.
+
+### Purpose
+
+The `question_bookmarks` table enables users to:
+
+- Bookmark questions they want to revisit later.
+- Add a personal note (up to **100 characters**) to each bookmarked question.
+- Retrieve bookmarks ordered by the most recently added.
+
+Each user can bookmark a question **only once**, enforced by the composite primary key.
+
+### Columns
+
+| Column        | Type          | Description                                                                          |
+| ------------- | ------------- | ------------------------------------------------------------------------------------ |
+| `user_id`     | `UUID`        | References `users.id`. The owner of the bookmark.                                    |
+| `question_id` | `UUID`        | References `questions.id`. The bookmarked question.                                  |
+| `notes`       | `TEXT`        | Optional personal note. Limited to **100 characters**.                               |
+| `created_at`  | `TIMESTAMPTZ` | Timestamp indicating when the bookmark was created. Defaults to `CURRENT_TIMESTAMP`. |
+
+### Constraints
+
+- **Primary Key:** (`user_id`, `question_id`)
+    - Prevents duplicate bookmarks for the same question by the same user.
+
+- **Foreign Keys**
+    - `user_id` → `users.id` (`ON DELETE CASCADE`)
+    - `question_id` → `questions.id` (`ON DELETE CASCADE`)
+
+- **Notes Length**
+    - `notes` is optional but cannot exceed **100 characters**.
+
+### Indexes
+
+| Index                        | Purpose                                                           |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `(user_id, created_at DESC)` | Optimizes retrieval of a user's bookmarks sorted by newest first. |
+
+### Row Level Security (RLS)
+
+RLS is enabled on this table.
+
+Users may:
+
+- View their own bookmarks.
+- Create bookmarks for themselves.
+- Update their own bookmarks (including notes).
+- Delete their own bookmarks.
+
+Users cannot access or modify bookmarks belonging to other users.
+
+### Example
+
+| user_id | question_id | notes                | created_at               |
+| ------- | ----------- | -------------------- | ------------------------ |
+| `uuid`  | `uuid`      | "Review before exam" | `2026-08-02 10:15:43+00` |
 
 ---
 
@@ -1461,3 +1522,317 @@ The function completes silently when account deletion succeeds. If the user is n
 -- Delete the currently authenticated user's account
 SELECT delete_account();
 ```
+
+### Function: `toggle_question_bookmark`
+
+Toggles a question bookmark for the authenticated user. If the question is already bookmarked, the bookmark is removed. If it is not bookmarked, a new bookmark is created.
+
+This RPC also supports adding an optional personal note when creating a bookmark.
+
+### Purpose
+
+The `toggle_question_bookmark` function allows users to manage bookmarks with a single operation instead of having to check the bookmark state first.
+
+The function will:
+
+- Create a bookmark if one does not exist.
+- Remove the bookmark if it already exists.
+- Store an optional note when creating a bookmark.
+- Return the updated bookmark state.
+
+### Parameters
+
+| Parameter       | Type   | Required | Description                                                              |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------ |
+| `p_question_id` | `UUID` | Yes      | The ID of the question to bookmark/unbookmark.                           |
+| `p_note`        | `TEXT` | No       | Optional personal note for the bookmark. Maximum length: 100 characters. |
+
+### Return Value
+
+Returns a boolean indicating the new bookmark state.
+
+| Value   | Meaning                            |
+| ------- | ---------------------------------- |
+| `true`  | Bookmark was created successfully. |
+| `false` | Bookmark was removed successfully. |
+
+### Behavior
+
+#### Adding a Bookmark
+
+When the question is not already bookmarked:
+
+```text
+Input:
+- question_id: abc123
+- note: "Review this before interview"
+
+Action:
+Creates a new row in question_bookmarks.
+
+Result:
+Returns true.
+```
+
+#### Removing a Bookmark
+
+When the question is already bookmarked:
+
+```text
+Input:
+- question_id: abc123
+
+Action:
+Deletes the existing row from question_bookmarks.
+
+Result:
+Returns false.
+```
+
+### Authentication
+
+The function uses `auth.uid()` to identify the current user.
+
+Unauthenticated requests will fail with:
+
+```text
+Authentication required
+```
+
+Users can only toggle bookmarks belonging to themselves.
+
+### Validation
+
+- `p_question_id` must reference an existing question.
+- `p_note` is optional.
+- `p_note` cannot exceed **100 characters**.
+
+### Example
+
+```ts
+const { data, error } = await supabase.rpc('toggle_question_bookmark', {
+    p_question_id: questionId,
+    p_note: 'Important question for revision',
+});
+
+if (data) {
+    // Bookmark added
+} else {
+    // Bookmark removed
+}
+```
+
+### Related Table
+
+This RPC operates on:
+
+- `question_bookmarks`
+
+See: `question_bookmarks` table documentation for schema details.
+
+### Function: `update_question_bookmark_note`
+
+Updates the personal note attached to an existing question bookmark.
+
+This RPC is used when a user wants to modify or remove the note on a bookmarked question without changing the bookmark state.
+
+### Purpose
+
+The `update_question_bookmark_note` function allows users to:
+
+- Add a note to an existing bookmark.
+- Edit an existing bookmark note.
+- Remove a bookmark note by setting it to `NULL`.
+
+### Parameters
+
+| Parameter       | Type   | Required | Description                                                                           |
+| --------------- | ------ | -------- | ------------------------------------------------------------------------------------- |
+| `p_question_id` | `UUID` | Yes      | The ID of the bookmarked question.                                                    |
+| `p_note`        | `TEXT` | Yes      | The new note value. Can be `NULL` to remove the note. Maximum length: 100 characters. |
+
+### Return Value
+
+Returns no value (`void`).
+
+A successful execution means the note was updated.
+
+### Behavior
+
+#### Update Note
+
+```text
+Input:
+- question_id: abc123
+- note: "Review before final exam"
+
+Action:
+Updates the existing bookmark note.
+
+Result:
+Success.
+```
+
+#### Remove Note
+
+```text
+Input:
+- question_id: abc123
+- note: null
+
+Action:
+Clears the bookmark note.
+
+Result:
+Success.
+```
+
+### Authentication
+
+The function uses `auth.uid()` to identify the current user.
+
+Unauthenticated requests will fail with:
+
+```text
+Authentication required
+```
+
+Users can only update notes on their own bookmarks.
+
+### Validation
+
+- The bookmark must already exist.
+- Notes cannot exceed **100 characters**.
+- The question must belong to the authenticated user's bookmarks.
+
+### Example
+
+```ts
+const { error } = await supabase.rpc('update_question_bookmark_note', {
+    p_question_id: questionId,
+    p_note: 'Important for revision',
+});
+```
+
+### Related Table
+
+This RPC operates on:
+
+- `question_bookmarks`
+
+See: `question_bookmarks` table documentation for schema details.
+
+### Function: `get_user_bookmarks`
+
+Retrieves bookmarks created by the currently authenticated user.
+
+This RPC provides a way to fetch a user's bookmarked questions, with optional filtering by subject. Results are ordered by the most recently created bookmarks first.
+
+### Purpose
+
+The `get_user_bookmarks` function allows users to:
+
+- View all of their bookmarked questions.
+- Filter bookmarks by subject.
+- Retrieve bookmark metadata such as notes and creation time.
+- Fetch question details required for displaying bookmarked questions.
+
+### Parameters
+
+| Parameter   | Type   | Required | Description                                                                                        |
+| ----------- | ------ | -------- | -------------------------------------------------------------------------------------------------- |
+| `p_subject` | `TEXT` | No       | Optional subject filter. When provided, only bookmarks matching the question subject are returned. |
+
+### Return Value
+
+Returns a table containing bookmarked question details.
+
+| Column          | Type          | Description                                        |
+| --------------- | ------------- | -------------------------------------------------- |
+| `question_id`   | `UUID`        | ID of the bookmarked question.                     |
+| `notes`         | `TEXT`        | User's personal note attached to the bookmark.     |
+| `created_at`    | `TIMESTAMPTZ` | When the bookmark was created.                     |
+| `question`      | `TEXT`        | Question content.                                  |
+| `subject`       | `TEXT`        | Subject/category of the question.                  |
+| `topic`         | `TEXT`        | Topic associated with the question.                |
+| `question_type` | `TEXT`        | Type of question (e.g., multiple-choice, numeric). |
+| `difficulty`    | `TEXT`        | Difficulty level of the question.                  |
+
+### Behavior
+
+#### Fetch All Bookmarks
+
+When no subject filter is provided:
+
+```text
+Input:
+- p_subject: null
+
+Result:
+Returns all bookmarks belonging to the authenticated user.
+```
+
+#### Filter By Subject
+
+When a subject is provided:
+
+```text
+Input:
+- p_subject: "dsa"
+
+Result:
+Returns only bookmarked questions where the subject matches "dsa".
+```
+
+### Authentication
+
+The function uses `auth.uid()` to identify the current user.
+
+Unauthenticated requests will fail with:
+
+```text
+Authentication required.
+```
+
+Users can only retrieve their own bookmarks. Bookmarks belonging to other users are never returned.
+
+### Ordering
+
+Results are sorted by:
+
+```sql
+created_at DESC
+```
+
+The newest bookmarked questions appear first.
+
+### Example
+
+```ts
+const { data, error } = await supabase.rpc('get_user_bookmarks', {
+    p_subject: null,
+});
+```
+
+Filter by subject:
+
+```ts
+const { data, error } = await supabase.rpc('get_user_bookmarks', {
+    p_subject: 'dsa',
+});
+```
+
+### Related Table
+
+This RPC operates on:
+
+- `question_bookmarks`
+
+and retrieves related data from:
+
+- `questions`
+
+See:
+
+- `question_bookmarks` table documentation
+- `questions` table documentation
