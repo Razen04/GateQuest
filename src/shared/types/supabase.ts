@@ -252,6 +252,42 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            question_bookmarks: {
+                Row: {
+                    created_at: string;
+                    notes: string | null;
+                    question_id: string;
+                    user_id: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    notes?: string | null;
+                    question_id: string;
+                    user_id: string;
+                };
+                Update: {
+                    created_at?: string;
+                    notes?: string | null;
+                    question_id?: string;
+                    user_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'fk_bookmarks_question';
+                        columns: ['question_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'fk_bookmarks_user';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
             question_peer_stats: {
                 Row: {
                     avg_time_seconds: number | null;
@@ -744,6 +780,7 @@ export type Database = {
             };
             users: {
                 Row: {
+                    about: string | null;
                     avatar: string | null;
                     bookmark_questions: Json | null;
                     college: string | null;
@@ -761,6 +798,7 @@ export type Database = {
                     version_number: number;
                 };
                 Insert: {
+                    about?: string | null;
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
@@ -778,6 +816,7 @@ export type Database = {
                     version_number?: number;
                 };
                 Update: {
+                    about?: string | null;
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
@@ -1019,6 +1058,27 @@ export type Database = {
                     unattempted_count: number;
                 }[];
             };
+            get_user_attempted_ids: {
+                Args: { p_mode?: string; p_subject_slug?: string };
+                Returns: {
+                    question_id: string;
+                }[];
+            };
+            get_user_bookmarks: {
+                Args: { p_subject_slug?: string };
+                Returns: {
+                    created_at: string;
+                    difficulty: string;
+                    notes: string;
+                    question: string;
+                    question_id: string;
+                    question_type: string;
+                    subject_id: string;
+                    subject_name: string;
+                    subject_slug: string;
+                    topic: string;
+                }[];
+            };
             get_verified_donations: {
                 Args: never;
                 Returns: {
@@ -1041,6 +1101,14 @@ export type Database = {
                 Returns: undefined;
             };
             internal_calc_exam_stats: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_global_stats: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_recent_history: {
                 Args: { p_user_id: string; p_version_number: number };
                 Returns: Json;
             };
@@ -1067,6 +1135,14 @@ export type Database = {
                     p_session_id: string;
                 };
                 Returns: Json;
+            };
+            toggle_question_bookmark: {
+                Args: { p_note?: string; p_question_id: string };
+                Returns: boolean;
+            };
+            update_question_bookmark_note: {
+                Args: { p_note: string; p_question_id: string };
+                Returns: undefined;
             };
             update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };
         };
