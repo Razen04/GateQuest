@@ -14,8 +14,6 @@ import {
 
 import { Button } from '@/shared/components/ui/button';
 import About from '@/features/about/pages/AboutPage';
-import animatedLogo from '../../../../public/icons/logo.svg';
-import useAuth from '@/shared/hooks/useAuth';
 import { SunIcon } from '@phosphor-icons/react';
 import { MoonIcon } from '@phosphor-icons/react';
 import useSettings from '@/features/settings/hooks/useSettings';
@@ -133,7 +131,7 @@ const NavigationMenu = ({
         <nav className="sticky top-0 z-50 bg-[#F4F5F1]/50 dark:bg-[#0B0C10]/50 backdrop-blur-3xl">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
                 <div className="flex items-center gap-3">
-                    <img src={animatedLogo} alt="GateQuest" className="h-9 w-9" />
+                    <img src="/icons/logo.svg" alt="GateQuest" className="h-9 w-9" />
 
                     <div className="leading-none">
                         <p className="text-sm font-bold tracking-tight">

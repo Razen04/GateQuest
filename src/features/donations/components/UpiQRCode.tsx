@@ -25,7 +25,7 @@ const UpiQRCode: React.FC<UpiQRCodeProps> = ({ amount }) => {
                 fgColor="#000000"
                 level="H"
                 imageSettings={{
-                    src: '../../../../public/icons/logo.png',
+                    src: '/icons/logo.png',
                     height: 40,
                     width: 40,
                     excavate: true,

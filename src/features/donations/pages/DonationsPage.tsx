@@ -8,7 +8,6 @@ import DonationBox from '../components/DonationBox';
 import DonorList from '../components/DonorList';
 import UpiQRCode from '../components/UpiQRCode';
 import { getUserProfile } from '@/shared/utils/helper';
-import tidScreenshot from '../../../../public/screenshots/tidscreenshot.jpeg';
 
 // Shared Palette Accents
 const signal = '#2A5CFF';
@@ -222,7 +221,7 @@ const Donations: React.FC = () => {
                                     {/* Proof Screenshot Guide thumbnail */}
                                     <div className="overflow-hidden border border-slate-900/10 dark:border-white/10">
                                         <img
-                                            src={tidScreenshot}
+                                            src="/screenshots/tidscreenshot.jpeg"
                                             alt="UTR Guide"
                                             className="mx-auto w-full object-cover opacity-80 transition hover:opacity-100"
                                         />
