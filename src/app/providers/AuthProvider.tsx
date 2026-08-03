@@ -46,79 +46,86 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             userIdRef.current = supaUser.id;
 
-            // 1. Fetch existing profile first to avoid overwriting user progress (e.g. total_xp)
-            const { data: existingUser } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', supaUser.id)
-                .maybeSingle();
-
-            let finalProfile = existingUser;
-
-            // 2. If profile doesn't exist, create it with default values
-            if (!existingUser) {
-                const newProfile = {
-                    id: supaUser.id,
-                    email: supaUser.email ?? null,
-                    name: supaUser.user_metadata?.full_name || '',
-                    avatar: supaUser.user_metadata?.avatar_url ?? null,
-                    show_name: true,
-                    total_xp: 0,
-                    settings: {
-                        sound: true,
-                        autoTimer: true,
-                        darkMode: true,
-                        is_beta: false,
-                    },
-                };
-
-                const { data: insertedData, error } = await supabase
+            try {
+                // Fetch existing profile first
+                const { data: existingUser, error: selectError } = await supabase
                     .from('users')
-                    .insert(newProfile)
-                    .select()
-                    .single();
+                    .select('*')
+                    .eq('id', supaUser.id)
+                    .maybeSingle();
 
-                if (!error) finalProfile = insertedData;
-            }
+                if (selectError) throw selectError;
 
-            if (finalProfile && isMounted) {
-                const rawSettings =
-                    typeof finalProfile.settings === 'object' && finalProfile.settings !== null
-                        ? (finalProfile.settings as Record<string, boolean>)
-                        : {};
+                let finalProfile = existingUser;
 
-                const profile = {
-                    ...finalProfile,
-                    bookmark_questions: finalProfile.bookmark_questions || [],
-                    college: finalProfile.college || '',
-                    targetYear: finalProfile.targetYear || 2027,
-                    version_number: finalProfile.version_number || 1,
-                    settings: {
-                        sound: true,
-                        autoTimer: true,
-                        darkMode: true,
-                        is_beta: false,
-                        shareProgress: false,
-                        dataCollection: false,
-                        ...rawSettings,
-                    },
-                };
+                // If profile doesn't exist, we create it
+                if (!existingUser) {
+                    const newProfile = {
+                        id: supaUser.id,
+                        email: supaUser.email ?? null,
+                        name: supaUser.user_metadata?.full_name || '',
+                        avatar: supaUser.user_metadata?.avatar_url ?? null,
+                        show_name: true,
+                        total_xp: 0,
+                        settings: {
+                            sound: true,
+                            autoTimer: true,
+                            darkMode: true,
+                            is_beta: false,
+                        },
+                    };
 
-                if (profile.settings.is_beta) {
-                    // Check username condition
-                    if (supaUser.id !== '1' && !profile.username) {
-                        setNeedsUsername(true);
-                    } else {
-                        setNeedsUsername(false);
-                    }
+                    const { data: insertedData, error: insertError } = await supabase
+                        .from('users')
+                        .insert(newProfile)
+                        .select()
+                        .single();
+
+                    if (insertError) throw insertError;
+                    finalProfile = insertedData;
                 }
 
-                localStorage.setItem('gate_user_profile', JSON.stringify(profile));
-                refreshRef.current();
-                setUser(profile as unknown as AppUser);
-            }
+                if (finalProfile && isMounted) {
+                    const rawSettings =
+                        typeof finalProfile.settings === 'object' && finalProfile.settings !== null
+                            ? (finalProfile.settings as Record<string, boolean>)
+                            : {};
 
-            if (isMounted) setLoading(false);
+                    const profile = {
+                        ...finalProfile,
+                        bookmark_questions: finalProfile.bookmark_questions || [],
+                        college: finalProfile.college || '',
+                        targetYear: finalProfile.targetYear || 2027,
+                        version_number: finalProfile.version_number || 1,
+                        settings: {
+                            sound: true,
+                            autoTimer: true,
+                            darkMode: true,
+                            is_beta: false,
+                            shareProgress: false,
+                            dataCollection: false,
+                            ...rawSettings,
+                        },
+                    };
+
+                    if (profile.settings.is_beta) {
+                        if (supaUser.id !== '1' && !profile.username) {
+                            setNeedsUsername(true);
+                        } else {
+                            setNeedsUsername(false);
+                        }
+                    }
+
+                    localStorage.setItem('gate_user_profile', JSON.stringify(profile));
+                    refreshRef.current();
+                    setUser(profile as unknown as AppUser);
+                }
+            } catch (err) {
+                console.error('Session initialization / sync error:', err);
+                toast.error('Session initialization error.');
+            } finally {
+                if (isMounted) setLoading(false);
+            }
         };
 
         // Rely on onAuthStateChange for session initialization & updates
