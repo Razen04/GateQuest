@@ -447,6 +447,9 @@ const AccountSettings = () => {
                                 rows={3}
                                 className="resize-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
                             />
+                            <div className="flex justify-end text-xs text-slate-400">
+                                {about.length}/100
+                            </div>
                         </FormField>
                     )}
                 </div>
