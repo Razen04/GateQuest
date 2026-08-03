@@ -1,6 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CaretDown, Funnel, MagnifyingGlass } from '@phosphor-icons/react';
+import {
+    CaretDown,
+    Funnel,
+    MagnifyingGlass,
+    ArrowCounterClockwiseIcon,
+} from '@phosphor-icons/react';
 import {
     Select,
     SelectContent,
@@ -85,6 +90,26 @@ const SearchAndFilters = ({
     const inputGlass =
         'bg-white/50 dark:bg-zinc-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 focus:ring-2 focus:ring-blue-400 transition-all';
 
+    const hasActiveFilters =
+        searchQuery.trim() !== '' ||
+        difficultyFilter.length > 0 ||
+        yearFilter.length > 0 ||
+        topicFilter.length > 0 ||
+        examFilter.length > 0 ||
+        tagFilter.length > 0 ||
+        attemptFilter !== 'unattempted';
+
+    // Reset all filter states back to default
+    const handleClearFilters = () => {
+        setSearchQuery('');
+        setDifficultyFilter([]);
+        setYearFilter([]);
+        setTopicFilter([]);
+        setExamFilter([]);
+        setTagFilter([]);
+        setAttemptFilter('unattempted');
+    };
+
     return (
         <div className={`p-2 sm:p-4 mb-4 sm:mb-6 ${glass}`}>
             <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
@@ -100,19 +125,24 @@ const SearchAndFilters = ({
                     />
                 </div>
 
-                <Button
-                    variant="ghost"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="px-2 sm:px-4 py-2 w-fit hover:bg-white/30 dark:hover:bg-zinc-800/50 rounded-none"
-                >
-                    <Funnel className="mr-2" weight={showFilters ? 'fill' : 'duotone'} />
-                    <span>Filter</span>
-                    <CaretDown
-                        className={`ml-2 transition-transform duration-500 ${
-                            showFilters ? 'rotate-180' : ''
-                        }`}
-                    />
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="px-2 sm:px-4 py-2 w-fit hover:bg-white/30 dark:hover:bg-zinc-800/50 rounded-none relative"
+                    >
+                        <Funnel className="mr-2" weight={showFilters ? 'fill' : 'duotone'} />
+                        <span>Filter</span>
+                        {hasActiveFilters && (
+                            <span className="ml-1.5 flex h-2 w-2 rounded-full bg-blue-500" />
+                        )}
+                        <CaretDown
+                            className={`ml-2 transition-transform duration-500 ${
+                                showFilters ? 'rotate-180' : ''
+                            }`}
+                        />
+                    </Button>
+                </div>
             </div>
 
             <AnimatePresence>
@@ -121,8 +151,26 @@ const SearchAndFilters = ({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="mt-4 pt-4 border-t border-white/20 dark:border-white/10 overflow-hidden overflow-y-scroll"
+                        className="mt-4 pt-4 border-t border-white/20 dark:border-white/10 overflow-hidden"
                     >
+                        <div className="flex items-center justify-between mb-3 px-1">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Active Filters
+                            </span>
+
+                            {hasActiveFilters && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClearFilters}
+                                    className="h-7 px-2 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-none flex items-center gap-1 transition-colors"
+                                >
+                                    <ArrowCounterClockwiseIcon size={14} />
+                                    Clear All
+                                </Button>
+                            )}
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {[
                                 {
