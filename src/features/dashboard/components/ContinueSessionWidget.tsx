@@ -35,8 +35,7 @@ export const ContinueSessionWidget = () => {
     const [pathPart, searchPart] = sessionUrl.split('?');
     const segments = pathPart?.split('/').filter(Boolean) || [];
     const queryParams = new URLSearchParams(searchPart || '');
-    const isBookmarkMode =
-        queryParams.get('bookmark') === 'true' || queryParams.get('bookmarked') === 'true';
+    const isBookmarkMode = queryParams.get('attempt') === 'bookmarked';
 
     let cardTitle = 'Continue Learning';
     let cardSubtitle = 'Pick up exactly where you paused.';

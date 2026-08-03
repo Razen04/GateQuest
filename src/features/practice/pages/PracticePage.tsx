@@ -87,14 +87,13 @@ const Practice = () => {
 
     // Filter subjects based on active tab
     const filteredSubjects = subjects.filter((subject) => {
-        if (activeFilter === 'all' || activeFilter === 'bookmarked') return true;
+        if (activeFilter === 'all') return true;
         return subject.category === activeFilter;
     });
 
     // Handle subject selection
     const handleSubjectSelect = (slug: string) => {
-        const isBookmarked = activeFilter === 'bookmarked';
-        navigate(`${slug}?bookmarked=${isBookmarked}`);
+        navigate(`${slug}`);
     };
 
     return (
@@ -135,13 +134,9 @@ const Practice = () => {
             <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 pt-6 pb-24 flex-1 flex flex-col">
                 {/* HEADER */}
                 <PageHeader
-                    primaryTitle={activeFilter === 'bookmarked' ? 'Your' : 'Practice by'}
-                    secondaryTitle={activeFilter === 'bookmarked' ? 'Bookmarks' : 'Subject'}
-                    caption={
-                        activeFilter === 'bookmarked'
-                            ? 'Select a subject to view your saved questions.'
-                            : 'Select a subject and start practicing.'
-                    }
+                    primaryTitle="Practice by"
+                    secondaryTitle="Subject"
+                    caption="Select a subject and start practicing."
                 />
 
                 {/* STICKY SUB-HEADER FILTER TABS */}
@@ -219,9 +214,7 @@ const Practice = () => {
                                             }}
                                         >
                                             <Button className="w-full text-xs font-medium group rounded-none">
-                                                {activeFilter === 'bookmarked'
-                                                    ? 'View Bookmarks'
-                                                    : 'Start Practice'}
+                                                Start Practice
                                                 <span className="ml-1.5 group-hover:translate-x-1 transition-transform">
                                                     →
                                                 </span>

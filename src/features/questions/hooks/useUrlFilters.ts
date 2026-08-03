@@ -79,7 +79,6 @@ export default function useUrlFilters({
 
         params.set('q', searchQuery || '');
         params.set('attempt', attemptFilter);
-        params.set('bookmarked', searchParams.get('bookmarked') ?? 'false');
 
         setArrayParam('diff', difficultyFilter);
         setArrayParam('year', yearFilter);
@@ -103,13 +102,9 @@ export default function useUrlFilters({
         searchParams,
     ]);
 
-    // A derived boolean state for the 'bookmarked' filter.
-    const bookmarked = searchParams.get('bookmarked') === 'true';
-
     // Memoize the full query string. This is useful for constructing links that need to preserve the current filter state.
     const queryString = useMemo(() => {
         const p = new URLSearchParams({
-            bookmarked: String(bookmarked),
             q: searchQuery || '',
             attempt: attemptFilter,
             diff: difficultyFilter.length > 0 ? difficultyFilter.join(',') : 'all',
@@ -120,7 +115,6 @@ export default function useUrlFilters({
         });
         return p.toString();
     }, [
-        bookmarked,
         searchQuery,
         difficultyFilter,
         yearFilter,

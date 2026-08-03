@@ -4,11 +4,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
-import { getUserProfile, sortQuestionsByYear } from '@/shared/utils/helper';
+import { sortQuestionsByYear } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import {
     bulkUpsertQuestions,
-    getQuestionByIds,
     getQuestionsBySubject,
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
@@ -75,8 +74,8 @@ const fetchQuestionsBySubject = async (
     return [];
 };
 
-// Fetches questions for a specific subject, handling both regular and bookmarked questions.
-const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
+// Fetches questions for a specific subject.
+const useQuestions = (subjectId: string | undefined) => {
     const [allQuestions, setAllQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -87,13 +86,8 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
     const filteredQuestions = useMemo(() => {
         const activeExams = (userGoal?.target_exams as string[]) || [];
 
-        const currSubject = getPracticeSubjects().find((s) => s.id === subjectId);
-
-        const isUniversalSubject = currSubject?.is_universal;
-
-        if (bookmarked || isUniversalSubject) return allQuestions; // bookmarks will show all the questions regadless of exam selected
         return allQuestions.filter((q) => isQuestionInActiveExams(q, activeExams));
-    }, [allQuestions, bookmarked, userGoal?.target_exams, getPracticeSubjects, subjectId]);
+    }, [allQuestions, userGoal?.target_exams, getPracticeSubjects, subjectId]);
 
     useEffect(() => {
         // A guard to prevent fetching if the subject is not yet defined.
@@ -108,20 +102,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
             setError('');
             try {
                 let localData: Question[] = [];
-                // If the 'bookmarked' flag is true, we fetch bookmarked questions.
-                if (bookmarked) {
-                    const profile = getUserProfile();
-                    // The user's bookmarked questions are retrieved from their profile.
-                    const bookmarkIds =
-                        (profile?.bookmark_questions as unknown as Question[])?.map((q) => q.id) ||
-                        [];
-                    if (bookmarkIds.length > 0) {
-                        localData = await getQuestionByIds(bookmarkIds);
-                        localData = localData.filter((q) => q.subject_id === subjectId);
-                    }
-                } else {
-                    localData = await getQuestionsBySubject(subjectId);
-                }
+                localData = await getQuestionsBySubject(subjectId);
 
                 if (isMounted) {
                     setAllQuestions(sortQuestionsByYear(localData));
@@ -153,21 +134,8 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
                     }
 
                     // refresh UI
-                    if (bookmarked) {
-                        const profile = getUserProfile();
-                        const bookmarkIds =
-                            (profile?.bookmark_questions as unknown as Question[])?.map(
-                                (q) => q.id,
-                            ) || [];
-                        if (bookmarkIds.length > 0) {
-                            const updatedLocal = await getQuestionByIds(bookmarkIds);
-                            const filtered = updatedLocal.filter((q) => q.subject_id === subjectId);
-                            if (isMounted) setAllQuestions(sortQuestionsByYear(filtered));
-                        }
-                    } else {
-                        const updatedLocal = await getQuestionsBySubject(subjectId);
-                        if (isMounted) setAllQuestions(sortQuestionsByYear(updatedLocal));
-                    }
+                    const updatedLocal = await getQuestionsBySubject(subjectId);
+                    if (isMounted) setAllQuestions(sortQuestionsByYear(updatedLocal));
 
                     if (isMounted && remotedFetched) toast.success('Questions updated.');
                 }
@@ -189,7 +157,7 @@ const useQuestions = (subjectId: string | undefined, bookmarked: boolean) => {
         return () => {
             isMounted = false;
         };
-    }, [subjectId, bookmarked]); // The effect re-runs whenever the subject or the bookmarked flag changes.
+    }, [subjectId]); // The effect re-runs whenever the subject
 
     // Expose the questions, loading state, and error state to the component.
     return { questions: filteredQuestions, isLoading, error };
