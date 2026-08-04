@@ -140,56 +140,88 @@ language plpgsql
 security definer
 as $$
 declare
-    final_json jsonb;
+    v_final_stats jsonb;
     v_branch_id text;
-    v_primary_exam text;
-    v_exam_total_available int := 0;
 begin
-    -- 1. Safe target exam and branch extraction
-    select 
-        lower(branch_id), 
-        lower(target_exams->>0) -- Safely grabs the first target exam
-    into v_branch_id, v_primary_exam
+    -- Extract user branch
+    select lower(branch_id)
+    into v_branch_id
     from public.user_goals
     where user_id = p_user_id and is_active = true
     limit 1;
 
-    if v_primary_exam is null then
-        return '{}'::jsonb;
-    end if;
-
-    -- 2. Get distinct valid subjects for this exam (including common subjects like Aptitude)
-    with exam_subjects_list as (
-        select distinct s.id, s.name, s.slug, s.icon_name, s.theme_color, s.question_count
-        from public.subjects s
-        join public.exams_subjects es on es.subject_id = s.id
-        left join public.branch_subjects bs on bs.subject_id = s.id
-        where lower(es.exams_id) = v_primary_exam
-          and (
-              bs.branch_id is null 
-              or lower(bs.branch_id) = coalesce(v_branch_id, lower(bs.branch_id))
-          )
+    -- Extract active target exams
+    with user_target_exams as (
+        select distinct lower(te.exam_id) as exam_id
+        from public.user_goals ug
+        cross join jsonb_array_elements_text(ug.target_exams) as te(exam_id)
+        where ug.user_id = p_user_id and ug.is_active = true
     ),
-    -- 3. Calculate attempts per subject
+    -- Fetch valid subjects per target exam
+    exam_subjects as (
+        select distinct 
+            ute.exam_id,
+            s.id as subject_id, 
+            s.name as subject_name, 
+            s.slug as subject_slug, 
+            s.icon_name, 
+            s.theme_color
+        from user_target_exams ute
+        join public.exams_subjects es on lower(es.exams_id) = ute.exam_id
+        join public.subjects s on es.subject_id = s.id
+        left join public.branch_subjects bs on bs.subject_id = s.id
+        where (
+            s.is_universal = true
+            or bs.branch_id is null 
+            or lower(bs.branch_id) = coalesce(v_branch_id, lower(bs.branch_id))
+        )
+    ),
+    -- Calculate total available questions dynamically from questions table per exam
+    exam_question_counts as (
+        select 
+            es.exam_id,
+            q.subject_id,
+            count(q.id)::int as available_count
+        from exam_subjects es
+        join public.questions q on q.subject_id = es.subject_id
+        where (
+            -- Matches array: ["ISRO", "GATE"]
+            (jsonb_typeof(q.metadata->'exam') = 'array' and q.metadata->'exam' @> jsonb_build_array(upper(es.exam_id)))
+            or
+            -- Matches string: "ISRO"
+            (jsonb_typeof(q.metadata->'exam') = 'string' and lower(q.metadata->>'exam') = es.exam_id)
+        )
+        group by es.exam_id, q.subject_id
+    ),
+    -- Calculate user attempts per exam & subject
     subject_activity as (
         select
+            es.exam_id,
             q.subject_id,
             count(distinct uqa.question_id)::int as attempted,
             sum(case when uqa.was_correct then 1 else 0 end)::int as correct
         from public.user_question_activity uqa
         join public.questions q on uqa.question_id = q.id
-        where uqa.user_id = p_user_id and uqa.user_version_number = p_version_number
-        group by q.subject_id
+        join exam_subjects es on es.subject_id = q.subject_id
+        where uqa.user_id = p_user_id 
+          and uqa.user_version_number = p_version_number
+          and (
+              (jsonb_typeof(q.metadata->'exam') = 'array' and q.metadata->'exam' @> jsonb_build_array(upper(es.exam_id)))
+              or
+              (jsonb_typeof(q.metadata->'exam') = 'string' and lower(q.metadata->>'exam') = es.exam_id)
+          )
+        group by es.exam_id, q.subject_id
     ),
-    -- 4. Build JSON Array & Calculate Totals
-    subject_agg as (
+    -- Combine and build per-subject json array
+    exam_agg as (
         select 
+            es.exam_id,
             jsonb_agg(
                 jsonb_build_object(
-                    'subject_name', esl.name,
-                    'subject_slug', esl.slug,
-                    'icon_name', esl.icon_name,
-                    'theme_color', esl.theme_color,
+                    'subject_name', es.subject_name,
+                    'subject_slug', es.subject_slug,
+                    'icon_name', es.icon_name,
+                    'theme_color', es.theme_color,
                     'attempted', coalesce(sa.attempted, 0),
                     'correct', coalesce(sa.correct, 0),
                     'accuracy', case 
@@ -197,35 +229,39 @@ begin
                         then round(coalesce(sa.correct, 0) * 100.0 / sa.attempted)::int 
                         else 0 
                     end,
-                    'total_available', coalesce(esl.question_count, 0),
+                    'total_available', coalesce(eqc.available_count, 0),
                     'progress', case 
-                        when coalesce(esl.question_count, 0) > 0 
-                        then least(100, round(coalesce(sa.attempted, 0) * 100.0 / esl.question_count))::int 
+                        when coalesce(eqc.available_count, 0) > 0 
+                        then least(100, round(coalesce(sa.attempted, 0) * 100.0 / eqc.available_count))::int 
                         else 0 
                     end
                 )
             ) as subjects_array,
-            sum(coalesce(esl.question_count, 0))::int as total_available,
+            sum(coalesce(eqc.available_count, 0))::int as total_available,
             sum(coalesce(sa.attempted, 0))::int as overall_attempted,
             sum(coalesce(sa.correct, 0))::int as overall_correct
-        from exam_subjects_list esl
-        left join subject_activity sa on esl.id = sa.subject_id
+        from exam_subjects es
+        left join exam_question_counts eqc on es.exam_id = eqc.exam_id and es.subject_id = eqc.subject_id
+        left join subject_activity sa on es.exam_id = sa.exam_id and es.subject_id = sa.subject_id
+        group by es.exam_id
     )
-    select jsonb_build_object(
-        v_primary_exam, jsonb_build_object(
-            'overall_attempted', coalesce(overall_attempted, 0),
+    -- Build root JSON map for exams
+    select jsonb_object_agg(
+        ea.exam_id,
+        jsonb_build_object(
+            'overall_attempted', coalesce(ea.overall_attempted, 0),
             'overall_accuracy', case 
-                when coalesce(overall_attempted, 0) > 0 
-                then round(coalesce(overall_correct, 0) * 100.0 / nullif(overall_attempted, 0))::int 
+                when coalesce(ea.overall_attempted, 0) > 0 
+                then round(coalesce(ea.overall_correct, 0) * 100.0 / nullif(ea.overall_attempted, 0))::int 
                 else 0 
             end,
-            'total_available', coalesce(total_available, 0),
-            'subjects', coalesce(subjects_array, '[]'::jsonb)
+            'total_available', coalesce(ea.total_available, 0),
+            'subjects', coalesce(ea.subjects_array, '[]'::jsonb)
         )
-    ) into final_json
-    from subject_agg;
+    ) into v_final_stats
+    from exam_agg ea;
 
-    return coalesce(final_json, '{}'::jsonb);
+    return coalesce(v_final_stats, '{}'::jsonb);
 end;
 $$;
 
@@ -246,6 +282,30 @@ begin
         from public.user_question_activity uqa
         where uqa.user_id = p_user_id and uqa.user_version_number = p_version_number
     ),
+    -- Gather all unique subjects (including universal ones) for any active goal
+    user_enrolled_subjects as (
+        select distinct s.id
+        from public.user_goals ug
+        cross join jsonb_array_elements_text(ug.target_exams) as te(exam_id)
+        join public.exams_subjects es on lower(es.exams_id) = lower(te.exam_id)
+        join public.subjects s on es.subject_id = s.id
+        left join public.branch_subjects bs on bs.subject_id = s.id
+        where ug.user_id = p_user_id 
+          and ug.is_active = true
+          and (
+              s.is_universal = true
+              or bs.branch_id is null 
+              or lower(bs.branch_id) = lower(ug.branch_id)
+          )
+    ),
+    total_available_by_type as (
+        select 
+            q.question_type as q_type,
+            count(*)::int as total_available
+        from public.questions q
+        join user_enrolled_subjects ues on q.subject_id = ues.id
+        group by q.question_type
+    ),
     type_counts as (
         select
             q.question_type as q_type,
@@ -259,12 +319,14 @@ begin
     type_agg as (
         select coalesce(jsonb_agg(
             jsonb_build_object(
-                'type', q_type,
-                'solved', solved,
-                'accuracy', accuracy
+                'type', t.q_type,
+                'solved', coalesce(c.solved, 0),
+                'total_available', t.total_available,
+                'accuracy', coalesce(c.accuracy, 0)
             )
         ), '[]'::jsonb) as qt
-        from type_counts
+        from total_available_by_type t
+        left join type_counts c on t.q_type = c.q_type
     )
     select jsonb_build_object(
         'total_unique_solved', coalesce(o.total_unique_solved, 0),
@@ -277,7 +339,6 @@ begin
     return coalesce(v_global_stats, '{}'::jsonb);
 end;
 $$;
-
 
 -- RECENT HISTORY HELPER
 create or replace function internal_calc_recent_history(p_user_id uuid, p_version_number int)
@@ -341,18 +402,28 @@ declare
     v_days_left_completion int;
     v_daily_target int;
     v_primary_exam text;
+    v_branch_id text;
     
     v_final_json jsonb;
 begin
-    -- Look up base fields
+    -- Look up base user profile
     select version_number, total_xp, college, "targetYear", joined_at
     into v_user_data
     from public.users
     where id = p_user_id;
 
-		if not found then
-    	raise exception 'User not found.';
-		end if;
+    if not found then
+        raise exception 'User not found.';
+    end if;
+
+    -- Extract active goal details (Primary Exam + Branch)
+    select 
+        lower(branch_id), 
+        lower(target_exams->>0)
+    into v_branch_id, v_primary_exam
+    from public.user_goals
+    where user_id = p_user_id and is_active = true
+    limit 1;
 
     -- Fallback targetYear if null or invalid
     v_target_year := coalesce(v_user_data."targetYear", extract(year from now())::int + 1);
@@ -364,37 +435,52 @@ begin
     v_global_stats := internal_calc_global_stats(p_user_id, v_user_data.version_number);
     v_recent_history := internal_calc_recent_history(p_user_id, v_user_data.version_number);
 
-    -- Calculate Dashboard Target Operations (IST Offset)
+		-- Calculate Dashboard Target Operations (IST Offset)
     v_today_ist := (now() at time zone 'Asia/Kolkata')::date;
     v_exam_date := make_date(v_target_year, 2, 7);
     v_completion_date := make_date(v_target_year, 1, 15);
 
-    -- Get today's unique attempts in IST
-    select count(distinct question_id)::int
+    -- Gather all valid subjects across ALL active target exams
+    with active_goal_subjects as (
+        select distinct s.id
+        from public.user_goals ug
+        cross join jsonb_array_elements_text(ug.target_exams) as te(exam_id)
+        join public.exams_subjects es on lower(es.exams_id) = lower(te.exam_id)
+        join public.subjects s on es.subject_id = s.id
+        left join public.branch_subjects bs on bs.subject_id = s.id
+        where ug.user_id = p_user_id
+          and ug.is_active = true
+          and (
+              s.is_universal = true
+              or bs.branch_id is null 
+              or lower(bs.branch_id) = coalesce(v_branch_id, lower(bs.branch_id))
+          )
+    )
+    -- Count ALL unique attempts today for ANY subject in active goal pool
+    select count(distinct uqa.question_id)::int
     into v_today_attempts
-    from public.user_question_activity
-    where user_id = p_user_id
-      and user_version_number = v_user_data.version_number
-      and (attempted_at at time zone 'Asia/Kolkata')::date = v_today_ist;
+    from public.user_question_activity uqa
+    join public.questions q on uqa.question_id = q.id
+    join active_goal_subjects ags on q.subject_id = ags.id
+    where uqa.user_id = p_user_id
+      and uqa.user_version_number = v_user_data.version_number
+      and (uqa.attempted_at at time zone 'Asia/Kolkata')::date = v_today_ist;
 
-    -- Extract totals to calculate pacing
-    v_total_solved := coalesce((v_global_stats->>'total_unique_solved')::int, 0);
-    v_primary_exam := (select jsonb_object_keys(v_exam_stats) limit 1);
-    
-    if v_primary_exam is not null then
-        v_total_available := coalesce((v_exam_stats->v_primary_exam->>'total_available')::int, 0);
-    else
-        v_total_available := 0;
-    end if;
-    
+    -- Calculate COMBINED total available & total solved across ALL active target exams
+    select 
+        coalesce(sum((exam_data.value->>'total_available')::int), 0),
+        coalesce(sum((exam_data.value->>'overall_attempted')::int), 0)
+    into v_total_available, v_total_solved
+    from jsonb_each(v_exam_stats) as exam_data;
+
+    -- Calculate Pacing against combined pool
     v_remaining_questions := greatest(0, v_total_available - v_total_solved);
     v_days_left_completion := v_completion_date - v_today_ist;
 
-    -- Safe target pacing computation
     if v_days_left_completion > 0 then
         v_daily_target := ceil(v_remaining_questions::numeric / v_days_left_completion)::int;
     else
-        v_daily_target := v_remaining_questions; -- Past target date: finish all remaining
+        v_daily_target := v_remaining_questions;
     end if;
 
     -- Final JSON Assembly
