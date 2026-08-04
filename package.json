@@ -25,7 +25,7 @@
         "db:push:prod": "supabase link --project-ref zewzixicpoxirmouyeje && supabase db push"
     },
     "lint-staged": {
-        "*.{js,ts,jsx,tsx,json,css,md}": "biome check --staged --write"
+        "*.{js,ts,jsx,tsx,json,css,md}": "biome check --write"
     },
     "dependencies": {
         "@base-ui/react": "^1.2.0",
