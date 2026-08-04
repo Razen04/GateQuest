@@ -30,6 +30,9 @@ begin
 	-- User Incorrect Queue
 	delete from public.user_incorrect_queue where user_id = target_user_id;
 
+	-- Bookmarks (Migrated from users.bookmark_questions)
+  delete from public.question_bookmarks where user_id = target_user_id;
+
 	-- Push Subscriptions
 	delete from public.push_subscriptions where user_id = target_user_id;
 
