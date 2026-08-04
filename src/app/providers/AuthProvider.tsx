@@ -39,7 +39,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 return;
             }
 
-            if (userIdRef.current === supaUser.id && user) {
+            if (userIdRef.current === supaUser.id) {
                 if (isMounted) setLoading(false);
                 return;
             }
@@ -137,7 +137,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             isMounted = false;
             listener?.subscription.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleLogin = async (credential: string) => {
