@@ -7,10 +7,11 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "lint": "eslint .",
-        "lint:fix": "eslint . --fix",
+        "lint": "biome check .",
+        "lint:fix": "biome check --write .",
+        "lint:staged": "biome check --staged --write",
+        "format": "biome format --write .",
         "preview": "vite preview",
-        "format": "prettier --write .",
         "format:check": "prettier --check .",
         "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
         "test": "supabase test db && vitest",
@@ -24,7 +25,7 @@
         "db:push:prod": "supabase link --project-ref zewzixicpoxirmouyeje && supabase db push"
     },
     "lint-staged": {
-        "*.{js,ts,jsx,tsx,json,css,md}": "prettier --write"
+        "*.{js,ts,jsx,tsx,json,css,md}": "biome check --staged --write"
     },
     "dependencies": {
         "@base-ui/react": "^1.2.0",
@@ -66,6 +67,7 @@
         "tailwind-merge": "^3.4.0"
     },
     "devDependencies": {
+        "@biomejs/biome": "2.5.6",
         "@eslint/js": "^9.25.0",
         "@tailwindcss/typography": "^0.5.19",
         "@testing-library/dom": "^10.4.1",
@@ -76,17 +78,12 @@
         "@types/react": "^19.2.7",
         "@types/react-dom": "^19.2.3",
         "@types/react-katex": "^3.0.4",
-        "@typescript-eslint/eslint-plugin": "^8.40.0",
-        "@typescript-eslint/parser": "^8.40.0",
         "@vitejs/plugin-react": "^4.4.1",
         "autoprefixer": "^10.4.21",
-        "eslint": "^9.25.0",
-        "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
         "globals": "^16.0.0",
         "jsdom": "^27.2.0",
         "postcss": "^8.5.6",
-        "prettier": "^3.6.2",
         "prettier-plugin-tailwindcss": "^0.6.14",
         "supabase": "^2.40.7",
         "tailwindcss": "^4.1.12",

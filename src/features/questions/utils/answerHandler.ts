@@ -1,8 +1,8 @@
 import { toast } from 'sonner';
-import { isNumericalQuestion } from './questionUtils.js';
-import { recordAttemptLocally } from '@/shared/utils/helper';
 import type { AppUser } from '@/shared/types/AppUser';
 import type { NumericalAnswerSpec, Question } from '@/shared/types/storage';
+import { recordAttemptLocally } from '@/shared/utils/helper';
+import { isNumericalQuestion } from './questionUtils.js';
 
 type submitAndRecordAnswerProp = {
     currentQuestion: Question;
@@ -31,10 +31,15 @@ export const submitAndRecordAnswer = async ({
 
     let wasAttempted;
     if (selectedOptionIndices) {
-        wasAttempted = selectedOptionIndices.length > 0 || isNumericalQuestion(currentQuestion);
+        wasAttempted =
+            selectedOptionIndices.length > 0 ||
+            isNumericalQuestion(currentQuestion);
     }
 
-    const isNumericalAnswerCorrect = (userAnswer: number, spec: NumericalAnswerSpec): boolean => {
+    const isNumericalAnswerCorrect = (
+        userAnswer: number,
+        spec: NumericalAnswerSpec
+    ): boolean => {
         switch (spec.type) {
             case 'exact':
                 return userAnswer === spec.value;
@@ -56,7 +61,10 @@ export const submitAndRecordAnswer = async ({
         if (isNumericalQuestion(currentQuestion)) {
             const answerToCheck = numericalAnswer;
             if (answerToCheck !== null)
-                isCorrect = isNumericalAnswerCorrect(answerToCheck, currentQuestion.correct_answer);
+                isCorrect = isNumericalAnswerCorrect(
+                    answerToCheck,
+                    currentQuestion.correct_answer
+                );
         } else {
             // This logic works for both MCQ and MSQ.
             function arraysMatch(a: number[], b: number[]) {
@@ -68,7 +76,10 @@ export const submitAndRecordAnswer = async ({
                 return sortedA.every((val, index) => val === sortedB[index]);
             }
 
-            isCorrect = arraysMatch(selectedOptionIndices!, currentQuestion.correct_answer);
+            isCorrect = arraysMatch(
+                selectedOptionIndices!,
+                currentQuestion.correct_answer
+            );
         }
     }
     // If not attempted, `isCorrect` remains null.
@@ -94,8 +105,7 @@ export const submitAndRecordAnswer = async ({
 
                 // NEW: Broadcast an event telling the app the attempt is saved
                 window.dispatchEvent(new Event('STATS_UPDATED'));
-            } catch (error) {
-                console.error('Failed to record attempt:', error);
+            } catch (_error) {
                 toast.error('Could not save your attempt.');
             }
         }

@@ -1,25 +1,32 @@
+import {
+    Check,
+    Dot,
+    Eye,
+    Flag,
+    ShareFat,
+    Trash,
+    Warning,
+} from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/shared/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/shared/components/ui/dialog';
+import { Textarea } from '@/shared/components/ui/textarea';
+import type { Question } from '@/shared/types/storage.js';
+import useBookmark from '../../hooks/useBookmark';
 import {
     getDifficultyClassNames,
     getQuestionTypeText,
     isMultipleSelection,
 } from '../../utils/questionUtils.js';
-import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
-import { Warning, ShareFat, Dot, Eye, Flag, Trash, Check } from '@phosphor-icons/react';
-import type { Question } from '@/shared/types/storage.js';
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
-import useBookmark from '../../hooks/useBookmark';
+import QuestionTimer from './QuestionTimer.js';
 
 type TimerProps = {
     minutes: string;
@@ -42,7 +49,11 @@ type QuestionHeaderProps = {
 };
 
 const Divider = () => (
-    <Dot size={14} weight="fill" className="text-slate-300 dark:text-slate-600" />
+    <Dot
+        size={14}
+        weight="fill"
+        className="text-slate-300 dark:text-slate-600"
+    />
 );
 
 const QuestionHeader = ({
@@ -57,8 +68,13 @@ const QuestionHeader = ({
     isAnswered,
     userCount,
 }: QuestionHeaderProps) => {
-    const { bookmarksMap, fetchBookmarks, toggleBookmark, updateBookmarkNote, loading } =
-        useBookmark();
+    const {
+        bookmarksMap,
+        fetchBookmarks,
+        toggleBookmark,
+        updateBookmarkNote,
+        loading,
+    } = useBookmark();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [noteText, setNoteText] = useState('');
@@ -71,7 +87,7 @@ const QuestionHeader = ({
         if (subjectSlug) {
             fetchBookmarks(subjectSlug);
         }
-    }, [subjectSlug, question.id, fetchBookmarks]);
+    }, [subjectSlug, fetchBookmarks]);
 
     // Keep textarea state in sync with existing bookmark note when modal opens
     useEffect(() => {
@@ -102,8 +118,7 @@ const QuestionHeader = ({
 
             window.dispatchEvent(new Event('BOOKMARKS_UPDATED'));
             setIsDialogOpen(false);
-        } catch (err) {
-            console.error('Failed to save bookmark:', err);
+        } catch (_err) {
             toast.error('Failed to save bookmark. Please try again.');
         }
     };
@@ -121,8 +136,7 @@ const QuestionHeader = ({
                 toast.success('Bookmark removed');
             }
             setIsDialogOpen(false);
-        } catch (err) {
-            console.error('Failed to remove bookmark:', err);
+        } catch (_err) {
             toast.error('Failed to remove bookmark. Please try again.');
         }
     };
@@ -211,7 +225,7 @@ const QuestionHeader = ({
 
                     <span
                         className={`px-2.5 py-1 text-xs font-semibold ${getDifficultyClassNames(
-                            question.difficulty,
+                            question.difficulty
                         )}`}
                     >
                         {getDifficultyDisplayText()}
@@ -231,7 +245,9 @@ const QuestionHeader = ({
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Eye size={14} />
 
-                    <span className="flex items-center gap-1">{userCount ?? 1} studying now</span>
+                    <span className="flex items-center gap-1">
+                        {userCount ?? 1} studying now
+                    </span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -258,7 +274,9 @@ const QuestionHeader = ({
                 <DialogContent className="sm:max-w-[425px] rounded-none">
                     <DialogHeader>
                         <DialogTitle>
-                            {isBookmarked ? 'Edit Bookmark Note' : 'Add Bookmark'}
+                            {isBookmarked
+                                ? 'Edit Bookmark Note'
+                                : 'Add Bookmark'}
                         </DialogTitle>
                     </DialogHeader>
 

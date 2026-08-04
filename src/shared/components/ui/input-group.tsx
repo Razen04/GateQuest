@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from '@/shared/utils/cn';
 import { Button } from './button';
-import { Textarea } from './textarea';
 import { Input } from './input';
+import { Textarea } from './textarea';
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
     return (
@@ -26,7 +26,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
                 // Error state.
                 'has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-destructive/20 dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40',
 
-                className,
+                className
             )}
             {...props}
         />
@@ -51,7 +51,7 @@ const inputGroupAddonVariants = cva(
         defaultVariants: {
             align: 'inline-start',
         },
-    },
+    }
 );
 
 function InputGroupAddon({
@@ -76,19 +76,23 @@ function InputGroupAddon({
     );
 }
 
-const inputGroupButtonVariants = cva('flex items-center gap-2 text-sm shadow-none', {
-    variants: {
-        size: {
-            xs: "h-6 gap-1 rounded-[calc(var(--radius)-5px)] px-2 has-[>svg]:px-2 [&>svg:not([class*='size-'])]:size-3.5",
-            sm: 'h-8 gap-1.5 rounded-md px-2.5 has-[>svg]:px-2.5',
-            'icon-xs': 'size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0',
-            'icon-sm': 'size-8 p-0 has-[>svg]:p-0',
+const inputGroupButtonVariants = cva(
+    'flex items-center gap-2 text-sm shadow-none',
+    {
+        variants: {
+            size: {
+                xs: "h-6 gap-1 rounded-[calc(var(--radius)-5px)] px-2 has-[>svg]:px-2 [&>svg:not([class*='size-'])]:size-3.5",
+                sm: 'h-8 gap-1.5 rounded-md px-2.5 has-[>svg]:px-2.5',
+                'icon-xs':
+                    'size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0',
+                'icon-sm': 'size-8 p-0 has-[>svg]:p-0',
+            },
         },
-    },
-    defaultVariants: {
-        size: 'xs',
-    },
-});
+        defaultVariants: {
+            size: 'xs',
+        },
+    }
+);
 
 function InputGroupButton({
     className,
@@ -114,33 +118,39 @@ function InputGroupText({ className, ...props }: React.ComponentProps<'span'>) {
         <span
             className={cn(
                 "flex items-center gap-2 text-sm text-muted-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
-                className,
+                className
             )}
             {...props}
         />
     );
 }
 
-function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>) {
+function InputGroupInput({
+    className,
+    ...props
+}: React.ComponentProps<'input'>) {
     return (
         <Input
             data-slot="input-group-control"
             className={cn(
                 'flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent',
-                className,
+                className
             )}
             {...props}
         />
     );
 }
 
-function InputGroupTextarea({ className, ...props }: React.ComponentProps<'textarea'>) {
+function InputGroupTextarea({
+    className,
+    ...props
+}: React.ComponentProps<'textarea'>) {
     return (
         <Textarea
             data-slot="input-group-control"
             className={cn(
                 'flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none focus-visible:ring-0 dark:bg-transparent',
-                className,
+                className
             )}
             {...props}
         />
@@ -151,7 +161,7 @@ export {
     InputGroup,
     InputGroupAddon,
     InputGroupButton,
-    InputGroupText,
     InputGroupInput,
+    InputGroupText,
     InputGroupTextarea,
 };

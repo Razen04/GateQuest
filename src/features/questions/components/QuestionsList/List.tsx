@@ -1,11 +1,14 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { getDifficultyClassNames, getQuestionDisplayText } from '../../utils/questionUtils.ts';
-import Pagination from './Pagination.tsx';
-import MathRenderer from '../Renderers/MathRenderer.tsx';
-import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
-import type { Question } from '@/shared/types/storage.ts';
+import type React from 'react';
 import ModernLoader from '@/shared/components/ModernLoader.tsx';
+import type { Question } from '@/shared/types/storage.ts';
+import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
+import {
+    getDifficultyClassNames,
+    getQuestionDisplayText,
+} from '../../utils/questionUtils.ts';
+import MathRenderer from '../Renderers/MathRenderer.tsx';
+import Pagination from './Pagination.tsx';
 
 type ListProps = {
     loading: boolean;
@@ -50,7 +53,7 @@ const List = ({
                     <div className="flex justify-between items-center text-xs">
                         <span
                             className={`font-bold md:font-normal px-2 py-1 backdrop-blur-md border border-white/20 ${getDifficultyClassNames(
-                                question.difficulty,
+                                question.difficulty
                             )}`}
                         >
                             {question.difficulty}

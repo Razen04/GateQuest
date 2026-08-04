@@ -1,10 +1,15 @@
+import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { useWebPush } from '../hooks/useWebPush';
-import { useEffect } from 'react';
 
 export const WebNotificationToggle = () => {
-    const { status, isProcessing, enableNotifications, disableNotifications, dismissWidget } =
-        useWebPush();
+    const {
+        status,
+        isProcessing,
+        enableNotifications,
+        disableNotifications,
+        dismissWidget,
+    } = useWebPush();
 
     useEffect(() => {
         if (status === 'subscribed') {
@@ -16,7 +21,11 @@ export const WebNotificationToggle = () => {
         }
     }, [status, dismissWidget]);
 
-    if (status === 'loading' || status === 'dismissed' || status === 'unsupported') {
+    if (
+        status === 'loading' ||
+        status === 'dismissed' ||
+        status === 'unsupported'
+    ) {
         return null; // Keep dashboard completely clean if loading, dismissed, or impossible
     }
 
@@ -35,8 +44,8 @@ export const WebNotificationToggle = () => {
                 </p>
                 {status === 'denied' && (
                     <p className="text-[11px] font-medium text-red-500 mt-1">
-                        ⚠️ Alerts are blocked. Reset permission settings in your browser URL bar to
-                        resume.
+                        ⚠️ Alerts are blocked. Reset permission settings in your
+                        browser URL bar to resume.
                     </p>
                 )}
             </div>
@@ -44,9 +53,12 @@ export const WebNotificationToggle = () => {
             <div className="flex items-center gap-2 self-end sm:self-center">
                 {status === 'ios-tab' ? (
                     <div className="bg-amber-50 dark:bg-amber-950/30 p-2 text-[11px] text-amber-700 dark:text-amber-400 border border-amber-200/40">
-                        📲 Tap <strong className="font-semibold">Share</strong> then{' '}
-                        <strong className="font-semibold">Add to Home Screen</strong> to unlock
-                        streak alerts.
+                        📲 Tap <strong className="font-semibold">Share</strong>{' '}
+                        then{' '}
+                        <strong className="font-semibold">
+                            Add to Home Screen
+                        </strong>{' '}
+                        to unlock streak alerts.
                     </div>
                 ) : status === 'subscribed' ? (
                     <Button
@@ -75,7 +87,9 @@ export const WebNotificationToggle = () => {
                             disabled={status === 'denied' || isProcessing}
                             className="text-xs font-medium rounded-none"
                         >
-                            {isProcessing ? 'Connecting...' : 'Enable Notifications'}
+                            {isProcessing
+                                ? 'Connecting...'
+                                : 'Enable Notifications'}
                         </Button>
                     </>
                 )}

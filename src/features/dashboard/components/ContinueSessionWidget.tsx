@@ -1,17 +1,18 @@
 import {
+    ArrowRightIcon,
     BookmarkIcon,
-    TargetIcon,
-    SlidersIcon,
+    BookOpenIcon,
+    ChartBarIcon,
+    ClockIcon,
     EyeIcon,
     HeartIcon,
-    XIcon,
-    ArrowRightIcon,
-    ClockIcon,
-    ChartBarIcon,
-    BookOpenIcon,
     HighlighterIcon,
+    SlidersIcon,
+    TargetIcon,
+    XIcon,
 } from '@phosphor-icons/react';
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const ContinueSessionWidget = () => {
@@ -19,8 +20,12 @@ export const ContinueSessionWidget = () => {
     const [sessionUrl, setSessionUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        const lastSessionUrl = localStorage.getItem('gatequest_last_active_session');
-        const lastTimestamp = localStorage.getItem('gatequest_last_active_timestamp');
+        const lastSessionUrl = localStorage.getItem(
+            'gatequest_last_active_session'
+        );
+        const lastTimestamp = localStorage.getItem(
+            'gatequest_last_active_timestamp'
+        );
 
         if (lastSessionUrl && lastTimestamp) {
             const threeDays = 3 * 24 * 60 * 60 * 1000;
@@ -59,7 +64,8 @@ export const ContinueSessionWidget = () => {
     if (segments[0] === 'practice') {
         iconColorClass = 'text-blue-600 dark:text-blue-400';
         iconBgClass = 'bg-blue-50 dark:bg-blue-500/10';
-        hoverBorderClass = 'hover:border-blue-200 dark:hover:border-blue-900/50';
+        hoverBorderClass =
+            'hover:border-blue-200 dark:hover:border-blue-900/50';
         badgeClass =
             'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/50';
 
@@ -71,17 +77,20 @@ export const ContinueSessionWidget = () => {
             Icon = BookmarkIcon;
         } else if (segments[1] && segments[2]) {
             cardTitle = `${formatSlug(segments[1])} • Active Session`;
-            cardSubtitle = 'You disappeared mid-session. The questions took it personally.';
+            cardSubtitle =
+                'You disappeared mid-session. The questions took it personally.';
             badgeText = 'Solving PYQ';
             Icon = TargetIcon;
         } else if (segments[1]) {
             cardTitle = `${formatSlug(segments[1])} Pool`;
-            cardSubtitle = 'Fresh questions waiting to test your confidence levels.';
+            cardSubtitle =
+                'Fresh questions waiting to test your confidence levels.';
             badgeText = 'Question List';
             Icon = BookOpenIcon;
         } else {
             cardTitle = 'Practice Arena';
-            cardSubtitle = 'Welcome back soldier, today we fight silly little MCQs again.';
+            cardSubtitle =
+                'Welcome back soldier, today we fight silly little MCQs again.';
             badgeText = 'Practice Hub';
             Icon = BookOpenIcon;
         }
@@ -95,7 +104,8 @@ export const ContinueSessionWidget = () => {
 
         iconColorClass = 'text-amber-600 dark:text-amber-400';
         iconBgClass = 'bg-amber-50 dark:bg-amber-500/10';
-        hoverBorderClass = 'hover:border-amber-200 dark:hover:border-amber-900/50';
+        hoverBorderClass =
+            'hover:border-amber-200 dark:hover:border-amber-900/50';
         badgeClass =
             'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/50';
 
@@ -111,7 +121,8 @@ export const ContinueSessionWidget = () => {
             Icon = ListOfItemsIcon(HighlighterIcon);
         } else {
             cardTitle = 'Smart Revision Center';
-            cardSubtitle = 'Because your brain deletes information for fun apparently.';
+            cardSubtitle =
+                'Because your brain deletes information for fun apparently.';
             badgeText = 'Revision Hub';
             Icon = HighlighterIcon;
         }
@@ -126,23 +137,27 @@ export const ContinueSessionWidget = () => {
     ) {
         iconColorClass = 'text-rose-600 dark:text-rose-400';
         iconBgClass = 'bg-rose-50 dark:bg-rose-500/10';
-        hoverBorderClass = 'hover:border-rose-200 dark:hover:border-rose-900/50';
+        hoverBorderClass =
+            'hover:border-rose-200 dark:hover:border-rose-900/50';
         badgeClass =
             'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-900/50';
 
         if (segments[0] === 'topic-test-generate') {
             cardTitle = 'Configure Mock Paper';
-            cardSubtitle = 'Customizing the exact exam that may emotionally damage you.';
+            cardSubtitle =
+                'Customizing the exact exam that may emotionally damage you.';
             badgeText = 'Test Setup';
             Icon = SlidersIcon;
         } else if (segments[0] === 'topic-test-result') {
             cardTitle = 'Review Performance Analytics';
-            cardSubtitle = 'Some numbers went up. Hopefully the important ones.';
+            cardSubtitle =
+                'Some numbers went up. Hopefully the important ones.';
             badgeText = 'Score Card';
             Icon = ChartBarIcon;
         } else if (segments[0] === 'topic-test-review') {
             cardTitle = 'Analyzing Test Solutions';
-            cardSubtitle = 'Let’s calmly inspect where things became unfortunate.';
+            cardSubtitle =
+                'Let’s calmly inspect where things became unfortunate.';
             badgeText = 'Solution Audit';
             Icon = EyeIcon;
         } else if (segments[2] === 'attempt') {
@@ -155,12 +170,14 @@ export const ContinueSessionWidget = () => {
                 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-900/50 animate-pulse font-bold';
         } else if (segments[1]) {
             cardTitle = 'Topic Test Lobby';
-            cardSubtitle = 'One last peaceful screen before the academic violence begins.';
+            cardSubtitle =
+                'One last peaceful screen before the academic violence begins.';
             badgeText = 'Exam Gate';
             Icon = ClockIcon;
         } else {
             cardTitle = 'Topic Test Center';
-            cardSubtitle = 'Mocks, panic attacks, comeback arcs — everything lives here.';
+            cardSubtitle =
+                'Mocks, panic attacks, comeback arcs — everything lives here.';
             badgeText = 'Test Hub';
             Icon = ClockIcon;
         }
@@ -169,13 +186,15 @@ export const ContinueSessionWidget = () => {
     // Donate Route
     else if (segments[0] === 'donate') {
         cardTitle = 'Support GATEQuest';
-        cardSubtitle = 'Aye, thanks for even thinking about donating. Means a lot genuinely 🫶';
+        cardSubtitle =
+            'Aye, thanks for even thinking about donating. Means a lot genuinely 🫶';
         badgeText = 'Contribution';
         Icon = HeartIcon;
 
         iconColorClass = 'text-emerald-600 dark:text-emerald-400';
         iconBgClass = 'bg-emerald-50 dark:bg-emerald-500/10';
-        hoverBorderClass = 'hover:border-emerald-200 dark:hover:border-emerald-900/50';
+        hoverBorderClass =
+            'hover:border-emerald-200 dark:hover:border-emerald-900/50';
 
         badgeClass =
             'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-900/50';

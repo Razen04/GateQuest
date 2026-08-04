@@ -15,7 +15,10 @@ export const doesUsernameExists = async (username: string) => {
     return !!data;
 };
 
-export const handleUsernameSubmittion = async (username: string, user: AppUser) => {
+export const handleUsernameSubmittion = async (
+    username: string,
+    user: AppUser
+) => {
     if (!user.id) return;
 
     const { error } = await supabase

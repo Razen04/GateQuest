@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import useAuth from '@/shared/hooks/useAuth';
+import { Button } from '@/shared/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -9,8 +10,11 @@ import {
     DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
-import { Button } from '@/shared/components/ui/button';
-import { doesUsernameExists, handleUsernameSubmittion } from './api/usernameCheck';
+import useAuth from '@/shared/hooks/useAuth';
+import {
+    doesUsernameExists,
+    handleUsernameSubmittion,
+} from './api/usernameCheck';
 import { RESERVED_WORDS } from './data/reservedWords';
 
 export function UsernameModal() {
@@ -33,7 +37,9 @@ export function UsernameModal() {
 
             const isValidFormat = /^[a-z0-9_]{3,20}$/.test(username);
             if (!isValidFormat) {
-                setError('3-20 characters. Lowercase, numbers, and underscores only.');
+                setError(
+                    '3-20 characters. Lowercase, numbers, and underscores only.'
+                );
                 setIsChecking(false);
                 return;
             }
@@ -82,7 +88,10 @@ export function UsernameModal() {
             profile.username = username;
             localStorage.setItem('gate_user_profile', JSON.stringify(profile));
         } else {
-            localStorage.setItem('gate_user_profile', JSON.stringify(updatedUser));
+            localStorage.setItem(
+                'gate_user_profile',
+                JSON.stringify(updatedUser)
+            );
         }
 
         setUser(updatedUser);
@@ -98,32 +107,45 @@ export function UsernameModal() {
                 <DialogHeader>
                     <DialogTitle>Claim your Username</DialogTitle>
                     <DialogDescription>
-                        This will be your unique identity on GATEQuest. Choose wisely, you can't
-                        change it later!
+                        This will be your unique identity on GATEQuest. Choose
+                        wisely, you can't change it later!
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-4">
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col gap-4 py-4"
+                >
                     <div className="flex flex-col gap-2">
                         <div className="relative flex items-center">
-                            <span className="absolute left-3 text-slate-400">@</span>
+                            <span className="absolute left-3 text-slate-400">
+                                @
+                            </span>
                             <Input
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                                onChange={(e) =>
+                                    setUsername(e.target.value.toLowerCase())
+                                }
                                 placeholder="razen"
                                 className={`pl-8 ${error ? 'border-red-500' : ''}`}
                                 maxLength={20}
                             />
                         </div>
-                        {error && <p className="text-xs text-red-500">{error}</p>}
+                        {error && (
+                            <p className="text-xs text-red-500">{error}</p>
+                        )}
                         {!error && username && !isChecking && (
-                            <p className="text-xs text-emerald-500">Username is available!</p>
+                            <p className="text-xs text-emerald-500">
+                                Username is available!
+                            </p>
                         )}
                     </div>
 
                     <Button
                         type="submit"
-                        disabled={!!error || isChecking || !username || isSubmitting}
+                        disabled={
+                            !!error || isChecking || !username || isSubmitting
+                        }
                     >
                         {isSubmitting ? 'Claiming...' : 'Claim Username'}
                     </Button>

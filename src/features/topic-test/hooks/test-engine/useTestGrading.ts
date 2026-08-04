@@ -1,6 +1,9 @@
-import { getTestSession, updateAttempts } from '@/features/topic-test/services/testSession';
-import type { Attempt } from '@/shared/types/storage';
 import { useCallback, useState } from 'react';
+import {
+    getTestSession,
+    updateAttempts,
+} from '@/features/topic-test/services/testSession';
+import type { Attempt } from '@/shared/types/storage';
 import { submitTestGrading } from '../../api/topicTest';
 
 const useTestGrading = () => {
@@ -23,12 +26,18 @@ const useTestGrading = () => {
             const remainingTime = testSession.session.remaining_time_seconds;
 
             const rpcCall = async () => {
-                const { data, error } = await submitTestGrading(testId, payload, remainingTime);
+                const { data, error } = await submitTestGrading(
+                    testId,
+                    payload,
+                    remainingTime
+                );
 
                 if (error) {
                     if (retryCount < maxRetries) {
                         retryCount++;
-                        await new Promise((res) => setTimeout(res, Math.pow(2, retryCount) * 1000));
+                        await new Promise((res) =>
+                            setTimeout(res, 2 ** retryCount * 1000)
+                        );
                         return rpcCall();
                     }
 
@@ -42,7 +51,13 @@ const useTestGrading = () => {
 
             const attempted = result.correct_count + result.incorrect_count;
 
-            await updateAttempts(testId, [], attempted, result.total_score, result.correct_count);
+            await updateAttempts(
+                testId,
+                [],
+                attempted,
+                result.total_score,
+                result.correct_count
+            );
             // Add broadcast to update the stats in Dashboard.
             window.dispatchEvent(new Event('STATS_UPDATED'));
 
@@ -51,9 +66,6 @@ const useTestGrading = () => {
                 correctCount: result.correct_count,
                 incorrectCount: result.incorrect_count,
             };
-        } catch (err) {
-            console.error('Submission error: ', err);
-            throw err;
         } finally {
             setIsSubmitting(false);
         }

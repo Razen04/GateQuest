@@ -5,14 +5,19 @@ export const getVerifiedDonation = async () => {
     const { data, error } = await supabase.rpc('get_verified_donations');
 
     if (error) {
-        console.error('Error loading donations:', error);
         throw error;
     }
 
     return data ?? [];
 };
 
-export const insertDonation = async ({ userId, amount, message, anonymous, utr }: newDonation) => {
+export const insertDonation = async ({
+    userId,
+    amount,
+    message,
+    anonymous,
+    utr,
+}: newDonation) => {
     const { data, error } = await supabase.from('donations').insert([
         {
             user_id: userId ?? null,
@@ -25,7 +30,6 @@ export const insertDonation = async ({ userId, amount, message, anonymous, utr }
     ]);
 
     if (error) {
-        console.error('Error adding donation:', error);
         throw error;
     }
 

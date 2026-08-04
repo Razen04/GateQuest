@@ -1,13 +1,16 @@
-import { BookOpen, Target, Fire, Lightning } from '@phosphor-icons/react';
-import type { ProfileData } from '../types/profile';
+import { BookOpen, Fire, Lightning, Target } from '@phosphor-icons/react';
 import { glassPanel, palette } from '../styles/profileTheme';
+import type { ProfileData } from '../types/profile';
 
 interface ProfileStatsGridProps {
     globalStats: ProfileData['global_stats'];
     streaks: ProfileData['streaks'];
 }
 
-export default function ProfileStatsGrid({ globalStats, streaks }: ProfileStatsGridProps) {
+export default function ProfileStatsGrid({
+    globalStats,
+    streaks,
+}: ProfileStatsGridProps) {
     const metrics = [
         {
             icon: <BookOpen size={17} weight="duotone" />,
@@ -43,7 +46,10 @@ export default function ProfileStatsGrid({ globalStats, streaks }: ProfileStatsG
         <div className={glassPanel}>
             <div className="divide-y divide-slate-900/5 dark:divide-white/10">
                 {metrics.map(({ icon, color, label, value, subtext }) => (
-                    <div key={label} className="flex items-center gap-3 px-5 py-4">
+                    <div
+                        key={label}
+                        className="flex items-center gap-3 px-5 py-4"
+                    >
                         <div
                             className="flex h-9 w-9 shrink-0 items-center justify-center"
                             style={{ backgroundColor: `${color}1A`, color }}

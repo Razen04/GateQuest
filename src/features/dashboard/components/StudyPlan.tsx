@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.ts';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import ModernLoader from '@/shared/components/ModernLoader';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import { useExamCountdown } from '../hooks/useExamCountdown';
 
 interface StudyPlanData {
@@ -21,7 +21,9 @@ const StudyPlan = () => {
         todayProgressPercent,
     }: StudyPlanData = useStudyPlan();
 
-    const { days, hours, minutes, seconds } = useExamCountdown('2027-02-08T09:00:00');
+    const { days, hours, minutes, seconds } = useExamCountdown(
+        '2027-02-08T09:00:00'
+    );
 
     if (loading) {
         return <ModernLoader />;

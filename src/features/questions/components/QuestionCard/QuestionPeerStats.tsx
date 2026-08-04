@@ -1,4 +1,4 @@
-import { SpinnerGap, ChartBar } from '@phosphor-icons/react';
+import { ChartBar, SpinnerGap } from '@phosphor-icons/react';
 import type { Database } from '@/shared/types/supabase.ts';
 import { formatTime } from '@/shared/utils/helper';
 
@@ -10,11 +10,18 @@ type QuestionPeerStatsType = {
     data: BenchmarkData | null | undefined;
 };
 
-const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) => {
+const QuestionPeerStats = ({
+    loading,
+    message,
+    data,
+}: QuestionPeerStatsType) => {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-6 text-gray-500 text-sm mb-2">
-                <SpinnerGap className="animate-spin mr-2 h-5 w-5" weight="bold" />
+                <SpinnerGap
+                    className="animate-spin mr-2 h-5 w-5"
+                    weight="bold"
+                />
                 Loading stats...
             </div>
         );
@@ -41,7 +48,8 @@ const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) =>
     const safeTotal = total_attempts || 0;
     const safeCorrect = correct_attempts || 0;
 
-    const correctPercent = safeTotal > 0 ? Math.round((safeCorrect / safeTotal) * 100) : 0;
+    const correctPercent =
+        safeTotal > 0 ? Math.round((safeCorrect / safeTotal) * 100) : 0;
 
     const wrongPercent = 100 - correctPercent;
 
@@ -49,7 +57,10 @@ const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) =>
         <div className="mt-6 mb-2 border border-gray-200 dark:border-gray-800 shadow-md">
             {/* Header */}
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 px-4 py-3">
-                <ChartBar className="h-5 w-5 text-indigo-500" weight="duotone" />
+                <ChartBar
+                    className="h-5 w-5 text-indigo-500"
+                    weight="duotone"
+                />
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                     Question Statistics
                 </h2>
@@ -60,8 +71,12 @@ const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) =>
                 {/* Progress Bar */}
                 <div>
                     <div className="flex justify-between text-xs font-medium mb-1">
-                        <span className="text-green-600">{correctPercent}% correct</span>
-                        <span className="text-red-600">{wrongPercent}% wrong</span>
+                        <span className="text-green-600">
+                            {correctPercent}% correct
+                        </span>
+                        <span className="text-red-600">
+                            {wrongPercent}% wrong
+                        </span>
                     </div>
                     <div className="relative w-full bg-gray-200 h-3 overflow-hidden">
                         <div
@@ -82,7 +97,9 @@ const QuestionPeerStats = ({ loading, message, data }: QuestionPeerStatsType) =>
                             Average Time Taken
                         </span>
                         <span className="font-medium text-gray-800 dark:text-gray-200">
-                            {avg_time_seconds ? `${formatTime(avg_time_seconds)}` : '-'}
+                            {avg_time_seconds
+                                ? `${formatTime(avg_time_seconds)}`
+                                : '-'}
                         </span>
                     </div>
                     <div className="flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-800">

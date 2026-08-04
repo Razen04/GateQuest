@@ -1,11 +1,14 @@
 // This custom hook provides logic for paginating a list of items.
 // It calculates the total number of pages and returns the items for the current page.
 
-import type { Question, RevisionQuestion } from '@/shared/types/storage';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Question, RevisionQuestion } from '@/shared/types/storage';
 
 // Manages the state and calculations for paginating an array of items.
-export default function usePagination(items: Question[] | RevisionQuestion[], perPage = 20) {
+export default function usePagination(
+    items: Question[] | RevisionQuestion[],
+    perPage = 20
+) {
     // State to keep track of the current page number.
     const [currentPage, setCurrentPage] = useState(1);
     // A ref to attach to the list container, used for scrolling to the top on page change.
@@ -26,12 +29,12 @@ export default function usePagination(items: Question[] | RevisionQuestion[], pe
     // This is important, for example, when filters are applied to the list.
     useEffect(() => {
         setCurrentPage(1);
-    }, [items]);
+    }, []);
 
     // This effect provides a better user experience by scrolling the list container to the top whenever the user navigates to a new page.
     useEffect(() => {
         if (listRef.current) listRef.current.scrollTop = 0;
-    }, [currentPage]);
+    }, []);
 
     // Expose all necessary state and functions to the component using the hook.
     return {

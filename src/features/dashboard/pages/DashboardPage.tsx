@@ -1,32 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
-    ChartLine,
-    Medal,
-    LightningIcon,
     ArrowClockwiseIcon,
+    ArrowRightIcon,
     CaretDownIcon,
+    ChartLine,
     Compass,
+    LightningIcon,
+    Medal,
 } from '@phosphor-icons/react';
-
-// Hooks & Utilities
-import useAuth from '@/shared/hooks/useAuth';
-import useStats from '../hooks/useStats';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { getUserProfile } from '@/shared/utils/helper';
-import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // UI Components
 import Login from '@/features/auth/components/Login';
-import ModernLoader from '@/shared/components/ModernLoader';
-import StudyPlan from '../components/StudyPlan';
-import StreakMap from '../components/StreakMap';
-import StatCard from '../components/StatCard';
-import SubjectStats from '../components/SubjectStats';
 import Branding from '@/shared/components/Branding';
-import { WebNotificationToggle } from '../components/WebNotificationToggle';
-import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import ModernLoader from '@/shared/components/ModernLoader';
 import { Button } from '@/shared/components/ui/button';
 import {
     DropdownMenu,
@@ -34,7 +21,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { ArrowRightIcon } from '@phosphor-icons/react';
+// Hooks & Utilities
+import useAuth from '@/shared/hooks/useAuth';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { getUserProfile } from '@/shared/utils/helper';
+import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import StatCard from '../components/StatCard';
+import StreakMap from '../components/StreakMap';
+import StudyPlan from '../components/StudyPlan';
+import SubjectStats from '../components/SubjectStats';
+import { WebNotificationToggle } from '../components/WebNotificationToggle';
+import useStats from '../hooks/useStats';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();
@@ -45,7 +43,7 @@ const Dashboard = () => {
 
     const activeExams = useMemo(
         () => (userGoal?.target_exams as string[]) || [],
-        [userGoal?.target_exams],
+        [userGoal?.target_exams]
     );
 
     const [selectedExam, setSelectedExam] = useState(activeExams[0] || '');
@@ -58,12 +56,15 @@ const Dashboard = () => {
 
     const currentSubjectStats = useMemo(
         () => stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [],
-        [stats?.subjectStatsMap, selectedExam],
+        [stats?.subjectStatsMap, selectedExam]
     );
 
     useEffect(() => {
         if (currentSubjectStats.length) {
-            localStorage.setItem('subjectStats', JSON.stringify(currentSubjectStats));
+            localStorage.setItem(
+                'subjectStats',
+                JSON.stringify(currentSubjectStats)
+            );
         }
     }, [currentSubjectStats]);
 
@@ -120,7 +121,8 @@ const Dashboard = () => {
                             <span className="font-semibold text-slate-900 dark:text-white">
                                 {userProgress}%
                             </span>{' '}
-                            of your target syllabus. Stay focused on your weak areas today.
+                            of your target syllabus. Stay focused on your weak
+                            areas today.
                         </p>
                     </div>
 
@@ -135,7 +137,10 @@ const Dashboard = () => {
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${userProgress}%` }}
-                                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                                    transition={{
+                                        duration: 1.2,
+                                        ease: 'easeOut',
+                                    }}
                                     className="h-full bg-blue-500"
                                 />
                             </div>
@@ -266,7 +271,9 @@ const Dashboard = () => {
                                     size="sm"
                                     className="h-8 gap-2 rounded-none border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800"
                                 >
-                                    <span className="text-blue-600 dark:text-blue-400">EXAM:</span>
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                        EXAM:
+                                    </span>
                                     <span>{selectedExam.toUpperCase()}</span>
                                     <CaretDownIcon size={12} weight="bold" />
                                 </Button>
@@ -308,7 +315,8 @@ const Dashboard = () => {
                         ) : (
                             <div className="p-12 text-center border border-dashed border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/30">
                                 <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
-                                    No activity data logged yet for {selectedExam.toUpperCase()}.
+                                    No activity data logged yet for{' '}
+                                    {selectedExam.toUpperCase()}.
                                 </p>
                             </div>
                         )}

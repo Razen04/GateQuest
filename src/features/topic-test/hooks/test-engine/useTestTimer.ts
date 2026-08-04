@@ -1,5 +1,5 @@
-import { formatTime } from '@/shared/utils/helper';
 import { useEffect, useRef, useState } from 'react';
+import { formatTime } from '@/shared/utils/helper';
 
 interface useTestTimerPropsType {
     initialSeconds: number;
@@ -21,7 +21,8 @@ const useTestTimer = ({ initialSeconds, onExpire }: useTestTimerPropsType) => {
 
     useEffect(() => {
         // Calculate target end time
-        if (!targetTimeRef.current) targetTimeRef.current = Date.now() + initialSeconds * 1000;
+        if (!targetTimeRef.current)
+            targetTimeRef.current = Date.now() + initialSeconds * 1000;
 
         const tick = () => {
             if (!targetTimeRef.current) return;
@@ -48,7 +49,7 @@ const useTestTimer = ({ initialSeconds, onExpire }: useTestTimerPropsType) => {
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, []); // initialSeconds does not change mid-test so we don't include it in dependency array
+    }, [initialSeconds]); // initialSeconds does not change mid-test so we don't include it in dependency array
 
     return {
         timeDisplay: formatTime(secondsRemaining),

@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Sidebar from './Sidebar/Sidebar.tsx';
-import Navbar from './Navbar.tsx';
-import { getUserProfile } from '@/shared/utils/helper';
-import { supabase } from '@/shared/utils/supabaseClient';
-import type { AppUser } from '@/shared/types/AppUser';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
+import type { AppUser } from '@/shared/types/AppUser';
+import { getUserProfile } from '@/shared/utils/helper';
+import { supabase } from '@/shared/utils/supabaseClient';
+import Navbar from './Navbar.tsx';
+import Sidebar from './Sidebar/Sidebar.tsx';
 import { UsernameModal } from './UsernameModal.tsx';
 
 type SyncOnUnloadProps = {
@@ -25,12 +25,12 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
 
             if (user?.id && buffer.length > 0) {
                 try {
-                    await supabase.from('user_question_activity').insert(buffer);
+                    await supabase
+                        .from('user_question_activity')
+                        .insert(buffer);
                     refresh();
                     localStorage.removeItem(LOCAL_KEY);
-                } catch (err) {
-                    console.error('Sync failed during unload: ', err);
-                }
+                } catch (_err) {}
             }
         };
 
@@ -51,7 +51,7 @@ const Layout = () => {
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
     const hideMobileNavigation = FOCUS_PATHS.some(
-        (path) => location.pathname.startsWith(path) || isPracticeCard,
+        (path) => location.pathname.startsWith(path) || isPracticeCard
     );
 
     return (

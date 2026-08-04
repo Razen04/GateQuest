@@ -1,17 +1,16 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-
-import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
-import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
-import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import useAnswerFlow from '@/features/questions/hooks/useAnswerFlow';
-import useAuth from '@/shared/hooks/useAuth';
+import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
+import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
 import useSettings from '@/features/settings/hooks/useSettings';
+import useAuth from '@/shared/hooks/useAuth';
+import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import type { Question } from '@/shared/types/storage';
-import { handleReport } from './quesitons';
 import { useQuestionState } from '../hooks/useQuestionState';
 import { useQuestionTimer } from '../hooks/useQuestionTimer';
+import { handleReport } from './quesitons';
 
 interface UseQuestionControllerProps {
     questions: Question[];
@@ -40,13 +39,17 @@ export const useQuestionController = ({
     const currentQuestion = useMemo(() => {
         if (!questions || questions.length === 0) return null;
         return (
-            questions.find((q: Question) => String(q.id) === String(currentIndex)) || questions[0]
+            questions.find(
+                (q: Question) => String(q.id) === String(currentIndex)
+            ) || questions[0]
         );
     }, [questions, currentIndex]);
 
     const safeQuestion = useMemo(
-        () => currentQuestion || ({ id: '0', options: [], correct_answer: [], subject: '' } as any),
-        [currentQuestion],
+        () =>
+            currentQuestion ||
+            ({ id: '0', options: [], correct_answer: [], subject: '' } as any),
+        [currentQuestion]
     );
 
     const {
@@ -117,16 +120,20 @@ export const useQuestionController = ({
 
     useEffect(() => {
         if (showAnswer && settings?.sound && result !== 'unattempted') {
-            if (result === 'correct') correctSoundRef.current?.play().catch((e) => console.warn(e));
+            if (result === 'correct')
+                correctSoundRef.current?.play().catch((_e) => {});
             else if (result === 'incorrect')
-                wrongSoundRef.current?.play().catch((e) => console.warn(e));
+                wrongSoundRef.current?.play().catch((_e) => {});
         }
     }, [showAnswer, result, settings?.sound]);
 
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportSubmitting, setReportSubmitting] = useState(false);
 
-    const handleReportSubmit = async (reportType: string, reportText: string) => {
+    const handleReportSubmit = async (
+        reportType: string,
+        reportText: string
+    ) => {
         setReportSubmitting(true);
 
         if (!user?.id) {
@@ -143,14 +150,14 @@ export const useQuestionController = ({
         try {
             const { error } = await handleReport(report);
             if (error) {
-                if (error.code === '23505') toast.error('Already reported by you.');
+                if (error.code === '23505')
+                    toast.error('Already reported by you.');
                 else toast.error('Error submitting report.');
             } else {
                 toast.success('Thank you for the report! ❤️');
                 setShowReportModal(false);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (_err) {
         } finally {
             setReportSubmitting(false);
         }
@@ -163,9 +170,7 @@ export const useQuestionController = ({
                     title: 'GATEQuest PYQ question',
                     url: window.location.href,
                 });
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (_err) {}
         } else {
             await navigator.clipboard.writeText(window.location.href);
             toast.message('Link copied.');
@@ -173,12 +178,18 @@ export const useQuestionController = ({
     };
 
     const onExplanationClick = () => {
-        const url = mode === 'practice' ? safeQuestion.source_url : safeQuestion.explanation;
+        const url =
+            mode === 'practice'
+                ? safeQuestion.source_url
+                : safeQuestion.explanation;
         if (url) window.open(url, '_blank');
     };
 
     const handleBack = () => {
-        const path = mode === 'practice' ? `/practice/${subjectSlug}` : `/revision/${revisionId}`;
+        const path =
+            mode === 'practice'
+                ? `/practice/${subjectSlug}`
+                : `/revision/${revisionId}`;
         navigate(`${path}?${qs}`);
     };
 
@@ -189,7 +200,7 @@ export const useQuestionController = ({
             onShowAnswer: handleShowAnswer,
             onExplain: onExplanationClick,
         },
-        [safeQuestion],
+        [safeQuestion]
     );
 
     return {
@@ -200,7 +211,9 @@ export const useQuestionController = ({
             question: currentQuestion!,
             totalQuestions: questions.length,
             questionNumber:
-                questions.findIndex((q) => String(q.id) === String(safeQuestion.id)) + 1,
+                questions.findIndex(
+                    (q) => String(q.id) === String(safeQuestion.id)
+                ) + 1,
             subjectSlug: subjectSlug,
             userAnswerIndex,
             selectedOptionIndices,

@@ -11,7 +11,6 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 self.addEventListener('push', (event) => {
     if (!event.data) {
-        console.warn('Push event is received but payload data is emty.');
         return;
     }
 
@@ -32,11 +31,9 @@ self.addEventListener('push', (event) => {
                 data: {
                     url: deepLinkUrl,
                 },
-            } as NotificationOptions),
+            } as NotificationOptions)
         );
-    } catch (err) {
-        console.error('Service worker failed to unpack push notification data: ', err);
-    }
+    } catch (_err) {}
 });
 
 self.addEventListener('notificationclick', (event) => {
@@ -51,13 +48,15 @@ self.addEventListener('notificationclick', (event) => {
             .then((windowClients) => {
                 for (const client of windowClients) {
                     if ('focus' in client && 'navigate' in client) {
-                        return client.navigate(absoluteUrl).then(() => client.focus());
+                        return client
+                            .navigate(absoluteUrl)
+                            .then(() => client.focus());
                     }
                 }
 
                 if (self.clients.openWindow) {
                     return self.clients.openWindow(absoluteUrl);
                 }
-            }),
+            })
     );
 });

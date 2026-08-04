@@ -1,6 +1,6 @@
-import { GithubLogoIcon, CoffeeIcon } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { CoffeeIcon, GithubLogoIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Branding = ({ className = '' }) => {
     const navigate = useNavigate();

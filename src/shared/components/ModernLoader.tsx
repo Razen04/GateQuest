@@ -49,6 +49,7 @@ export default function ModernLoader() {
                             className="flex gap-2 items-center"
                             target="_blank"
                             href="https://discord.gg/dFmg3g52c5"
+                            rel="noopener"
                         >
                             <DiscordLogoIcon className="w-4 h-4" />{' '}
                             <h1 className="font-bold">DISCORD</h1>

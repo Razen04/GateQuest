@@ -2,9 +2,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
-import App from './App.tsx';
-import { Toaster } from 'sonner';
 import { registerSW } from 'virtual:pwa-register';
+import { Toaster } from 'sonner';
+import App from './App.tsx';
 
 // --- helper to clear localStorage + Cache Storage ---
 const clearStaleData = async () => {
@@ -29,16 +29,12 @@ const clearStaleData = async () => {
                 localStorage.removeItem(k);
             }
         });
-    } catch (e) {
-        console.warn('⚠️ localStorage clearing error:', e);
-    }
+    } catch (_e) {}
 
     try {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
-    } catch (e) {
-        console.warn('⚠️ Cache Storage clearing error:', e);
-    }
+    } catch (_e) {}
 };
 
 // --- instrument service worker lifecycle & registration ---
@@ -56,19 +52,13 @@ if ('serviceWorker' in navigator) {
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     if (newWorker) {
-                        newWorker.addEventListener('statechange', () => {
-                            console.log('installing worker statechange:', newWorker.state);
-                        });
+                        newWorker.addEventListener('statechange', () => {});
                     }
                 });
             }
         },
-        onRegisterError(err) {
-            console.error('🔴 SW registration error:', err);
-        },
-        onOfflineReady() {
-            console.log('✅ App ready to work offline');
-        },
+        onRegisterError(_err) {},
+        onOfflineReady() {},
     });
 }
 
@@ -79,5 +69,5 @@ createRoot(rootEl).render(
     <StrictMode>
         <Toaster richColors position="top-right" closeButton />
         <App />
-    </StrictMode>,
+    </StrictMode>
 );

@@ -1,14 +1,13 @@
 // 1. Core and external library imports
 import { useNavigate, useParams } from 'react-router-dom';
-
-// 2. Custom hook imports - This is where we abstract all the heavy lifting.
-import useQuestions from '../hooks/useQuestions'; // Fetches the raw question data.
+import QuestionsList from '@/features/questions/components/QuestionsList/QuestionsList';
 
 // 3. Component imports - Breaking the UI into smaller, manageable pieces.
 import ModernLoader from '@/shared/components/ModernLoader';
-import QuestionsList from '@/features/questions/components/QuestionsList/QuestionsList';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question } from '@/shared/types/storage';
+// 2. Custom hook imports - This is where we abstract all the heavy lifting.
+import useQuestions from '../hooks/useQuestions'; // Fetches the raw question data.
 
 // This component is the main hub for showing list of questions. It's responsible for:
 // - Fetching all questions for a subject.
@@ -34,7 +33,10 @@ const PracticeList = () => {
     // --- Event Handlers ---
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
+    const handleQuestionClick = (
+        id: string,
+        currentFilteredList: Question[]
+    ) => {
         const currentQueryString = window.location.search;
 
         // Navigate to the specific question URL, making sure to include the current filter query string.
@@ -60,8 +62,8 @@ const PracticeList = () => {
     if (error) {
         return (
             <div>
-                Failed to load questions, please clear cache and try again, if this does not work,
-                hop on Discord and I might help.
+                Failed to load questions, please clear cache and try again, if
+                this does not work, hop on Discord and I might help.
             </div>
         );
     }

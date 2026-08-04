@@ -1,6 +1,4 @@
 import type { NumericalQuestion, Question } from '@/shared/types/storage.js';
-import { getUserProfile, updateUserProfile, syncUserToSupabase } from '@/shared/utils/helper.js';
-import { toast } from 'sonner';
 
 // Get difficulty class names
 export const getDifficultyClassNames = (difficulty: string) => {
@@ -20,16 +18,18 @@ export const getDifficultyClassNames = (difficulty: string) => {
 export const isMultipleSelection = (currentQuestion: Question) => {
     if (!currentQuestion) return false;
 
-    const isTypeMatch =
-        currentQuestion.question_type &&
-        currentQuestion.question_type.toLowerCase().includes('multiple-select');
+    const isTypeMatch = currentQuestion.question_type
+        ?.toLowerCase()
+        .includes('multiple-select');
 
     const isTagMatch =
         currentQuestion.tags &&
         Array.isArray(currentQuestion.tags) &&
         currentQuestion.tags.some((tag) => {
             const t = tag.toLowerCase();
-            return t.includes('multiple-select') || t.includes('multiple select');
+            return (
+                t.includes('multiple-select') || t.includes('multiple select')
+            );
         });
 
     return isTypeMatch || isTagMatch;
@@ -53,7 +53,9 @@ export const getQuestionTypeText = (q: Question) => {
 };
 
 // Get correct answer text
-export const getCorrectAnswerText = (currentQuestion: Question): number | number[] | string => {
+export const getCorrectAnswerText = (
+    currentQuestion: Question
+): number | number[] | string => {
     if (!currentQuestion) return '';
 
     try {
@@ -76,12 +78,15 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             }
         }
 
-        if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correct_answer)) {
+        if (
+            isMultipleSelection(currentQuestion) &&
+            Array.isArray(currentQuestion.correct_answer)
+        ) {
             // For multiple selection, show all correct options
             const correctIndices = currentQuestion.correct_answer;
             if (Array.isArray(currentQuestion.options)) {
                 const correctOptions = correctIndices
-                    .map((index) => currentQuestion.options![index])
+                    .map((index) => currentQuestion.options?.[index])
                     .filter(Boolean);
                 return correctOptions.join(', ');
             }
@@ -93,20 +98,22 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             Array.isArray(currentQuestion.options)
         ) {
             const index = currentQuestion.correct_answer[0];
-            if (index !== undefined && currentQuestion.options[index] !== undefined) {
+            if (
+                index !== undefined &&
+                currentQuestion.options[index] !== undefined
+            ) {
                 return currentQuestion.options[index];
             }
         }
 
         return currentQuestion.correct_answer || 'Answer not available';
-    } catch (error) {
-        console.error('Error getting correct answer text:', error);
+    } catch (_error) {
         return 'Answer not available';
     }
 };
 
 export const getQuestionDisplayText = (question: Question) => {
-    if (!question || !question.question) return 'Question content unavailable';
+    if (!question?.question) return 'Question content unavailable';
 
     const maxLength = 120;
     if (question.question.length <= maxLength) {
@@ -126,5 +133,5 @@ export const getQuestionDisplayText = (question: Question) => {
     }
 
     // Return the final processed string
-    return truncated + '...';
+    return `${truncated}...`;
 };

@@ -1,4 +1,5 @@
-import React, { createContext } from 'react';
+import type React from 'react';
+import { createContext } from 'react';
 import type { AppUser } from '@/shared/types/AppUser.ts';
 
 type AuthContextType = {

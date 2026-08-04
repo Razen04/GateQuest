@@ -1,9 +1,9 @@
-import ModernLoader from '@/shared/components/ModernLoader';
+import type React from 'react';
 import useTestLoader, {
     type TestData,
 } from '@/features/topic-test/hooks/test-engine/useTestLoader';
 import useTestSession from '@/features/topic-test/hooks/test-engine/useTestSession';
-import React from 'react';
+import ModernLoader from '@/shared/components/ModernLoader';
 import TestSessionContext from './TestSessionContext';
 
 interface TestSessionProviderPropTypes {
@@ -17,13 +17,24 @@ interface InitializeTestSessionPropTypes {
     children: React.ReactNode;
 }
 
-const InitializeTestSession = ({ testId, data, children }: InitializeTestSessionPropTypes) => {
+const InitializeTestSession = ({
+    testId,
+    data,
+    children,
+}: InitializeTestSessionPropTypes) => {
     const engine = useTestSession(testId, data);
 
-    return <TestSessionContext.Provider value={engine}>{children}</TestSessionContext.Provider>;
+    return (
+        <TestSessionContext.Provider value={engine}>
+            {children}
+        </TestSessionContext.Provider>
+    );
 };
 
-export const TestSessionProvider = ({ testId, children }: TestSessionProviderPropTypes) => {
+export const TestSessionProvider = ({
+    testId,
+    children,
+}: TestSessionProviderPropTypes) => {
     const { data, loading } = useTestLoader(testId);
 
     if (loading) {

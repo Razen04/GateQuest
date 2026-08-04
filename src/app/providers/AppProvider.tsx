@@ -1,14 +1,19 @@
 // This file provides a context for managing general application settings.
 // It handles loading settings from the user's profile, updating them in the local state, and persisting those changes back to localStorage and Supabase.
 
-import React, { useEffect, useState } from 'react';
-import AppSettingContext from './AppSettingContext.ts';
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper.ts';
-import type { Settings } from '@/shared/types/Settings.ts';
-import useAuth from '@/shared/hooks/useAuth.ts';
-import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { getCurrentUser } from '@/shared/api/auth.ts';
+import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
+import useAuth from '@/shared/hooks/useAuth.ts';
+import type { Settings } from '@/shared/types/Settings.ts';
+import {
+    getUserProfile,
+    syncUserToSupabase,
+    updateUserProfile,
+} from '@/shared/utils/helper.ts';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import AppSettingContext from './AppSettingContext.ts';
 
 const defaultSettings: Settings = {
     sound: true,
@@ -36,7 +41,10 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
 
     // A generic function to toggle any boolean setting by its key, or explicitly set its value.
-    const handleSettingToggle = <K extends keyof Settings>(key: K, value?: Settings[K]) => {
+    const handleSettingToggle = <K extends keyof Settings>(
+        key: K,
+        value?: Settings[K]
+    ) => {
         setSettings((prev) => ({
             ...prev,
             [key]: value !== undefined ? value : !prev[key],
@@ -66,7 +74,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         if (profile) {
             updateUserProfile({ ...profile, settings });
         }
-    }, [settings, user]);
+    }, [settings]);
 
     useEffect(() => {
         if (!isLogin) return;
@@ -75,12 +83,12 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             setIsUpdatingSettings(true);
 
             syncUserToSupabase(isLogin)
-                .catch((err) => console.error('Sync error:', err))
+                .catch((_err) => {})
                 .finally(() => setIsUpdatingSettings(false));
         }, 1500);
 
         return () => clearTimeout(syncTimer);
-    }, [settings, isLogin]);
+    }, [isLogin]);
 
     // This allows Tailwind CSS's dark mode variants to work globally.
     useEffect(() => {

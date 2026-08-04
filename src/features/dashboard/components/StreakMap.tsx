@@ -1,9 +1,9 @@
-import { useContext, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import { ResponsiveTimeRange } from '@nivo/calendar';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { motion } from 'framer-motion';
+import { useContext, useMemo } from 'react';
+import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import type { Stats } from '@/shared/types/Stats.ts';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
 type StreakMapType = {
     stats: Stats;
@@ -24,13 +24,16 @@ const StreakMap = ({ stats }: StreakMapType) => {
     const toIso = endDate.toISOString().slice(0, 10);
 
     const heatmapLookup = useMemo(
-        () => Object.fromEntries(stats.heatmapData.map((item) => [item.date, item])),
-        [stats.heatmapData],
+        () =>
+            Object.fromEntries(
+                stats.heatmapData.map((item) => [item.date, item])
+            ),
+        [stats.heatmapData]
     );
 
     const maxCount = useMemo(
         () => Math.max(...stats.heatmapData.map((d) => d.count), 1),
-        [stats.heatmapData],
+        [stats.heatmapData]
     );
 
     const bucketedData = useMemo(
@@ -54,12 +57,26 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                     : 0,
                 };
             }),
-        [stats.heatmapData, maxCount],
+        [stats.heatmapData, maxCount]
     );
 
     const colors = isDark
-        ? ['rgba(255,255,255,0.06)', '#064e3b', '#047857', '#059669', '#10b981', '#34d399']
-        : ['rgba(15,23,42,0.06)', '#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a'];
+        ? [
+              'rgba(255,255,255,0.06)',
+              '#064e3b',
+              '#047857',
+              '#059669',
+              '#10b981',
+              '#34d399',
+          ]
+        : [
+              'rgba(15,23,42,0.06)',
+              '#bbf7d0',
+              '#86efac',
+              '#4ade80',
+              '#22c55e',
+              '#16a34a',
+          ];
 
     const streakCards = [
         {
@@ -157,7 +174,11 @@ const StreakMap = ({ stats }: StreakMapType) => {
                             data={bucketedData}
                             from={fromIso}
                             to={toIso}
-                            emptyColor={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)'}
+                            emptyColor={
+                                isDark
+                                    ? 'rgba(255,255,255,0.08)'
+                                    : 'rgba(15,23,42,0.06)'
+                            }
                             colors={colors}
                             minValue={0}
                             maxValue={5}
@@ -171,7 +192,9 @@ const StreakMap = ({ stats }: StreakMapType) => {
                             dayRadius={4}
                             dayBorderWidth={2}
                             dayBorderColor={
-                                isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)'
+                                isDark
+                                    ? 'rgba(255,255,255,0.05)'
+                                    : 'rgba(15,23,42,0.05)'
                             }
                             tooltip={({ day }) => {
                                 const item = heatmapLookup[day];
@@ -181,7 +204,8 @@ const StreakMap = ({ stats }: StreakMapType) => {
                                         <strong>{day}</strong>
 
                                         <div className="mt-1 text-slate-500 dark:text-white/60">
-                                            Questions solved: <strong>{item?.count ?? 0}</strong>
+                                            Questions solved:{' '}
+                                            <strong>{item?.count ?? 0}</strong>
                                         </div>
                                     </div>
                                 );

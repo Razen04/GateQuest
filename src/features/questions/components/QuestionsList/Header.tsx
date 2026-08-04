@@ -1,5 +1,5 @@
-import type { Question } from '@/shared/types/storage';
 import { ArrowLeft } from '@phosphor-icons/react';
+import type { Question } from '@/shared/types/storage';
 
 type HeaderProps = {
     handleBack: () => void;
@@ -22,7 +22,8 @@ const Header = ({ handleBack, questions, attemptFilter }: HeaderProps) => {
                 <span className="bg-blue-100 text-blue-700 px-2 sm:px-3 py-1 text-xs md:text-sm">
                     {questions?.length}{' '}
                     {attemptFilter &&
-                        attemptFilter.charAt(0).toUpperCase() + attemptFilter.slice(1)}{' '}
+                        attemptFilter.charAt(0).toUpperCase() +
+                            attemptFilter.slice(1)}{' '}
                     Question
                 </span>
             </div>

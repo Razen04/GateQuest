@@ -1,11 +1,11 @@
-import { useContext, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ChartBar } from '@phosphor-icons/react';
 import { ResponsiveTimeRange } from '@nivo/calendar';
+import { ChartBar } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { useContext, useMemo } from 'react';
 import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
-import { glassPanel, eyebrow } from '../styles/profileTheme';
 
 interface ProfileHeatmapProps {
     heatmapData: ProfileData['heatmap'];
@@ -51,13 +51,18 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
     }, []);
 
     const heatmapLookup = useMemo(
-        () => Object.fromEntries(heatmapData.map((d) => [d.date.split('T')[0], d])),
-        [heatmapData],
+        () =>
+            Object.fromEntries(
+                heatmapData.map((d) => [d.date.split('T')[0], d])
+            ),
+        [heatmapData]
     );
 
     if (!heatmapData || heatmapData.length === 0) {
         return (
-            <div className={`${glassPanel} p-5 text-center text-xs text-slate-400`}>
+            <div
+                className={`${glassPanel} p-5 text-center text-xs text-slate-400`}
+            >
                 No activity data available.
             </div>
         );
@@ -112,7 +117,8 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
                                     text: {
                                         fontSize: 10,
                                         fill: isDark ? '#94A3B8' : '#64748B',
-                                        fontFamily: 'Plus Jakarta Sans, sans-serif',
+                                        fontFamily:
+                                            'Plus Jakarta Sans, sans-serif',
                                     },
                                 },
                             }}
@@ -120,7 +126,9 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
                                 const original = heatmapLookup[day];
                                 return (
                                     <div className="border border-white/60 bg-white/70 px-3 py-2 text-xs backdrop-blur-2xl shadow-xl dark:border-white/10 dark:bg-slate-900/80">
-                                        <div className="font-semibold">{day}</div>
+                                        <div className="font-semibold">
+                                            {day}
+                                        </div>
                                         <div className="mt-1 text-slate-600 dark:text-white/60">
                                             Attempts{' '}
                                             <span className="font-semibold text-[#3E8EFF]">

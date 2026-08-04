@@ -1,14 +1,24 @@
-import React, { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CaretDown, CaretUp, ArrowRight, CurrencyInr, Info, EyeSlash } from '@phosphor-icons/react';
-import instructions from '@/shared/data/donationInstructions.ts';
+import {
+    ArrowRight,
+    CaretDown,
+    CaretUp,
+    CurrencyInr,
+    EyeSlash,
+    Info,
+} from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import type React from 'react';
+import { useRef, useState } from 'react';
 import ToggleSwitch from '@/shared/components/ToggleSwitch.tsx';
 import { Button } from '@/shared/components/ui/button.tsx';
-import { Textarea } from '@/shared/components/ui/textarea.tsx';
 import { Input } from '@/shared/components/ui/input.tsx';
+import { Textarea } from '@/shared/components/ui/textarea.tsx';
+import instructions from '@/shared/data/donationInstructions.ts';
 
 type DonationBoxProps = {
-    setStep: React.Dispatch<React.SetStateAction<'form' | 'generateQR' | 'utr' | 'thankYou'>>;
+    setStep: React.Dispatch<
+        React.SetStateAction<'form' | 'generateQR' | 'utr' | 'thankYou'>
+    >;
     amount: number | null;
     message: string | null;
     anonymous: boolean;
@@ -48,7 +58,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
             {/* Header Title */}
             <div>
                 <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
-                    TERMINAL // STEP 01
+                    TERMINAL {/* STEP 01 */}
                 </p>
                 <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                     Configure Contribution
@@ -69,7 +79,11 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                         </span>
                     </div>
                     <div className="bg-slate-200/50 p-1 text-slate-600 dark:bg-white/10 dark:text-slate-300">
-                        {instructionOpen ? <CaretUp size={14} /> : <CaretDown size={14} />}
+                        {instructionOpen ? (
+                            <CaretUp size={14} />
+                        ) : (
+                            <CaretDown size={14} />
+                        )}
                     </div>
                 </button>
 
@@ -92,14 +106,17 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                                             <p>{item.text}</p>
                                             {item.sub && (
                                                 <ul className="mt-1.5 space-y-1 pl-2">
-                                                    {item.sub.map((sub, subIdx) => (
-                                                        <li
-                                                            key={subIdx}
-                                                            className="text-[11px] text-slate-500 dark:text-slate-400"
-                                                        >
-                                                            &bull; {sub.text}
-                                                        </li>
-                                                    ))}
+                                                    {item.sub.map(
+                                                        (sub, subIdx) => (
+                                                            <li
+                                                                key={subIdx}
+                                                                className="text-[11px] text-slate-500 dark:text-slate-400"
+                                                            >
+                                                                &bull;{' '}
+                                                                {sub.text}
+                                                            </li>
+                                                        )
+                                                    )}
                                                 </ul>
                                             )}
                                         </div>
@@ -152,14 +169,17 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                         type="number"
                         placeholder="Enter custom amount"
                         value={amount || ''}
-                        onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                            setAmount(parseFloat(e.target.value) || 0)
+                        }
                         className="h-11 rounded-none border-slate-900/10 bg-white pl-10 font-['JetBrains_Mono',monospace] text-sm font-semibold text-slate-900 transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.04] dark:text-white"
                     />
                 </div>
 
                 {amount && amount > 0 && amount < 50 && (
                     <p className="mt-2 text-sm font-medium text-red-500">
-                        ₹50 minimum. I'd genuinely rather you keep ₹{amount} than donate it. 😭
+                        ₹50 minimum. I'd genuinely rather you keep ₹{amount}{' '}
+                        than donate it. 😭
                     </p>
                 )}
             </div>
@@ -199,7 +219,10 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                 className="group relative flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] text-sm font-bold text-white transition-all hover:bg-[#2A5CFF]/90 hover:shadow-lg hover:shadow-[#2A5CFF]/25 active:scale-[0.99]"
             >
                 Generate Dynamic QR Code
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                <ArrowRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                />
             </Button>
         </div>
     );

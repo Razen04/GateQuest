@@ -1,5 +1,5 @@
 import { ArrowLeftIcon } from '@phosphor-icons/react';
-import React from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     AlertDialog,
@@ -26,7 +26,11 @@ const isTimeCritical = (timeDisplay: string) => {
     return minutes ? minutes < 5 : false;
 };
 
-const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, onEndTest }) => {
+const TestHeader: React.FC<TestHeaderProps> = ({
+    timeDisplay,
+    questionStatus,
+    onEndTest,
+}) => {
     const critical = isTimeCritical(timeDisplay);
     const navigate = useNavigate();
     const onBack = () => {
@@ -45,15 +49,20 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will pause the test, but this is not advisable and you
-                                    should complete the test in one sitting.
+                                    This will pause the test, but this is not
+                                    advisable and you should complete the test
+                                    in one sitting.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onBack}>Leave Test</AlertDialogAction>
+                                <AlertDialogAction onClick={onBack}>
+                                    Leave Test
+                                </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
@@ -61,7 +70,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
 
                 <div className="flex items-center justify-between gap-4">
                     <div className="min-w-0">
-                        <h1 className="truncate text-sm font-semibold sm:text-base">Custom Test</h1>
+                        <h1 className="truncate text-sm font-semibold sm:text-base">
+                            Custom Test
+                        </h1>
                         <p className="text-xs">{questionStatus}</p>
                     </div>
 
@@ -83,7 +94,9 @@ const TestHeader: React.FC<TestHeaderProps> = ({ timeDisplay, questionStatus, on
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This action cannot be undone.
                                 </AlertDialogDescription>
