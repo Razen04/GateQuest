@@ -5,6 +5,7 @@ import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler'
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question } from '@/shared/types/storage';
+import { invalidateProfileCache, useProfile } from '@/features/profile/hooks/useProfile';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;
@@ -60,6 +61,10 @@ export default function useAnswerFlow({
 
         // Update the UI with the result (e.g., 'Correct' or 'Incorrect').
         setResult(resultStatus);
+
+        if (user?.username) {
+            invalidateProfileCache(user.username);
+        }
     };
 
     // The handleSubmit function is an alias for handleShowAnswer.

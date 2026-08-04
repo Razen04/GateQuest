@@ -52,6 +52,7 @@ import {
     ComboboxValue,
 } from '@/shared/components/ui/combobox';
 import type { Settings } from '@/shared/types/Settings';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 
 type FormFieldProps = {
     label: string;
@@ -79,6 +80,7 @@ const FormField = ({ label, tag, children, className }: FormFieldProps) => (
 const AccountSettings = () => {
     const { isLogin, user, setUser } = useAuth();
     const localUser = getUserProfile();
+    const { invalidateCache } = useProfile(user?.username);
 
     const [name, setName] = useState(localUser?.name || '');
     const [college, setCollege] = useState(localUser?.college || '');
@@ -157,6 +159,7 @@ const AccountSettings = () => {
 
             setSavedSuccess(true);
             setTimeout(() => setSavedSuccess(false), 3000);
+            invalidateCache();
         } catch (err) {
             console.error('Unable to save profile: ', err);
             toast.error('Unable to save profile changes.');

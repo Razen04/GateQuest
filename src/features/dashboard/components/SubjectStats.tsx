@@ -33,7 +33,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
         >
             <motion.div className="relative overflow-hidden">
                 <div className="relative overflow-x-auto no-scrollbar">
-                    <div className="flex gap-3 px-1 pb-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                         {subjectStats?.map((subject, index) => {
                             const progress = Number(subject.progress) || 0;
                             const accuracy = Number(subject.accuracy) || 0;
@@ -59,7 +59,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                                         stiffness: 300,
                                         damping: 25,
                                     }}
-                                    className="min-w-[240px] border border-black/10 bg-white/40 backdrop-blue-2xl shadow-sm p-4 dark:border-white/10 dark:bg-white/[0.05]"
+                                    className="w-full border border-black/10 bg-white/40 backdrop-blue-2xl shadow-sm p-4 dark:border-white/10 dark:bg-white/[0.05]"
                                 >
                                     <div className="mb-3 flex items-center gap-3">
                                         <div

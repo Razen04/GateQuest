@@ -18,6 +18,7 @@ const useFilters = (
     selectedQuestion: string | null,
     mode: FilterMode,
 ) => {
+    const [loading, setLoading] = useState(false);
     // State for each available filter option.
     const [searchQuery, setSearchQuery] = useState('');
     const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
@@ -33,25 +34,33 @@ const useFilters = (
     // Fetch attempted question IDs on mount/change & listen for updates
     useEffect(() => {
         async function fetchAttemptedIds() {
-            // In practice mode, we need a subject slug. In revision, subject can be null for global revision.
             if (!subject && mode === 'practice') return;
 
-            const { data, error } = await supabase.rpc('get_user_attempted_ids', {
-                p_subject_slug: subject,
-                p_mode: mode,
-            });
+            setLoading(true);
 
-            if (!error && data) {
+            try {
+                const { data, error } = await supabase.rpc('get_user_attempted_ids', {
+                    p_subject_slug: subject,
+                    p_mode: mode,
+                });
+
+                if (error) throw error;
+
                 setAttemptedIds(
-                    new Set(data.map((row: { question_id: string }) => row.question_id)),
+                    new Set((data ?? []).map((row: { question_id: string }) => row.question_id)),
                 );
+            } catch (error) {
+                console.error('Failed to fetch attempted questions:', error);
+                setAttemptedIds(new Set());
+            } finally {
+                setLoading(false);
             }
         }
 
         fetchAttemptedIds();
 
-        // Refetch when a question is submitted
         window.addEventListener('STATS_UPDATED', fetchAttemptedIds);
+
         return () => window.removeEventListener('STATS_UPDATED', fetchAttemptedIds);
     }, [subject, mode]);
 
@@ -60,24 +69,32 @@ const useFilters = (
         async function fetchBookmarkedIds() {
             if (!subject && mode === 'practice') return;
 
-            const { data, error } = await supabase.rpc('get_user_bookmarks', {
-                p_subject_slug: subject,
-            });
+            setLoading(true);
 
-            if (!error && data) {
+            try {
+                const { data, error } = await supabase.rpc('get_user_bookmarks', {
+                    p_subject_slug: subject,
+                });
+
+                if (error) throw error;
+
                 setBookmarkedIds(
-                    new Set(data.map((row: { question_id: string }) => row.question_id)),
+                    new Set((data ?? []).map((row: { question_id: string }) => row.question_id)),
                 );
+            } catch (error) {
+                console.error('Failed to fetch bookmarks:', error);
+                setBookmarkedIds(new Set());
+            } finally {
+                setLoading(false);
             }
         }
 
-        // Fetch bookmarks immediately if bookmarked filter is active
         if (attemptFilter === 'bookmarked') {
             fetchBookmarkedIds();
         }
 
-        // Refetch bookmarks whenever a bookmark action occurs anywhere in the app
         window.addEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+
         return () => window.removeEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
     }, [subject, mode, attemptFilter]);
 
@@ -157,6 +174,7 @@ const useFilters = (
 
     // Expose the filtered data and state setters to UI components
     return {
+        loading,
         filteredQuestions,
         searchQuery,
         setSearchQuery,

@@ -5,8 +5,10 @@ import Pagination from './Pagination.tsx';
 import MathRenderer from '../Renderers/MathRenderer.tsx';
 import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
 import type { Question } from '@/shared/types/storage.ts';
+import ModernLoader from '@/shared/components/ModernLoader.tsx';
 
 type ListProps = {
+    loading: boolean;
     listRef: React.RefObject<HTMLDivElement | null>;
     questions: Question[];
     handleQuestionClick: (id: string) => void;
@@ -16,6 +18,7 @@ type ListProps = {
 };
 
 const List = ({
+    loading,
     listRef,
     questions,
     handleQuestionClick,
@@ -23,6 +26,7 @@ const List = ({
     totalPages,
     setCurrentPage,
 }: ListProps) => {
+    if (loading) return <ModernLoader />;
     return (
         <motion.div
             initial="initial"

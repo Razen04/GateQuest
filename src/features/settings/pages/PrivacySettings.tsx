@@ -1,5 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import {
     ShieldCheck,
@@ -147,7 +145,7 @@ const PrivacySettings = () => {
                         )}
                     </div>
 
-                    <p className="font-['Fraunces',serif] text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                         Manage your raw database records, profile snapshot resets, and active
                         session tokens.
                     </p>

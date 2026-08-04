@@ -43,6 +43,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
     // Filters
     const {
+        loading,
         filteredQuestions,
         searchQuery,
         setSearchQuery,
@@ -165,6 +166,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
                         {filteredQuestions.length > 0 ? (
                             <List
+                                loading={loading}
                                 listRef={listRef}
                                 questions={pageItems}
                                 handleQuestionClick={handleQuestionClick}

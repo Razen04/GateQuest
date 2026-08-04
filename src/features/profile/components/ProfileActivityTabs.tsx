@@ -8,6 +8,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
 import { formatTime } from '@/shared/utils/helper';
 import { glassPanel, palette } from '../styles/profileTheme';
+import { Button } from '@/shared/components/ui/button';
 
 type AttemptStatus = 'Correct' | 'Wrong' | 'Skipped';
 
@@ -34,11 +35,19 @@ const TYPE_COLOR: Record<string, string> = {
 
 interface ProfileActivityTabsProps {
     recentHistory: ProfileData['recent_history'];
-    subjects: ProfileData['exam_stats'][string]['subjects'];
+    examStats: ProfileData['exam_stats'];
 }
 
-export default function ProfileActivityTabs({ recentHistory, subjects }: ProfileActivityTabsProps) {
+export default function ProfileActivityTabs({
+    recentHistory,
+    examStats,
+}: ProfileActivityTabsProps) {
     const [currentTab, setCurrentTab] = useState<string>('history');
+
+    const availableExams = Object.keys(examStats || {});
+    const [selectedExam, setSelectedExam] = useState<string>(availableExams[0] || 'gate');
+
+    const subjects = examStats?.[selectedExam]?.subjects || [];
 
     return (
         <div className={glassPanel}>
@@ -61,8 +70,8 @@ export default function ProfileActivityTabs({ recentHistory, subjects }: Profile
 
                     <span className="hidden pr-4 font-['JetBrains_Mono',monospace] text-[10px] text-slate-400 dark:text-white/40 sm:block">
                         {currentTab === 'history'
-                            ? `${recentHistory.length} attempts`
-                            : `${subjects.length} subjects`}
+                            ? `Last ${recentHistory.length} attempts`
+                            : `${subjects.length} subjects in ${selectedExam.toUpperCase()}`}
                     </span>
                 </div>
 
@@ -97,25 +106,25 @@ export default function ProfileActivityTabs({ recentHistory, subjects }: Profile
                                         </p>
 
                                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                            <Badge className="h-5 border border-white/60 bg-white/50 text-[11px] text-slate-600 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/70">
+                                            <Badge className="rounded-none h-5 border border-white/60 bg-white/50 text-[11px] text-slate-600 dark:border-white/10 dark:bg-white/[0.06] dark:text-white/70">
                                                 {item.subject_name}
                                             </Badge>
                                             <Badge
                                                 variant="outline"
-                                                className="h-5 border-slate-900/10 text-[11px] font-mono dark:border-white/15"
+                                                className="rounded-none h-5 border-slate-900/10 text-[11px] font-mono dark:border-white/15"
                                             >
                                                 {item.exam_year}
                                             </Badge>
                                             <Badge
                                                 variant="outline"
-                                                className="h-5 border-slate-900/10 text-[11px] dark:border-white/15"
+                                                className="rounded-none h-5 border-slate-900/10 text-[11px] dark:border-white/15"
                                             >
                                                 {item.marks} Marks
                                             </Badge>
                                             {item.time_taken && (
                                                 <Badge
                                                     variant="outline"
-                                                    className="h-5 gap-1 border-slate-900/10 text-[11px] font-mono dark:border-white/15"
+                                                    className="rounded-none h-5 gap-1 border-slate-900/10 text-[11px] font-mono dark:border-white/15"
                                                 >
                                                     <ClockIcon
                                                         size={12}
@@ -154,6 +163,31 @@ export default function ProfileActivityTabs({ recentHistory, subjects }: Profile
                 </TabsContent>
 
                 <TabsContent value="subjects" className="m-0">
+                    {availableExams.length > 1 && (
+                        <div className="flex items-center gap-2 border-b border-slate-900/5 px-4 py-3 dark:border-white/10">
+                            <span className="text-xs text-slate-500 dark:text-white/50">
+                                Target:
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                                {availableExams.map((exam) => (
+                                    <Button
+                                        key={exam}
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedExam(exam)}
+                                        className={`uppercase rounded-none ${
+                                            selectedExam === exam
+                                                ? 'bg-[#3E8EFF] text-white'
+                                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-white/5 dark:text-white/50 dark:hover:bg-white/10'
+                                        }`}
+                                    >
+                                        {exam}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="divide-y divide-slate-900/5 dark:divide-white/10">
                         {subjects.length === 0 && (
                             <div className="p-8 text-center text-sm text-slate-500">
@@ -164,30 +198,61 @@ export default function ProfileActivityTabs({ recentHistory, subjects }: Profile
                         {subjects.map((s) => (
                             <div
                                 key={s.subject_slug}
-                                className="group flex cursor-pointer items-center gap-3 px-4 py-3 hover:bg-slate-900/[0.03] dark:hover:bg-white/[0.06] sm:px-5"
+                                className="border-b border-slate-200 px-4 py-4 last:border-b-0 dark:border-white/10"
                             >
-                                <div className="min-w-0 flex-1">
-                                    <div className="mb-1.5 flex items-center justify-between">
-                                        <span className="truncate text-xs font-medium text-slate-700 dark:text-white/80">
-                                            {s.subject_name}
-                                        </span>
-                                        <div className="ml-3 flex shrink-0 items-center gap-3">
-                                            <span className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-400 dark:text-white/40">
-                                                {s.attempted}/{s.total_available}
-                                            </span>
-                                            <span
-                                                className={`w-8 text-right text-[10px] font-bold ${accuracyTextColor(s.accuracy)}`}
-                                            >
-                                                {s.accuracy}%
-                                            </span>
-                                        </div>
+                                {/* Header */}
+                                <div className="mb-3 flex items-center justify-between">
+                                    <h3 className="truncate text-sm font-medium text-slate-800 dark:text-white">
+                                        {s.subject_name}
+                                    </h3>
+
+                                    <span
+                                        className={`text-xs font-semibold ${accuracyTextColor(
+                                            s.accuracy,
+                                        )}`}
+                                    >
+                                        {s.accuracy}% Accuracy
+                                    </span>
+                                </div>
+
+                                {/* Progress */}
+                                <div className="mb-4">
+                                    <div className="mb-1 flex justify-between text-[11px] text-slate-500 dark:text-white/50">
+                                        <span>Progress</span>
+                                        <span>{s.progress}%</span>
                                     </div>
 
-                                    <div className="h-1.5 overflow-hidden bg-slate-900/5 dark:bg-white/10">
+                                    <div className="h-1 bg-slate-200 dark:bg-white/10">
                                         <div
-                                            className={`h-full ${accuracyColor(s.accuracy)}`}
-                                            style={{ width: `${s.accuracy}%` }}
+                                            className="h-full bg-blue-500"
+                                            style={{ width: `${s.progress}%` }}
                                         />
+                                    </div>
+                                </div>
+
+                                {/* Stats */}
+                                <div className="grid grid-cols-3 gap-4 text-xs">
+                                    <div>
+                                        <p className="text-slate-500 dark:text-white/50">Correct</p>
+                                        <p className="mt-1 font-semibold text-slate-900 dark:text-white">
+                                            {s.correct}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-slate-500 dark:text-white/50">
+                                            Attempted
+                                        </p>
+                                        <p className="mt-1 font-semibold text-slate-900 dark:text-white">
+                                            {s.attempted}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-slate-500 dark:text-white/50">Total</p>
+                                        <p className="mt-1 font-semibold text-slate-900 dark:text-white">
+                                            {s.total_available}
+                                        </p>
                                     </div>
                                 </div>
                             </div>

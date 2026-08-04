@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export default function ModernLoader() {
     return (
         <div
-            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-900"
+            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-950"
             role="status"
             aria-busy="true"
         >

@@ -28,9 +28,6 @@ export default function ProfilePage() {
         return <ProfileError message={error} />;
     }
 
-    const primaryExamKey = Object.keys(data.exam_stats)[0] || 'gate';
-    const subjects = data.exam_stats[primaryExamKey]?.subjects || [];
-
     return (
         <motion.div variants={containerVariants} initial="initial" animate="animate">
             <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-white pb-30 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:from-[#06070A] dark:via-[#0A0D12] dark:to-[#0F1218] dark:text-slate-200">
@@ -58,7 +55,7 @@ export default function ProfilePage() {
                                 <ProfileHeatmap heatmapData={data.heatmap} />
                                 <ProfileActivityTabs
                                     recentHistory={data.recent_history}
-                                    subjects={subjects}
+                                    examStats={data.exam_stats}
                                 />
                             </main>
                         </div>

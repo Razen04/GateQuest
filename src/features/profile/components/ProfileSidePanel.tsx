@@ -30,9 +30,7 @@ export default function ProfileSidePanel({ globalStats }: ProfileSidePanelProps)
                         {globalStats.question_types.map((qt) => {
                             const pct =
                                 globalStats.total_unique_solved > 0
-                                    ? Math.round(
-                                          (qt.solved / globalStats.total_unique_solved) * 100,
-                                      )
+                                    ? Math.round((qt.solved / qt.total_available) * 100)
                                     : 0;
                             const color = typeColor(qt.type);
 
@@ -49,7 +47,7 @@ export default function ProfileSidePanel({ globalStats }: ProfileSidePanelProps)
                                             </span>
                                         </div>
                                         <span className="font-['JetBrains_Mono',monospace] text-xs font-medium text-slate-700 dark:text-white/75">
-                                            {qt.solved}
+                                            {qt.solved}/{qt.total_available}
                                         </span>
                                     </div>
 
