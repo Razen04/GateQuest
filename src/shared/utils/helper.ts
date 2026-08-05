@@ -1,48 +1,47 @@
 // This file contains various utility functions used throughout the application,such as interacting with localStorage, styling, and syncing data with Supabase.
-
-import {
-    AppWindowIcon,
-    Bicycle,
-    BinaryIcon,
-    Books,
-    Brain,
-    BroadcastIcon,
-    BrowsersIcon,
-    Calculator,
-    CircuitryIcon,
-    Code,
-    CpuIcon,
-    Database,
-    EmptyIcon,
-    EngineIcon,
-    FactoryIcon,
-    FileCodeIcon,
-    FlameIcon,
-    GaugeIcon,
-    GitBranchIcon,
-    Globe,
-    GraphIcon,
-    HeadCircuitIcon,
-    LightbulbIcon,
-    LinuxLogoIcon,
-    MagnetIcon,
-    PiIcon,
-    PlugChargingIcon,
-    PowerIcon,
-    PulseIcon,
-    SlidersIcon,
-    TerminalWindow,
-    TreeStructure,
-    WaveformIcon,
-    WaveSineIcon,
-    WavesIcon,
-    WrenchIcon,
-} from '@phosphor-icons/react';
-import type React from 'react';
+import React from 'react';
 import { toast } from 'sonner';
-import type { AppUser } from '@/shared/types/AppUser.js';
-import type { Question } from '@/shared/types/storage.js';
 import { supabase } from '@/shared/utils/supabaseClient.js';
+import type { AppUser } from '@/shared/types/AppUser.js';
+import {
+    Calculator,
+    Code,
+    Database,
+    Globe,
+    TreeStructure,
+    Bicycle,
+    Brain,
+    TerminalWindow,
+    Books,
+    FlameIcon,
+    LightbulbIcon,
+} from '@phosphor-icons/react';
+import { EmptyIcon } from '@phosphor-icons/react';
+import { PiIcon } from '@phosphor-icons/react';
+import { BinaryIcon } from '@phosphor-icons/react';
+import { CpuIcon } from '@phosphor-icons/react';
+import { GraphIcon } from '@phosphor-icons/react';
+import { GitBranchIcon } from '@phosphor-icons/react';
+import { FileCodeIcon } from '@phosphor-icons/react';
+import { LinuxLogoIcon } from '@phosphor-icons/react';
+import { AppWindowIcon } from '@phosphor-icons/react';
+import { BrowsersIcon } from '@phosphor-icons/react';
+import type { Question } from '@/shared/types/storage.js';
+import { HeadCircuitIcon } from '@phosphor-icons/react';
+import { PulseIcon } from '@phosphor-icons/react';
+import { WaveSineIcon } from '@phosphor-icons/react';
+import { SlidersIcon } from '@phosphor-icons/react';
+import { BroadcastIcon } from '@phosphor-icons/react';
+import { MagnetIcon } from '@phosphor-icons/react';
+import { WaveformIcon } from '@phosphor-icons/react';
+import { PowerIcon } from '@phosphor-icons/react';
+import { PlugChargingIcon } from '@phosphor-icons/react';
+import { GaugeIcon } from '@phosphor-icons/react';
+import { CircuitryIcon } from '@phosphor-icons/react';
+import { EngineIcon } from '@phosphor-icons/react';
+import { WrenchIcon } from '@phosphor-icons/react';
+import { WavesIcon } from '@phosphor-icons/react';
+import { FactoryIcon } from '@phosphor-icons/react';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -110,28 +109,21 @@ const colors = {
 
     // New colors
     lime: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400',
-    emerald:
-        'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    emerald: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
     teal: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400',
     sky: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400',
     violet: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
-    fuchsia:
-        'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
+    fuchsia: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
     rose: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
     amber: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
     slate: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400',
     zinc: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400',
-    neutral:
-        'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400',
+    neutral: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400',
     stone: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400',
-    trueGray:
-        'bg-trueGray-100 text-trueGray-600 dark:bg-trueGray-900/30 dark:text-trueGray-400',
-    coolGray:
-        'bg-coolGray-100 text-coolGray-600 dark:bg-coolGray-900/30 dark:text-coolGray-400',
-    blueGray:
-        'bg-blueGray-100 text-blueGray-600 dark:bg-blueGray-900/30 dark:text-blueGray-400',
-    turquoise:
-        'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+    trueGray: 'bg-trueGray-100 text-trueGray-600 dark:bg-trueGray-900/30 dark:text-trueGray-400',
+    coolGray: 'bg-coolGray-100 text-coolGray-600 dark:bg-coolGray-900/30 dark:text-coolGray-400',
+    blueGray: 'bg-blueGray-100 text-blueGray-600 dark:bg-blueGray-900/30 dark:text-blueGray-400',
+    turquoise: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
     brown: 'bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
     black: 'bg-black/10 text-black dark:bg-white/10 dark:text-white',
 
@@ -171,6 +163,7 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     const user = getUserProfile();
 
     if (!user?.id) {
+        console.warn('User missing id');
         return;
     }
 
@@ -189,12 +182,10 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     };
 
     // 2. Send only the clean payload to the database
-    const { error } = await supabase
-        .from('users')
-        .update(dbPayload)
-        .eq('id', user.id);
+    const { error } = await supabase.from('users').update(dbPayload).eq('id', user.id);
 
     if (error) {
+        console.error('Sync failed', error);
         toast.error('Profile update failed, try again later.');
         return;
     }
@@ -209,6 +200,8 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     });
 
     if (authError) {
+        // Warning only, because the DB sync succeeded which is the critical part
+        console.warn('Session metadata sync failed:', authError.message);
     }
 
     toast.success('Profile updated successfully');
@@ -242,7 +235,7 @@ export const recordAttemptLocally = async ({
     refresh,
 }: recordAttemptLocallyProps) => {
     // A check to ensure attempts are only recorded for logged-in users.
-    if (!user?.id) {
+    if (!user || !user.id) {
         toast.error('No valid user profile found.');
         return;
     }
@@ -256,9 +249,7 @@ export const recordAttemptLocally = async ({
     const LOCAL_KEY = `attempt_buffer_${user.id}`;
     const storedBuffer = localStorage.getItem(LOCAL_KEY);
 
-    const buffer = storedBuffer
-        ? (JSON.parse(storedBuffer) as AttemptBufferItem[])
-        : [];
+    const buffer = storedBuffer ? (JSON.parse(storedBuffer) as AttemptBufferItem[]) : [];
 
     // Add the new attempt to the buffer.
     buffer.push({
@@ -273,7 +264,7 @@ export const recordAttemptLocally = async ({
     if (buffer.length >= 1) {
         const error = await recordAttempt({ buffer, user, refresh });
         if (error) {
-            toast.error(`Failed to record attempt: ${error.message}`);
+            toast.error('Failed to record attempt: ' + error.message);
             return;
         }
         localStorage.removeItem(LOCAL_KEY); // Clear the buffer after a successful sync.
@@ -289,12 +280,8 @@ type recordAttemptProp = {
     refresh: () => void;
 };
 
-export const recordAttempt = async ({
-    buffer,
-    user,
-    refresh,
-}: recordAttemptProp) => {
-    if (!user?.id) {
+export const recordAttempt = async ({ buffer, user, refresh }: recordAttemptProp) => {
+    if (!user || !user.id) {
         toast.error('No valid user profile found.');
         return;
     }
@@ -307,14 +294,12 @@ export const recordAttempt = async ({
 
     // Insert the entire buffer as new rows in the activity table.
     if (buffer.length !== 0) {
-        const { error } = await supabase.rpc(
-            'insert_user_question_activity_batch',
-            {
-                batch: buffer,
-            }
-        );
+        const { error } = await supabase.rpc('insert_user_question_activity_batch', {
+            batch: buffer,
+        });
 
         if (error) {
+            console.error('Batch insert error:', error);
             return error;
         }
     }

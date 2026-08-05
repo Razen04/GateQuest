@@ -1,7 +1,7 @@
 // This custom hook provides a convenient interface for accessing the user's study plan data.
 // It abstracts the logic of retrieving data from the global StatsContext.
 
-import { useCallback, useContext } from 'react';
+import { useContext, useCallback } from 'react';
 import StatsContext from '@/app/providers/StatsContext';
 
 interface StudyPlanType {

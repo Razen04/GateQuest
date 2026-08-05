@@ -1,25 +1,24 @@
-import {
-    ArrowUpRight,
-    CaretDown,
-    Coffee,
-    DiscordLogo,
-    GithubLogo,
-} from '@phosphor-icons/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useSettings from '@/features/settings/hooks/useSettings';
-import { Button } from '@/shared/components/ui/button.js';
+import { motion, AnimatePresence } from 'framer-motion';
 import { faqs } from '@/shared/data/faqs.js';
+import {
+    GithubLogo,
+    DiscordLogo,
+    Coffee,
+    SealCheck,
+    CaretDown,
+    ArrowUpRight,
+} from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/shared/components/ui/button.js';
+import useSettings from '@/features/settings/hooks/useSettings';
 
 const ink = '#12151B';
 const signal = '#2A5CFF';
 const verified = '#22C55E';
 const alert = '#E23744';
 
-type Answer =
-    | { type: 'text'; content: string }
-    | { type: 'link'; text: string; href: string };
+type Answer = { type: 'text'; content: string } | { type: 'link'; text: string; href: string };
 
 const renderAnswer = (parts: Answer[]) =>
     parts.map((part, i) =>
@@ -35,7 +34,7 @@ const renderAnswer = (parts: Answer[]) =>
             </a>
         ) : (
             <span key={i}>{part.content}</span>
-        )
+        ),
     );
 
 const CircledPhrase = ({ children }: { children: string }) => (
@@ -155,9 +154,7 @@ const JoinRow = ({
                 <p className="font-['Space_Grotesk',sans-serif] text-base font-semibold text-slate-800 dark:text-white">
                     {label}
                 </p>
-                <p className="text-sm text-slate-500 dark:text-white/50">
-                    {desc}
-                </p>
+                <p className="text-sm text-slate-500 dark:text-white/50">{desc}</p>
             </div>
         </div>
 
@@ -245,8 +242,8 @@ const About = ({ landing = false }: { landing: boolean }) => {
                             transition={{ delay: 0.5, duration: 0.6 }}
                             className="mt-8 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60"
                         >
-                            Somebody has to explain why this exists. That
-                            somebody is me, and this is the paperwork.
+                            Somebody has to explain why this exists. That somebody is me, and this
+                            is the paperwork.
                         </motion.p>
                     </section>
 
@@ -264,11 +261,9 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                     Why this exists
                                 </h2>
                                 <p className="mt-6 max-w-2xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-['Space_Grotesk',sans-serif] first-letter:text-7xl first-letter:font-black dark:text-white/70 [&::first-letter]:text-[#2A5CFF]">
-                                    Good GATE resources already existed such as
-                                    GO, Examside &mdash; and I have used both of
-                                    them. But the interface always felt like an
-                                    afterthought bolted onto good content. I
-                                    wanted{' '}
+                                    Good GATE resources already existed such as GO, Examside &mdash;
+                                    and I have used both of them. But the interface always felt like
+                                    an afterthought bolted onto good content. I wanted{' '}
                                     <CircledPhrase>
                                         something that respected your time
                                     </CircledPhrase>
@@ -292,10 +287,9 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                     Requisition for help
                                 </h2>
                                 <p className="mt-6 max-w-2xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 dark:text-white/70">
-                                    This is a one-person operation pretending to
-                                    be a product. If any of this is useful to
-                                    you, here&rsquo;s where to push back or just
-                                    say thanks.
+                                    This is a one-person operation pretending to be a product. If
+                                    any of this is useful to you, here&rsquo;s where to push back or
+                                    just say thanks.
                                 </p>
 
                                 <div className="mt-8 divide-y divide-slate-900/10 border-y border-slate-900/10 dark:divide-white/10 dark:border-white/10">
@@ -343,8 +337,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                     Cross-examination
                                 </h2>
                                 <p className="mt-6 font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 dark:text-white/70">
-                                    The questions people actually ask, on the
-                                    record.
+                                    The questions people actually ask, on the record.
                                 </p>
 
                                 <div className="mt-8 divide-y divide-slate-900/10 dark:divide-white/10">
@@ -353,19 +346,11 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                         return (
                                             <div key={i}>
                                                 <button
-                                                    onClick={() =>
-                                                        setOpenIndex(
-                                                            open ? null : i
-                                                        )
-                                                    }
+                                                    onClick={() => setOpenIndex(open ? null : i)}
                                                     className="flex w-full items-start gap-4 py-6 text-left"
                                                 >
                                                     <span className="mt-1 shrink-0 font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-300 dark:text-white/20">
-                                                        Q
-                                                        {String(i + 1).padStart(
-                                                            2,
-                                                            '0'
-                                                        )}
+                                                        Q{String(i + 1).padStart(2, '0')}
                                                     </span>
                                                     <span className="flex-1 font-['Space_Grotesk',sans-serif] text-base font-semibold text-slate-800 dark:text-white sm:text-lg">
                                                         {faq.question}
@@ -376,23 +361,12 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                                     />
                                                 </button>
 
-                                                <AnimatePresence
-                                                    initial={false}
-                                                >
+                                                <AnimatePresence initial={false}>
                                                     {open && (
                                                         <motion.div
-                                                            initial={{
-                                                                height: 0,
-                                                                opacity: 0,
-                                                            }}
-                                                            animate={{
-                                                                height: 'auto',
-                                                                opacity: 1,
-                                                            }}
-                                                            exit={{
-                                                                height: 0,
-                                                                opacity: 0,
-                                                            }}
+                                                            initial={{ height: 0, opacity: 0 }}
+                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                            exit={{ height: 0, opacity: 0 }}
                                                             transition={{
                                                                 duration: 0.3,
                                                                 ease: 'easeInOut',
@@ -402,21 +376,14 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                                             <div className="flex gap-4 pb-6 pl-9">
                                                                 <span
                                                                     className="mt-1 shrink-0 font-['JetBrains_Mono',monospace] text-xs font-bold"
-                                                                    style={{
-                                                                        color: verified,
-                                                                    }}
+                                                                    style={{ color: verified }}
                                                                 >
                                                                     A
-                                                                    {String(
-                                                                        i + 1
-                                                                    ).padStart(
-                                                                        2,
-                                                                        '0'
-                                                                    )}
+                                                                    {String(i + 1).padStart(2, '0')}
                                                                 </span>
                                                                 <p className="font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/60">
                                                                     {renderAnswer(
-                                                                        faq.answer as Answer[]
+                                                                        faq.answer as Answer[],
                                                                     )}
                                                                 </p>
                                                             </div>
@@ -437,8 +404,8 @@ const About = ({ landing = false }: { landing: boolean }) => {
                         className="relative mt-16 overflow-hidden rounded-[32px] px-6 py-20 text-center sm:mt-24 sm:px-12 bg-white/40 dark:bg-black"
                     >
                         <p className="mx-auto mt-10 max-w-xl font-['Fraunces',serif] text-xl italic leading-relaxed text-black/70 dark:text-white/70 sm:text-2xl">
-                            &ldquo;I declare that this isn't my design, I ain't
-                            that smart pal.&rdquo;
+                            &ldquo;I declare that this isn't my design, I ain't that smart
+                            pal.&rdquo;
                         </p>
 
                         <div className="mt-8 flex flex-col items-center gap-2">

@@ -1,19 +1,14 @@
-import { CheckCircle, Clock, ClockIcon, XCircle } from '@phosphor-icons/react';
+import { useState, type JSX } from 'react';
+import { CheckCircle, XCircle, Clock, ClockIcon } from '@phosphor-icons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
-import { type JSX, useState } from 'react';
-import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
+import type { ProfileData } from '../types/profile';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs';
+import { accuracyColor, accuracyTextColor } from '../utils';
 import { Badge } from '@/shared/components/ui/badge';
-import { Button } from '@/shared/components/ui/button';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/shared/components/ui/tabs';
+import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
 import { formatTime } from '@/shared/utils/helper';
 import { glassPanel, palette } from '../styles/profileTheme';
-import type { ProfileData } from '../types/profile';
-import { accuracyTextColor } from '../utils';
+import { Button } from '@/shared/components/ui/button';
 
 type AttemptStatus = 'Correct' | 'Wrong' | 'Skipped';
 
@@ -50,19 +45,13 @@ export default function ProfileActivityTabs({
     const [currentTab, setCurrentTab] = useState<string>('history');
 
     const availableExams = Object.keys(examStats || {});
-    const [selectedExam, setSelectedExam] = useState<string>(
-        availableExams[0] || 'gate'
-    );
+    const [selectedExam, setSelectedExam] = useState<string>(availableExams[0] || 'gate');
 
     const subjects = examStats?.[selectedExam]?.subjects || [];
 
     return (
         <div className={glassPanel}>
-            <Tabs
-                value={currentTab}
-                onValueChange={setCurrentTab}
-                className="w-full"
-            >
+            <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                 <div className="flex items-center justify-between overflow-x-auto border-b border-slate-900/5 px-2 dark:border-white/10">
                     <TabsList className="h-auto gap-1 rounded-none bg-transparent p-0">
                         <TabsTrigger
@@ -102,26 +91,18 @@ export default function ProfileActivityTabs({
                                       ? 'Wrong'
                                       : 'Skipped';
                             const st = STATUS_CFG[attemptStatus];
-                            const typeColor =
-                                TYPE_COLOR[item.question_type] ||
-                                palette.photon;
+                            const typeColor = TYPE_COLOR[item.question_type] || palette.photon;
 
                             return (
                                 <div
                                     key={item.question_id + item.attempted_at}
                                     className="group flex cursor-pointer items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-900/[0.03] dark:hover:bg-white/[0.06] sm:px-5"
                                 >
-                                    <span
-                                        className={`mt-0.5 shrink-0 ${st.cls}`}
-                                    >
-                                        {st.icon}
-                                    </span>
+                                    <span className={`mt-0.5 shrink-0 ${st.cls}`}>{st.icon}</span>
 
                                     <div className="min-w-0 flex-1">
                                         <p className="line-clamp-2 text-sm font-medium leading-snug text-slate-700 group-hover:text-slate-900 dark:text-white/80 dark:group-hover:text-white">
-                                            <MathRenderer
-                                                text={item.question_text}
-                                            />
+                                            <MathRenderer text={item.question_text} />
                                         </p>
 
                                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -149,9 +130,7 @@ export default function ProfileActivityTabs({
                                                         size={12}
                                                         className="text-slate-400 dark:text-white/40"
                                                     />
-                                                    {formatTime(
-                                                        item.time_taken
-                                                    )}
+                                                    {formatTime(item.time_taken)}
                                                 </Badge>
                                             )}
                                         </div>
@@ -166,15 +145,14 @@ export default function ProfileActivityTabs({
                                                 backgroundColor: `${typeColor}14`,
                                             }}
                                         >
-                                            {TYPE_LABEL[item.question_type] ||
-                                                'MCQ'}
+                                            {TYPE_LABEL[item.question_type] || 'MCQ'}
                                         </span>
                                         <span className="font-['JetBrains_Mono',monospace] text-[10px] text-slate-400 dark:text-white/30">
                                             {formatDistanceToNowStrict(
                                                 new Date(item.attempted_at),
                                                 {
                                                     addSuffix: true,
-                                                }
+                                                },
                                             )}
                                         </span>
                                     </div>
@@ -230,7 +208,7 @@ export default function ProfileActivityTabs({
 
                                     <span
                                         className={`text-xs font-semibold ${accuracyTextColor(
-                                            s.accuracy
+                                            s.accuracy,
                                         )}`}
                                     >
                                         {s.accuracy}% Accuracy
@@ -255,9 +233,7 @@ export default function ProfileActivityTabs({
                                 {/* Stats */}
                                 <div className="grid grid-cols-3 gap-4 text-xs">
                                     <div>
-                                        <p className="text-slate-500 dark:text-white/50">
-                                            Correct
-                                        </p>
+                                        <p className="text-slate-500 dark:text-white/50">Correct</p>
                                         <p className="mt-1 font-semibold text-slate-900 dark:text-white">
                                             {s.correct}
                                         </p>
@@ -273,9 +249,7 @@ export default function ProfileActivityTabs({
                                     </div>
 
                                     <div>
-                                        <p className="text-slate-500 dark:text-white/50">
-                                            Total
-                                        </p>
+                                        <p className="text-slate-500 dark:text-white/50">Total</p>
                                         <p className="mt-1 font-semibold text-slate-900 dark:text-white">
                                             {s.total_available}
                                         </p>

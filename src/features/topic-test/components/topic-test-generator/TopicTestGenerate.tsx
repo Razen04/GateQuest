@@ -1,10 +1,8 @@
-import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import type React from 'react';
-import { useMemo, useState } from 'react';
+import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import PageHeader from '@/shared/components/PageHeader';
 import {
     Select,
@@ -15,22 +13,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/shared/components/ui/select';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { SubjectIconMap } from '@/shared/utils/helper';
+
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { supabase } from '@/shared/utils/supabaseClient';
+
 import TopicsSelection from './TopicsSelection';
 import TopicTestConfiguration from './TopicTestConfiguration';
 import TopicTestFooter from './TopicTestFooter';
+
+import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { SubjectIconMap } from '@/shared/utils/helper';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();
     const { getPracticeSubjects, userGoal } = useGoals();
     const subjects = getPracticeSubjects();
 
-    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
-        null
-    );
+    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -80,7 +80,8 @@ const TopicTestGeneratePage = () => {
             if (error) throw error;
 
             navigate(`/topic-test/${data.test_id}`);
-        } catch (_err) {
+        } catch (err) {
+            console.error(err);
             toast.error('Failed to generate test.');
         } finally {
             setIsGenerating(false);
@@ -145,10 +146,7 @@ const TopicTestGeneratePage = () => {
                                     ] as React.ElementType;
 
                                     return (
-                                        <SelectItem
-                                            key={s.id}
-                                            value={s.id.toString()}
-                                        >
+                                        <SelectItem key={s.id} value={s.id.toString()}>
                                             <SubjectIcon className="h-4 w-4 mr-2 inline" />
                                             {s.name}
                                         </SelectItem>

@@ -1,17 +1,12 @@
-import {
-    CaretLeft,
-    Coffee,
-    DiscordLogo,
-    GithubLogo,
-} from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import Changelog from '@/shared/components/Changelog';
+import { motion } from 'framer-motion';
+import { SidebarItem } from './SidebarItem';
 import { Button } from '@/shared/components/ui/button';
+import { CaretLeft, DiscordLogo, GithubLogo, Coffee } from '@phosphor-icons/react';
 import { Text, Title } from '@/shared/components/ui/typography';
 import type { Tab } from './Sidebar';
-import { SidebarItem } from './SidebarItem';
+import Changelog from '@/shared/components/Changelog';
+import { useLocation } from 'react-router-dom';
 
 type SidebarDesktopProps = {
     showSidebar: boolean;
@@ -27,9 +22,7 @@ export const SidebarDesktop = ({
     navigate,
 }: SidebarDesktopProps) => {
     const location = useLocation();
-    const isTopicTestAttempt = /^\/topic-test\/[^/]+\/attempt$/.test(
-        location.pathname
-    );
+    const isTopicTestAttempt = /^\/topic-test\/[^/]+\/attempt$/.test(location.pathname);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const animatedLogo = '/icons/animated_logo.svg';
 
@@ -57,8 +50,7 @@ export const SidebarDesktop = ({
                 .then((res) => res.json())
                 .then((data) => {
                     const count = data.stargazers_count;
-                    const formatted =
-                        count > 999 ? `${(count / 1000).toFixed(1)}k` : count;
+                    const formatted = count > 999 ? (count / 1000).toFixed(1) + 'k' : count;
 
                     // Save to state
                     setStarCount(formatted);
@@ -69,7 +61,7 @@ export const SidebarDesktop = ({
                         JSON.stringify({
                             count: formatted,
                             timestamp: Date.now(),
-                        })
+                        }),
                     );
                 })
                 .catch(() => setStarCount(0));
@@ -119,9 +111,7 @@ export const SidebarDesktop = ({
                         <div className={`${isCollapsed ? 'hidden' : 'block'}`}>
                             <Title className="bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent">
                                 GATE
-                                <span className="text-black dark:text-white">
-                                    Quest
-                                </span>
+                                <span className="text-black dark:text-white">Quest</span>
                             </Title>
                             <Text className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-[-5px] text-right w-full">
                                 Good Luck
@@ -139,9 +129,7 @@ export const SidebarDesktop = ({
                             name={tab.name}
                             icon={tab.icon}
                             activeIcon={tab.activeIcon}
-                            isActive={locationPath.pathname.startsWith(
-                                tab.path
-                            )}
+                            isActive={locationPath.pathname.startsWith(tab.path)}
                             isCollapsed={isCollapsed}
                             animation={tab.animation}
                             onClick={() => navigate(tab.path)}
@@ -187,9 +175,7 @@ export const SidebarDesktop = ({
                             >
                                 <GithubLogo size={16} />
                                 {starCount !== null && (
-                                    <span className="text-base font-extralight">
-                                        {starCount}
-                                    </span>
+                                    <span className="text-base font-extralight">{starCount}</span>
                                 )}
                             </a>
                         </Button>
@@ -209,9 +195,7 @@ export const SidebarDesktop = ({
                     <motion.button
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
                         transition={{ duration: 0.3 }}
-                        aria-label={
-                            isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
-                        }
+                        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                         className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white"
                         onClick={handleCollapse}
                     >

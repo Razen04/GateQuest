@@ -1,8 +1,7 @@
 // This custom hook synchronizes the filter state of the question list with the URL's query parameters.
 // This allows filter states to be bookmarkable and shareable.
 
-import type React from 'react';
-import { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 type useUrlFiltersProps = {
@@ -64,17 +63,7 @@ export default function useUrlFilters({
 
         // The exhaustive-deps rule is disabled because this effect is intentionally designed to run only once.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        setYearFilter, // Populate initial local state from URL
-        setSearchQuery,
-        setTopicFilter,
-        setExamFilter,
-        searchParams.get,
-        setTagFilter,
-        setDifficultyFilter,
-        setAttemptFilter,
-        getArrayParam,
-    ]);
+    }, []);
 
     // This prevents an inconsistent state if a user navigates to a URL with missing parameters.
     useEffect(() => {
@@ -118,10 +107,7 @@ export default function useUrlFilters({
         const p = new URLSearchParams({
             q: searchQuery || '',
             attempt: attemptFilter,
-            diff:
-                difficultyFilter.length > 0
-                    ? difficultyFilter.join(',')
-                    : 'all',
+            diff: difficultyFilter.length > 0 ? difficultyFilter.join(',') : 'all',
             year: yearFilter.length > 0 ? yearFilter.join(',') : 'all',
             topic: topicFilter.length > 0 ? topicFilter.join(',') : 'all',
             exam: examFilter.length > 0 ? examFilter.join(',') : 'all',

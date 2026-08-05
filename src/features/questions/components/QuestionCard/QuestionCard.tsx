@@ -1,27 +1,25 @@
+import React, { useEffect, useRef } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import type React from 'react';
-import { useEffect, useRef } from 'react';
-import useSettings from '@/features/settings/hooks/useSettings';
-import Branding from '@/shared/components/Branding';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { usePresence } from '@/shared/hooks/usePresence';
-import type { Question } from '@/shared/types/storage';
+
 // Types
 import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
-import { openInAI } from '@/shared/utils/aiPromptUtils';
+
 // Utils
-import {
-    getCorrectAnswerText,
-    isNumericalQuestion,
-} from '../../utils/questionUtils';
-import ActionButtons from './ActionButtons';
-import AskAIBanner from './AskAIBanner';
-import QuestionBadge from './QuestionBadge';
-import QuestionContent from './QuestionContent';
-import QuestionExplanation from './QuestionExplanation';
+import { isNumericalQuestion, getCorrectAnswerText } from '../../utils/questionUtils';
 import QuestionHeader from './QuestionHeader';
-import QuestionPeerStats from './QuestionPeerStats';
+import QuestionContent from './QuestionContent';
 import ResultMessage from './ResultMessage';
+import QuestionPeerStats from './QuestionPeerStats';
+import ActionButtons from './ActionButtons';
+import QuestionBadge from './QuestionBadge';
+import QuestionExplanation from './QuestionExplanation';
+import type { Question } from '@/shared/types/storage';
+import { openInAI } from '@/shared/utils/aiPromptUtils';
+import AskAIBanner from './AskAIBanner';
+import useSettings from '@/features/settings/hooks/useSettings';
+import { useGoals } from '@/shared/hooks/useGoals';
+import Branding from '@/shared/components/Branding';
+import { usePresence } from '@/shared/hooks/usePresence';
 
 // Child Components
 
@@ -130,7 +128,7 @@ const QuestionCard = ({
     // effect to scroll to top when user go to next or previous question
     useEffect(() => {
         if (pageRef.current) pageRef.current.scrollTop = 0;
-    }, []);
+    }, [questionNumber]);
 
     // check if the question belong to the user goal
     const isCompatible = isSubjectInGoal(question.subject_id);
@@ -152,9 +150,8 @@ const QuestionCard = ({
                 <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
                     <p className="font-bold">Branch Mismatch</p>
                     <p>
-                        This question belongs to a different branch. You can
-                        view it, but answering is disabled to protect your
-                        current branch progress.
+                        This question belongs to a different branch. You can view it, but answering
+                        is disabled to protect your current branch progress.
                     </p>
                 </div>
             )}
@@ -211,13 +208,11 @@ const QuestionCard = ({
                                 placeholder="Enter your answer"
                                 disabled={showAnswer}
                             />
-                            {showAnswer &&
-                                numericalAnswer ===
-                                    Number(correctAnswerText) && (
-                                    <p className="mt-2 text-sm text-green-600">
-                                        Correct answer: {correctAnswerText}
-                                    </p>
-                                )}
+                            {showAnswer && numericalAnswer === Number(correctAnswerText) && (
+                                <p className="mt-2 text-sm text-green-600">
+                                    Correct answer: {correctAnswerText}
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -243,12 +238,7 @@ const QuestionCard = ({
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
 
-                    {showAnswer && (
-                        <AskAIBanner
-                            provider={aiProvider}
-                            onClick={handleAskAI}
-                        />
-                    )}
+                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
 
                     {/* Action Buttons */}
                     <ActionButtons

@@ -1,5 +1,5 @@
-import { createContext } from 'react';
 import type { Database } from '@/shared/types/supabase';
+import { createContext } from 'react';
 
 type Tables = Database['public']['Tables'];
 export type Branch = Tables['branches']['Row'];
@@ -19,11 +19,7 @@ interface GoalContextType {
     loading: boolean;
     error: string | null;
     // Logic-derived helper
-    setInitialGoal: (
-        branchId: string,
-        examIds: string[],
-        silent: boolean
-    ) => Promise<void>;
+    setInitialGoal: (branchId: string, examIds: string[], silent: boolean) => Promise<void>;
     getPracticeSubjects: () => Subject[];
     isSubjectInGoal: (subjectId: string) => boolean | undefined;
     refresh: () => Promise<void>;

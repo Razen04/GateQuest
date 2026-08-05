@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { getTestSession } from '@/features/topic-test/services/testSession';
 import type { Attempt, Question, TestSession } from '@/shared/types/storage';
+import { useEffect, useState } from 'react';
 
 export type TestData = {
     session: TestSession;

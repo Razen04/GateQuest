@@ -1,15 +1,13 @@
-import { useMemo, useState } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { toast } from 'sonner';
-import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
-import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
-import {
-    isMultipleSelection,
-    isNumericalQuestion,
-} from '@/features/questions/utils/questionUtils';
-import ReportModal from '@/shared/components/ReportModal';
-import useAuth from '@/shared/hooks/useAuth';
 import { supabase } from '@/shared/utils/supabaseClient';
+import useAuth from '@/shared/hooks/useAuth';
+import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
+import { isMultipleSelection, isNumericalQuestion } from '@/features/questions/utils/questionUtils';
+
+import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
+import ReportModal from '@/shared/components/ReportModal';
 
 const TestSolutionView = () => {
     const { testId, questionIndex } = useParams<{
@@ -36,13 +34,7 @@ const TestSolutionView = () => {
 
     const safeQuestion = useMemo(() => {
         return (
-            currentQuestion ||
-            ({
-                id: '0',
-                options: [],
-                correct_answer: [],
-                subject_id: '',
-            } as any)
+            currentQuestion || ({ id: '0', options: [], correct_answer: [], subject_id: '' } as any)
         );
     }, [currentQuestion]);
 
@@ -56,8 +48,7 @@ const TestSolutionView = () => {
 
         return {
             // MCQ: Expects index (number) or null
-            userAnswerIndex:
-                !isMSQ && !isNAT && typeof ans === 'number' ? ans : null,
+            userAnswerIndex: !isMSQ && !isNAT && typeof ans === 'number' ? ans : null,
 
             // MSQ: Expects array of indices
             selectedOptionIndices: isMSQ && Array.isArray(ans) ? ans : [],
@@ -100,10 +91,7 @@ const TestSolutionView = () => {
         navigate(`/topic-test-result/${testId}`);
     };
 
-    const handleReportSubmit = async (
-        reportType: string,
-        reportText: string
-    ) => {
+    const handleReportSubmit = async (reportType: string, reportText: string) => {
         const report = {
             user_id: user?.id,
             question_id: safeQuestion.id,
@@ -111,9 +99,7 @@ const TestSolutionView = () => {
             report_text: reportText,
         };
 
-        const { error } = await supabase
-            .from('question_reports')
-            .insert([report]);
+        const { error } = await supabase.from('question_reports').insert([report]);
 
         if (error) {
             if (error.code === '23505') {
@@ -121,6 +107,7 @@ const TestSolutionView = () => {
             } else {
                 toast.error('There was an error in submitting the report.');
             }
+            console.error('Error reporting question:', error);
         } else {
             toast.success('Thank you for making the platform great. ❤️');
         }
@@ -132,10 +119,7 @@ const TestSolutionView = () => {
         const shareUrl = `${window.location.origin}/practice/${safeQuestion.subject}/${safeQuestion.id}`;
 
         if (navigator.share) {
-            await navigator.share({
-                title: 'Check this question',
-                url: shareUrl,
-            });
+            await navigator.share({ title: 'Check this question', url: shareUrl });
         } else {
             await navigator.clipboard.writeText(shareUrl);
             toast.success('Public practice link copied!');
@@ -156,9 +140,7 @@ const TestSolutionView = () => {
                 questionNumber={currentIndex + 1}
                 subjectSlug={subjectSlug}
                 userAnswerIndex={normalizedProps?.userAnswerIndex ?? null}
-                selectedOptionIndices={
-                    normalizedProps?.selectedOptionIndices ?? []
-                }
+                selectedOptionIndices={normalizedProps?.selectedOptionIndices ?? []}
                 numericalAnswer={normalizedProps?.numericalAnswer ?? null}
                 marked={normalizedProps?.marked}
                 onOptionSelect={() => {}}

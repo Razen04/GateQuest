@@ -1,21 +1,22 @@
+import type React from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
-    ArrowUpRight,
     Brain,
     ChartLineUp,
     Fingerprint,
     Lightning,
-    MoonIcon,
     SealCheck,
-    SunIcon,
     Timer,
+    ArrowUpRight,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
-import type React from 'react';
-import { useNavigate } from 'react-router-dom';
-import About from '@/features/about/pages/AboutPage';
-import useSettings from '@/features/settings/hooks/useSettings';
+
 import { Button } from '@/shared/components/ui/button';
+import About from '@/features/about/pages/AboutPage';
+import { SunIcon } from '@phosphor-icons/react';
+import { MoonIcon } from '@phosphor-icons/react';
+import useSettings from '@/features/settings/hooks/useSettings';
 import type { Settings } from '@/shared/types/Settings';
 
 const signal = '#2A5CFF';
@@ -130,20 +131,14 @@ const NavigationMenu = ({
         <nav className="sticky top-0 z-50 bg-[#F4F5F1]/50 dark:bg-[#0B0C10]/50 backdrop-blur-3xl">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
                 <div className="flex items-center gap-3">
-                    <img
-                        src="/icons/logo.svg"
-                        alt="GateQuest"
-                        className="h-9 w-9"
-                    />
+                    <img src="/icons/logo.svg" alt="GateQuest" className="h-9 w-9" />
 
                     <div className="leading-none">
                         <p className="text-sm font-bold tracking-tight">
                             <span className="text-blue-500">GATE</span>Quest
                         </p>
 
-                        <p className="text-[8px] uppercase text-slate-500 font-bold">
-                            Good Luck
-                        </p>
+                        <p className="text-[8px] uppercase text-slate-500 font-bold">Good Luck</p>
                     </div>
                 </div>
 
@@ -202,16 +197,13 @@ export default function LandingPage() {
                         className="relative overflow-hidden border border-white/10 bg-[#F4F5F1] dark:bg-[#12151B] p-6 text-white dark:text-black shadow-2xl sm:p-12"
                     >
                         <div className="pointer-events-none absolute -right-12 -top-12 opacity-10">
-                            <Fingerprint
-                                size={280}
-                                fill={isDark ? 'white' : 'black'}
-                            />
+                            <Fingerprint size={280} fill={isDark ? 'white' : 'black'} />
                         </div>
 
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#2A5CFF]">
-                                    DOSSIER {/* GQ-2027 */}
+                                    DOSSIER // GQ-2027
                                 </p>
                                 <p className="mt-1 font-['JetBrains_Mono',monospace] text-xs dark:text-white/40 text-black/40">
                                     STATUS: OPEN INVESTIGATION
@@ -231,11 +223,9 @@ export default function LandingPage() {
                             </h1>
 
                             <p className="mt-6 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-black/70 dark:text-white/70">
-                                Every solved question. Every unhandled topic.
-                                Every recovered mark.{' '}
-                                <HighlightScribble>GATEQuest</HighlightScribble>{' '}
-                                converts invisible study hours into concrete
-                                evidence.
+                                Every solved question. Every unhandled topic. Every recovered mark.{' '}
+                                <HighlightScribble>GATEQuest</HighlightScribble> converts invisible
+                                study hours into concrete evidence.
                             </p>
                         </div>
 
@@ -254,10 +244,7 @@ export default function LandingPage() {
                                 {[
                                     ['QUESTION BANK', '10,000+'],
                                     ['SYLLABUS COVERAGE', '140 TOPICS (IDK)'],
-                                    [
-                                        'MOCK PRECISION',
-                                        '99.99999999% GATE REGIME',
-                                    ],
+                                    ['MOCK PRECISION', '99.99999999% GATE REGIME'],
                                 ].map(([label, val]) => (
                                     <div key={label}>
                                         <p className="font-['JetBrains_Mono',monospace] text-[9px] uppercase tracking-widest text-black/40 dark:text-white/40">
@@ -280,7 +267,7 @@ export default function LandingPage() {
                 >
                     <header className="mb-12">
                         <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#2A5CFF]">
-                            EXHIBIT A {/* SYSTEM PROOF */}
+                            EXHIBIT A // SYSTEM PROOF
                         </p>
                         <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black tracking-tight sm:text-5xl">
                             Preparation leaves fingerprints.
@@ -296,10 +283,7 @@ export default function LandingPage() {
                                     initial={{ opacity: 0, y: 15 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true, amount: 0.3 }}
-                                    transition={{
-                                        duration: 0.4,
-                                        delay: idx * 0.08,
-                                    }}
+                                    transition={{ duration: 0.4, delay: idx * 0.08 }}
                                     className="group grid gap-4 py-8 sm:grid-cols-[100px_1fr_auto] sm:items-center"
                                 >
                                     <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-400 dark:text-white/30">
@@ -308,10 +292,7 @@ export default function LandingPage() {
 
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <Icon
-                                                size={20}
-                                                className="text-[#2A5CFF]"
-                                            />
+                                            <Icon size={20} className="text-[#2A5CFF]" />
                                             <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold">
                                                 {item.title}
                                             </h3>
@@ -343,15 +324,14 @@ export default function LandingPage() {
                     <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
                         <div>
                             <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.3em] text-[#E23744]">
-                                EXHIBIT B {/* MARKS RECOVERY */}
+                                EXHIBIT B // MARKS RECOVERY
                             </p>
                             <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black sm:text-4xl">
                                 Recovering lost accuracy
                             </h2>
                             <p className="mt-4 font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60">
-                                Systematic error logging catches repetitive
-                                conceptual traps long before they cost marks on
-                                final exam day.
+                                Systematic error logging catches repetitive conceptual traps long
+                                before they cost marks on final exam day.
                             </p>
                         </div>
 
@@ -362,21 +342,13 @@ export default function LandingPage() {
                                     before: '42%',
                                     after: '81%',
                                 },
-                                {
-                                    subject: 'Network Theory',
-                                    before: '55%',
-                                    after: '89%',
-                                },
+                                { subject: 'Network Theory', before: '55%', after: '89%' },
                                 {
                                     subject: 'Data Structures & Algo',
                                     before: '48%',
                                     after: '85%',
                                 },
-                                {
-                                    subject: 'Operating Systems',
-                                    before: '38%',
-                                    after: '79%',
-                                },
+                                { subject: 'Operating Systems', before: '38%', after: '79%' },
                             ].map(({ subject, before, after }) => (
                                 <div
                                     key={subject}
@@ -394,10 +366,7 @@ export default function LandingPage() {
                                                 {before}
                                             </p>
                                         </div>
-                                        <ArrowUpRight
-                                            size={20}
-                                            className="text-slate-400"
-                                        />
+                                        <ArrowUpRight size={20} className="text-slate-400" />
                                         <div className="text-right">
                                             <p className="font-['JetBrains_Mono',monospace] text-[9px] text-slate-400">
                                                 RECOVERED

@@ -1,17 +1,14 @@
-import { useEffect, useState } from 'react';
-import {
-    cacheTestSessions,
-    getCompletedTestSessions,
-    getOngoingTestSession,
-} from '@/features/topic-test/services/testSession';
 import type { TestSession } from '@/shared/types/storage';
-import { fetchTestHistory } from '../api/topicTest';
+import { useEffect, useState } from 'react';
 import { syncTestFromSupabaseToDexie } from '../services/testSyncService';
+import {
+    getOngoingTestSession,
+    getCompletedTestSessions,
+    cacheTestSessions,
+} from '@/features/topic-test/services/testSession';
+import { fetchTestHistory } from '../api/topicTest';
 
-const useTopicTestHubData = (
-    userId: string | undefined,
-    branchId: string | undefined
-) => {
+const useTopicTestHubData = (userId: string | undefined, branchId: string | undefined) => {
     const [activeTest, setActiveTest] = useState<TestSession | null>(null);
     const [history, setHistory] = useState<TestSession[]>([]);
     const [loading, setLoading] = useState(true);
@@ -35,21 +32,23 @@ const useTopicTestHubData = (
 
                 // 3. If Dexie history is empty, fetch from Supabase and cache it
                 if (localHistory && localHistory.length === 0) {
-                    const { data: supaTestSessions, error: supaError } =
-                        await fetchTestHistory(userId, branchId);
+                    const { data: supaTestSessions, error: supaError } = await fetchTestHistory(
+                        userId,
+                        branchId,
+                    );
 
                     if (supaError) {
-                    } else if (
-                        supaTestSessions &&
-                        supaTestSessions.length > 0
-                    ) {
+                        console.error('Error fetching test history', supaError);
+                    } else if (supaTestSessions && supaTestSessions.length > 0) {
                         await cacheTestSessions(supaTestSessions);
                         localHistory = supaTestSessions;
                     }
                 }
 
                 setHistory(localHistory.slice(0, 10));
-            } catch (_error) {
+            } catch (error) {
+                // Now, if Dexie throws, we will see it in the console!
+                console.error('Failed to load topic test hub data:', error);
             } finally {
                 // GUARANTEES the loading state is removed even if an error is thrown
                 setLoading(false);

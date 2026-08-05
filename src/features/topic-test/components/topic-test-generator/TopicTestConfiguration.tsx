@@ -1,8 +1,8 @@
+import type React from 'react';
 import { Funnel, X } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import type React from 'react';
-import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
+import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import { Button } from '@/shared/components/ui/button';
 
 interface TopicTestConfigurationProps {
@@ -46,14 +46,10 @@ const TopicTestConfiguration = ({
                                     key={`${topic.subjectName}-${topic.name}`}
                                     className="inline-flex items-center gap-2 rounded-xl border border-blue-200/40 dark:border-blue-400/20 bg-blue-500/10 backdrop-blur-xl px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300"
                                 >
-                                    <span className="opacity-70">
-                                        {topic.subjectName}:
-                                    </span>
+                                    <span className="opacity-70">{topic.subjectName}:</span>
                                     {topic.name}
                                     <button
-                                        onClick={() =>
-                                            onRemoveTopic(topic.name)
-                                        }
+                                        onClick={() => onRemoveTopic(topic.name)}
                                         className="transition-colors hover:text-red-500"
                                     >
                                         <X weight="bold" />
@@ -96,9 +92,7 @@ const TopicTestConfiguration = ({
 
                     <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
                         <div>
-                            <p className="text-sm font-medium">
-                                Include Attempted Questions
-                            </p>
+                            <p className="text-sm font-medium">Include Attempted Questions</p>
                             <span className="text-xs text-gray-400">
                                 Allow recycling previously seen questions.
                             </span>

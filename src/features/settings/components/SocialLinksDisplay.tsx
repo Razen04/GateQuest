@@ -1,15 +1,15 @@
+import { toast } from 'sonner';
 import {
     DiscordLogoIcon,
-    FediverseLogoIcon,
     GithubLogoIcon,
     LinkedinLogoIcon,
-    MastodonLogoIcon,
     RedditLogoIcon,
     SpotifyLogoIcon,
     XLogoIcon,
+    FediverseLogoIcon,
+    MastodonLogoIcon,
     YoutubeLogoIcon,
 } from '@phosphor-icons/react';
-import { toast } from 'sonner';
 
 interface SocialLinksDisplayProps {
     links: Record<string, string>;

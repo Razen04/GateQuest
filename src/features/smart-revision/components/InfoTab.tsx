@@ -1,14 +1,14 @@
-import {
-    ArrowsClockwise,
-    CheckCircle,
-    Fire,
-    Info,
-    Lightning,
-    ShieldCheck,
-    Sparkle,
-} from '@phosphor-icons/react';
+import * as React from 'react';
 import { motion } from 'framer-motion';
-import type * as React from 'react';
+import {
+    Info,
+    CheckCircle,
+    ShieldCheck,
+    ArrowsClockwise,
+    Fire,
+    Sparkle,
+    Lightning,
+} from '@phosphor-icons/react';
 
 type BoxCardProps = {
     step: string;
@@ -20,15 +20,7 @@ type BoxCardProps = {
     accentClass: string;
 };
 
-const BoxCard = ({
-    step,
-    icon,
-    title,
-    badge,
-    desc,
-    glowColor,
-    accentClass,
-}: BoxCardProps) => (
+const BoxCard = ({ step, icon, title, badge, desc, glowColor, accentClass }: BoxCardProps) => (
     <motion.div
         whileHover={{ y: -6, scale: 1.01 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -46,8 +38,7 @@ const BoxCard = ({
                     {icon}
                 </div>
                 <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    STAGE {/*  */}
-                    {step}
+                    STAGE // {step}
                 </span>
             </div>
 
@@ -83,7 +74,7 @@ const InfoTab = () => {
                         Algorithmic Progression Model
                     </h2>
                     <p className="font-['JetBrains_Mono',monospace] text-[10px] font-semibold text-slate-400">
-                        SPACED REPEAT {/* LEITNER SYSTEM */}
+                        SPACED REPEAT // LEITNER SYSTEM
                     </p>
                 </div>
             </div>
@@ -92,13 +83,7 @@ const InfoTab = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <BoxCard
                     step="01"
-                    icon={
-                        <Fire
-                            size={22}
-                            weight="fill"
-                            className="text-rose-500 animate-pulse"
-                        />
-                    }
+                    icon={<Fire size={22} weight="fill" className="text-rose-500 animate-pulse" />}
                     title="Box 1: Critical Core"
                     badge="EVERY 7 DAYS"
                     desc="New errors and persistent failures. Automatically queued weekly until successfully overcome."
@@ -108,13 +93,7 @@ const InfoTab = () => {
 
                 <BoxCard
                     step="02"
-                    icon={
-                        <ArrowsClockwise
-                            size={22}
-                            weight="bold"
-                            className="text-amber-500"
-                        />
-                    }
+                    icon={<ArrowsClockwise size={22} weight="bold" className="text-amber-500" />}
                     title="Box 2: Intermediate"
                     badge="EVERY 14 DAYS"
                     desc="Questions cleared once. Subject to a 14-day hold pattern to verify long-term memory consolidation."
@@ -124,13 +103,7 @@ const InfoTab = () => {
 
                 <BoxCard
                     step="03"
-                    icon={
-                        <CheckCircle
-                            size={22}
-                            weight="fill"
-                            className="text-emerald-500"
-                        />
-                    }
+                    icon={<CheckCircle size={22} weight="fill" className="text-emerald-500" />}
                     title="Box 3: Mastery Vault"
                     badge="EVERY 30 DAYS"
                     desc="The final verification. Solve it once more here to permanently graduate the concept from your queue."
@@ -156,7 +129,7 @@ const InfoTab = () => {
                                 Burnout Prevention Safeguards
                             </h3>
                             <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold text-slate-400">
-                                SYSTEM REGULATOR {/* OPTIMAL LOAD */}
+                                SYSTEM REGULATOR // OPTIMAL LOAD
                             </p>
                         </div>
                     </div>
@@ -169,33 +142,23 @@ const InfoTab = () => {
                 <div className="mt-4 grid grid-cols-1 gap-4 text-xs sm:grid-cols-2">
                     <div className="space-y-1 border border-slate-900/5 bg-slate-50/50 p-4 dark:border-white/5 dark:bg-white/[0.02]">
                         <div className="flex items-center gap-1.5 font-['Space_Grotesk',sans-serif] font-bold text-slate-800 dark:text-slate-200">
-                            <Lightning
-                                size={14}
-                                className="text-amber-500"
-                                weight="fill"
-                            />
+                            <Lightning size={14} className="text-amber-500" weight="fill" />
                             <span>Strict 30-Question Cap</span>
                         </div>
                         <p className="font-['Fraunces',serif] text-slate-500 dark:text-slate-400 leading-relaxed">
-                            Caps revision volume at 30 items per week so you can
-                            reserve peak mental energy for learning unmastered
-                            concepts.
+                            Caps revision volume at 30 items per week so you can reserve peak mental
+                            energy for learning unmastered concepts.
                         </p>
                     </div>
 
                     <div className="space-y-1 border border-slate-900/5 bg-slate-50/50 p-4 dark:border-white/5 dark:bg-white/[0.02]">
                         <div className="flex items-center gap-1.5 font-['Space_Grotesk',sans-serif] font-bold text-slate-800 dark:text-slate-200">
-                            <Sparkle
-                                size={14}
-                                className="text-blue-500"
-                                weight="fill"
-                            />
+                            <Sparkle size={14} className="text-blue-500" weight="fill" />
                             <span>Fresh Start Protocol</span>
                         </div>
                         <p className="font-['Fraunces',serif] text-slate-500 dark:text-slate-400 leading-relaxed">
-                            Missed a week? Backlogs are archived instantly
-                            without penalty, serving you a clean set based on
-                            immediate priority.
+                            Missed a week? Backlogs are archived instantly without penalty, serving
+                            you a clean set based on immediate priority.
                         </p>
                     </div>
                 </div>

@@ -4,7 +4,7 @@ import { supabase } from '@/shared/utils/supabaseClient';
 export const pushNotificationDetails = async (
     endpoint: string,
     auth_key: string,
-    p256dh_key: string
+    p256dh_key: string,
 ): Promise<void> => {
     const user = await getCurrentUser();
     if (!user) throw new Error('No authenticated student session found.');
@@ -16,15 +16,13 @@ export const pushNotificationDetails = async (
             auth_key: auth_key,
             p256dh_key: p256dh_key,
         },
-        { onConflict: 'endpoint' }
+        { onConflict: 'endpoint' },
     );
 
     if (error) throw error;
 };
 
-export const deleteNotificationDetails = async (
-    storedEndpoint: string
-): Promise<void> => {
+export const deleteNotificationDetails = async (storedEndpoint: string): Promise<void> => {
     const { error } = await supabase
         .from('push_subscriptions')
         .delete()
@@ -33,15 +31,10 @@ export const deleteNotificationDetails = async (
     if (error) throw error;
 };
 
-export const triggerWelcomeNotification = async (
-    rawSubscriptionObject: any
-) => {
-    const { data, error } = await supabase.functions.invoke(
-        'welcome-notification',
-        {
-            body: { subscription: rawSubscriptionObject },
-        }
-    );
+export const triggerWelcomeNotification = async (rawSubscriptionObject: any) => {
+    const { data, error } = await supabase.functions.invoke('welcome-notification', {
+        body: { subscription: rawSubscriptionObject },
+    });
 
     if (error) {
         throw new Error(`Backend welcome trigger failed: ${error.message}`);

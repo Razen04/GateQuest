@@ -1,6 +1,6 @@
-import { ClockIcon } from '@phosphor-icons/react';
-import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import { Button } from '@/shared/components/ui/button';
+import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import { ClockIcon } from '@phosphor-icons/react';
 
 interface TopicTestFooterProps {
     estimatedTime: number;
@@ -27,18 +27,13 @@ const TopicTestFooter = ({
                     </span>
                     <div className="flex items-center gap-2 text-slate-900 dark:text-white">
                         <ClockIcon className="w-5 h-5 text-blue-500" />
-                        <span className="text-xl font-bold">
-                            {estimatedTime}m
-                        </span>
+                        <span className="text-xl font-bold">{estimatedTime}m</span>
                         <span className="text-sm text-gray-400 font-medium">
                             ({finalQuestionCount} Qs)
                         </span>
                     </div>
                 </div>
-                <Button
-                    disabled={isGenerating || !canGenerate}
-                    onClick={handleStartTest}
-                >
+                <Button disabled={isGenerating || !canGenerate} onClick={handleStartTest}>
                     Generate Test
                 </Button>
             </div>

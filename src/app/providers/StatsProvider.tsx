@@ -1,16 +1,13 @@
-import type React from 'react';
-import { useCallback, useEffect, useState } from 'react';
-import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
-import { useGoals } from '@/shared/hooks/useGoals.js';
-import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
-import type { DashboardResponse } from '@/shared/types/StatsType.js';
-import { getUserProfile } from '@/shared/utils/helper.ts';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
+import React, { useEffect, useState, useCallback } from 'react';
 import StatsContext from './StatsContext.js';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
+import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
+import { getUserProfile } from '@/shared/utils/helper.ts';
+import { useGoals } from '@/shared/hooks/useGoals.js';
+import type { DashboardResponse } from '@/shared/types/StatsType.js';
 
-export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
-    children,
-}) => {
+export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [stats, setStats] = useState<Stats>({
         progress: 0,
         accuracy: 0,
@@ -55,6 +52,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
             const { data, error } = await supabase.rpc('get_my_dashboard');
 
             if (error || !data) {
+                console.error('Supabase RPC error:', error);
                 setLoading(false);
                 return;
             }
@@ -69,9 +67,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
             // Case-insensitive lookup helper for exam_stats JSON keys from DB
             const findExamStats = (examName: string) => {
                 const keys = Object.keys(dashboardData.exam_stats || {});
-                const matchKey = keys.find(
-                    (k) => k.toLowerCase() === examName.toLowerCase()
-                );
+                const matchKey = keys.find((k) => k.toLowerCase() === examName.toLowerCase());
                 return matchKey ? dashboardData.exam_stats[matchKey] : null;
             };
 
@@ -94,23 +90,17 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
 
             // Persist to local storage
             try {
-                localStorage.setItem(
-                    'subjectStats',
-                    JSON.stringify(defaultSubjectStats)
-                );
-            } catch (_e) {}
+                localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
+            } catch (e) {
+                console.warn('Failed to save subjectStats to localStorage', e);
+            }
 
             // Global Metrics
             const totalQuestions = primaryExamStats.total_available || 0;
             const uniqueAttemptCount = primaryExamStats.overall_attempted || 0;
-            const remainingQuestions = Math.max(
-                totalQuestions - uniqueAttemptCount,
-                0
-            );
+            const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
             const overallUniqueProgressPercent =
-                totalQuestions > 0
-                    ? Math.round((uniqueAttemptCount / totalQuestions) * 100)
-                    : 0;
+                totalQuestions > 0 ? Math.round((uniqueAttemptCount / totalQuestions) * 100) : 0;
 
             const dbStats = dashboardData.dashboard_stats || {};
 
@@ -122,10 +112,8 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
                 question: new Set(),
                 heatmapData: dashboardData.heatmap || [],
                 streaks: {
-                    learning_current:
-                        dashboardData.streaks?.learning_current || 0,
-                    learning_longest:
-                        dashboardData.streaks?.learning_longest || 0,
+                    learning_current: dashboardData.streaks?.learning_current || 0,
+                    learning_longest: dashboardData.streaks?.learning_longest || 0,
                     study_current: dashboardData.streaks?.study_current || 0,
                     study_longest: dashboardData.streaks?.study_longest || 0,
                 },
@@ -135,14 +123,14 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
                     remainingQuestions,
                     daysLeft: dbStats.days_left || 0,
                     dailyQuestionTarget: dbStats.daily_question_target || 0,
-                    todayUniqueAttemptCount:
-                        dbStats.today_unique_attempt_count || 0,
+                    todayUniqueAttemptCount: dbStats.today_unique_attempt_count || 0,
                     progressPercent: overallUniqueProgressPercent,
                     todayProgressPercent: dbStats.today_progress_percent || 0,
                     isTargetMetToday: dbStats.is_target_met_today || false,
                 },
             });
-        } catch (_err) {
+        } catch (err) {
+            console.error('Failed to update stats:', err);
         } finally {
             setLoading(false);
         }
@@ -156,7 +144,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
             return;
         }
         updateStats();
-    }, [updateStats]);
+    }, [currentSet?.set_id, updateStats]);
 
     // Global Event Handlers
     useEffect(() => {
@@ -166,10 +154,7 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
         window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
         window.addEventListener('STATS_UPDATED', handleStatsUpdate);
         return () => {
-            window.removeEventListener(
-                'REVISION_UPDATED',
-                handleRevisionUpdate
-            );
+            window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
             window.removeEventListener('STATS_UPDATED', handleStatsUpdate);
         };
     }, [fetchCurrentSet, updateStats]);

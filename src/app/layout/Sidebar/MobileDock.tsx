@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import useAuth from '@/shared/hooks/useAuth';
 import type { Tab } from './Sidebar';
+import useAuth from '@/shared/hooks/useAuth';
 
 type MobileDockProp = {
     tabs: Tab[];
@@ -44,11 +44,7 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
                             >
                                 <motion.div
                                     whileTap={{ scale: 0.92 }}
-                                    transition={{
-                                        type: 'spring',
-                                        stiffness: 500,
-                                        damping: 30,
-                                    }}
+                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                                     className="relative flex h-10 px-2 w-full max-w-[72px] items-center justify-center rounded-full"
                                 >
                                     {isActive && (
@@ -69,9 +65,7 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
 
                                     <div
                                         className={`relative z-10 flex flex-col items-center justify-center leading-none transition-colors duration-200 ${
-                                            isActive
-                                                ? 'text-foreground'
-                                                : 'text-muted-foreground'
+                                            isActive ? 'text-foreground' : 'text-muted-foreground'
                                         }`}
                                     >
                                         <motion.div

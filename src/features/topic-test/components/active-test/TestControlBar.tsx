@@ -1,13 +1,13 @@
+import { Button } from '@/shared/components/ui/button';
 import {
-    ArrowLeftIcon,
-    ArrowRightIcon,
-    BookmarkSimpleIcon,
-    CaretDownIcon,
     CaretUpIcon,
+    ArrowRightIcon,
+    CaretDownIcon,
+    ArrowLeftIcon,
+    BookmarkSimpleIcon,
     TrashSimpleIcon,
 } from '@phosphor-icons/react';
-import type React from 'react';
-import { Button } from '@/shared/components/ui/button';
+import React from 'react';
 
 interface TestControlBarProps {
     isFirst: boolean;
@@ -57,9 +57,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
             "
                     >
                         <TrashSimpleIcon size={18} />
-                        <span className="sr-only md:not-sr-only">
-                            Clear Response
-                        </span>
+                        <span className="sr-only md:not-sr-only">Clear Response</span>
                     </Button>
 
                     <Button
@@ -81,9 +79,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                             size={18}
                             weight={isReviewMarked ? 'fill' : 'regular'}
                         />
-                        <span className="sr-only md:not-sr-only">
-                            Mark for Review
-                        </span>
+                        <span className="sr-only md:not-sr-only">Mark for Review</span>
                     </Button>
                 </div>
 
@@ -97,11 +93,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                 px-3 py-3 text-sm font-medium
             "
                     >
-                        {isPaletteOpen ? (
-                            <CaretDownIcon size={18} />
-                        ) : (
-                            <CaretUpIcon size={18} />
-                        )}
+                        {isPaletteOpen ? <CaretDownIcon size={18} /> : <CaretUpIcon size={18} />}
                     </Button>
 
                     <Button

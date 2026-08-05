@@ -8,19 +8,13 @@ const db = appStorage;
 const initializeTestSession = async (
     session: TestSession,
     attempts: Attempt[],
-    questions: Question[]
+    questions: Question[],
 ) => {
-    await db.transaction(
-        'rw',
-        db.sessions,
-        db.attempts,
-        db.questions,
-        async () => {
-            await db.sessions.put(session);
-            await db.attempts.bulkPut(attempts);
-            await db.questions.bulkPut(questions);
-        }
-    );
+    await db.transaction('rw', db.sessions, db.attempts, db.questions, async () => {
+        await db.sessions.put(session);
+        await db.attempts.bulkPut(attempts);
+        await db.questions.bulkPut(questions);
+    });
 };
 
 // Loading a test session
@@ -28,10 +22,7 @@ const getTestSession = async (sessionId: string) => {
     const session = await db.sessions.get(sessionId);
     if (!session) return null;
 
-    const attempts = await db.attempts
-        .where('session_id')
-        .equals(sessionId)
-        .toArray();
+    const attempts = await db.attempts.where('session_id').equals(sessionId).toArray();
 
     const questionIds = attempts.map((a) => a.question_id);
 
@@ -47,17 +38,14 @@ const updateAttempts = async (
     updatedAttempts: Attempt[],
     attempted: number,
     totalScore: number,
-    correctCount: number
+    correctCount: number,
 ) => {
     await db.transaction('rw', db.attempts, db.sessions, async () => {
         await db.attempts.bulkPut(updatedAttempts);
 
         await db.sessions.update(testId, {
             score: totalScore,
-            accuracy:
-                attempted > 0
-                    ? Math.round((correctCount / attempted) * 100)
-                    : 0,
+            accuracy: attempted > 0 ? Math.round((correctCount / attempted) * 100) : 0,
             correct_count: correctCount,
             attempted_count: attempted,
             status: 'completed',
@@ -81,10 +69,7 @@ const getOngoingTestSession = async (branchId?: string) => {
 };
 
 const getCompletedTestSessions = async (branchId?: string) => {
-    const sessions = await db.sessions
-        .where('status')
-        .equals('completed')
-        .toArray();
+    const sessions = await db.sessions.where('status').equals('completed').toArray();
 
     let filtered = sessions;
     if (branchId) {
@@ -108,11 +93,7 @@ const saveAttempt = async (attempt: Attempt) => {
 };
 
 // Updating session time and status
-const updateSessionTimeAndStatus = async (
-    sessionId: string,
-    time: number,
-    status: string
-) => {
+const updateSessionTimeAndStatus = async (sessionId: string, time: number, status: string) => {
     const session = await db.sessions.get(sessionId);
     if (!session) return null;
 
@@ -140,15 +121,15 @@ const markAttemptsSynced = async (attempts: Attempt[]) => {
 };
 
 export {
-    cacheTestSessions,
-    getCompletedTestSessions,
-    getOngoingTestSession,
+    initializeTestSession,
+    getTestSession,
+    saveAttempt,
+    updateSessionTimeAndStatus,
     getPendingAttempts,
     getPendingSessions,
-    getTestSession,
-    initializeTestSession,
     markAttemptsSynced,
-    saveAttempt,
     updateAttempts,
-    updateSessionTimeAndStatus,
+    getOngoingTestSession,
+    getCompletedTestSessions,
+    cacheTestSessions,
 };
