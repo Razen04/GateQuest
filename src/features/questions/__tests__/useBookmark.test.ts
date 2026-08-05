@@ -2,8 +2,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { supabase } from '@/shared/utils/supabaseClient';
 import useBookmark from '../hooks/useBookmark';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 const mockRpc = <T>(data: T) => ({
     data,
@@ -105,13 +105,10 @@ describe('useBookmark hook', () => {
             });
 
             // Assert
-            expect(supabase.rpc).toHaveBeenCalledWith(
-                'toggle_question_bookmark',
-                {
-                    p_question_id: 'q1',
-                    p_note: 'note',
-                }
-            );
+            expect(supabase.rpc).toHaveBeenCalledWith('toggle_question_bookmark', {
+                p_question_id: 'q1',
+                p_note: 'note',
+            });
 
             expect(supabase.rpc).toHaveBeenCalledWith('get_user_bookmarks', {
                 p_subject_slug: 'dsa',
@@ -154,12 +151,9 @@ describe('useBookmark hook', () => {
             });
 
             // Assert
-            expect(supabase.rpc).toHaveBeenCalledWith(
-                'toggle_question_bookmark',
-                {
-                    p_question_id: 'q1',
-                }
-            );
+            expect(supabase.rpc).toHaveBeenCalledWith('toggle_question_bookmark', {
+                p_question_id: 'q1',
+            });
 
             expect(supabase.rpc).toHaveBeenCalledWith('get_user_bookmarks', {
                 p_subject_slug: 'dsa',
@@ -178,9 +172,7 @@ describe('useBookmark hook', () => {
         it('should maintain the same state when there is any error', async () => {
             const mockedSupabase = vi.mocked(supabase);
 
-            mockedSupabase.rpc.mockRejectedValueOnce(
-                new Error('Network error')
-            );
+            mockedSupabase.rpc.mockRejectedValueOnce(new Error('Network error'));
 
             const { result } = renderHook(() => useBookmark());
 
@@ -192,7 +184,7 @@ describe('useBookmark hook', () => {
                     questionId: 'q1',
                     subjectSlug: 'dsa',
                     note: 'note',
-                })
+                }),
             ).rejects.toThrowError('Network error');
 
             // after failure the state should remain same
@@ -210,7 +202,7 @@ describe('useBookmark hook', () => {
                     questionId: 'q1',
                     subjectSlug: 'dsa',
                     note: 'a'.repeat(101),
-                })
+                }),
             ).rejects.toThrowError();
 
             expect(mockedSupabase.rpc).not.toHaveBeenCalled();
@@ -265,13 +257,10 @@ describe('useBookmark hook', () => {
             });
 
             // Assert
-            expect(supabase.rpc).toHaveBeenCalledWith(
-                'update_question_bookmark_note',
-                {
-                    p_question_id: 'q1',
-                    p_note: 'note',
-                }
-            );
+            expect(supabase.rpc).toHaveBeenCalledWith('update_question_bookmark_note', {
+                p_question_id: 'q1',
+                p_note: 'note',
+            });
 
             expect(supabase.rpc).toHaveBeenCalledWith('get_user_bookmarks', {
                 p_subject_slug: 'dsa',
@@ -288,9 +277,7 @@ describe('useBookmark hook', () => {
         it('should maintain the same state when there is any error', async () => {
             const mockedSupabase = vi.mocked(supabase);
 
-            mockedSupabase.rpc.mockRejectedValueOnce(
-                new Error('Network error')
-            );
+            mockedSupabase.rpc.mockRejectedValueOnce(new Error('Network error'));
 
             const { result } = renderHook(() => useBookmark());
 
@@ -302,16 +289,13 @@ describe('useBookmark hook', () => {
                     questionId: 'q1',
                     subjectSlug: 'dsa',
                     note: 'note',
-                })
+                }),
             ).rejects.toThrowError('Network error');
 
-            expect(supabase.rpc).toHaveBeenCalledWith(
-                'update_question_bookmark_note',
-                {
-                    p_question_id: 'q1',
-                    p_note: 'note',
-                }
-            );
+            expect(supabase.rpc).toHaveBeenCalledWith('update_question_bookmark_note', {
+                p_question_id: 'q1',
+                p_note: 'note',
+            });
 
             // after failure the state should remain same
             expect(result.current.bookmarksMap).toEqual({});
@@ -328,7 +312,7 @@ describe('useBookmark hook', () => {
                     questionId: 'q1',
                     subjectSlug: 'dsa',
                     note: 'a'.repeat(101),
-                })
+                }),
             ).rejects.toThrowError();
 
             expect(mockedSupabase.rpc).not.toHaveBeenCalled();

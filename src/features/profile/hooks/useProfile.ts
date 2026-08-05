@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getPublicProfile } from '../api/profileApi';
 import type { ProfileData } from '../types/profile';
+import { getPublicProfile } from '../api/profileApi';
 
 const profileCache = new Map<string, ProfileData>();
 
@@ -48,6 +48,7 @@ export const useProfile = (username: string) => {
                     setData(profileData as ProfileData);
                 }
             } catch (err: any) {
+                console.error('Failed to fetch profile:', err);
                 if (isMounted) {
                     setError(err.message || 'This profile is private.');
                 }

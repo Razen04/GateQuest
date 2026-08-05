@@ -1,5 +1,5 @@
+import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import type React from 'react';
 
 // Never change this only the lead developer touches this
 const upiId = 'razen@upi';

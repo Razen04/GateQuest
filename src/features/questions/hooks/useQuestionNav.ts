@@ -3,11 +3,9 @@
  * It determines the current question's position within a filtered list and provides handlers to move to the next or previous question.
  * It expects question IDs to be comparable as strings.
  */
-
-import type React from 'react';
-import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { Question } from '@/shared/types/storage';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type questionMode = 'practice' | 'revision';
 
@@ -36,11 +34,8 @@ export default function useQuestionNav({
     // Find the numerical index of the current question in the filtered array.
     // Using String() ensures consistent comparison, as IDs might be numbers or strings.
     const index = useMemo(
-        () =>
-            filteredQuestions.findIndex(
-                (q) => String(q.id) === String(currentIndex)
-            ),
-        [filteredQuestions, currentIndex]
+        () => filteredQuestions.findIndex((q) => String(q.id) === String(currentIndex)),
+        [filteredQuestions, currentIndex],
     );
 
     // Determine if the current question is the first or last in the list.

@@ -1,24 +1,23 @@
-import {
-    ArrowLeft,
-    CheckCircle,
-    Play,
-    Question,
-    Timer,
-    WarningCircle,
-} from '@phosphor-icons/react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
-import { getCurrentUser } from '@/shared/api/auth';
-import ModernLoader from '@/shared/components/ModernLoader';
-import PageHeader from '@/shared/components/PageHeader';
+import {
+    Timer,
+    Question,
+    Play,
+    WarningCircle,
+    CheckCircle,
+    ArrowLeft,
+} from '@phosphor-icons/react';
 import { Button } from '@/shared/components/ui/button';
-import { useGoals } from '@/shared/hooks/useGoals';
+import PageHeader from '@/shared/components/PageHeader';
+import { toast } from 'sonner';
 import type { TestSession } from '@/shared/types/storage';
+import ModernLoader from '@/shared/components/ModernLoader';
+import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
+import { useGoals } from '@/shared/hooks/useGoals';
 import { fetchTestById, updateTestStatus } from '../api/topicTest';
+import { getCurrentUser } from '@/shared/api/auth';
 
 type InstructionRule = {
     id: string;
@@ -46,8 +45,8 @@ const INSTRUCTION_RULES: InstructionRule[] = [
         id: 'pause',
         text: (
             <>
-                Closing the app will <strong>Pause</strong> the timer, but try
-                to finish in one sitting.
+                Closing the app will <strong>Pause</strong> the timer, but try to finish in one
+                sitting.
             </>
         ),
         type: 'warning',
@@ -61,11 +60,7 @@ const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
 
     return (
         <div className="flex gap-3">
-            <Icon
-                size={18}
-                weight="fill"
-                className={`${iconColor} shrink-0 mt-0.5`}
-            />
+            <Icon size={18} weight="fill" className={`${iconColor} shrink-0 mt-0.5`} />
             <p>{rule.text}</p>
         </div>
     );
@@ -87,6 +82,7 @@ const TopicTestLobby = () => {
             const { data, error } = await fetchTestById(testId);
 
             if (error) {
+                console.error('Error fetching test:', error);
                 toast.error('Test not found');
                 navigate('/topic-test');
                 return;
@@ -120,7 +116,8 @@ const TopicTestLobby = () => {
 
             await syncTestFromSupabaseToDexie(user.id, userGoal?.branch_id);
             navigate(`/topic-test/${testId}/attempt`);
-        } catch (_err) {
+        } catch (err) {
+            console.error(err);
             toast.error('Failed to start test. Please check your connection.');
             setStarting(false);
         }
@@ -155,9 +152,7 @@ const TopicTestLobby = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="rounded-3xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
                 >
-                    <h2 className="text-xl font-bold mb-1">
-                        Custom Topic Test
-                    </h2>
+                    <h2 className="text-xl font-bold mb-1">Custom Topic Test</h2>
 
                     <p className="text-sm truncate text-slate-500 dark:text-slate-400 mb-6 max-w-md">
                         {testData.topics.join(', ')}

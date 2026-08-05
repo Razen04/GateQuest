@@ -1,11 +1,11 @@
 // This custom hook encapsulates the logic for handling the entire answer submission process, from revealing the correct answer to recording the user's attempt.
-import type React from 'react';
-import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
-import { invalidateProfileCache } from '@/features/profile/hooks/useProfile';
-import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
-import { useGoals } from '@/shared/hooks/useGoals';
+import React from 'react';
 import type { AppUser } from '@/shared/types/AppUser';
+import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
+import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
+import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question } from '@/shared/types/storage';
+import { invalidateProfileCache, useProfile } from '@/features/profile/hooks/useProfile';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;
@@ -15,9 +15,7 @@ type useAnswerFlowProps = {
     user: AppUser | null;
     isLogin: boolean;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
-    setResult: React.Dispatch<
-        React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>
-    >;
+    setResult: React.Dispatch<React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>>;
     stop: () => void;
     showAnswer: boolean;
 };

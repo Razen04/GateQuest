@@ -1,5 +1,5 @@
-import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { useDonations } from '../../hooks/useDonations.ts';
 
@@ -89,9 +89,9 @@ describe('useDonations hook', () => {
             expect(result.current.donations).toHaveLength(3);
 
             // Checking formatting logic
-            expect(result.current.donations[0]?.user_name).toBe('Anonymous');
-            expect(result.current.donations[1]?.user_name).toBe('Razen');
-            expect(result.current.donations[2]?.user_name).toBe('Anonymous');
+            expect(result.current.donations[0]!.user_name).toBe('Anonymous');
+            expect(result.current.donations[1]!.user_name).toBe('Razen');
+            expect(result.current.donations[2]!.user_name).toBe('Anonymous');
 
             expect(result.current.loading).toBe(false);
         });
@@ -103,9 +103,7 @@ describe('useDonations hook', () => {
             mockedSupabase.rpc.mockResolvedValue(mockRpc(null, 'RPC ERROR!'));
 
             // Spy on console.error (so we can assert it was called)
-            const errorSpy = vi
-                .spyOn(console, 'error')
-                .mockImplementation(() => {});
+            const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
             const { result } = renderHook(() => useDonations());
 
@@ -128,10 +126,7 @@ describe('useDonations hook', () => {
             expect(result.current.error).toBe(true);
 
             // Error should be called
-            expect(errorSpy).toHaveBeenCalledWith(
-                'Error loading donations:',
-                'RPC ERROR!'
-            );
+            expect(errorSpy).toHaveBeenCalledWith('Error loading donations:', 'RPC ERROR!');
 
             errorSpy.mockRestore();
         });
@@ -202,9 +197,7 @@ describe('useDonations hook', () => {
                 insert: mockInsert,
             } as unknown as ReturnType<typeof supabase.from>);
 
-            const errorSpy = vi
-                .spyOn(console, 'error')
-                .mockImplementation(() => {});
+            const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
             const { result } = renderHook(() => useDonations());
 
@@ -218,7 +211,7 @@ describe('useDonations hook', () => {
                         anonymous: false,
                         utr: 'UTR123',
                     });
-                })
+                }),
             ).rejects.toBe('Insert failed.');
 
             // Assertion

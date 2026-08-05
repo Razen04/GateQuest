@@ -1,33 +1,27 @@
-import {
-    DiscordLogoIcon,
-    FediverseLogoIcon,
-    GithubLogoIcon,
-    LinkedinLogoIcon,
-    MastodonLogoIcon,
-    RedditLogoIcon,
-    SpotifyLogoIcon,
-    XLogoIcon,
-    YoutubeLogoIcon,
-} from '@phosphor-icons/react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import useAuth from '@/shared/hooks/useAuth';
 import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import useAuth from '@/shared/hooks/useAuth';
 import {
-    getSocialSettingsValue,
-    handleUpdateSocialSettings,
-} from '../api/social-settings';
+    GithubLogoIcon,
+    LinkedinLogoIcon,
+    RedditLogoIcon,
+    SpotifyLogoIcon,
+    DiscordLogoIcon,
+    XLogoIcon,
+    MastodonLogoIcon,
+    FediverseLogoIcon,
+    YoutubeLogoIcon,
+} from '@phosphor-icons/react';
+import { getSocialSettingsValue, handleUpdateSocialSettings } from '../api/social-settings';
 
 interface SocialSettingsFormProps {
     onSuccess?: () => void;
 }
 
-export default function SocialSettingsForm({
-    onSuccess,
-}: SocialSettingsFormProps) {
+export default function SocialSettingsForm({ onSuccess }: SocialSettingsFormProps) {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -85,8 +79,7 @@ export default function SocialSettingsForm({
         setIsSaving(false);
     };
 
-    if (isLoading)
-        return <div className="text-sm text-slate-500">Loading socials...</div>;
+    if (isLoading) return <div className="text-sm text-slate-500">Loading socials...</div>;
 
     // ... inside SocialSettingsForm
 
@@ -156,24 +149,15 @@ export default function SocialSettingsForm({
             <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
                 {socialFields.map((field) => (
                     <div key={field.name} className="space-y-2">
-                        <Label
-                            htmlFor={field.name}
-                            className="flex items-center gap-2"
-                        >
+                        <Label htmlFor={field.name} className="flex items-center gap-2">
                             {field.icon} {field.label}
                         </Label>
                         <Input
                             id={field.name}
                             name={field.name}
-                            type={
-                                'inputType' in field ? field.inputType : 'url'
-                            }
+                            type={'inputType' in field ? field.inputType : 'url'}
                             defaultValue={field.value}
-                            placeholder={
-                                'placeholder' in field
-                                    ? field.placeholder
-                                    : 'https://'
-                            }
+                            placeholder={'placeholder' in field ? field.placeholder : 'https://'}
                             className="rounded-none"
                         />
                     </div>
@@ -181,11 +165,7 @@ export default function SocialSettingsForm({
             </div>
 
             <div className="pt-4 border-t flex justify-end">
-                <Button
-                    type="submit"
-                    disabled={isSaving}
-                    className="w-full sm:w-auto rounded-none"
-                >
+                <Button type="submit" disabled={isSaving} className="w-full sm:w-auto rounded-none">
                     {isSaving ? 'Saving...' : 'Save Socials'}
                 </Button>
             </div>

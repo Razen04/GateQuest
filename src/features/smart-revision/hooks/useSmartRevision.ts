@@ -1,10 +1,9 @@
-import { compress } from 'lz-string';
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { compress } from 'lz-string';
 import { toast } from 'sonner';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { RevisionQuestion } from '@/shared/types/storage';
-import { getUserProfile } from '@/shared/utils/helper';
 import {
     fetchCriticalQuestionCount,
     fetchWeeklySet,
@@ -12,6 +11,7 @@ import {
     startWeeklySet,
     type WeeklySet,
 } from '../api/smartRevision';
+import { getUserProfile } from '@/shared/utils/helper';
 
 const useSmartRevision = () => {
     // Getting the user
@@ -42,15 +42,13 @@ const useSmartRevision = () => {
                 setQuestions(data.questions || []);
 
                 // storing the weekly set info
-                localStorage.setItem(
-                    'weekly_set_info',
-                    compress(JSON.stringify(data))
-                );
+                localStorage.setItem('weekly_set_info', compress(JSON.stringify(data)));
             } else {
                 setCurrentSet(null);
                 setQuestions([]);
             }
-        } catch (_err) {
+        } catch (err) {
+            console.error('Error fetching weekly set:', err);
         } finally {
             setLoading(false);
         }
@@ -62,15 +60,13 @@ const useSmartRevision = () => {
 
         setLoading(true);
         const activeSubjects = getPracticeSubjects().map((s) => s.id);
-        const activeExams =
-            (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) ||
-            [];
+        const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
 
         try {
             const { data, error } = await generateWeeklySet(
                 activeSubjects,
                 activeExams,
-                userGoal?.branch_id
+                userGoal?.branch_id,
             );
 
             if (error) throw error;
@@ -85,17 +81,13 @@ const useSmartRevision = () => {
                 // Letting the event to know the whole app that the app has generated revision set
                 window.dispatchEvent(new Event('REVISION_UPDATED'));
             }
-        } catch (_err) {
+        } catch (err) {
+            console.error('Error generating set', err);
             toast.error('Error generating set.');
         } finally {
             setLoading(false);
         }
-    }, [
-        userGoal?.branch_id,
-        userGoal?.target_exams,
-        getPracticeSubjects,
-        fetchCurrentSet,
-    ]);
+    }, [userGoal?.branch_id, userGoal?.target_exams, getPracticeSubjects, fetchCurrentSet]);
 
     // Start the set
     const startSet = useCallback(async () => {
@@ -118,7 +110,8 @@ const useSmartRevision = () => {
             }
 
             navigate(`/revision/${currentSet.set_id}`);
-        } catch (_err) {
+        } catch (err) {
+            console.error('Error starting set:', err);
         } finally {
             setLoading(false);
         }
@@ -132,18 +125,18 @@ const useSmartRevision = () => {
             // Get present week's Sunday (end of week)
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
             const activeExams =
-                (userGoal?.target_exams as string[])?.map((e) =>
-                    e.toUpperCase()
-                ) || [];
+                (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
             const { data: count, error } = await fetchCriticalQuestionCount(
                 activeSubjects,
-                activeExams
+                activeExams,
             );
 
             if (error) throw error;
 
             setCriticalQuestionsCount(count ?? 0);
-        } catch (_err) {}
+        } catch (err) {
+            console.error('Error fetching critical question count:', err);
+        }
     }, [userId, getPracticeSubjects, userGoal?.target_exams]);
 
     useEffect(() => {

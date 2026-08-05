@@ -1,22 +1,22 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import {
-    BookOpen,
-    ChartPieSlice,
+    Notification,
     Coffee,
     DiscordLogo,
-    Gear,
     GithubLogo,
+    ChartPieSlice,
+    BookOpen,
+    Gear,
     Info,
-    Notification,
     Star,
     UserCircleDashedIcon,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Changelog from '@/shared/components/Changelog';
+import { useNavigate, useLocation } from 'react-router-dom';
 import NotificationDialog from '@/shared/components/NotificationDialog';
-import useAuth from '@/shared/hooks/useAuth';
 import useWindowSize from '@/shared/hooks/useWindowSize';
+import Changelog from '@/shared/components/Changelog';
+import useAuth from '@/shared/hooks/useAuth';
 
 const springTransition = {
     type: 'spring' as const,
@@ -39,18 +39,14 @@ const Navbar = () => {
 
     // Close notifications panel on click outside
     const handleClickOutside = useCallback((event: MouseEvent) => {
-        if (
-            notificationRef.current &&
-            !notificationRef.current.contains(event.target as Node)
-        ) {
+        if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
             setShowNotifications(false);
         }
     }, []);
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [handleClickOutside]);
 
     // Fetch GitHub Stars with 1-hour cache
@@ -64,17 +60,12 @@ const Navbar = () => {
                 .then((data) => {
                     const count = data.stargazers_count;
                     const formatted =
-                        count > 999
-                            ? `${(count / 1000).toFixed(1)}k`
-                            : String(count || 0);
+                        count > 999 ? (count / 1000).toFixed(1) + 'k' : String(count || 0);
 
                     setStarCount(formatted);
                     localStorage.setItem(
                         CACHE_KEY,
-                        JSON.stringify({
-                            count: formatted,
-                            timestamp: Date.now(),
-                        })
+                        JSON.stringify({ count: formatted, timestamp: Date.now() }),
                     );
                 })
                 .catch(() => setStarCount('0'));
@@ -174,26 +165,16 @@ const Navbar = () => {
                     <motion.nav
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{
-                            duration: 0.5,
-                            delay: 0.1,
-                            ease: 'easeOut',
-                        }}
+                        transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
                         className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-1 p-1.5  dark:bg-zinc-900/60"
                     >
                         {/* Light highlight edge */}
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20" />
 
                         {tabs
-                            .filter(
-                                (tab) =>
-                                    tab.id !== 'profile' ||
-                                    user?.settings?.is_beta
-                            )
+                            .filter((tab) => tab.id !== 'profile' || user?.settings?.is_beta)
                             .map((tab) => {
-                                const isActive = location.pathname.startsWith(
-                                    tab.path
-                                );
+                                const isActive = location.pathname.startsWith(tab.path);
                                 return (
                                     <button
                                         key={tab.id}
@@ -212,9 +193,7 @@ const Navbar = () => {
                                             />
                                         )}
                                         <span className="relative z-10 text-base">
-                                            {isActive
-                                                ? tab.activeIcon
-                                                : tab.icon}
+                                            {isActive ? tab.activeIcon : tab.icon}
                                         </span>
                                         <span className="relative z-10 font-['Space_Grotesk',sans-serif]">
                                             {tab.name}
@@ -252,11 +231,7 @@ const Navbar = () => {
                         <GithubLogo size={18} weight="bold" />
                         {starCount !== null && (
                             <span className="hidden md:flex items-center gap-0.5 border border-slate-900/10 bg-slate-100/80 px-1.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-300">
-                                <Star
-                                    size={10}
-                                    weight="fill"
-                                    className="text-amber-500"
-                                />
+                                <Star size={10} weight="fill" className="text-amber-500" />
                                 {starCount}
                             </span>
                         )}
@@ -276,9 +251,7 @@ const Navbar = () => {
 
                     <div className="relative" ref={notificationRef}>
                         <button
-                            onClick={() =>
-                                setShowNotifications(!showNotifications)
-                            }
+                            onClick={() => setShowNotifications(!showNotifications)}
                             aria-label="Notifications"
                             className="relative flex h-8 w-8 items-center justify-center text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-all"
                         >

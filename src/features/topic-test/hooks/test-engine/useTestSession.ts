@@ -1,4 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import useTestAnswer from './useTestAnswer';
+import useTestNavigation from './useTestNavigation';
+import useTestTimer from './useTestTimer';
+import useTestGrading from './useTestGrading';
+import type { TestData } from './useTestLoader';
+import type { Question } from '@/shared/types/storage';
 import { useNavigate } from 'react-router-dom';
 import {
     getPendingAttempts,
@@ -6,13 +12,7 @@ import {
     markAttemptsSynced,
     updateSessionTimeAndStatus,
 } from '@/features/topic-test/services/testSession';
-import type { Question } from '@/shared/types/storage';
 import { updateTestTime, upsertAttempts } from '../../api/topicTest';
-import useTestAnswer from './useTestAnswer';
-import useTestGrading from './useTestGrading';
-import type { TestData } from './useTestLoader';
-import useTestNavigation from './useTestNavigation';
-import useTestTimer from './useTestTimer';
 
 export interface UseTestSessionReturn {
     status: 'ready' | 'error' | 'submitting' | 'completed';
@@ -26,13 +26,8 @@ export interface UseTestSessionReturn {
     handleSubmit: () => void;
 }
 
-const useTestSession = (
-    testId: string,
-    data: TestData
-): UseTestSessionReturn => {
-    const [status, setStatus] = useState<
-        'ready' | 'error' | 'submitting' | 'completed'
-    >('ready');
+const useTestSession = (testId: string, data: TestData): UseTestSessionReturn => {
+    const [status, setStatus] = useState<'ready' | 'error' | 'submitting' | 'completed'>('ready');
     const navigate = useNavigate();
 
     // for tracking time_spent_seconds for each Attempt
@@ -57,12 +52,9 @@ const useTestSession = (
 
         const questionId = question.id;
 
-        const deltaSeconds = Math.floor(
-            (Date.now() - startTimeRef.current) / 1000
-        );
+        const deltaSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
-        const attemptOrder =
-            data.questions.findIndex((q) => q.id === question.id) + 1;
+        const attemptOrder = data.questions.findIndex((q) => q.id === question.id) + 1;
         answers.updateTimeSpent(questionId, deltaSeconds, attemptOrder);
         startTimeRef.current = Date.now();
     }, [answers, navigation.currentIndex, data.questions]);
@@ -83,21 +75,18 @@ const useTestSession = (
             commitCurrentTime();
             navigation.jumpTo(index);
         },
-        [navigation, commitCurrentTime]
+        [navigation, commitCurrentTime],
     );
 
     const { currentIndex } = navigation;
     useEffect(() => {
         const question = data.questions[currentIndex];
         if (question) {
-            const realIndex = data.questions.findIndex(
-                (q) => q.id === question.id
-            );
-            const attemptOrder =
-                realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
+            const realIndex = data.questions.findIndex((q) => q.id === question.id);
+            const attemptOrder = realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
             answers.markAsVisited(question.id, attemptOrder);
         }
-    }, [currentIndex, data.questions, answers]);
+    }, [currentIndex, data.questions, answers, status]);
 
     // wrapper for submit button which will also sync with supabase
     const handleSubmit = useCallback(async () => {
@@ -118,7 +107,8 @@ const useTestSession = (
 
             navigate(`/topic-test-result/${testId}`, { replace: true });
             setStatus('completed');
-        } catch (_err) {
+        } catch (err) {
+            console.error('Error in handleSubmit: ', err);
             setStatus('error');
         }
     }, [commitCurrentTime, grading, testId, navigate]);
@@ -148,14 +138,11 @@ const useTestSession = (
 
                     const payload = dirtyAttempts.map((a) => {
                         // Find the REAL index from the master list
-                        const realIndex = data.questions.findIndex(
-                            (q) => q.id === a.question_id
-                        );
+                        const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
 
                         // Calculate the order (1-based)
                         // Fallback to a.attempt_order only if not found
-                        const finalOrder =
-                            realIndex !== -1 ? realIndex + 1 : a.attempt_order;
+                        const finalOrder = realIndex !== -1 ? realIndex + 1 : a.attempt_order;
 
                         return {
                             session_id: a.session_id,
@@ -175,9 +162,12 @@ const useTestSession = (
                         // mark attempts as synced locally
                         await markAttemptsSynced(dirtyAttempts);
                     } else {
+                        console.error('Heartbeat upsert error:', error);
                     }
                 }
-            } catch (_err) {}
+            } catch (err) {
+                console.error('Heartbeat failed:', err);
+            }
         };
 
         // run immediately once
@@ -192,15 +182,10 @@ const useTestSession = (
             cancelled = true;
             clearInterval(interval);
         };
-    }, [testId, data.questions]);
+    }, [testId, status, data.questions]);
 
     useEffect(() => {
-        if (
-            timer.isExpired &&
-            status !== 'completed' &&
-            status !== 'submitting'
-        )
-            handleSubmit();
+        if (timer.isExpired && status !== 'completed' && status !== 'submitting') handleSubmit();
     }, [timer.isExpired, status, handleSubmit]);
 
     // to save the timer value to appStorage every 5s
@@ -209,11 +194,7 @@ const useTestSession = (
 
         timerRef.current = timer.secondsRemaining;
         const saveTimer = async () => {
-            await updateSessionTimeAndStatus(
-                testId,
-                timer.secondsRemaining,
-                status
-            );
+            await updateSessionTimeAndStatus(testId, timer.secondsRemaining, status);
         };
 
         if (timer.secondsRemaining % 5 === 0) {

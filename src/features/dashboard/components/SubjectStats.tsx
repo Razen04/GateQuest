@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import type React from 'react';
-import { useGoals } from '@/shared/hooks/useGoals';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import type React from 'react';
+import { useGoals } from '@/shared/hooks/useGoals';
 
 // Using the exact structure returned by your new RPC
 type SubjectStat = {
@@ -39,7 +39,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                             const accuracy = Number(subject.accuracy) || 0;
 
                             const subjectMeta = subjects.find(
-                                (s) => s.slug === subject.subject_slug
+                                (s) => s.slug === subject.subject_slug,
                             );
 
                             const SubjectIcon = SubjectIconMap[
@@ -47,12 +47,9 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                             ] as React.ElementType;
 
                             const questionCount =
-                                subject.total_available ||
-                                subjectMeta?.question_count;
+                                subject.total_available || subjectMeta?.question_count;
 
-                            const bgClass = getBackgroundColor(
-                                subjectMeta?.theme_color as string
-                            );
+                            const bgClass = getBackgroundColor(subjectMeta?.theme_color as string);
 
                             return (
                                 <motion.div

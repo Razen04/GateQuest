@@ -1,16 +1,16 @@
 import {
-    Binary,
+    LinuxLogo,
     Brain,
-    Cpu,
     Database,
+    Globe,
+    Cpu,
+    Graph,
+    Terminal,
+    GitBranch,
+    Binary,
     Empty,
     FileCode,
-    GitBranch,
-    Globe,
-    Graph,
-    LinuxLogo,
     Pi,
-    Terminal,
 } from '@phosphor-icons/react';
 import type { Subject } from '../types/Subject.ts';
 

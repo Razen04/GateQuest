@@ -1,26 +1,22 @@
+import { motion } from 'framer-motion';
+import type { ProfileData } from '../types/profile';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import {
     CalendarBlank,
-    DiscordLogo,
-    FediverseLogoIcon,
-    GithubLogo,
-    Globe,
     GraduationCap,
+    GithubLogo,
     LinkedinLogo,
-    MastodonLogoIcon,
+    Globe,
+    XLogoIcon,
+    DiscordLogo,
     RedditLogo,
     SpotifyLogo,
-    XLogoIcon,
     YoutubeLogo,
+    FediverseLogoIcon,
+    MastodonLogoIcon,
 } from '@phosphor-icons/react';
-import { motion } from 'framer-motion';
 import type { JSX } from 'react';
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from '@/shared/components/ui/avatar';
-import { eyebrow, glassPanel } from '../styles/profileTheme';
-import type { ProfileData } from '../types/profile';
+import { glassPanel, eyebrow } from '../styles/profileTheme';
 
 const SOCIAL_ICONS: Record<string, JSX.Element> = {
     github: <GithubLogo size={15} />,
@@ -44,7 +40,7 @@ export default function ProfileHero({ profile }: ProfileHeroProps) {
     const displayInitials = displayName.substring(0, 2).toUpperCase();
 
     const activeSocials = Object.entries(profile.socials || {}).filter(
-        ([, val]) => val !== null && val !== ''
+        ([, val]) => val !== null && val !== '',
     );
 
     return (
@@ -88,23 +84,15 @@ export default function ProfileHero({ profile }: ProfileHeroProps) {
                         <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-white/60">
                             {profile.college && (
                                 <span className="inline-flex items-center gap-1.5">
-                                    <GraduationCap
-                                        size={15}
-                                        className="text-[#3E8EFF]"
-                                    />
+                                    <GraduationCap size={15} className="text-[#3E8EFF]" />
                                     {profile.college}
                                 </span>
                             )}
                             {profile.joined_at && (
                                 <span className="inline-flex items-center gap-1.5">
-                                    <CalendarBlank
-                                        size={15}
-                                        className="text-slate-400"
-                                    />
+                                    <CalendarBlank size={15} className="text-slate-400" />
                                     Joined{' '}
-                                    {new Date(
-                                        profile.joined_at
-                                    ).toLocaleDateString('en-US', {
+                                    {new Date(profile.joined_at).toLocaleDateString('en-US', {
                                         month: 'short',
                                         year: 'numeric',
                                     })}
@@ -128,21 +116,13 @@ export default function ProfileHero({ profile }: ProfileHeroProps) {
                                 {activeSocials.map(([key, url]) => (
                                     <a
                                         key={key}
-                                        href={
-                                            url?.startsWith('http') ? url : '#'
-                                        }
-                                        target={
-                                            url?.startsWith('http')
-                                                ? '_blank'
-                                                : undefined
-                                        }
+                                        href={url?.startsWith('http') ? url : '#'}
+                                        target={url?.startsWith('http') ? '_blank' : undefined}
                                         rel="noreferrer"
                                         title={key}
                                         className="flex h-8 w-8 items-center justify-center border border-white/60 bg-white/50 text-slate-600 transition-all hover:-translate-y-0.5 hover:border-[#3E8EFF]/40 hover:text-[#3E8EFF] hover:shadow-md dark:border-white/10 dark:bg-white/[0.05] dark:text-white/60 dark:hover:text-[#8fbcff]"
                                     >
-                                        {SOCIAL_ICONS[key] || (
-                                            <Globe size={15} />
-                                        )}
+                                        {SOCIAL_ICONS[key] || <Globe size={15} />}
                                     </a>
                                 ))}
                             </div>

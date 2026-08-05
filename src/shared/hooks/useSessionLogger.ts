@@ -29,10 +29,7 @@ export const useSessionLogger = () => {
 
         if (isPractice || isRevision || isTopicTest || isDonate) {
             localStorage.setItem('gatequest_last_active_session', currentPath);
-            localStorage.setItem(
-                'gatequest_last_active_timestamp',
-                String(Date.now())
-            );
+            localStorage.setItem('gatequest_last_active_timestamp', String(Date.now()));
         }
     }, [location]);
 };

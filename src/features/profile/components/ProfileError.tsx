@@ -1,5 +1,5 @@
-import { ArrowLeft, House, LockKey, UserMinus } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { UserMinus, LockKey, ArrowLeft, House } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { glassPanel } from '../styles/profileTheme';
 
@@ -35,11 +35,7 @@ export default function ProfileError({ message }: ProfileErrorProps) {
             >
                 <div className={`${glassPanel} p-8`}>
                     <div className="relative mx-auto mb-8 flex h-24 w-24 items-center justify-center border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/[0.06]">
-                        <Icon
-                            size={30}
-                            weight="duotone"
-                            style={{ color: accent }}
-                        />
+                        <Icon size={30} weight="duotone" style={{ color: accent }} />
                     </div>
 
                     <div className="text-center">

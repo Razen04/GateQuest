@@ -1,27 +1,28 @@
+import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
-    BellRinging,
-    Clock,
-    Cpu,
-    GitBranch,
-    MoonStars,
-    Sliders,
-    Sparkle,
     SpeakerHigh,
     Timer,
+    MoonStars,
+    BellRinging,
     WarningCircle,
+    Cpu,
+    GitBranch,
+    Clock,
+    Sliders,
+    Sparkle,
 } from '@phosphor-icons/react';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
-import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
-import AskAI from '@/features/settings/components/AskAI';
+
 import useSettings from '@/features/settings/hooks/useSettings';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
-import { last_updated, version } from '../../../../package.json';
+import AskAI from '@/features/settings/components/AskAI';
+import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
+import { version, last_updated } from '../../../../package.json';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();
-    const { status, enableNotifications, disableNotifications, isProcessing } =
-        useWebPush();
+    const { status, enableNotifications, disableNotifications, isProcessing } = useWebPush();
     const APP_VERSION = version;
     const APP_LAST_UPDATED_AT = last_updated;
 
@@ -41,15 +42,13 @@ const AppSettings = () => {
         if (isProcessing) return;
 
         if (status === 'unsupported') {
-            toast.error(
-                'Web Push notifications are not supported on this browser.'
-            );
+            toast.error('Web Push notifications are not supported on this browser.');
             return;
         }
 
         if (status === 'denied') {
             toast.info(
-                'Notifications are blocked by browser settings. Click the lock icon in your browser URL bar to grant permission.'
+                'Notifications are blocked by browser settings. Click the lock icon in your browser URL bar to grant permission.',
             );
             return;
         }
@@ -64,7 +63,7 @@ const AppSettings = () => {
             <div className="flex items-center justify-between border-b border-slate-900/10 pb-4 dark:border-white/10">
                 <div className="space-y-1">
                     <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
-                        CONTROL {/* CENTER */}
+                        CONTROL // CENTER
                     </p>
                     <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                         Application Preferences
@@ -81,7 +80,7 @@ const AppSettings = () => {
             {/* Core Preferences Matrix */}
             <div className="space-y-3">
                 <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    {/* USER EXPERIENCE & INTERACTION */}
+                    // USER EXPERIENCE & INTERACTION
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">
@@ -136,14 +135,10 @@ const AppSettings = () => {
             {/* AI Assistant Module */}
             <div className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white p-5 shadow-sm dark:border-white/10 dark:from-white/[0.03] dark:to-white/[0.01]">
                 <div className="mb-3 flex items-center gap-2">
-                    <Sparkle
-                        size={18}
-                        className="text-[#2A5CFF]"
-                        weight="fill"
-                    />
+                    <Sparkle size={18} className="text-[#2A5CFF]" weight="fill" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        AI Integration (Cause Everyone is doing this shit, it is
-                        kinda helpful though)
+                        AI Integration (Cause Everyone is doing this shit, it is kinda helpful
+                        though)
                     </span>
                 </div>
                 <AskAI />

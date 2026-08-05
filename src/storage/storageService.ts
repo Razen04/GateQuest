@@ -1,14 +1,8 @@
-import Dexie, { type Table } from 'dexie';
-import type {
-    Attempt,
-    Question,
-    QuestionSyncMetadata,
-    TestSession,
-} from '@/shared/types/storage';
+import type { Attempt, Question, QuestionSyncMetadata, TestSession } from '@/shared/types/storage';
 import type { Database } from '@/shared/types/supabase';
+import Dexie, { type Table } from 'dexie';
 
-export type BenchmarkRow =
-    Database['public']['Tables']['question_peer_stats']['Row'];
+export type BenchmarkRow = Database['public']['Tables']['question_peer_stats']['Row'];
 export interface PeerBenchmarkCache {
     question_id: string;
     data: BenchmarkRow | null;
@@ -34,8 +28,7 @@ export class StorageService extends Dexie {
             .stores({
                 questions:
                     'id, subject, subject_id, topic, year, difficulty, marks, question_type, verified, *tags, metadata.set, metadata.exam, [subject_id+topic], updated_at',
-                questions_sync_metadata:
-                    'subject_id, last_fetched_at, last_sync',
+                questions_sync_metadata: 'subject_id, last_fetched_at, last_sync',
                 sessions: 'id, status, branch_id, is_synced',
                 attempts: '[session_id+question_id], session_id, is_synced', // composite primary key
                 peer_benchmarks: 'question_id',
@@ -49,8 +42,14 @@ export class StorageService extends Dexie {
 
     // nuke the entire Db when doing logout.
     async nuke() {
-        this.close();
-        await Dexie.delete(DB_NAME);
+        try {
+            this.close();
+            await Dexie.delete(DB_NAME);
+            console.log('IndexedDB deleted successfully');
+        } catch (error) {
+            console.error('Error nuking IndexedDB:', error);
+            throw error;
+        }
     }
 }
 

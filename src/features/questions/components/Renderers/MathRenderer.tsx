@@ -1,8 +1,8 @@
 import React from 'react';
-import { BlockMath, InlineMath } from 'react-katex';
+import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
-import CodeBlockRenderer from '../Renderers/CodeBlockRenderer.js';
 import TableRenderer from '../Renderers/TableRenderer.js';
+import CodeBlockRenderer from '../Renderers/CodeBlockRenderer.js';
 import parseContent from './parseContent.js';
 import 'prismjs/themes/prism-tomorrow.css';
 // @ts-expect-error Don't really know why TS is showing error (help me)
@@ -46,8 +46,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
 
     // Detect markdown alignment row like | :---: | --- |
     const isAlignmentRow = (cells: string[]): boolean =>
-        cells.length > 0 &&
-        cells.every((c) => /^:?-{3,}:?$/.test(c.replace(/\s+/g, '')));
+        cells.length > 0 && cells.every((c) => /^:?-{3,}:?$/.test(c.replace(/\s+/g, '')));
 
     type Range = { start: number; end: number; kind: 'latex' | 'md' };
 
@@ -83,7 +82,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                 const startLine = i;
                 const blockLines: string[] = [];
                 let j = i;
-                while (j < lines.length && lines[j]?.trim().startsWith('|')) {
+                while (j < lines.length && lines[j]!.trim().startsWith('|')) {
                     blockLines.push(lines[j]!);
                     j++;
                 }
@@ -93,13 +92,12 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                         l
                             .split('|')
                             .filter((c) => c.trim() !== '')
-                            .map((c) => c.trim())
+                            .map((c) => c.trim()),
                     );
                     const alignIdx = rows.findIndex(isAlignmentRow);
                     if (alignIdx > 0 && rows.length > alignIdx + 1) {
                         const start = offsets[startLine]!;
-                        const end =
-                            j < lines.length ? offsets[j]! : fullText.length;
+                        const end = j < lines.length ? offsets[j]! : fullText.length;
                         ranges.push({ start, end, kind: 'md' });
                         i = j;
                         continue;
@@ -110,15 +108,10 @@ const MathRenderer = ({ text }: MathRendererProps) => {
         }
 
         // 3) Combine ranges (prefer LaTeX when overlapping), sort and build segments
-        ranges.sort(
-            (a, b) => a.start - b.start || (a.kind === 'latex' ? -1 : 1)
-        );
+        ranges.sort((a, b) => a.start - b.start || (a.kind === 'latex' ? -1 : 1));
         const merged: Range[] = [];
         for (const r of ranges) {
-            if (
-                merged.length === 0 ||
-                r.start >= merged[merged.length - 1]?.end
-            ) {
+            if (merged.length === 0 || r.start >= merged[merged.length - 1]!.end) {
                 merged.push(r);
             }
             // if overlapping, skip this one (latex already prioritized by sort secondary key)
@@ -138,8 +131,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
             });
             cursor = r.end;
         }
-        if (cursor < fullText.length)
-            segs.push({ type: 'text', content: fullText.slice(cursor) });
+        if (cursor < fullText.length) segs.push({ type: 'text', content: fullText.slice(cursor) });
         return segs;
     };
 
@@ -149,20 +141,12 @@ const MathRenderer = ({ text }: MathRendererProps) => {
     }
 
     // If the entire string is a LaTeX expression
-    if (
-        text.startsWith('$') &&
-        text.endsWith('$') &&
-        text.indexOf('$', 1) === text.length - 1
-    ) {
+    if (text.startsWith('$') && text.endsWith('$') && text.indexOf('$', 1) === text.length - 1) {
         return <InlineMath math={cleanLatexContent(text.slice(1, -1))} />;
     }
 
     // If the entire string is a block LaTeX expression
-    if (
-        text.startsWith('$$') &&
-        text.endsWith('$$') &&
-        text.indexOf('$$', 2) === text.length - 2
-    ) {
+    if (text.startsWith('$$') && text.endsWith('$$') && text.indexOf('$$', 2) === text.length - 2) {
         return <BlockMath math={cleanLatexContent(text.slice(2, -2))} />;
     }
 
@@ -204,8 +188,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                             // 1. If this part is a List Block
                             if (part.toLowerCase().startsWith('<ul>')) {
                                 // Extract list items manually
-                                const liMatches =
-                                    part.match(/<li>([\s\S]*?)<\/li>/gi);
+                                const liMatches = part.match(/<li>([\s\S]*?)<\/li>/gi);
                                 if (!liMatches) return null;
 
                                 return (
@@ -215,16 +198,11 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                     >
                                         {liMatches.map((liRaw, liIdx) => {
                                             // Strip the <li> tags to get the content
-                                            const innerContent = liRaw.replace(
-                                                /<\/?li>/gi,
-                                                ''
-                                            );
+                                            const innerContent = liRaw.replace(/<\/?li>/gi, '');
                                             return (
                                                 <li key={liIdx}>
                                                     {/* RECURSION: Use MathRenderer inside the list item */}
-                                                    <MathRenderer
-                                                        text={innerContent}
-                                                    />
+                                                    <MathRenderer text={innerContent} />
                                                 </li>
                                             );
                                         })}
@@ -249,9 +227,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                                 }}
                                             >
                                                 <InlineMath
-                                                    math={cleanLatexContent(
-                                                        segment.content!
-                                                    )}
+                                                    math={cleanLatexContent(segment.content!)}
                                                 />
                                             </div>
                                         );
@@ -262,9 +238,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                                 className="block scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 p-2"
                                             >
                                                 <BlockMath
-                                                    math={cleanLatexContent(
-                                                        segment.content!
-                                                    )}
+                                                    math={cleanLatexContent(segment.content!)}
                                                 />
                                             </div>
                                         );
@@ -284,11 +258,7 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                             />
                                         );
                                     case 'lineBreak':
-                                        return (
-                                            <br
-                                                key={`${segIdx}-${partIdx}-${index}`}
-                                            />
-                                        );
+                                        return <br key={`${segIdx}-${partIdx}-${index}`} />;
                                     case 'image':
                                         // ... (Keep your existing image logic) ...
                                         return (
@@ -298,16 +268,10 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                             >
                                                 {/* ... existing image rendering code ... */}
                                                 <img
-                                                    src={getCachedImageUrl(
-                                                        segment.src
-                                                    )}
-                                                    alt={getCachedImageUrl(
-                                                        segment.alt
-                                                    )}
+                                                    src={getCachedImageUrl(segment.src)}
+                                                    alt={getCachedImageUrl(segment.alt)}
                                                     className="w-full h-auto object-contain mx-auto dark:invert dark:brightness-90 dark:contrast-100"
-                                                    style={{
-                                                        maxHeight: '50vh',
-                                                    }}
+                                                    style={{ maxHeight: '50vh' }}
                                                 />
                                             </div>
                                         );
@@ -317,37 +281,26 @@ const MathRenderer = ({ text }: MathRendererProps) => {
 
                                         // 1. Split by <br> tags (if any exist)
                                         const parts = segment.content
-                                            ? segment.content.split(
-                                                  /<br\s*\/?>/i
-                                              )
+                                            ? segment.content.split(/<br\s*\/?>/i)
                                             : [segment.content || ''];
 
                                         return (
-                                            <React.Fragment
-                                                key={`${segIdx}-${partIdx}-${index}`}
-                                            >
+                                            <React.Fragment key={`${segIdx}-${partIdx}-${index}`}>
                                                 {parts.map((p, i) => (
                                                     <React.Fragment key={i}>
                                                         <span
                                                             dangerouslySetInnerHTML={{
-                                                                __html: decodeEntities(
-                                                                    p
-                                                                )
+                                                                __html: decodeEntities(p)
                                                                     // This simple replace works even if the string was split by parseContent
-                                                                    .replace(
-                                                                        /<b>/gi,
-                                                                        '<strong>'
-                                                                    )
+                                                                    .replace(/<b>/gi, '<strong>')
                                                                     .replace(
                                                                         /<\/b>/gi,
-                                                                        '</strong>'
+                                                                        '</strong>',
                                                                     ),
                                                             }}
                                                         />
                                                         {/* Re-add the break if this wasn't the last part */}
-                                                        {i <
-                                                            parts.length -
-                                                                1 && <br />}
+                                                        {i < parts.length - 1 && <br />}
                                                     </React.Fragment>
                                                 ))}
                                             </React.Fragment>

@@ -1,10 +1,4 @@
-export type Json =
-    | string
-    | number
-    | boolean
-    | null
-    | { [key: string]: Json | undefined }
-    | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
     graphql_public: {
@@ -900,9 +894,7 @@ export type Database = {
                     id: string;
                     start_of_week: string;
                     started_at: string | null;
-                    status:
-                        | Database['public']['Enums']['revision_status']
-                        | null;
+                    status: Database['public']['Enums']['revision_status'] | null;
                     total_questions: number | null;
                 };
                 Insert: {
@@ -916,9 +908,7 @@ export type Database = {
                     id?: string;
                     start_of_week: string;
                     started_at?: string | null;
-                    status?:
-                        | Database['public']['Enums']['revision_status']
-                        | null;
+                    status?: Database['public']['Enums']['revision_status'] | null;
                     total_questions?: number | null;
                 };
                 Update: {
@@ -932,9 +922,7 @@ export type Database = {
                     id?: string;
                     start_of_week?: string;
                     started_at?: string | null;
-                    status?:
-                        | Database['public']['Enums']['revision_status']
-                        | null;
+                    status?: Database['public']['Enums']['revision_status'] | null;
                     total_questions?: number | null;
                 };
                 Relationships: [
@@ -1049,10 +1037,7 @@ export type Database = {
             get_critical_question_count:
                 | { Args: { p_valid_subjects: string[] }; Returns: number }
                 | {
-                      Args: {
-                          p_target_exams: string[];
-                          p_valid_subjects: string[];
-                      };
+                      Args: { p_target_exams: string[]; p_valid_subjects: string[] };
                       Returns: number;
                   };
             get_exam_subject_counts: {
@@ -1142,10 +1127,7 @@ export type Database = {
             };
             refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
-            start_weekly_revision_set: {
-                Args: { v_set_id: string };
-                Returns: Json;
-            };
+            start_weekly_revision_set: { Args: { v_set_id: string }; Returns: Json };
             submit_test_grading: {
                 Args: {
                     p_payload: Json;
@@ -1162,10 +1144,7 @@ export type Database = {
                 Args: { p_note: string; p_question_id: string };
                 Returns: undefined;
             };
-            update_status_of_weekly_set: {
-                Args: { v_set_id: string };
-                Returns: Json;
-            };
+            update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };
         };
         Enums: {
             revision_status: 'pending' | 'started' | 'expired';
@@ -1178,10 +1157,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<
-    keyof Database,
-    'public'
->];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
 
 export type Tables<
     DefaultSchemaTableNameOrOptions extends

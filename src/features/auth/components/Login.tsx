@@ -1,8 +1,8 @@
 import { X } from '@phosphor-icons/react';
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import { toast } from 'sonner';
 import useAuth from '@/shared/hooks/useAuth.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { toast } from 'sonner';
 
 type LoginProp = {
     canClose?: boolean;
@@ -17,6 +17,7 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
         });
 
         if (error) {
+            console.error('Error logging in:', error.message);
             toast.error('Error logging in');
         } else {
             window.location.reload();
@@ -49,9 +50,8 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                         </h1>
 
                         <p className="text-gray-600 dark:text-gray-300 text-base">
-                            Sign up or log in to track your progress, bookmark
-                            important questions, and join the leaderboard (in
-                            future)!
+                            Sign up or log in to track your progress, bookmark important questions,
+                            and join the leaderboard (in future)!
                         </p>
                     </div>
 
@@ -63,7 +63,9 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                                     if (onClose) onClose();
                                 }
                             }}
-                            onError={() => {}}
+                            onError={() => {
+                                console.error('Google login widget failed');
+                            }}
                             theme="filled_blue"
                             shape="rectangular"
                             text="continue_with"
@@ -90,8 +92,8 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
 
                     <div className="mt-6 text-xs text-gray-400 text-center w-full">
                         <span>
-                            By continuing, you agree to give your details like
-                            gmail, name and profile photo.
+                            By continuing, you agree to give your details like gmail, name and
+                            profile photo.
                         </span>
                     </div>
                 </div>

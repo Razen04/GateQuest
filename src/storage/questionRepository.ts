@@ -1,6 +1,5 @@
 import type { Question } from '@/shared/types/storage';
 import { appStorage } from './storageService';
-
 const db = appStorage;
 
 const getQuestionsBySubject = async (subjectId: string) => {
@@ -27,7 +26,7 @@ const bulkUpsertQuestions = async (questions: Question[]) => {
 
 const updateSubjectSyncMetadata = async (
     subject_id: string,
-    last_fetched_at?: string | undefined
+    last_fetched_at?: string | undefined,
 ) => {
     let payload;
     if (!last_fetched_at) {
@@ -44,10 +43,10 @@ const updateSubjectSyncMetadata = async (
 };
 
 export {
-    bulkUpsertQuestions,
+    getQuestionsBySubject,
     getAllQuestions,
     getQuestionByIds,
-    getQuestionsBySubject,
+    bulkUpsertQuestions,
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
 };

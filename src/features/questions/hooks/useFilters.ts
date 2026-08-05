@@ -2,8 +2,8 @@
 // It manages filter states and efficiently computes the filtered list based on user selections.
 
 import { useEffect, useMemo, useState } from 'react';
-import type { Question, RevisionQuestion } from '@/shared/types/storage';
 import { normalizeTag, sortQuestionsByYear } from '@/shared/utils/helper';
+import type { Question, RevisionQuestion } from '@/shared/types/storage';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 // Type of filter mode for smart-Revision
@@ -16,7 +16,7 @@ const useFilters = (
     sourceQuestions: Question[] | RevisionQuestion[],
     subject: string | null,
     selectedQuestion: string | null,
-    mode: FilterMode
+    mode: FilterMode,
 ) => {
     const [loading, setLoading] = useState(false);
     // State for each available filter option.
@@ -24,8 +24,7 @@ const useFilters = (
     const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
     const [yearFilter, setYearFilter] = useState<string[]>([]);
     const [topicFilter, setTopicFilter] = useState<string[]>([]);
-    const [attemptFilter, setAttemptFilter] =
-        useState<AttemptFilterMode>('unattempted');
+    const [attemptFilter, setAttemptFilter] = useState<AttemptFilterMode>('unattempted');
     const [examFilter, setExamFilter] = useState<string[]>([]);
     const [tagFilter, setTagFilter] = useState<string[]>([]);
 
@@ -40,24 +39,18 @@ const useFilters = (
             setLoading(true);
 
             try {
-                const { data, error } = await supabase.rpc(
-                    'get_user_attempted_ids',
-                    {
-                        p_subject_slug: subject,
-                        p_mode: mode,
-                    }
-                );
+                const { data, error } = await supabase.rpc('get_user_attempted_ids', {
+                    p_subject_slug: subject,
+                    p_mode: mode,
+                });
 
                 if (error) throw error;
 
                 setAttemptedIds(
-                    new Set(
-                        (data ?? []).map(
-                            (row: { question_id: string }) => row.question_id
-                        )
-                    )
+                    new Set((data ?? []).map((row: { question_id: string }) => row.question_id)),
                 );
-            } catch (_error) {
+            } catch (error) {
+                console.error('Failed to fetch attempted questions:', error);
                 setAttemptedIds(new Set());
             } finally {
                 setLoading(false);
@@ -68,8 +61,7 @@ const useFilters = (
 
         window.addEventListener('STATS_UPDATED', fetchAttemptedIds);
 
-        return () =>
-            window.removeEventListener('STATS_UPDATED', fetchAttemptedIds);
+        return () => window.removeEventListener('STATS_UPDATED', fetchAttemptedIds);
     }, [subject, mode]);
 
     // Fetch bookmarked question IDs when needed & listen for updates
@@ -80,23 +72,17 @@ const useFilters = (
             setLoading(true);
 
             try {
-                const { data, error } = await supabase.rpc(
-                    'get_user_bookmarks',
-                    {
-                        p_subject_slug: subject,
-                    }
-                );
+                const { data, error } = await supabase.rpc('get_user_bookmarks', {
+                    p_subject_slug: subject,
+                });
 
                 if (error) throw error;
 
                 setBookmarkedIds(
-                    new Set(
-                        (data ?? []).map(
-                            (row: { question_id: string }) => row.question_id
-                        )
-                    )
+                    new Set((data ?? []).map((row: { question_id: string }) => row.question_id)),
                 );
-            } catch (_error) {
+            } catch (error) {
+                console.error('Failed to fetch bookmarks:', error);
                 setBookmarkedIds(new Set());
             } finally {
                 setLoading(false);
@@ -109,8 +95,7 @@ const useFilters = (
 
         window.addEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
 
-        return () =>
-            window.removeEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+        return () => window.removeEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
     }, [subject, mode, attemptFilter]);
 
     // Core filtering logic
@@ -123,29 +108,23 @@ const useFilters = (
             filtered = filtered.filter(
                 (qn) =>
                     qn.question?.toLowerCase().includes(q) ||
-                    qn.tags?.some((tag) => tag.toLowerCase().includes(q))
+                    qn.tags?.some((tag) => tag.toLowerCase().includes(q)),
             );
         }
 
         // Apply difficulty filter.
         if (difficultyFilter.length > 0) {
-            filtered = filtered.filter((qn) =>
-                difficultyFilter.includes(qn.difficulty || '')
-            );
+            filtered = filtered.filter((qn) => difficultyFilter.includes(qn.difficulty || ''));
         }
 
         // Apply year filter.
         if (yearFilter.length > 0) {
-            filtered = filtered.filter((qn) =>
-                yearFilter.includes(qn.year?.toString() || '')
-            );
+            filtered = filtered.filter((qn) => yearFilter.includes(qn.year?.toString() || ''));
         }
 
         // Apply topic filter.
         if (topicFilter.length > 0) {
-            filtered = filtered.filter((qn) =>
-                topicFilter.includes(qn.topic || '')
-            );
+            filtered = filtered.filter((qn) => topicFilter.includes(qn.topic || ''));
         }
 
         // Apply filter for attempted/unattempted questions.
@@ -159,9 +138,7 @@ const useFilters = (
                 }
 
                 // Ensures currently active question remains visible even if attempted
-                return attemptFilter === 'attempted'
-                    ? isAttempted
-                    : !isAttempted || isActive;
+                return attemptFilter === 'attempted' ? isAttempted : !isAttempted || isActive;
             });
         }
 
@@ -176,9 +153,7 @@ const useFilters = (
 
         if (tagFilter.length > 0) {
             filtered = filtered.filter((qn) => {
-                return qn.tags?.some((tag) =>
-                    tagFilter.includes(normalizeTag(tag))
-                );
+                return qn.tags?.some((tag) => tagFilter.includes(normalizeTag(tag)));
             });
         }
 

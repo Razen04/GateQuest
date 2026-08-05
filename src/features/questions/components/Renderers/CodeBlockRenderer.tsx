@@ -1,5 +1,5 @@
-import Prism from 'prismjs';
 import { useEffect, useRef } from 'react';
+import Prism from 'prismjs';
 
 type CodeBlockRendererProps = {
     code: string | undefined;
@@ -26,9 +26,7 @@ const CodeBlockRenderer = ({ code, language }: CodeBlockRendererProps) => {
 
         const lastBacktickPos = processedCode.lastIndexOf('```');
         if (lastBacktickPos > firstLineEnd) {
-            processedCode = processedCode
-                .substring(firstLineEnd + 1, lastBacktickPos)
-                .trim();
+            processedCode = processedCode.substring(firstLineEnd + 1, lastBacktickPos).trim();
         }
     }
     // Parse inline backticks
@@ -45,12 +43,9 @@ const CodeBlockRenderer = ({ code, language }: CodeBlockRendererProps) => {
     let langClass = 'language-text';
     if (codeLang) {
         codeLang = codeLang.toLowerCase();
-        if (['js', 'javascript'].includes(codeLang))
-            langClass = 'language-javascript';
-        else if (['ts', 'typescript'].includes(codeLang))
-            langClass = 'language-typescript';
-        else if (['py', 'python'].includes(codeLang))
-            langClass = 'language-python';
+        if (['js', 'javascript'].includes(codeLang)) langClass = 'language-javascript';
+        else if (['ts', 'typescript'].includes(codeLang)) langClass = 'language-typescript';
+        else if (['py', 'python'].includes(codeLang)) langClass = 'language-python';
         else if (['java'].includes(codeLang)) langClass = 'language-java';
         else if (['c'].includes(codeLang)) langClass = 'language-c';
         else if (['cpp', 'c++'].includes(codeLang)) langClass = 'language-cpp';
@@ -61,7 +56,7 @@ const CodeBlockRenderer = ({ code, language }: CodeBlockRendererProps) => {
         if (codeRef.current) {
             Prism.highlightElement(codeRef.current);
         }
-    }, []);
+    }, [processedCode]);
 
     if (isInline) {
         return (

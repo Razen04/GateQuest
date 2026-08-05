@@ -3,14 +3,11 @@ import { initializeTestSession } from './testSession';
 
 export const syncTestFromSupabaseToDexie = async (
     userId: string | undefined,
-    branchId: string | undefined
+    branchId: string | undefined,
 ) => {
     if (!userId || !branchId) return;
 
-    const { testSession, attempts, questions } = await fetchFullTestData(
-        userId,
-        branchId
-    );
+    const { testSession, attempts, questions } = await fetchFullTestData(userId, branchId);
 
     if (!testSession || !attempts || !questions) return;
 

@@ -4,10 +4,7 @@ import type { Settings } from '@/shared/types/Settings';
 type AppSettingContextType =
     | {
           settings: Settings;
-          handleSettingToggle: <K extends keyof Settings>(
-              key: K,
-              value?: Settings[K]
-          ) => void;
+          handleSettingToggle: <K extends keyof Settings>(key: K, value?: Settings[K]) => void;
           handleUserAnonymity: (isPublic: boolean) => void;
           isUpdatingSettings: boolean;
       }

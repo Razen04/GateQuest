@@ -1,6 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import type React from 'react';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../utils/cn';
 
 export interface TabItem {
@@ -18,12 +17,7 @@ interface AnimatedTabsProps {
     className?: string;
 }
 
-const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
-    tabs,
-    activeTab,
-    onChange,
-    className,
-}) => {
+const AnimatedTabs: React.FC<AnimatedTabsProps> = ({ tabs, activeTab, onChange, className }) => {
     const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
     useEffect(() => {
@@ -35,19 +29,12 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
     }, [activeTab]);
 
     return (
-        <div
-            className={cn(
-                'relative w-full overflow-hidden no-scrollbar p-1',
-                className
-            )}
-        >
+        <div className={cn('relative w-full overflow-hidden no-scrollbar p-1', className)}>
             <nav className="relative border border-slate-900/10 bg-slate-950/5 p-1.5 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/40 dark:shadow-[0_8px_32px_rgba(0,0,0,0.36)]">
                 <div className="relative flex items-center gap-1.5 overflow-x-auto">
                     {tabs.map((tab) => {
                         const isActive = tab.id === activeTab;
-                        const iconToDisplay = isActive
-                            ? (tab.activeIcon ?? tab.icon)
-                            : tab.icon;
+                        const iconToDisplay = isActive ? (tab.activeIcon ?? tab.icon) : tab.icon;
 
                         return (
                             <motion.button
@@ -62,43 +49,28 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
                                     'font-["Space_Grotesk",sans-serif]',
                                     isActive
                                         ? 'text-slate-900 dark:text-white'
-                                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200',
                                 )}
                             >
                                 {/* Animated Icon Wrapper */}
                                 {iconToDisplay && (
                                     <span className="relative z-10 flex items-center justify-center">
-                                        <AnimatePresence
-                                            mode="wait"
-                                            initial={false}
-                                        >
+                                        <AnimatePresence mode="wait" initial={false}>
                                             <motion.span
                                                 key={
                                                     isActive
                                                         ? `${tab.id}-active`
                                                         : `${tab.id}-inactive`
                                                 }
-                                                initial={{
-                                                    opacity: 0,
-                                                    scale: 0.8,
-                                                    rotate: -10,
-                                                }}
-                                                animate={{
-                                                    opacity: 1,
-                                                    scale: 1,
-                                                    rotate: 0,
-                                                }}
-                                                exit={{
-                                                    opacity: 0,
-                                                    scale: 0.8,
-                                                    rotate: 10,
-                                                }}
+                                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
                                                 transition={{ duration: 0.15 }}
                                                 className={cn(
                                                     'transition-colors duration-200',
                                                     isActive
                                                         ? 'text-[#2A5CFF] dark:text-blue-400'
-                                                        : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300'
+                                                        : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300',
                                                 )}
                                             >
                                                 {iconToDisplay}
@@ -108,9 +80,7 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
                                 )}
 
                                 {/* Label */}
-                                <span className="relative z-10">
-                                    {tab.label}
-                                </span>
+                                <span className="relative z-10">{tab.label}</span>
 
                                 {/* Optional Badge */}
                                 {tab.badge !== undefined && (
@@ -119,7 +89,7 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
                                             'relative z-10 px-2 py-0.5 font-["JetBrains_Mono",monospace] text-[10px] font-bold transition-colors',
                                             isActive
                                                 ? 'bg-[#2A5CFF]/15 text-[#2A5CFF] dark:bg-blue-400/20 dark:text-blue-300'
-                                                : 'bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-400'
+                                                : 'bg-slate-200 text-slate-600 dark:bg-white/10 dark:text-slate-400',
                                         )}
                                     >
                                         {tab.badge}

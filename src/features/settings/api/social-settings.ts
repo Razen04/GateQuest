@@ -15,10 +15,7 @@ export const getSocialSettingsValue = async (user: AppUser) => {
     return data;
 };
 
-export const handleUpdateSocialSettings = async (
-    formData: FormData,
-    user: AppUser
-) => {
+export const handleUpdateSocialSettings = async (formData: FormData, user: AppUser) => {
     if (!user) return;
 
     const { error } = await supabase.from('users_social').upsert({

@@ -1,7 +1,7 @@
-import { decompress } from 'lz-string';
 import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { decompress } from 'lz-string';
 import QuestionsList from '@/features/questions/components/QuestionsList/QuestionsList';
+import { toast } from 'sonner';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
 
 const SmartRevisionQuestionList = () => {
@@ -11,7 +11,8 @@ const SmartRevisionQuestionList = () => {
     try {
         stored = localStorage.getItem('weekly_set_info');
         questions = stored ? JSON.parse(decompress(stored)).questions : [];
-    } catch (_err) {
+    } catch (err) {
+        console.error('Error loading questions from localStorage.', err);
         toast.error('No questions, clear cache and restart app.');
     }
 
@@ -24,10 +25,7 @@ const SmartRevisionQuestionList = () => {
     };
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (
-        id: string,
-        currentFilteredList: Question[]
-    ) => {
+    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
         const subject = currentFilteredList.find((q) => q.id === id)?.subject;
 
         const currentQueryString = window.location.search;

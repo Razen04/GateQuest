@@ -1,5 +1,5 @@
-import { Pause, Timer } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Pause, Timer } from '@phosphor-icons/react';
 
 type QuestionTimerProps = {
     minutes: string;

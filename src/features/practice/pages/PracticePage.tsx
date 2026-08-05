@@ -1,9 +1,16 @@
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { getBackgroundColor, getUserProfile, SubjectIconMap } from '@/shared/utils/helper';
 import { useNavigate } from 'react-router-dom';
-import AnimatedTabs from '@/shared/components/AnimatedTabs';
+import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
+import type { SubjectStat } from '@/shared/types/Stats';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Badge } from '@/shared/components/ui/badge';
+import { Progress } from '@/shared/components/ui/progress';
 import PageHeader from '@/shared/components/PageHeader';
+import AnimatedTabs from '@/shared/components/AnimatedTabs';
+import { useGoals } from '@/shared/hooks/useGoals';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,23 +21,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/shared/components/ui/alert-dialog';
-import { Badge } from '@/shared/components/ui/badge';
-import { Button } from '@/shared/components/ui/button';
-import {
-    Card,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/shared/components/ui/card';
-import { Progress } from '@/shared/components/ui/progress';
-import { useGoals } from '@/shared/hooks/useGoals';
-import type { SubjectStat } from '@/shared/types/Stats';
-import {
-    getBackgroundColor,
-    getUserProfile,
-    SubjectIconMap,
-} from '@/shared/utils/helper';
-import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
 
 const Practice = () => {
     const navigate = useNavigate();
@@ -42,7 +32,7 @@ const Practice = () => {
 
     // Get the subjects of the branch and exams selected by the user
     const { userGoal, getPracticeSubjects, loading } = useGoals();
-    const [showGoalAlert, setShowGoalAlert] = useState(user === null);
+    const [showGoalAlert, setShowGoalAlert] = useState(user === null ? true : false);
 
     const subjects = getPracticeSubjects();
 
@@ -112,9 +102,7 @@ const Practice = () => {
             <AlertDialog open={showGoalAlert} onOpenChange={setShowGoalAlert}>
                 <AlertDialogContent className="rounded-none">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Set your goal first.
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>Set your goal first.</AlertDialogTitle>
                         <AlertDialogDescription>
                             {user === null
                                 ? 'You need to login first.'
@@ -122,9 +110,7 @@ const Practice = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-none">
-                            Cancel
-                        </AlertDialogCancel>
+                        <AlertDialogCancel className="rounded-none">Cancel</AlertDialogCancel>
                         {user === null ? (
                             <AlertDialogAction
                                 onClick={() => navigate('/dashboard')}
@@ -172,29 +158,22 @@ const Practice = () => {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
                         {filteredSubjects.map((subject) => {
-                            const stat = subjectStats.find(
-                                (s) => s.subject_slug === subject.slug
-                            );
+                            const stat = subjectStats.find((s) => s.subject_slug === subject.slug);
                             const progress = stat ? stat.progress : 0;
                             const SubjectIcon = SubjectIconMap[
                                 subject.icon_name || 'default'
                             ] as React.ElementType;
 
                             return (
-                                <motion.div
-                                    variants={fadeInUp}
-                                    key={subject.id}
-                                >
+                                <motion.div variants={fadeInUp} key={subject.id}>
                                     <Card className="rounded-none relative overflow-hidden flex flex-col h-full py-0 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-slate-200/80 dark:border-zinc-800/80 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
                                         <CardHeader className="relative flex flex-row items-start space-x-3 p-5">
                                             <div
                                                 className={`p-3 border border-white/10 shrink-0 ${getBackgroundColor(
-                                                    subject.theme_color
+                                                    subject.theme_color,
                                                 )}`}
                                             >
-                                                {SubjectIcon && (
-                                                    <SubjectIcon className="h-6 w-6" />
-                                                )}
+                                                {SubjectIcon && <SubjectIcon className="h-6 w-6" />}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start gap-2">
@@ -204,11 +183,9 @@ const Practice = () => {
                                                     <Badge
                                                         variant="secondary"
                                                         className={`rounded-none shrink-0 px-2 py-0.5 text-[10px] font-medium border border-white/20 backdrop-blur-md ${
-                                                            subject.difficulty ===
-                                                            'Easy'
+                                                            subject.difficulty === 'Easy'
                                                                 ? 'bg-green-500/15 text-green-700 dark:text-green-300'
-                                                                : subject.difficulty ===
-                                                                    'Medium'
+                                                                : subject.difficulty === 'Medium'
                                                                   ? 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-300'
                                                                   : 'bg-red-500/15 text-red-700 dark:text-red-300'
                                                         }`}
@@ -223,8 +200,7 @@ const Practice = () => {
                                                         className="h-1.5 rounded-none"
                                                     />
                                                     <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
-                                                        Progress:{' '}
-                                                        {progress.toFixed(0)}%
+                                                        Progress: {progress.toFixed(0)}%
                                                     </p>
                                                 </div>
                                             </div>
@@ -234,9 +210,7 @@ const Practice = () => {
                                             className="mt-auto p-5 pt-0"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleSubjectSelect(
-                                                    subject.slug
-                                                );
+                                                handleSubjectSelect(subject.slug);
                                             }}
                                         >
                                             <Button className="w-full text-xs font-medium group rounded-none">

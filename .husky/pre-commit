@@ -1,2 +1,2 @@
 #!/bin/sh
-biome check --staged --write
+npx lint-staged

@@ -1,12 +1,8 @@
-import type React from 'react';
-import { toast } from 'sonner';
-import { isNumericalQuestion } from '@/features/questions/utils/questionUtils';
+import type { Question, MCQQuestion, MSQQuestion } from '@/shared/types/storage';
 import type { AIProvider } from '@/shared/types/Settings';
-import type {
-    MCQQuestion,
-    MSQQuestion,
-    Question,
-} from '@/shared/types/storage';
+import { toast } from 'sonner';
+import type React from 'react';
+import { isNumericalQuestion } from '@/features/questions/utils/questionUtils';
 import { DEFAULT_TEMPLATE } from '../data/ai_prompt_template';
 
 // ---------------------------------------------------------------------------
@@ -31,16 +27,14 @@ export const AI_PROVIDERS: Record<
         label: 'ChatGPT',
         url: (q) => `https://chatgpt.com/?q=${q}`,
         badgeBg: 'bg-[#10a37f]',
-        btnClass:
-            'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
+        btnClass: 'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
         icon: null, // set in component
     },
     claude: {
         label: 'Claude',
         url: (q) => `https://claude.ai/new?q=${q}`,
         badgeBg: 'bg-[#cc785c]',
-        btnClass:
-            'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
+        btnClass: 'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
         icon: null,
     },
     grok: {
@@ -62,9 +56,7 @@ export const AI_PROVIDERS: Record<
  * Returns an empty array if there are no images.
  */
 export function extractImageUrls(questionText: string): string[] {
-    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map(
-        (m) => m[1] as string
-    );
+    return [...questionText.matchAll(/!\[.*?\]\((.*?)\)/g)].map((m) => m[1] as string);
 }
 
 /**
@@ -95,8 +87,7 @@ function resolveCorrectAnswer(question: Question): string {
 
     if (typeStr.includes('multiple')) {
         const q = question as MCQQuestion | MSQQuestion;
-        if (!q.options || !Array.isArray(q.correct_answer))
-            return 'See solution';
+        if (!q.options || !Array.isArray(q.correct_answer)) return 'See solution';
 
         return q.correct_answer
             .map((idx: number) => `${labels[idx] ?? idx}) ${q.options[idx]}`)
@@ -122,28 +113,20 @@ export function buildGateAIPrompt(
     question: Question,
     imageCount = 0,
     userTemplate?: string,
-    doubt?: string
+    doubt?: string,
 ): string {
-    const isMCQ =
-        question.question_type?.toLowerCase().includes('multiple-choice') ??
-        false;
+    const isMCQ = question.question_type?.toLowerCase().includes('multiple-choice') ?? false;
     const q = question as MCQQuestion | MSQQuestion;
 
     // --- Data Pre-processing (The "Necessary Defaults") ---
     let imagePlaceholder = '[Image — diagram not available]';
-    if (imageCount === 1)
-        imagePlaceholder = '[Diagram attached — refer to the pasted image]';
-    else if (imageCount > 1)
-        imagePlaceholder = '[Diagrams attached — refer to pasted images]';
+    if (imageCount === 1) imagePlaceholder = '[Diagram attached — refer to the pasted image]';
+    else if (imageCount > 1) imagePlaceholder = '[Diagrams attached — refer to pasted images]';
 
-    const cleanQuestion = question.question
-        .replace(/!\[.*?\]\(.*?\)/g, imagePlaceholder)
-        .trim();
+    const cleanQuestion = question.question.replace(/!\[.*?\]\(.*?\)/g, imagePlaceholder).trim();
 
     const optionsBlock =
-        isMCQ && q.options?.length
-            ? `\nOPTIONS:\n${labelledOptions(q.options)}\n`
-            : '';
+        isMCQ && q.options?.length ? `\nOPTIONS:\n${labelledOptions(q.options)}\n` : '';
 
     const correctAnswer = resolveCorrectAnswer(question);
 
@@ -205,10 +188,9 @@ async function stitchImagesToBlob(urls: string[]): Promise<Blob | null> {
                     img.crossOrigin = 'anonymous';
                     img.src = url;
                     img.onload = () => resolve(img);
-                    img.onerror = () =>
-                        reject(new Error(`CORS block on: ${url}`));
+                    img.onerror = () => reject(new Error(`CORS block on: ${url}`));
                 });
-            })
+            }),
         );
 
         const canvas = document.createElement('canvas');
@@ -217,10 +199,7 @@ async function stitchImagesToBlob(urls: string[]): Promise<Blob | null> {
 
         const spacing = 20;
         const maxWidth = Math.max(...loadedImages.map((img) => img.width));
-        const totalHeight = loadedImages.reduce(
-            (sum, img) => sum + img.height + spacing,
-            0
-        );
+        const totalHeight = loadedImages.reduce((sum, img) => sum + img.height + spacing, 0);
 
         canvas.width = maxWidth;
         canvas.height = totalHeight;
@@ -235,7 +214,9 @@ async function stitchImagesToBlob(urls: string[]): Promise<Blob | null> {
         });
 
         return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-    } catch (_error) {
+    } catch (error) {
+        // Log the error for debugging but don't crash the app
+        console.warn('Stitching blocked by browser security (CORS). Fallback to manual copy.');
         return null;
     }
 }
@@ -247,19 +228,14 @@ export async function openInAI(
     question: Question,
     provider: AIProvider = 'chatgpt',
     aiCustomPrompt: string,
-    doubt?: string
+    doubt?: string,
 ): Promise<void> {
-    const config = AI_PROVIDERS[provider] || AI_PROVIDERS.chatgpt;
-    const fallback = FALLBACK_URLS[provider] || FALLBACK_URLS.chatgpt;
+    const config = AI_PROVIDERS[provider] || AI_PROVIDERS['chatgpt'];
+    const fallback = FALLBACK_URLS[provider] || FALLBACK_URLS['chatgpt'];
 
     const imageUrls = extractImageUrls(question.question);
     const hasImages = imageUrls.length > 0;
-    const prompt = buildGateAIPrompt(
-        question,
-        imageUrls.length,
-        aiCustomPrompt,
-        doubt
-    );
+    const prompt = buildGateAIPrompt(question, imageUrls.length, aiCustomPrompt, doubt);
 
     if (hasImages) {
         const stitchedBlob = await stitchImagesToBlob(imageUrls);
@@ -272,11 +248,11 @@ export async function openInAI(
                 });
                 await navigator.clipboard.write([clipboardItem]);
                 window.open(fallback, '_blank', 'noopener,noreferrer');
-                toast.success(
-                    `Prompt & Diagrams copied! Just paste in ${config.label}.`
-                );
+                toast.success(`Prompt & Diagrams copied! Just paste in ${config.label}.`);
                 return;
-            } catch (_err) {}
+            } catch (err) {
+                console.error('Clipboard write failed', err);
+            }
         }
 
         // --- FALLBACK: Text Only ---
@@ -286,7 +262,7 @@ export async function openInAI(
 
         toast.info(
             "Prompt copied! Note: Diagrams couldn't be auto-copied. Please right-click the image and 'Copy Image' manually.",
-            { duration: 10000 }
+            { duration: 10000 },
         );
         return;
     }
@@ -306,5 +282,4 @@ export async function openInAI(
 export const buildGateChatGPTPrompt = buildGateAIPrompt;
 
 /** @deprecated Use openInAI instead */
-export const openInChatGPT = (question: Question): Promise<void> =>
-    openInAI(question, 'chatgpt');
+export const openInChatGPT = (question: Question): Promise<void> => openInAI(question, 'chatgpt');

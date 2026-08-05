@@ -10,15 +10,9 @@ const parseContent = (text: string) => {
         const nextInlineCode = remainingText.indexOf('`');
         const nextBlockMath = remainingText.indexOf('$$');
         const nextLineBreak = Math.min(
-            remainingText.indexOf('<br>') !== -1
-                ? remainingText.indexOf('<br>')
-                : Infinity,
-            remainingText.indexOf('<br/>') !== -1
-                ? remainingText.indexOf('<br/>')
-                : Infinity,
-            remainingText.indexOf('<br />') !== -1
-                ? remainingText.indexOf('<br />')
-                : Infinity
+            remainingText.indexOf('<br>') !== -1 ? remainingText.indexOf('<br>') : Infinity,
+            remainingText.indexOf('<br/>') !== -1 ? remainingText.indexOf('<br/>') : Infinity,
+            remainingText.indexOf('<br />') !== -1 ? remainingText.indexOf('<br />') : Infinity,
         );
         const nextImage = remainingText.indexOf('![');
 
@@ -26,48 +20,32 @@ const parseContent = (text: string) => {
         let tokenType = null;
         let tokenPos = -1;
 
-        if (
-            nextCodeBlock !== -1 &&
-            (tokenPos === -1 || nextCodeBlock < tokenPos)
-        ) {
+        if (nextCodeBlock !== -1 && (tokenPos === -1 || nextCodeBlock < tokenPos)) {
             tokenPos = nextCodeBlock;
             tokenType = 'code';
         }
 
-        if (
-            nextBlockMath !== -1 &&
-            (tokenPos === -1 || nextBlockMath < tokenPos)
-        ) {
+        if (nextBlockMath !== -1 && (tokenPos === -1 || nextBlockMath < tokenPos)) {
             // Check if it's really $$ and not part of a $ followed by another $
-            if (
-                nextBlockMath === 0 ||
-                remainingText[nextBlockMath - 1] !== '$'
-            ) {
+            if (nextBlockMath === 0 || remainingText[nextBlockMath - 1] !== '$') {
                 tokenPos = nextBlockMath;
                 tokenType = 'blockMath';
             }
         }
 
-        if (
-            nextInlineMath !== -1 &&
-            (tokenPos === -1 || nextInlineMath < tokenPos)
-        ) {
+        if (nextInlineMath !== -1 && (tokenPos === -1 || nextInlineMath < tokenPos)) {
             // Make sure it's not part of a $$ expression
             if (
                 (nextInlineMath === remainingText.length - 1 ||
                     remainingText[nextInlineMath + 1] !== '$') &&
-                (nextInlineMath === 0 ||
-                    remainingText[nextInlineMath - 1] !== '$')
+                (nextInlineMath === 0 || remainingText[nextInlineMath - 1] !== '$')
             ) {
                 tokenPos = nextInlineMath;
                 tokenType = 'math';
             }
         }
 
-        if (
-            nextInlineCode !== -1 &&
-            (tokenPos === -1 || nextInlineCode < tokenPos)
-        ) {
+        if (nextInlineCode !== -1 && (tokenPos === -1 || nextInlineCode < tokenPos)) {
             // Make sure it's not part of a ``` fenced code block
             const isTriple = remainingText.startsWith('```', nextInlineCode);
             if (!isTriple) {
@@ -76,10 +54,7 @@ const parseContent = (text: string) => {
             }
         }
 
-        if (
-            nextLineBreak !== Infinity &&
-            (tokenPos === -1 || nextLineBreak < tokenPos)
-        ) {
+        if (nextLineBreak !== Infinity && (tokenPos === -1 || nextLineBreak < tokenPos)) {
             tokenPos = nextLineBreak;
             tokenType = 'lineBreak';
         }
@@ -214,13 +189,9 @@ const parseContent = (text: string) => {
             // Determine which <br> tag format was found and skip past it
             if (remainingText.substring(tokenPos, tokenPos + 4) === '<br>') {
                 remainingText = remainingText.substring(tokenPos + 4);
-            } else if (
-                remainingText.substring(tokenPos, tokenPos + 5) === '<br/>'
-            ) {
+            } else if (remainingText.substring(tokenPos, tokenPos + 5) === '<br/>') {
                 remainingText = remainingText.substring(tokenPos + 5);
-            } else if (
-                remainingText.substring(tokenPos, tokenPos + 6) === '<br />'
-            ) {
+            } else if (remainingText.substring(tokenPos, tokenPos + 6) === '<br />') {
                 remainingText = remainingText.substring(tokenPos + 6);
             } else {
                 // Default case, just skip a bit
@@ -244,10 +215,7 @@ const parseContent = (text: string) => {
                 // Malformed image tag, treat as text
                 segments.push({
                     type: 'text',
-                    content: remainingText.substring(
-                        tokenPos,
-                        closeBracketPos + 2
-                    ),
+                    content: remainingText.substring(tokenPos, closeBracketPos + 2),
                 });
                 remainingText = remainingText.substring(closeBracketPos + 2);
                 continue;
@@ -255,10 +223,7 @@ const parseContent = (text: string) => {
 
             // Extract alt text and image source
             const alt = remainingText.substring(tokenPos + 2, closeBracketPos);
-            const src = remainingText.substring(
-                closeBracketPos + 2,
-                closeParenPos
-            );
+            const src = remainingText.substring(closeBracketPos + 2, closeParenPos);
 
             segments.push({
                 type: 'image',

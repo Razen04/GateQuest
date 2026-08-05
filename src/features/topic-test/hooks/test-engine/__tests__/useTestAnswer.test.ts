@@ -1,8 +1,8 @@
-import { act, renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Attempt } from '@/shared/types/storage';
 import useTestAnswer from '@/features/topic-test/hooks/test-engine/useTestAnswer';
 import { saveAttempt } from '@/features/topic-test/services/testSession';
-import type { Attempt } from '@/shared/types/storage';
 
 // mock saveAttempt
 vi.mock('@/features/topic-test/services/testSession', () => ({
@@ -18,9 +18,7 @@ describe('useTestAnswer hook', () => {
 
     describe('initialization', () => {
         it('initializes empty state when no attempts', () => {
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [] })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts: [] }));
 
             expect(result.current.answers.size).toBe(0);
             expect(result.current.answeredCount).toBe(0);
@@ -55,9 +53,7 @@ describe('useTestAnswer hook', () => {
                 },
             ];
 
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts }));
 
             expect(result.current.answers.size).toBe(2);
             expect(result.current.answers.get('q1')?.user_answer).toEqual([0]);
@@ -68,9 +64,7 @@ describe('useTestAnswer hook', () => {
 
     describe('selectOption', () => {
         it('updates state and calls saveAttempt', async () => {
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [] })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts: [] }));
 
             await act(async () => {
                 result.current.selectOption('q1', [1], 1);
@@ -100,9 +94,7 @@ describe('useTestAnswer hook', () => {
                 },
             ];
 
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts }));
 
             await act(async () => {
                 result.current.selectOption('q1', [0], 1);
@@ -115,9 +107,7 @@ describe('useTestAnswer hook', () => {
 
     describe('toggleReview', () => {
         it('marks a question for review if no previous attempt exists', async () => {
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [] })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts: [] }));
 
             await act(async () => {
                 result.current.toggleReview('q1', 1);
@@ -145,9 +135,7 @@ describe('useTestAnswer hook', () => {
                 },
             ];
 
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts }));
 
             await act(async () => {
                 result.current.toggleReview('q1', 1);
@@ -181,7 +169,7 @@ describe('useTestAnswer hook', () => {
             };
 
             const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [initialAttempt] })
+                useTestAnswer({ testId, initialAttempts: [initialAttempt] }),
             );
 
             await act(async () => {
@@ -213,7 +201,7 @@ describe('useTestAnswer hook', () => {
             };
 
             const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [initialAttempt] })
+                useTestAnswer({ testId, initialAttempts: [initialAttempt] }),
             );
 
             act(() => {
@@ -227,9 +215,7 @@ describe('useTestAnswer hook', () => {
 
     describe('derived state', () => {
         it('updates answeredCount correctly when answers change', async () => {
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [] })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts: [] }));
 
             await act(async () => {
                 result.current.selectOption('q1', [0], 1);
@@ -240,9 +226,7 @@ describe('useTestAnswer hook', () => {
         });
 
         it('updates markedForReviewCount correctly', async () => {
-            const { result } = renderHook(() =>
-                useTestAnswer({ testId, initialAttempts: [] })
-            );
+            const { result } = renderHook(() => useTestAnswer({ testId, initialAttempts: [] }));
 
             await act(async () => {
                 result.current.toggleReview('q1', 1);

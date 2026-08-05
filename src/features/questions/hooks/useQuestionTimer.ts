@@ -1,14 +1,14 @@
 // This custom hook provides a flexible timer functionality for questions.
 // It can be started, stopped, and reset, and supports an auto-start feature.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Question } from '@/shared/types/storage';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 // Manages the state and logic for a question timer.
 export const useQuestionTimer = (
     autoTimer = false,
-    _currentQuestion?: Question,
-    isAnswered = false
+    currentQuestion?: Question,
+    isAnswered = false,
 ) => {
     // State to track if the timer is currently running.
     const [isActive, setIsActive] = useState(autoTimer);
@@ -75,7 +75,7 @@ export const useQuestionTimer = (
                 clearInterval(intervalRef.current);
             }
         };
-    }, [autoTimer, reset, start, stop, isAnswered]); // Dependencies include the memoized functions.
+    }, [currentQuestion, autoTimer, reset, start, stop, isAnswered]); // Dependencies include the memoized functions.
 
     // Format the elapsed time into a 'MM:SS' string for display.
     const minutes = String(Math.floor(time / 60)).padStart(2, '0');
