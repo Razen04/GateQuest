@@ -1,13 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import AuthContext from './AuthContext.js';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
-import { toast } from 'sonner';
-import type { AppUser } from '@/shared/types/AppUser.ts';
 import type { Session } from '@supabase/supabase-js';
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
+import type { AppUser } from '@/shared/types/AppUser.ts';
+import { getUserProfile } from '@/shared/utils/helper.js';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { appStorage } from '@/storage/storageService.ts';
+import AuthContext from './AuthContext.js';
 
-const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
     const [user, setUser] = useState<AppUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(false);
@@ -16,6 +19,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const { refresh } = useStudyPlan();
     const userIdRef = useRef<string | null>(null);
     const refreshRef = useRef(refresh);
+    const lastBetaStateRef = useRef<boolean | null>(null);
 
     const isLogin = !!user && user.id !== '1';
 
@@ -39,7 +43,22 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 return;
             }
 
-            if (userIdRef.current === supaUser.id) {
+            // Check if beta mode changed in localStorage since last run
+            const localProfile = getUserProfile();
+            const currentBetaState = localProfile?.settings?.is_beta ?? false;
+            const betaModeChanged =
+                lastBetaStateRef.current !== null &&
+                lastBetaStateRef.current !== currentBetaState;
+
+            lastBetaStateRef.current = currentBetaState;
+
+            // Invalidate cache ref if beta mode changed
+            if (betaModeChanged) {
+                userIdRef.current = null;
+            }
+
+            // Skip re-fetch if user ID is unchanged AND beta mode hasn't changed
+            if (userIdRef.current === supaUser.id && !betaModeChanged) {
                 if (isMounted) setLoading(false);
                 return;
             }
@@ -48,11 +67,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
             try {
                 // Fetch existing profile first
-                const { data: existingUser, error: selectError } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('id', supaUser.id)
-                    .maybeSingle();
+                const { data: existingUser, error: selectError } =
+                    await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', supaUser.id)
+                        .maybeSingle();
 
                 if (selectError) throw selectError;
 
@@ -75,11 +95,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         },
                     };
 
-                    const { data: insertedData, error: insertError } = await supabase
-                        .from('users')
-                        .insert(newProfile)
-                        .select()
-                        .single();
+                    const { data: insertedData, error: insertError } =
+                        await supabase
+                            .from('users')
+                            .insert(newProfile)
+                            .select()
+                            .single();
 
                     if (insertError) throw insertError;
                     finalProfile = insertedData;
@@ -87,13 +108,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
                 if (finalProfile && isMounted) {
                     const rawSettings =
-                        typeof finalProfile.settings === 'object' && finalProfile.settings !== null
+                        typeof finalProfile.settings === 'object' &&
+                        finalProfile.settings !== null
                             ? (finalProfile.settings as Record<string, boolean>)
                             : {};
 
                     const profile = {
                         ...finalProfile,
-                        bookmark_questions: finalProfile.bookmark_questions || [],
+                        bookmark_questions:
+                            finalProfile.bookmark_questions || [],
                         college: finalProfile.college || '',
                         targetYear: finalProfile.targetYear || 2027,
                         version_number: finalProfile.version_number || 1,
@@ -116,7 +139,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                         }
                     }
 
-                    localStorage.setItem('gate_user_profile', JSON.stringify(profile));
+                    localStorage.setItem(
+                        'gate_user_profile',
+                        JSON.stringify(profile)
+                    );
                     refreshRef.current();
                     setUser(profile as unknown as AppUser);
                 }
@@ -129,9 +155,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         };
 
         // Rely on onAuthStateChange for session initialization & updates
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            handleSession(session);
-        });
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                handleSession(session);
+            }
+        );
 
         return () => {
             isMounted = false;
@@ -163,7 +191,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         ];
 
         try {
-            staleKeys.forEach((k) => localStorage.removeItem(k));
+            staleKeys.forEach((k) => {
+                localStorage.removeItem(k);
+            });
         } catch (e) {
             console.warn('⚠️ localStorage clearing error:', e);
         }

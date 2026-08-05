@@ -107,7 +107,10 @@ export default function useUrlFilters({
         const p = new URLSearchParams({
             q: searchQuery || '',
             attempt: attemptFilter,
-            diff: difficultyFilter.length > 0 ? difficultyFilter.join(',') : 'all',
+            diff:
+                difficultyFilter.length > 0
+                    ? difficultyFilter.join(',')
+                    : 'all',
             year: yearFilter.length > 0 ? yearFilter.join(',') : 'all',
             topic: topicFilter.length > 0 ? topicFilter.join(',') : 'all',
             exam: examFilter.length > 0 ? examFilter.join(',') : 'all',

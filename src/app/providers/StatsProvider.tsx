@@ -7,7 +7,9 @@ import { getUserProfile } from '@/shared/utils/helper.ts';
 import { useGoals } from '@/shared/hooks/useGoals.js';
 import type { DashboardResponse } from '@/shared/types/StatsType.js';
 
-export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
     const [stats, setStats] = useState<Stats>({
         progress: 0,
         accuracy: 0,
@@ -67,7 +69,9 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             // Case-insensitive lookup helper for exam_stats JSON keys from DB
             const findExamStats = (examName: string) => {
                 const keys = Object.keys(dashboardData.exam_stats || {});
-                const matchKey = keys.find((k) => k.toLowerCase() === examName.toLowerCase());
+                const matchKey = keys.find(
+                    (k) => k.toLowerCase() === examName.toLowerCase()
+                );
                 return matchKey ? dashboardData.exam_stats[matchKey] : null;
             };
 
@@ -90,7 +94,10 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
             // Persist to local storage
             try {
-                localStorage.setItem('subjectStats', JSON.stringify(defaultSubjectStats));
+                localStorage.setItem(
+                    'subjectStats',
+                    JSON.stringify(defaultSubjectStats)
+                );
             } catch (e) {
                 console.warn('Failed to save subjectStats to localStorage', e);
             }
@@ -98,9 +105,14 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             // Global Metrics
             const totalQuestions = primaryExamStats.total_available || 0;
             const uniqueAttemptCount = primaryExamStats.overall_attempted || 0;
-            const remainingQuestions = Math.max(totalQuestions - uniqueAttemptCount, 0);
+            const remainingQuestions = Math.max(
+                totalQuestions - uniqueAttemptCount,
+                0
+            );
             const overallUniqueProgressPercent =
-                totalQuestions > 0 ? Math.round((uniqueAttemptCount / totalQuestions) * 100) : 0;
+                totalQuestions > 0
+                    ? Math.round((uniqueAttemptCount / totalQuestions) * 100)
+                    : 0;
 
             const dbStats = dashboardData.dashboard_stats || {};
 
@@ -112,8 +124,10 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 question: new Set(),
                 heatmapData: dashboardData.heatmap || [],
                 streaks: {
-                    learning_current: dashboardData.streaks?.learning_current || 0,
-                    learning_longest: dashboardData.streaks?.learning_longest || 0,
+                    learning_current:
+                        dashboardData.streaks?.learning_current || 0,
+                    learning_longest:
+                        dashboardData.streaks?.learning_longest || 0,
                     study_current: dashboardData.streaks?.study_current || 0,
                     study_longest: dashboardData.streaks?.study_longest || 0,
                 },
@@ -123,7 +137,8 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     remainingQuestions,
                     daysLeft: dbStats.days_left || 0,
                     dailyQuestionTarget: dbStats.daily_question_target || 0,
-                    todayUniqueAttemptCount: dbStats.today_unique_attempt_count || 0,
+                    todayUniqueAttemptCount:
+                        dbStats.today_unique_attempt_count || 0,
                     progressPercent: overallUniqueProgressPercent,
                     todayProgressPercent: dbStats.today_progress_percent || 0,
                     isTargetMetToday: dbStats.is_target_met_today || false,
@@ -154,7 +169,10 @@ export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
         window.addEventListener('STATS_UPDATED', handleStatsUpdate);
         return () => {
-            window.removeEventListener('REVISION_UPDATED', handleRevisionUpdate);
+            window.removeEventListener(
+                'REVISION_UPDATED',
+                handleRevisionUpdate
+            );
             window.removeEventListener('STATS_UPDATED', handleStatsUpdate);
         };
     }, [fetchCurrentSet, updateStats]);

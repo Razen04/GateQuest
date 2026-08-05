@@ -42,7 +42,10 @@ const useSmartRevision = () => {
                 setQuestions(data.questions || []);
 
                 // storing the weekly set info
-                localStorage.setItem('weekly_set_info', compress(JSON.stringify(data)));
+                localStorage.setItem(
+                    'weekly_set_info',
+                    compress(JSON.stringify(data))
+                );
             } else {
                 setCurrentSet(null);
                 setQuestions([]);
@@ -60,13 +63,15 @@ const useSmartRevision = () => {
 
         setLoading(true);
         const activeSubjects = getPracticeSubjects().map((s) => s.id);
-        const activeExams = (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
+        const activeExams =
+            (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) ||
+            [];
 
         try {
             const { data, error } = await generateWeeklySet(
                 activeSubjects,
                 activeExams,
-                userGoal?.branch_id,
+                userGoal?.branch_id
             );
 
             if (error) throw error;
@@ -87,7 +92,12 @@ const useSmartRevision = () => {
         } finally {
             setLoading(false);
         }
-    }, [userGoal?.branch_id, userGoal?.target_exams, getPracticeSubjects, fetchCurrentSet]);
+    }, [
+        userGoal?.branch_id,
+        userGoal?.target_exams,
+        getPracticeSubjects,
+        fetchCurrentSet,
+    ]);
 
     // Start the set
     const startSet = useCallback(async () => {
@@ -125,10 +135,12 @@ const useSmartRevision = () => {
             // Get present week's Sunday (end of week)
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
             const activeExams =
-                (userGoal?.target_exams as string[])?.map((e) => e.toUpperCase()) || [];
+                (userGoal?.target_exams as string[])?.map((e) =>
+                    e.toUpperCase()
+                ) || [];
             const { data: count, error } = await fetchCriticalQuestionCount(
                 activeSubjects,
-                activeExams,
+                activeExams
             );
 
             if (error) throw error;

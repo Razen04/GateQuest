@@ -12,12 +12,15 @@ interface ParsedTable {
 
 // Utility: check if a row is the markdown alignment row like | :---: | --- |
 const isAlignmentRow = (cells: string[]): boolean =>
-    cells.length > 0 && cells.every((c) => /^:?-{3,}:?$/.test(c.replace(/\s+/g, '')));
+    cells.length > 0 &&
+    cells.every((c) => /^:?-{3,}:?$/.test(c.replace(/\s+/g, '')));
 
 // Parse contiguous markdown table blocks
 const parseMarkdownTables = (text: string): ParsedTable[] => {
     const out: ParsedTable[] = [];
-    const normalized = text.replace(/<br\s*\/?>/gi, '\n').replace(/&nbsp;/gi, ' ');
+    const normalized = text
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/&nbsp;/gi, ' ');
     const lines = normalized.split('\n');
 
     let current: string[] = [];
@@ -32,7 +35,7 @@ const parseMarkdownTables = (text: string): ParsedTable[] => {
             line
                 .split('|')
                 .filter((cell) => cell.trim() !== '')
-                .map((c) => c.trim()),
+                .map((c) => c.trim())
         );
         if (rows.length < 2) {
             current = [];
@@ -52,13 +55,16 @@ const parseMarkdownTables = (text: string): ParsedTable[] => {
 
             const maybeHeader = rows[headerRowIdx];
             if (maybeHeader) {
-                const looksHeader = maybeHeader.some((c) => /[A-Za-z$\\]/.test(c));
+                const looksHeader = maybeHeader.some((c) =>
+                    /[A-Za-z$\\]/.test(c)
+                );
 
                 if (looksHeader && headerRowIdx - 1 >= 0) {
                     const maybeCaption = rows[headerRowIdx - 1];
                     if (maybeCaption) {
                         const isCaption = maybeCaption.every(
-                            (c) => c.length <= 3 || c === '' || /^(R|S)$/i.test(c),
+                            (c) =>
+                                c.length <= 3 || c === '' || /^(R|S)$/i.test(c)
                         );
                         if (isCaption) {
                             caption = maybeCaption.join(' ');

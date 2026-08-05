@@ -42,8 +42,13 @@ const getTimeRemaining = (expiresAt: string) => {
 
 const SmartRevision = () => {
     const navigate = useNavigate();
-    const { loading, currentSet, generateSet, startSet, criticalQuestionsCount } =
-        useSmartRevision();
+    const {
+        loading,
+        currentSet,
+        generateSet,
+        startSet,
+        criticalQuestionsCount,
+    } = useSmartRevision();
     const { isLogin } = useAuth();
 
     // Fix: Move navigation & toast side-effects into useEffect
@@ -125,7 +130,9 @@ const SmartRevision = () => {
                                         </h3>
                                         <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
                                             {currentSet?.expires_at
-                                                ? getTimeRemaining(currentSet.expires_at)
+                                                ? getTimeRemaining(
+                                                      currentSet.expires_at
+                                                  )
                                                 : 'Expires next Sunday or 24 hours after launch.'}
                                         </p>
                                     </div>
@@ -138,7 +145,10 @@ const SmartRevision = () => {
                                             onClick={startSet}
                                             className="rounded-none h-12 w-full gap-2 bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
                                         >
-                                            <Lightning size={18} weight="fill" />
+                                            <Lightning
+                                                size={18}
+                                                weight="fill"
+                                            />
                                             {currentSet?.status === 'pending'
                                                 ? 'Launch Revision Session'
                                                 : 'Resume Revision Session'}
@@ -154,7 +164,10 @@ const SmartRevision = () => {
                                     className="max-w-md space-y-4"
                                 >
                                     <div className="mx-auto flex h-16 w-16 items-center justify-center bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400">
-                                        <ShieldCheck size={36} weight="duotone" />
+                                        <ShieldCheck
+                                            size={36}
+                                            weight="duotone"
+                                        />
                                     </div>
 
                                     <div className="space-y-2">
@@ -162,8 +175,9 @@ const SmartRevision = () => {
                                             Weekly Set Concluded
                                         </h3>
                                         <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
-                                            You've finished this week's smart recovery sequence.
-                                            Next set unlocks next week.
+                                            You've finished this week's smart
+                                            recovery sequence. Next set unlocks
+                                            next week.
                                         </p>
                                     </div>
                                 </motion.div>
@@ -176,9 +190,14 @@ const SmartRevision = () => {
                                     className="max-w-md space-y-6"
                                 >
                                     <div className="inline-flex items-center gap-2 border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold text-orange-600 dark:text-orange-400">
-                                        <Fire size={16} weight="fill" className="animate-pulse" />
+                                        <Fire
+                                            size={16}
+                                            weight="fill"
+                                            className="animate-pulse"
+                                        />
                                         <span>
-                                            {criticalQuestionsCount} CRITICAL ERRORS DETECTED
+                                            {criticalQuestionsCount} CRITICAL
+                                            ERRORS DETECTED
                                         </span>
                                     </div>
 
@@ -187,8 +206,9 @@ const SmartRevision = () => {
                                             Ready to Recover Marks?
                                         </h3>
                                         <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
-                                            Generate an algorithmic revision queue targeted
-                                            specifically at your recent missteps.
+                                            Generate an algorithmic revision
+                                            queue targeted specifically at your
+                                            recent missteps.
                                         </p>
                                     </div>
 
@@ -215,7 +235,10 @@ const SmartRevision = () => {
                                     className="max-w-md space-y-4"
                                 >
                                     <div className="mx-auto flex h-16 w-16 items-center justify-center bg-emerald-500/10 text-emerald-500">
-                                        <CheckCircle size={36} weight="duotone" />
+                                        <CheckCircle
+                                            size={36}
+                                            weight="duotone"
+                                        />
                                     </div>
 
                                     <div className="space-y-2">
@@ -223,8 +246,9 @@ const SmartRevision = () => {
                                             All Clear This Week!
                                         </h3>
                                         <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
-                                            No pending critical questions detected. Great job
-                                            keeping your retention rate high!
+                                            No pending critical questions
+                                            detected. Great job keeping your
+                                            retention rate high!
                                         </p>
                                     </div>
                                 </motion.div>

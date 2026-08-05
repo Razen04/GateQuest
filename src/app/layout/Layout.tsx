@@ -25,7 +25,9 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
 
             if (user?.id && buffer.length > 0) {
                 try {
-                    await supabase.from('user_question_activity').insert(buffer);
+                    await supabase
+                        .from('user_question_activity')
+                        .insert(buffer);
                     refresh();
                     localStorage.removeItem(LOCAL_KEY);
                 } catch (err) {
@@ -51,7 +53,7 @@ const Layout = () => {
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
     const hideMobileNavigation = FOCUS_PATHS.some(
-        (path) => location.pathname.startsWith(path) || isPracticeCard,
+        (path) => location.pathname.startsWith(path) || isPracticeCard
     );
 
     return (

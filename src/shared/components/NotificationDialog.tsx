@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { BookOpen, Calendar, CheckSquareOffset, SealCheck } from '@phosphor-icons/react';
+import {
+    BookOpen,
+    Calendar,
+    CheckSquareOffset,
+    SealCheck,
+} from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '../utils/supabaseClient.js';
 import type { Database } from '../types/supabase.js';
@@ -13,7 +18,10 @@ type NotificationDialogProp = {
 
 type Notification = Database['public']['Tables']['notifications']['Row'];
 
-const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDialogProp) => {
+const NotificationDialog = ({
+    isOpen,
+    setUnreadNotifications,
+}: NotificationDialogProp) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [readNotifications, setReadNotifications] = useState<string[]>(() => {
         try {
@@ -29,7 +37,9 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
     // Mark all notifications as read
     const markAllAsRead = (notifications: Notification[]): void => {
         const allIds: string[] = notifications.map((n) => n.id);
-        const updatedRead: string[] = Array.from(new Set([...readNotifications, ...allIds]));
+        const updatedRead: string[] = Array.from(
+            new Set([...readNotifications, ...allIds])
+        );
 
         setReadNotifications(updatedRead);
         localStorage.setItem('read_notifications', JSON.stringify(updatedRead));
@@ -41,9 +51,13 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
     // Fetch notifications on mount
     useEffect(() => {
         const fetchNotifications = async () => {
-            const lastCheckedStr = localStorage.getItem('last_checked_notification');
+            const lastCheckedStr = localStorage.getItem(
+                'last_checked_notification'
+            );
 
-            const lastChecked = lastCheckedStr ? new Date(JSON.parse(lastCheckedStr)) : null;
+            const lastChecked = lastCheckedStr
+                ? new Date(JSON.parse(lastCheckedStr))
+                : null;
 
             const now = new Date();
             const diffInHours = lastChecked
@@ -53,7 +67,7 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
             if (diffInHours <= 3) return;
 
             const readIds = JSON.parse(
-                localStorage.getItem('read_notifications') || '[]',
+                localStorage.getItem('read_notifications') || '[]'
             ) as string[];
 
             const { data, error } = await supabase
@@ -66,9 +80,14 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                 console.error('Error fetching notifications: ', error);
                 toast.message("Couldn't fetch notifications");
             } else {
-                setNotifications((data || []).filter((n) => !readIds.includes(n.id)));
+                setNotifications(
+                    (data || []).filter((n) => !readIds.includes(n.id))
+                );
                 const time = new Date();
-                localStorage.setItem('last_checked_notification', JSON.stringify(time));
+                localStorage.setItem(
+                    'last_checked_notification',
+                    JSON.stringify(time)
+                );
             }
         };
 
@@ -119,7 +138,9 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
                     <div className="relative max-h-80 overflow-y-auto p-2 space-y-1">
                         {notifications?.length > 0 ? (
                             notifications.map((notification) => {
-                                const isRead = readNotifications.includes(notification.id);
+                                const isRead = readNotifications.includes(
+                                    notification.id
+                                );
 
                                 return (
                                     <div
@@ -139,7 +160,9 @@ const NotificationDialog = ({ isOpen, setUnreadNotifications }: NotificationDial
 
                                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                                     {formatDistanceToNow(
-                                                        new Date(notification.created_at),
+                                                        new Date(
+                                                            notification.created_at
+                                                        )
                                                     )}
                                                 </span>
                                             </div>

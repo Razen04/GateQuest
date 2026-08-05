@@ -62,7 +62,9 @@ describe('useTestTimer hook', () => {
     // Test case 4
     describe('drift test', () => {
         it('corrects drift when system time jumps forward', () => {
-            const { result } = renderHook(() => useTestTimer({ initialSeconds: 60 }));
+            const { result } = renderHook(() =>
+                useTestTimer({ initialSeconds: 60 })
+            );
 
             // 1 second passes normally
             act(() => {

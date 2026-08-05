@@ -50,8 +50,9 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                         </h1>
 
                         <p className="text-gray-600 dark:text-gray-300 text-base">
-                            Sign up or log in to track your progress, bookmark important questions,
-                            and join the leaderboard (in future)!
+                            Sign up or log in to track your progress, bookmark
+                            important questions, and join the leaderboard (in
+                            future)!
                         </p>
                     </div>
 
@@ -92,8 +93,8 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
 
                     <div className="mt-6 text-xs text-gray-400 text-center w-full">
                         <span>
-                            By continuing, you agree to give your details like gmail, name and
-                            profile photo.
+                            By continuing, you agree to give your details like
+                            gmail, name and profile photo.
                         </span>
                     </div>
                 </div>

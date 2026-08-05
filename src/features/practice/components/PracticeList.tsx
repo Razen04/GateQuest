@@ -34,7 +34,10 @@ const PracticeList = () => {
     // --- Event Handlers ---
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
+    const handleQuestionClick = (
+        id: string,
+        currentFilteredList: Question[]
+    ) => {
         const currentQueryString = window.location.search;
 
         // Navigate to the specific question URL, making sure to include the current filter query string.
@@ -60,8 +63,8 @@ const PracticeList = () => {
     if (error) {
         return (
             <div>
-                Failed to load questions, please clear cache and try again, if this does not work,
-                hop on Discord and I might help.
+                Failed to load questions, please clear cache and try again, if
+                this does not work, hop on Discord and I might help.
             </div>
         );
     }

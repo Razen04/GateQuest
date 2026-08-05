@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import useTest from '@/features/topic-test/hooks/test-engine/useTest';
 import QuestionContent from '@/features/questions/components/QuestionCard/QuestionContent';
-import { isMultipleSelection, isNumericalQuestion } from '@/features/questions/utils/questionUtils';
+import {
+    isMultipleSelection,
+    isNumericalQuestion,
+} from '@/features/questions/utils/questionUtils';
 
 // Sub-components
 import TestHeader from './TestHeader';
@@ -10,8 +13,15 @@ import QuestionPalette from './QuestionPallete';
 import { CalculatorIcon, XIcon } from '@phosphor-icons/react';
 
 const ActiveTest = () => {
-    const { navigation, answers, timer, handleNext, handlePrev, handleSubmit, questions } =
-        useTest();
+    const {
+        navigation,
+        answers,
+        timer,
+        handleNext,
+        handlePrev,
+        handleSubmit,
+        questions,
+    } = useTest();
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
     const [showCalc, setShowCalc] = useState(false);
 
@@ -38,7 +48,9 @@ const ActiveTest = () => {
     // Data Normalization
     // MSQ: Expects array of numbers. If undefined, give empty array.
     const msqSelection: number[] =
-        isMSQ && Array.isArray(currentAttempt?.user_answer) ? currentAttempt?.user_answer : [];
+        isMSQ && Array.isArray(currentAttempt?.user_answer)
+            ? currentAttempt?.user_answer
+            : [];
 
     // MCQ: Expects single number. If undefined or array, give null.
     const mcqSelection: number | null =
@@ -51,7 +63,8 @@ const ActiveTest = () => {
     const rawVal = currentAttempt?.user_answer;
 
     // Normalize: If it's a number or string, use it. If it's an array or null, use empty string.
-    const natValue = typeof rawVal === 'number' || typeof rawVal === 'string' ? rawVal : '';
+    const natValue =
+        typeof rawVal === 'number' || typeof rawVal === 'string' ? rawVal : '';
 
     // Handlers
     const handleOptionClick = (optionIndex: number) => {
@@ -97,10 +110,15 @@ const ActiveTest = () => {
     // ActiveTest.tsx logic
     const allAttempts = Array.from(answers.answers.values());
 
-    const answeredCount = allAttempts.filter((a) => a.status === 'answered').length;
+    const answeredCount = allAttempts.filter(
+        (a) => a.status === 'answered'
+    ).length;
     const markedCount = allAttempts.filter((a) => a.marked_for_review).length;
-    const visitedNotAnswered = allAttempts.filter((a) => a.status === 'viewed').length;
-    const unvisitedCount = questions.length - (answeredCount + visitedNotAnswered);
+    const visitedNotAnswered = allAttempts.filter(
+        (a) => a.status === 'viewed'
+    ).length;
+    const unvisitedCount =
+        questions.length - (answeredCount + visitedNotAnswered);
 
     return (
         <div className="flex flex-col h-full overflow-hidden text-slate-900 dark:text-slate-100">
@@ -136,7 +154,11 @@ const ActiveTest = () => {
                                     onClick={() => setShowCalc((prev) => !prev)}
                                     className={`px-2 py-1 text-white ${showCalc ? 'bg-red-500' : 'bg-blue-500'} rounded-md`}
                                 >
-                                    {showCalc ? <XIcon size={32} /> : <CalculatorIcon size={32} />}
+                                    {showCalc ? (
+                                        <XIcon size={32} />
+                                    ) : (
+                                        <CalculatorIcon size={32} />
+                                    )}
                                 </button>
 
                                 {showCalc && (
@@ -151,7 +173,9 @@ const ActiveTest = () => {
                                         <div className="hidden md:block absolute right-0 mt-2 z-50">
                                             <div
                                                 className="relative w-[475px] h-[350px] bg-white dark:bg-zinc-950 shadow-2xl rounded-lg overflow-hidden"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             >
                                                 <iframe
                                                     src="https://www.gatexplore.com/scientific-calculator/calculator.html"
@@ -164,7 +188,9 @@ const ActiveTest = () => {
                                         <div className="md:hidden fixed inset-x-0 bottom-0 z-50 flex items-end">
                                             <div
                                                 className="w-full h-[60vh] bg-white dark:bg-gray-800 rounded-t-2xl overflow-hidden relative"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             >
                                                 <iframe
                                                     src="https://www.gatexplore.com/scientific-calculator/calculator.html"

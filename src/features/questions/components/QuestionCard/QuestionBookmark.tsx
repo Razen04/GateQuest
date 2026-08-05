@@ -45,7 +45,11 @@ const QuestionBookmark = ({
                             duration: 0.3,
                         }}
                     >
-                        {isBookmarked ? (hasNote ? 'Note Added' : 'Bookmarked') : 'Bookmark'}
+                        {isBookmarked
+                            ? hasNote
+                                ? 'Note Added'
+                                : 'Bookmarked'
+                            : 'Bookmark'}
                     </motion.span>
                 </AnimatePresence>
             </button>

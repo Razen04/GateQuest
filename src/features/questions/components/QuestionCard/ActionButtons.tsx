@@ -1,4 +1,10 @@
-import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
+import {
+    ArrowLeft,
+    ArrowRight,
+    ChatCircle,
+    Eye,
+    Flag,
+} from '@phosphor-icons/react';
 import { Button } from '@/shared/components/ui/button.tsx';
 
 type ActionButtonsProps = {
@@ -80,7 +86,8 @@ const ActionButtons = ({
                     >
                         <ChatCircle className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Explanation <span className="font-mono">[/]</span>
+                            Show Explanation{' '}
+                            <span className="font-mono">[/]</span>
                         </span>
                     </Button>
                 </>

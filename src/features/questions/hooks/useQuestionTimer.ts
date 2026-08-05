@@ -8,7 +8,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 export const useQuestionTimer = (
     autoTimer = false,
     currentQuestion?: Question,
-    isAnswered = false,
+    isAnswered = false
 ) => {
     // State to track if the timer is currently running.
     const [isActive, setIsActive] = useState(autoTimer);

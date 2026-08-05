@@ -20,21 +20,41 @@ const PROVIDER_UI: Record<
     chatgpt: {
         label: 'ChatGPT',
         badgeBg: 'bg-[#10a37f]',
-        btnClass: 'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
-        icon: <img src="/ai_providers/chatgpt.svg" alt="ChatGPT" className="h-4 w-4" />,
+        btnClass:
+            'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
+        icon: (
+            <img
+                src="/ai_providers/chatgpt.svg"
+                alt="ChatGPT"
+                className="h-4 w-4"
+            />
+        ),
     },
     claude: {
         label: 'Claude',
         badgeBg: 'bg-[#cc785c]',
-        btnClass: 'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
-        icon: <img src="/ai_providers/claude.svg" alt="Claude" className="h-4 w-4" />,
+        btnClass:
+            'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
+        icon: (
+            <img
+                src="/ai_providers/claude.svg"
+                alt="Claude"
+                className="h-4 w-4"
+            />
+        ),
     },
     grok: {
         label: 'Grok',
         badgeBg: 'bg-zinc-900 dark:bg-zinc-100',
         btnClass:
             'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 focus:ring-zinc-500',
-        icon: <img src="/ai_providers/grok.svg" alt="Grok" className="h-4 w-4 dark:invert" />,
+        icon: (
+            <img
+                src="/ai_providers/grok.svg"
+                alt="Grok"
+                className="h-4 w-4 dark:invert"
+            />
+        ),
     },
 };
 
@@ -94,11 +114,17 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                         className={`shrink-0 flex-1 sm:flex-none flex items-center justify-center gap-2 text-xs md:text-sm px-5 py-2.5 sm:py-1.5 font-bold sm:font-semibold active:scale-[0.98] transition-all duration-150 ${ui.btnClass}`}
                     >
                         {isProcessing ? (
-                            <CircleNotchIcon size={16} className="animate-spin" />
+                            <CircleNotchIcon
+                                size={16}
+                                className="animate-spin"
+                            />
                         ) : (
                             <>
                                 Ask {ui.label}
-                                <ArrowSquareOutIcon className="text-base shrink-0" weight="bold" />
+                                <ArrowSquareOutIcon
+                                    className="text-base shrink-0"
+                                    weight="bold"
+                                />
                             </>
                         )}
                     </button>

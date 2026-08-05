@@ -29,7 +29,11 @@ export default function ProfilePage() {
     }
 
     return (
-        <motion.div variants={containerVariants} initial="initial" animate="animate">
+        <motion.div
+            variants={containerVariants}
+            initial="initial"
+            animate="animate"
+        >
             <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-white pb-30 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:from-[#06070A] dark:via-[#0A0D12] dark:to-[#0F1218] dark:text-slate-200">
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute left-1/2 -top-32 h-[500px] w-[500px] -translate-x-1/2 bg-[#3E8EFF]/10 blur-3xl" />
@@ -48,7 +52,9 @@ export default function ProfilePage() {
                                     globalStats={data.global_stats}
                                     streaks={data.streaks}
                                 />
-                                <ProfileSidePanel globalStats={data.global_stats} />
+                                <ProfileSidePanel
+                                    globalStats={data.global_stats}
+                                />
                             </aside>
 
                             <main className="flex min-w-0 flex-col gap-6">

@@ -15,7 +15,11 @@ import {
 import useAuth from '@/shared/hooks/useAuth';
 import { useGoals } from '@/shared/hooks/useGoals';
 import { getSocialSettingsValue } from '../api/social-settings';
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper';
+import {
+    getUserProfile,
+    syncUserToSupabase,
+    updateUserProfile,
+} from '@/shared/utils/helper';
 
 import SocialSettingsForm from '../components/SocialSettingsForm';
 import SocialLinksDisplay from '../components/SocialLinksDisplay';
@@ -110,7 +114,9 @@ const AccountSettings = () => {
             const data = await getSocialSettingsValue(user);
             if (data) {
                 const activeLinks = Object.fromEntries(
-                    Object.entries(data).filter(([, value]) => value !== null && value !== ''),
+                    Object.entries(data).filter(
+                        ([, value]) => value !== null && value !== ''
+                    )
                 ) as Record<string, string>;
                 setSocialLinks(activeLinks);
             }
@@ -215,7 +221,9 @@ const AccountSettings = () => {
                                     {user?.targetYear && (
                                         <>
                                             <span>&bull;</span>
-                                            <span>Target {user.targetYear}</span>
+                                            <span>
+                                                Target {user.targetYear}
+                                            </span>
                                         </>
                                     )}
                                 </div>
@@ -223,7 +231,10 @@ const AccountSettings = () => {
 
                             {user?.college && (
                                 <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-slate-500 dark:text-slate-400">
-                                    <GraduationCap size={14} className="text-[#2A5CFF]" />
+                                    <GraduationCap
+                                        size={14}
+                                        className="text-[#2A5CFF]"
+                                    />
                                     {user.college}
                                 </p>
                             )}
@@ -250,7 +261,10 @@ const AccountSettings = () => {
                 {user?.about && user?.settings?.is_beta && (
                     <div className="mt-4 pt-3 border-t border-slate-900/5 dark:border-white/10">
                         <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <Info size={16} className="mt-0.5 shrink-0 text-[#2A5CFF]" />
+                            <Info
+                                size={16}
+                                className="mt-0.5 shrink-0 text-[#2A5CFF]"
+                            />
                             <span>{user.about}</span>
                         </p>
                     </div>
@@ -268,17 +282,23 @@ const AccountSettings = () => {
             </motion.div>
 
             {/* Social Settings Modal Dialog */}
-            <Dialog open={openSocialSettings} onOpenChange={setOpenSocialSettings}>
+            <Dialog
+                open={openSocialSettings}
+                onOpenChange={setOpenSocialSettings}
+            >
                 <DialogContent className="border-slate-900/10 bg-white/90 p-6 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/90 sm:max-w-md rounded-none">
                     <DialogHeader>
                         <DialogTitle className="font-['Space_Grotesk',sans-serif] text-lg font-bold rounded-none">
                             Social Media Presence
                         </DialogTitle>
                         <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 rounded-none">
-                            Connect your profiles so peers and mentors can find your work.
+                            Connect your profiles so peers and mentors can find
+                            your work.
                         </DialogDescription>
                     </DialogHeader>
-                    <SocialSettingsForm onSuccess={() => setOpenSocialSettings(false)} />
+                    <SocialSettingsForm
+                        onSuccess={() => setOpenSocialSettings(false)}
+                    />
                 </DialogContent>
             </Dialog>
 
@@ -316,7 +336,10 @@ const AccountSettings = () => {
                         />
                     </FormField>
 
-                    <FormField label="College / University" tag="// ACADEMIC_INST">
+                    <FormField
+                        label="College / University"
+                        tag="// ACADEMIC_INST"
+                    >
                         <Input
                             type="text"
                             value={college}
@@ -380,7 +403,10 @@ const AccountSettings = () => {
                         </Select>
                     </FormField>
 
-                    <FormField label="Target Examinations" tag="// MULTI_SELECT">
+                    <FormField
+                        label="Target Examinations"
+                        tag="// MULTI_SELECT"
+                    >
                         <Combobox
                             items={availableExams}
                             multiple
@@ -391,7 +417,9 @@ const AccountSettings = () => {
                             <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
                                 <ComboboxValue>
                                     {tempExams.map((id) => {
-                                        const exam = exams.find((e) => e.id === id);
+                                        const exam = exams.find(
+                                            (e) => e.id === id
+                                        );
                                         if (!exam) return null;
 
                                         return (
@@ -408,7 +436,9 @@ const AccountSettings = () => {
 
                                 <ComboboxChipsInput
                                     placeholder={
-                                        tempExams.length === 0 ? 'Select target exams...' : ''
+                                        tempExams.length === 0
+                                            ? 'Select target exams...'
+                                            : ''
                                     }
                                     className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-slate-700 dark:text-slate-300"
                                 />
@@ -416,7 +446,8 @@ const AccountSettings = () => {
 
                             <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
                                 <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
-                                    No matching exams found. Select a branch first.
+                                    No matching exams found. Select a branch
+                                    first.
                                 </ComboboxEmpty>
                                 <ComboboxList>
                                     {(exam) => (
@@ -432,15 +463,19 @@ const AccountSettings = () => {
                             </ComboboxContent>
                         </Combobox>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                            Selecting multiple exams automatically merges relevant syllabi into your
-                            custom practice modules.
+                            Selecting multiple exams automatically merges
+                            relevant syllabi into your custom practice modules.
                         </p>
                     </FormField>
 
                     {/* NOTE: This is currently in beta. */}
                     {/* About Section */}
                     {user?.settings?.is_beta && (
-                        <FormField label="About / Bio" tag="// BIOGRAPHY" className="md:col-span-2">
+                        <FormField
+                            label="About / Bio"
+                            tag="// BIOGRAPHY"
+                            className="md:col-span-2"
+                        >
                             <Textarea
                                 value={about}
                                 onChange={(e) => setAbout(e.target.value)}
@@ -470,7 +505,10 @@ const AccountSettings = () => {
                     >
                         {isSaving ? (
                             <>
-                                <CircleNotch className="animate-spin" size={18} />
+                                <CircleNotch
+                                    className="animate-spin"
+                                    size={18}
+                                />
                                 <span>Syncing Changes...</span>
                             </>
                         ) : savedSuccess ? (

@@ -31,7 +31,9 @@ export const usePresence = (questionId: string) => {
         // When a new user joins the questionRoom
         channel.subscribe(async (status) => {
             if (status === 'CHANNEL_ERROR') {
-                console.warn('Realtime limit reached. Presence data unavailable.');
+                console.warn(
+                    'Realtime limit reached. Presence data unavailable.'
+                );
             }
 
             if (status !== 'SUBSCRIBED') {

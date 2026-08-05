@@ -40,13 +40,17 @@ export const useQuestionController = ({
     const currentQuestion = useMemo(() => {
         if (!questions || questions.length === 0) return null;
         return (
-            questions.find((q: Question) => String(q.id) === String(currentIndex)) || questions[0]
+            questions.find(
+                (q: Question) => String(q.id) === String(currentIndex)
+            ) || questions[0]
         );
     }, [questions, currentIndex]);
 
     const safeQuestion = useMemo(
-        () => currentQuestion || ({ id: '0', options: [], correct_answer: [], subject: '' } as any),
-        [currentQuestion],
+        () =>
+            currentQuestion ||
+            ({ id: '0', options: [], correct_answer: [], subject: '' } as any),
+        [currentQuestion]
     );
 
     const {
@@ -117,7 +121,8 @@ export const useQuestionController = ({
 
     useEffect(() => {
         if (showAnswer && settings?.sound && result !== 'unattempted') {
-            if (result === 'correct') correctSoundRef.current?.play().catch((e) => console.warn(e));
+            if (result === 'correct')
+                correctSoundRef.current?.play().catch((e) => console.warn(e));
             else if (result === 'incorrect')
                 wrongSoundRef.current?.play().catch((e) => console.warn(e));
         }
@@ -126,7 +131,10 @@ export const useQuestionController = ({
     const [showReportModal, setShowReportModal] = useState(false);
     const [reportSubmitting, setReportSubmitting] = useState(false);
 
-    const handleReportSubmit = async (reportType: string, reportText: string) => {
+    const handleReportSubmit = async (
+        reportType: string,
+        reportText: string
+    ) => {
         setReportSubmitting(true);
 
         if (!user?.id) {
@@ -143,7 +151,8 @@ export const useQuestionController = ({
         try {
             const { error } = await handleReport(report);
             if (error) {
-                if (error.code === '23505') toast.error('Already reported by you.');
+                if (error.code === '23505')
+                    toast.error('Already reported by you.');
                 else toast.error('Error submitting report.');
             } else {
                 toast.success('Thank you for the report! ❤️');
@@ -173,12 +182,18 @@ export const useQuestionController = ({
     };
 
     const onExplanationClick = () => {
-        const url = mode === 'practice' ? safeQuestion.source_url : safeQuestion.explanation;
+        const url =
+            mode === 'practice'
+                ? safeQuestion.source_url
+                : safeQuestion.explanation;
         if (url) window.open(url, '_blank');
     };
 
     const handleBack = () => {
-        const path = mode === 'practice' ? `/practice/${subjectSlug}` : `/revision/${revisionId}`;
+        const path =
+            mode === 'practice'
+                ? `/practice/${subjectSlug}`
+                : `/revision/${revisionId}`;
         navigate(`${path}?${qs}`);
     };
 
@@ -189,7 +204,7 @@ export const useQuestionController = ({
             onShowAnswer: handleShowAnswer,
             onExplain: onExplanationClick,
         },
-        [safeQuestion],
+        [safeQuestion]
     );
 
     return {
@@ -200,7 +215,9 @@ export const useQuestionController = ({
             question: currentQuestion!,
             totalQuestions: questions.length,
             questionNumber:
-                questions.findIndex((q) => String(q.id) === String(safeQuestion.id)) + 1,
+                questions.findIndex(
+                    (q) => String(q.id) === String(safeQuestion.id)
+                ) + 1,
             subjectSlug: subjectSlug,
             userAnswerIndex,
             selectedOptionIndices,

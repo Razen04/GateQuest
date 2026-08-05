@@ -45,8 +45,8 @@ const INSTRUCTION_RULES: InstructionRule[] = [
         id: 'pause',
         text: (
             <>
-                Closing the app will <strong>Pause</strong> the timer, but try to finish in one
-                sitting.
+                Closing the app will <strong>Pause</strong> the timer, but try
+                to finish in one sitting.
             </>
         ),
         type: 'warning',
@@ -60,7 +60,11 @@ const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
 
     return (
         <div className="flex gap-3">
-            <Icon size={18} weight="fill" className={`${iconColor} shrink-0 mt-0.5`} />
+            <Icon
+                size={18}
+                weight="fill"
+                className={`${iconColor} shrink-0 mt-0.5`}
+            />
             <p>{rule.text}</p>
         </div>
     );
@@ -152,7 +156,9 @@ const TopicTestLobby = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="rounded-3xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
                 >
-                    <h2 className="text-xl font-bold mb-1">Custom Topic Test</h2>
+                    <h2 className="text-xl font-bold mb-1">
+                        Custom Topic Test
+                    </h2>
 
                     <p className="text-sm truncate text-slate-500 dark:text-slate-400 mb-6 max-w-md">
                         {testData.topics.join(', ')}

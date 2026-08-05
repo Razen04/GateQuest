@@ -41,7 +41,9 @@ const StatCard = ({
                     </h3>
 
                     <div className="flex items-center mt-0.5">
-                        <span className={`text-xl font-bold ${textColor}`}>{value}</span>
+                        <span className={`text-xl font-bold ${textColor}`}>
+                            {value}
+                        </span>
                     </div>
 
                     <div className="mt-2 h-1.5 w-full overflow-hidden bg-black/10 dark:bg-white/10">

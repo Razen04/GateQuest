@@ -10,7 +10,12 @@ import {
     DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { ArticleIcon, GithubLogoIcon, LinkIcon, MegaphoneIcon } from '@phosphor-icons/react';
+import {
+    ArticleIcon,
+    GithubLogoIcon,
+    LinkIcon,
+    MegaphoneIcon,
+} from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { version } from '../../../package.json';
 
@@ -74,7 +79,8 @@ function Changelog() {
                                 ),
                                 a: ({ href, children }) => {
                                     const isGithubLink =
-                                        href?.includes('github.com') || href?.startsWith('#');
+                                        href?.includes('github.com') ||
+                                        href?.startsWith('#');
 
                                     return (
                                         <a
@@ -93,10 +99,14 @@ function Changelog() {
                                     );
                                 },
                                 ul: ({ children }) => (
-                                    <ul className="list-disc pl-6 space-y-1">{children}</ul>
+                                    <ul className="list-disc pl-6 space-y-1">
+                                        {children}
+                                    </ul>
                                 ),
                                 li: ({ children }) => (
-                                    <li className="leading-relaxed">{children}</li>
+                                    <li className="leading-relaxed">
+                                        {children}
+                                    </li>
                                 ),
                             }}
                         >

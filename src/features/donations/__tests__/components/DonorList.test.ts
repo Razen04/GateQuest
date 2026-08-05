@@ -46,7 +46,9 @@ describe('UTC timestamp normalisation (the DonorList fix)', () => {
         const withZ = '2026-01-01T10:00:00.000Z';
         const withoutZ = '2026-01-01T10:00:00.000';
         const dateA = new Date(withZ.endsWith('Z') ? withZ : withZ + 'Z');
-        const dateB = new Date(withoutZ.endsWith('Z') ? withoutZ : withoutZ + 'Z');
+        const dateB = new Date(
+            withoutZ.endsWith('Z') ? withoutZ : withoutZ + 'Z'
+        );
         expect(dateA.getTime()).toBe(dateB.getTime());
     });
 });
@@ -66,7 +68,9 @@ describe('DonorList component', () => {
     });
 
     it('shows correct relative time for a timestamp WITHOUT a trailing Z', () => {
-        const donation = makeDonation({ created_at: '2026-01-01T09:55:00.000' });
+        const donation = makeDonation({
+            created_at: '2026-01-01T09:55:00.000',
+        });
         render(React.createElement(DonorList, { donations: [donation] }));
 
         expect(screen.getByText(/5 minutes/i)).toBeInTheDocument();
@@ -84,20 +88,27 @@ describe('DonorList component', () => {
         });
 
         const { container: containerA } = render(
-            React.createElement(DonorList, { donations: [withoutZ] }),
+            React.createElement(DonorList, { donations: [withoutZ] })
         );
         const { container: containerB } = render(
-            React.createElement(DonorList, { donations: [withZ] }),
+            React.createElement(DonorList, { donations: [withZ] })
         );
 
-        const timeA = containerA.querySelector('.text-gray-500')?.textContent?.trim();
-        const timeB = containerB.querySelector('.text-gray-500')?.textContent?.trim();
+        const timeA = containerA
+            .querySelector('.text-gray-500')
+            ?.textContent?.trim();
+        const timeB = containerB
+            .querySelector('.text-gray-500')
+            ?.textContent?.trim();
 
         expect(timeA).toBe(timeB);
     });
 
     it('shows "Anonymous" when donation.anonymous is true', () => {
-        const donation = makeDonation({ anonymous: true, user_name: 'Real Name' });
+        const donation = makeDonation({
+            anonymous: true,
+            user_name: 'Real Name',
+        });
         render(React.createElement(DonorList, { donations: [donation] }));
 
         expect(screen.getByText(/anonymous/i)).toBeInTheDocument();
@@ -140,7 +151,9 @@ describe('DonorList component', () => {
     });
 
     it('renders an empty list when donations array is empty', () => {
-        const { container } = render(React.createElement(DonorList, { donations: [] }));
+        const { container } = render(
+            React.createElement(DonorList, { donations: [] })
+        );
         expect(container.querySelectorAll('li')).toHaveLength(0);
     });
 
@@ -150,7 +163,9 @@ describe('DonorList component', () => {
             makeDonation({ donation_id: '2', user_name: 'Bob' }),
             makeDonation({ donation_id: '3', user_name: 'Charlie' }),
         ];
-        const { container } = render(React.createElement(DonorList, { donations }));
+        const { container } = render(
+            React.createElement(DonorList, { donations })
+        );
         expect(container.querySelectorAll('li')).toHaveLength(3);
     });
 });

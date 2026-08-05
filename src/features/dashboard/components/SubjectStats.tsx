@@ -39,7 +39,7 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                             const accuracy = Number(subject.accuracy) || 0;
 
                             const subjectMeta = subjects.find(
-                                (s) => s.slug === subject.subject_slug,
+                                (s) => s.slug === subject.subject_slug
                             );
 
                             const SubjectIcon = SubjectIconMap[
@@ -47,9 +47,12 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
                             ] as React.ElementType;
 
                             const questionCount =
-                                subject.total_available || subjectMeta?.question_count;
+                                subject.total_available ||
+                                subjectMeta?.question_count;
 
-                            const bgClass = getBackgroundColor(subjectMeta?.theme_color as string);
+                            const bgClass = getBackgroundColor(
+                                subjectMeta?.theme_color as string
+                            );
 
                             return (
                                 <motion.div

@@ -22,7 +22,8 @@ import { version, last_updated } from '../../../../package.json';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();
-    const { status, enableNotifications, disableNotifications, isProcessing } = useWebPush();
+    const { status, enableNotifications, disableNotifications, isProcessing } =
+        useWebPush();
     const APP_VERSION = version;
     const APP_LAST_UPDATED_AT = last_updated;
 
@@ -42,13 +43,15 @@ const AppSettings = () => {
         if (isProcessing) return;
 
         if (status === 'unsupported') {
-            toast.error('Web Push notifications are not supported on this browser.');
+            toast.error(
+                'Web Push notifications are not supported on this browser.'
+            );
             return;
         }
 
         if (status === 'denied') {
             toast.info(
-                'Notifications are blocked by browser settings. Click the lock icon in your browser URL bar to grant permission.',
+                'Notifications are blocked by browser settings. Click the lock icon in your browser URL bar to grant permission.'
             );
             return;
         }
@@ -135,10 +138,14 @@ const AppSettings = () => {
             {/* AI Assistant Module */}
             <div className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white p-5 shadow-sm dark:border-white/10 dark:from-white/[0.03] dark:to-white/[0.01]">
                 <div className="mb-3 flex items-center gap-2">
-                    <Sparkle size={18} className="text-[#2A5CFF]" weight="fill" />
+                    <Sparkle
+                        size={18}
+                        className="text-[#2A5CFF]"
+                        weight="fill"
+                    />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        AI Integration (Cause Everyone is doing this shit, it is kinda helpful
-                        though)
+                        AI Integration (Cause Everyone is doing this shit, it is
+                        kinda helpful though)
                     </span>
                 </div>
                 <AskAI />

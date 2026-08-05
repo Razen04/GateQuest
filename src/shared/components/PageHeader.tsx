@@ -9,7 +9,11 @@ interface PageHeaderProps {
     caption?: string;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ primaryTitle, secondaryTitle, caption }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({
+    primaryTitle,
+    secondaryTitle,
+    caption,
+}) => {
     return (
         <motion.div
             variants={containerVariants}

@@ -34,7 +34,9 @@ const AskAI = () => {
 
     const currentPrompt = settings.aiCustomPrompt ?? DEFAULT_TEMPLATE;
     const [localPrompt, setLocalPrompt] = useState(currentPrompt);
-    const [saveStatus, setSaveStatus] = useState<'synced' | 'saving' | 'dirty'>('synced');
+    const [saveStatus, setSaveStatus] = useState<'synced' | 'saving' | 'dirty'>(
+        'synced'
+    );
 
     // Debounce to prevent excessive DB calls while updating the prompt
     useEffect(() => {
@@ -68,13 +70,21 @@ const AskAI = () => {
                             INTELLIGENCE // ENGINE
                         </p>
                         <h2 className="flex items-center gap-2.5 font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                            <Robot size={26} className="text-[#2A5CFF]" weight="duotone" />
+                            <Robot
+                                size={26}
+                                className="text-[#2A5CFF]"
+                                weight="duotone"
+                            />
                             AI Neural Dispatch
                         </h2>
                     </div>
 
                     <div className="flex items-center gap-2 border border-slate-900/10 bg-slate-50/50 px-3 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
-                        <Sparkle size={16} className="text-amber-500" weight="fill" />
+                        <Sparkle
+                            size={16}
+                            className="text-amber-500"
+                            weight="fill"
+                        />
                         <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600 dark:text-slate-300">
                             PROMPT ENGINE V2
                         </span>
@@ -82,8 +92,8 @@ const AskAI = () => {
                 </div>
 
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Select the target LLM environment to route your question contexts and custom
-                    prompt variables.
+                    Select the target LLM environment to route your question
+                    contexts and custom prompt variables.
                 </p>
 
                 <RadioGroup
@@ -94,13 +104,17 @@ const AskAI = () => {
                     className="grid grid-cols-1 sm:grid-cols-2"
                 >
                     {PROVIDERS.map((p) => {
-                        const isActive = (settings.aiProvider ?? 'chatgpt') === p.id;
+                        const isActive =
+                            (settings.aiProvider ?? 'chatgpt') === p.id;
                         return (
                             <Label
                                 key={p.id}
                                 className="group relative cursor-pointer outline-none"
                             >
-                                <RadioGroupItem value={p.id} className="sr-only" />
+                                <RadioGroupItem
+                                    value={p.id}
+                                    className="sr-only"
+                                />
                                 <motion.div
                                     whileHover={{ scale: 1.01 }}
                                     whileTap={{ scale: 0.99 }}
@@ -166,7 +180,11 @@ const AskAI = () => {
                                         exit={{ opacity: 0 }}
                                         className="flex items-center gap-1 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-blue-500"
                                     >
-                                        <FloppyDisk size={12} className="animate-spin" /> SYNCING...
+                                        <FloppyDisk
+                                            size={12}
+                                            className="animate-spin"
+                                        />{' '}
+                                        SYNCING...
                                     </motion.span>
                                 )}
                                 {saveStatus === 'synced' && (
@@ -182,8 +200,8 @@ const AskAI = () => {
                             </AnimatePresence>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Construct systemic instructions. Variables will be dynamically injected
-                            at query runtime.
+                            Construct systemic instructions. Variables will be
+                            dynamically injected at query runtime.
                         </p>
                     </div>
 
@@ -192,7 +210,10 @@ const AskAI = () => {
                         size="sm"
                         onClick={() => {
                             setLocalPrompt(DEFAULT_TEMPLATE);
-                            handleSettingToggle('aiCustomPrompt', DEFAULT_TEMPLATE);
+                            handleSettingToggle(
+                                'aiCustomPrompt',
+                                DEFAULT_TEMPLATE
+                            );
                         }}
                         className="h-8 gap-1.5 rounded-none border border-slate-900/10 px-3 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-600 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500 dark:border-white/10 dark:text-slate-300 dark:hover:border-red-500/30 dark:hover:text-red-400"
                     >
@@ -236,15 +257,19 @@ const AskAI = () => {
                 {/* Notice & Limitations Banner */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="flex items-start gap-2.5 border border-amber-500/20 bg-amber-500/[0.03] p-3.5 dark:border-amber-500/20 dark:bg-amber-500/[0.05]">
-                        <Warning size={18} className="shrink-0 text-amber-500" weight="bold" />
+                        <Warning
+                            size={18}
+                            className="shrink-0 text-amber-500"
+                            weight="bold"
+                        />
                         <div className="space-y-0.5">
                             <p className="font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-900 dark:text-white">
                                 Diagram Clipboard Restriction
                             </p>
                             <p className="text-[11px] leading-tight text-slate-500 dark:text-slate-400">
-                                Browser cross-origin policies may block diagram auto-copying.
-                                Right-click diagrams and select <i>Copy Image</i> to attach
-                                manually.
+                                Browser cross-origin policies may block diagram
+                                auto-copying. Right-click diagrams and select{' '}
+                                <i>Copy Image</i> to attach manually.
                             </p>
                         </div>
                     </div>
@@ -262,7 +287,8 @@ const AskAI = () => {
                             <p className="text-[11px] leading-tight text-slate-500 dark:text-slate-400">
                                 Retain the{' '}
                                 <code className="font-['JetBrains_Mono',monospace] font-bold text-[#2A5CFF] dark:text-blue-300">{`{{QUESTION_TEXT}}`}</code>{' '}
-                                key to ensure accurate problem context generation.
+                                key to ensure accurate problem context
+                                generation.
                             </p>
                         </div>
                     </div>
