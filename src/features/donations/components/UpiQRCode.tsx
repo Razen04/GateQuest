@@ -3,15 +3,22 @@ import type React from 'react';
 
 // Never change this only the lead developer touches this
 const upiId = 'razen@upi';
-const name = 'Razen';
 
 type UpiQRCodeProps = {
     amount: number | null;
 };
 
 const UpiQRCode: React.FC<UpiQRCodeProps> = ({ amount }) => {
-    // Custom upiUrl
-    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
+    const params = new URLSearchParams({
+        pa: upiId,
+        cu: 'INR',
+    });
+
+    if (amount != null) {
+        params.set('am', amount.toFixed(2));
+    }
+
+    const upiUrl = `upi://pay?${params.toString()}`;
 
     return (
         <div className="flex flex-col items-center justify-center gap-3">
@@ -24,6 +31,7 @@ const UpiQRCode: React.FC<UpiQRCodeProps> = ({ amount }) => {
                 bgColor="#ffffff"
                 fgColor="#000000"
                 level="H"
+                marginSize={2}
                 imageSettings={{
                     src: '/icons/logo.png',
                     height: 40,
