@@ -1,7 +1,13 @@
 import React, { type JSX } from 'react';
 import { type Variants } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChartPieSlice, BookOpen, Gear, Info, UserCircleDashedIcon } from '@phosphor-icons/react';
+import {
+    ChartPieSlice,
+    BookOpen,
+    Gear,
+    Info,
+    UserCircleDashedIcon,
+} from '@phosphor-icons/react';
 import useWindowSize from '@/shared/hooks/useWindowSize';
 import MobileDock from './MobileDock';
 import ModernLoader from '@/shared/components/ModernLoader';

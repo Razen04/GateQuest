@@ -57,7 +57,10 @@ if ('serviceWorker' in navigator) {
                     const newWorker = registration.installing;
                     if (newWorker) {
                         newWorker.addEventListener('statechange', () => {
-                            console.log('installing worker statechange:', newWorker.state);
+                            console.log(
+                                'installing worker statechange:',
+                                newWorker.state
+                            );
                         });
                     }
                 });
@@ -79,5 +82,5 @@ createRoot(rootEl).render(
     <StrictMode>
         <Toaster richColors position="top-right" closeButton />
         <App />
-    </StrictMode>,
+    </StrictMode>
 );

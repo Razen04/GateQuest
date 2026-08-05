@@ -45,7 +45,7 @@ const Dashboard = () => {
 
     const activeExams = useMemo(
         () => (userGoal?.target_exams as string[]) || [],
-        [userGoal?.target_exams],
+        [userGoal?.target_exams]
     );
 
     const [selectedExam, setSelectedExam] = useState(activeExams[0] || '');
@@ -58,12 +58,15 @@ const Dashboard = () => {
 
     const currentSubjectStats = useMemo(
         () => stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [],
-        [stats?.subjectStatsMap, selectedExam],
+        [stats?.subjectStatsMap, selectedExam]
     );
 
     useEffect(() => {
         if (currentSubjectStats.length) {
-            localStorage.setItem('subjectStats', JSON.stringify(currentSubjectStats));
+            localStorage.setItem(
+                'subjectStats',
+                JSON.stringify(currentSubjectStats)
+            );
         }
     }, [currentSubjectStats]);
 
@@ -120,7 +123,8 @@ const Dashboard = () => {
                             <span className="font-semibold text-slate-900 dark:text-white">
                                 {userProgress}%
                             </span>{' '}
-                            of your target syllabus. Stay focused on your weak areas today.
+                            of your target syllabus. Stay focused on your weak
+                            areas today.
                         </p>
                     </div>
 
@@ -135,7 +139,10 @@ const Dashboard = () => {
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${userProgress}%` }}
-                                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                                    transition={{
+                                        duration: 1.2,
+                                        ease: 'easeOut',
+                                    }}
                                     className="h-full bg-blue-500"
                                 />
                             </div>
@@ -266,7 +273,9 @@ const Dashboard = () => {
                                     size="sm"
                                     className="h-8 gap-2 rounded-none border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800"
                                 >
-                                    <span className="text-blue-600 dark:text-blue-400">EXAM:</span>
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                        EXAM:
+                                    </span>
                                     <span>{selectedExam.toUpperCase()}</span>
                                     <CaretDownIcon size={12} weight="bold" />
                                 </Button>
@@ -308,7 +317,8 @@ const Dashboard = () => {
                         ) : (
                             <div className="p-12 text-center border border-dashed border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/30">
                                 <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
-                                    No activity data logged yet for {selectedExam.toUpperCase()}.
+                                    No activity data logged yet for{' '}
+                                    {selectedExam.toUpperCase()}.
                                 </p>
                             </div>
                         )}

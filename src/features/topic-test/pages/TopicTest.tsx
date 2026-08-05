@@ -1,6 +1,13 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Play, CheckCircle, XCircle, Plus, Timer } from '@phosphor-icons/react';
+import {
+    Clock,
+    Play,
+    CheckCircle,
+    XCircle,
+    Plus,
+    Timer,
+} from '@phosphor-icons/react';
 import PageHeader from '@/shared/components/PageHeader';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { Button } from '@/shared/components/ui/button';
@@ -90,7 +97,10 @@ const TopicTest = () => {
             if (!user) throw new Error('No user');
 
             if (activeTest?.status === 'created') {
-                const { error } = await updateTestStatus(activeTest.id, 'ongoing');
+                const { error } = await updateTestStatus(
+                    activeTest.id,
+                    'ongoing'
+                );
 
                 if (error) throw error;
             }
@@ -191,14 +201,18 @@ const TopicTest = () => {
                                         </h3>
                                         <div className="bg-white/20 backdrop-blur-md px-3 py-1 flex items-center gap-2 text-xs font-mono">
                                             <Timer weight="fill" />
-                                            {formatTime(activeTest.remaining_time_seconds ?? 0)}
+                                            {formatTime(
+                                                activeTest.remaining_time_seconds ??
+                                                    0
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="flex items-end justify-between">
                                         <div className="text-sm text-blue-100">
                                             <span className="font-bold text-white text-lg mr-1">
-                                                {activeTest.status === 'ongoing' ||
+                                                {activeTest.status ===
+                                                    'ongoing' ||
                                                 activeTest.status === 'paused'
                                                     ? 'In Progress'
                                                     : 'Not Started Yet'}
@@ -235,13 +249,15 @@ const TopicTest = () => {
                             <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 p-5 shadow-xl text-center">
                                 <div className="flex flex-col items-center gap-4">
                                     <p className="text-gray-700 dark:text-gray-200 text-sm">
-                                        You currently have no ongoing or paused test sessions.
+                                        You currently have no ongoing or paused
+                                        test sessions.
                                     </p>
                                     <Button
                                         onClick={handleGenerateNew}
                                         className="bg-blue-600 text-white hover:bg-blue-700 rounded-none"
                                     >
-                                        Start a New Test <Plus weight="bold" className="ml-2" />
+                                        Start a New Test{' '}
+                                        <Plus weight="bold" className="ml-2" />
                                     </Button>
                                 </div>
                             </div>
@@ -329,7 +345,9 @@ const TopicTest = () => {
                                     <Area
                                         type="monotone"
                                         dataKey={
-                                            viewMode === 'accuracy' ? 'accuracy' : 'scorePercent'
+                                            viewMode === 'accuracy'
+                                                ? 'accuracy'
+                                                : 'scorePercent'
                                         }
                                         stroke="#3b82f6"
                                         strokeWidth={3}
@@ -347,7 +365,8 @@ const TopicTest = () => {
                                     className="mb-2 opacity-20"
                                 />
                                 <p className="text-xs italic">
-                                    Complete at least 2 tests to see your progress graph
+                                    Complete at least 2 tests to see your
+                                    progress graph
                                 </p>
                             </div>
                         )}
@@ -364,19 +383,23 @@ const TopicTest = () => {
                     <div>
                         {testHistory?.length ? (
                             testHistory.map((test) => {
-                                const { icon, bg, text, darkBg, darkText } = getStatusDisplay(
-                                    test.status,
-                                );
+                                const { icon, bg, text, darkBg, darkText } =
+                                    getStatusDisplay(test.status);
                                 const testName = getTestName(test.completed_at);
                                 const timeTookForTest = Math.round(
-                                    Math.ceil(test.total_questions * 2.77) * 60 -
-                                        test.remaining_time_seconds,
+                                    Math.ceil(test.total_questions * 2.77) *
+                                        60 -
+                                        test.remaining_time_seconds
                                 );
 
                                 return (
                                     <div
                                         key={test.id}
-                                        onClick={() => navigate(`/topic-test-result/${test.id}`)}
+                                        onClick={() =>
+                                            navigate(
+                                                `/topic-test-result/${test.id}`
+                                            )
+                                        }
                                         className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-xl border border-white/20 dark:border-white/10 p-4 my-2 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-4">
@@ -393,7 +416,9 @@ const TopicTest = () => {
                                                     Time taken:{' '}
                                                     {test.total_questions &&
                                                     test.remaining_time_seconds
-                                                        ? formatTime(timeTookForTest)
+                                                        ? formatTime(
+                                                              timeTookForTest
+                                                          )
                                                         : '—'}
                                                 </h4>
                                             </div>
@@ -403,7 +428,8 @@ const TopicTest = () => {
                                             <div
                                                 className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-green-600 dark:text-green-400' : test.accuracy < 40 ? 'text-red-500 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400') : 'text-gray-500 dark:text-gray-400'}`}
                                             >
-                                                {test.accuracy?.toFixed(2) ?? 0}%
+                                                {test.accuracy?.toFixed(2) ?? 0}
+                                                %
                                             </div>
                                             <p className="text-xs text-slate-400">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
                                         </div>

@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Heart, ShieldCheck, ArrowRight, Receipt, CheckCircle2, Crown } from 'lucide-react';
+import {
+    Heart,
+    ShieldCheck,
+    ArrowRight,
+    Receipt,
+    CheckCircle2,
+    Crown,
+} from 'lucide-react';
 
 import { useDonations } from '../hooks/useDonations.ts';
 import DonationBox from '../components/DonationBox';
@@ -59,11 +66,17 @@ const Donations: React.FC = () => {
     const [message, setMessage] = useState<string>('');
     const [anonymous, setAnonymous] = useState<boolean>(false);
     const [utr, setUtr] = useState<string>('');
-    const [step, setStep] = useState<'form' | 'generateQR' | 'utr' | 'thankYou'>('form');
+    const [step, setStep] = useState<
+        'form' | 'generateQR' | 'utr' | 'thankYou'
+    >('form');
     const [showQR, setShowQR] = useState<boolean>(false);
 
     const userProfile = getUserProfile();
-    const userId = userProfile ? (userProfile.id !== '1' ? userProfile.id : null) : null;
+    const userId = userProfile
+        ? userProfile.id !== '1'
+            ? userProfile.id
+            : null
+        : null;
 
     const { donations, loading, addDonation, loadDonations } = useDonations();
 
@@ -72,9 +85,16 @@ const Donations: React.FC = () => {
     }, [loadDonations]);
 
     const handleUTRSubmit = async () => {
-        if (!utr) return toast.warning('Please enter the 12-digit UTR / Ref Number');
+        if (!utr)
+            return toast.warning('Please enter the 12-digit UTR / Ref Number');
         try {
-            await addDonation({ userId, amount: amount!, message, anonymous, utr });
+            await addDonation({
+                userId,
+                amount: amount!,
+                message,
+                anonymous,
+                utr,
+            });
             setStep('thankYou');
             setMessage('');
             setAnonymous(false);
@@ -87,7 +107,10 @@ const Donations: React.FC = () => {
         }
     };
 
-    const maxAmount = donations.length > 0 ? Math.max(...donations.map((d) => d.actual_amount)) : 0;
+    const maxAmount =
+        donations.length > 0
+            ? Math.max(...donations.map((d) => d.actual_amount))
+            : 0;
     const topDonor = donations.filter((d) => d.actual_amount === maxAmount);
 
     return (
@@ -126,13 +149,16 @@ const Donations: React.FC = () => {
                             <h1 className="mt-2 font-['Space_Grotesk',sans-serif] text-3xl font-black tracking-tight sm:text-4xl">
                                 Fueling open engineering &{' '}
                                 <span className="font-['Fraunces',serif] font-normal italic text-[#2A5CFF]">
-                                    <HighlightLine>project build-outs.</HighlightLine>
+                                    <HighlightLine>
+                                        project build-outs.
+                                    </HighlightLine>
                                 </span>
                             </h1>
 
                             <p className="mt-3 max-w-2xl font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/70">
-                                Direct contributions keep the platform alive and development
-                                continuous. Every contribution is publicly recorded on the ledger.
+                                Direct contributions keep the platform alive and
+                                development continuous. Every contribution is
+                                publicly recorded on the ledger.
                             </p>
                         </div>
                     </div>
@@ -209,12 +235,14 @@ const Donations: React.FC = () => {
                                             type="text"
                                             placeholder="e.g. 4029XXXX1234"
                                             value={utr}
-                                            onChange={(e) => setUtr(e.target.value)}
+                                            onChange={(e) =>
+                                                setUtr(e.target.value)
+                                            }
                                             className="w-full border border-slate-900/20 bg-slate-50 p-3.5 font-['JetBrains_Mono',monospace] text-sm font-semibold outline-none transition focus:border-[#2A5CFF] focus:ring-2 focus:ring-[#2A5CFF]/20 dark:border-white/20 dark:bg-white/5 dark:text-white"
                                         />
                                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            Locate the UTR number in your UPI app receipt after
-                                            payment.
+                                            Locate the UTR number in your UPI
+                                            app receipt after payment.
                                         </p>
                                     </div>
 
@@ -253,8 +281,9 @@ const Donations: React.FC = () => {
                                     </h3>
 
                                     <p className="font-['Fraunces',serif] text-base text-slate-600 dark:text-white/70">
-                                        Your reference submission is being processed. It will
-                                        reflect on the live donor ledger shortly.
+                                        Your reference submission is being
+                                        processed. It will reflect on the live
+                                        donor ledger shortly.
                                     </p>
 
                                     <button
@@ -271,7 +300,8 @@ const Donations: React.FC = () => {
                         <div className="mt-8 flex items-center justify-between border-t border-slate-900/10 pt-4 font-['JetBrains_Mono',monospace] text-[10px] text-slate-400 dark:border-white/10">
                             <span>ENCRYPTED DIRECT UPI</span>
                             <span className="flex items-center gap-1 text-[#1FAA6D]">
-                                <ShieldCheck className="h-3.5 w-3.5" /> VERIFIED RECEIVER
+                                <ShieldCheck className="h-3.5 w-3.5" /> VERIFIED
+                                RECEIVER
                             </span>
                         </div>
                     </motion.div>
@@ -304,7 +334,8 @@ const Donations: React.FC = () => {
                                     <div className="relative overflow-hidden border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent p-5 backdrop-blur-md">
                                         <div className="flex items-center justify-between">
                                             <span className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[10px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                                                <Crown className="h-3.5 w-3.5" /> TOP BENEFACTOR
+                                                <Crown className="h-3.5 w-3.5" />{' '}
+                                                TOP BENEFACTOR
                                             </span>
                                         </div>
                                         <div className="mt-3">
@@ -327,7 +358,8 @@ const Donations: React.FC = () => {
                             <div className="flex flex-col items-center justify-center border border-dashed border-slate-900/20 p-12 text-center dark:border-white/20">
                                 <Heart className="h-8 w-8 text-slate-300 dark:text-slate-600" />
                                 <p className="mt-3 font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
-                                    No public records on the manifest yet. Be the founding patron.
+                                    No public records on the manifest yet. Be
+                                    the founding patron.
                                 </p>
                             </div>
                         )}

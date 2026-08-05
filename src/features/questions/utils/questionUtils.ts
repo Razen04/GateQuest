@@ -1,5 +1,9 @@
 import type { NumericalQuestion, Question } from '@/shared/types/storage.js';
-import { getUserProfile, updateUserProfile, syncUserToSupabase } from '@/shared/utils/helper.js';
+import {
+    getUserProfile,
+    updateUserProfile,
+    syncUserToSupabase,
+} from '@/shared/utils/helper.js';
 import { toast } from 'sonner';
 
 // Get difficulty class names
@@ -29,7 +33,9 @@ export const isMultipleSelection = (currentQuestion: Question) => {
         Array.isArray(currentQuestion.tags) &&
         currentQuestion.tags.some((tag) => {
             const t = tag.toLowerCase();
-            return t.includes('multiple-select') || t.includes('multiple select');
+            return (
+                t.includes('multiple-select') || t.includes('multiple select')
+            );
         });
 
     return isTypeMatch || isTagMatch;
@@ -53,7 +59,9 @@ export const getQuestionTypeText = (q: Question) => {
 };
 
 // Get correct answer text
-export const getCorrectAnswerText = (currentQuestion: Question): number | number[] | string => {
+export const getCorrectAnswerText = (
+    currentQuestion: Question
+): number | number[] | string => {
     if (!currentQuestion) return '';
 
     try {
@@ -76,7 +84,10 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             }
         }
 
-        if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correct_answer)) {
+        if (
+            isMultipleSelection(currentQuestion) &&
+            Array.isArray(currentQuestion.correct_answer)
+        ) {
             // For multiple selection, show all correct options
             const correctIndices = currentQuestion.correct_answer;
             if (Array.isArray(currentQuestion.options)) {
@@ -93,7 +104,10 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             Array.isArray(currentQuestion.options)
         ) {
             const index = currentQuestion.correct_answer[0];
-            if (index !== undefined && currentQuestion.options[index] !== undefined) {
+            if (
+                index !== undefined &&
+                currentQuestion.options[index] !== undefined
+            ) {
                 return currentQuestion.options[index];
             }
         }

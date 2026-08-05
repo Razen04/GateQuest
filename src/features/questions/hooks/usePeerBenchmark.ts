@@ -7,7 +7,9 @@ import { fetchQuestionPeerStats, type Benchmark } from '../api/quesitons';
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 export function usePeerBenchmark(questionId: string | number) {
-    const [benchmarkDetails, setBenchmarkDetails] = useState<Benchmark | null>(null);
+    const [benchmarkDetails, setBenchmarkDetails] = useState<Benchmark | null>(
+        null
+    );
     const [loading, setLoading] = useState<boolean>(true);
     const [message, setMessage] = useState<string | null>(null);
 
@@ -22,14 +24,17 @@ export function usePeerBenchmark(questionId: string | number) {
                 setLoading(true);
 
                 // Check IndexedDB first
-                const cached = await appStorage.peer_benchmarks.get(strQuestionId);
+                const cached =
+                    await appStorage.peer_benchmarks.get(strQuestionId);
 
                 if (cached && Date.now() - cached.fetched_at < CACHE_TTL_MS) {
                     if (isMounted) {
                         if (cached.data) {
                             setBenchmarkDetails(cached.data);
                         } else {
-                            setMessage('You are the first to attempt this question!');
+                            setMessage(
+                                'You are the first to attempt this question!'
+                            );
                         }
                         setLoading(false);
                     }
@@ -37,7 +42,8 @@ export function usePeerBenchmark(questionId: string | number) {
                 }
 
                 // Cache miss or expired: Fetch from Supabase
-                const { data, error } = await fetchQuestionPeerStats(strQuestionId);
+                const { data, error } =
+                    await fetchQuestionPeerStats(strQuestionId);
 
                 if (error && error.code !== 'PGRST116') {
                     console.error('Error fetching peer benchmark:', error);
@@ -47,7 +53,10 @@ export function usePeerBenchmark(questionId: string | number) {
                 }
 
                 if (!data) {
-                    if (isMounted) setMessage('You are the first to attempt this question!');
+                    if (isMounted)
+                        setMessage(
+                            'You are the first to attempt this question!'
+                        );
                 } else {
                     if (isMounted) setBenchmarkDetails(data);
                 }

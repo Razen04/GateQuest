@@ -2,13 +2,17 @@
 // It handles loading settings from the user's profile, updating them in the local state, and persisting those changes back to localStorage and Supabase.
 
 import React, { useEffect, useState } from 'react';
-import AppSettingContext from './AppSettingContext.ts';
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper.ts';
-import type { Settings } from '@/shared/types/Settings.ts';
-import useAuth from '@/shared/hooks/useAuth.ts';
-import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { getCurrentUser } from '@/shared/api/auth.ts';
+import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
+import useAuth from '@/shared/hooks/useAuth.ts';
+import type { Settings } from '@/shared/types/Settings.ts';
+import {
+    getUserProfile,
+    syncUserToSupabase,
+    updateUserProfile,
+} from '@/shared/utils/helper.ts';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import AppSettingContext from './AppSettingContext.ts';
 
 const defaultSettings: Settings = {
     sound: true,
@@ -36,7 +40,10 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
 
     // A generic function to toggle any boolean setting by its key, or explicitly set its value.
-    const handleSettingToggle = <K extends keyof Settings>(key: K, value?: Settings[K]) => {
+    const handleSettingToggle = <K extends keyof Settings>(
+        key: K,
+        value?: Settings[K]
+    ) => {
         setSettings((prev) => ({
             ...prev,
             [key]: value !== undefined ? value : !prev[key],

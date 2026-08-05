@@ -1,7 +1,11 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { toast } from 'sonner';
 import type { MCQQuestion } from '@/shared/types/storage';
-import { buildGateAIPrompt, extractImageUrls, openInAI } from '../aiPromptUtils';
+import {
+    buildGateAIPrompt,
+    extractImageUrls,
+    openInAI,
+} from '../aiPromptUtils';
 
 // Mock sonner
 vi.mock('sonner', () => ({
@@ -38,7 +42,10 @@ describe('aiPromptUtils', () => {
         vi.clearAllMocks();
 
         // Mock window.open
-        Object.defineProperty(window, 'open', { value: vi.fn(), writable: true });
+        Object.defineProperty(window, 'open', {
+            value: vi.fn(),
+            writable: true,
+        });
 
         // Mock Navigator Clipboard
         Object.defineProperty(navigator, 'clipboard', {
@@ -50,7 +57,9 @@ describe('aiPromptUtils', () => {
         });
 
         const MockClipboardItem = vi.fn().mockImplementation((obj) => obj);
-        (MockClipboardItem as unknown as any).supports = vi.fn().mockReturnValue(true);
+        (MockClipboardItem as unknown as any).supports = vi
+            .fn()
+            .mockReturnValue(true);
 
         vi.stubGlobal('ClipboardItem', MockClipboardItem);
 
@@ -63,7 +72,9 @@ describe('aiPromptUtils', () => {
                 drawImage: vi.fn(),
                 fillStyle: '',
             }),
-            toBlob: vi.fn((callback) => callback(new Blob(['test'], { type: 'image/png' }))),
+            toBlob: vi.fn((callback) =>
+                callback(new Blob(['test'], { type: 'image/png' }))
+            ),
             width: 0,
             height: 0,
         };
@@ -85,7 +96,7 @@ describe('aiPromptUtils', () => {
                 mockQuestionTemplate,
                 0,
                 undefined,
-                'My specific doubt',
+                'My specific doubt'
             );
             expect(prompt).toContain("USER'S SPECIFIC DOUBT:");
             expect(prompt).toContain('"My specific doubt"');
@@ -96,12 +107,14 @@ describe('aiPromptUtils', () => {
                 ...mockQuestionTemplate,
                 question: 'Here is the image: ![](test.url)',
             };
-            expect(buildGateAIPrompt(q, 0)).toContain('[Image — diagram not available]');
+            expect(buildGateAIPrompt(q, 0)).toContain(
+                '[Image — diagram not available]'
+            );
             expect(buildGateAIPrompt(q, 1)).toContain(
-                '[Diagram attached — refer to the pasted image]',
+                '[Diagram attached — refer to the pasted image]'
             );
             expect(buildGateAIPrompt(q, 2)).toContain(
-                '[Diagrams attached — refer to pasted images]',
+                '[Diagrams attached — refer to pasted images]'
             );
         });
     });
@@ -112,25 +125,33 @@ describe('aiPromptUtils', () => {
             expect(window.open).toHaveBeenCalledWith(
                 expect.stringContaining('https://chatgpt.com/?q='),
                 '_blank',
-                expect.any(String),
+                expect.any(String)
             );
         });
 
         it('falls back to clipboard for very long text-only prompts', async () => {
-            const longQ = { ...mockQuestionTemplate, question: 'A'.repeat(8500) };
+            const longQ = {
+                ...mockQuestionTemplate,
+                question: 'A'.repeat(8500),
+            };
             await openInAI(longQ, 'chatgpt', '');
 
             expect(navigator.clipboard.writeText).toHaveBeenCalled();
             expect(window.open).toHaveBeenCalledWith(
                 'https://chatgpt.com/',
                 '_blank',
-                expect.any(String),
+                expect.any(String)
             );
-            expect(toast.info).toHaveBeenCalledWith('Prompt copied to clipboard!');
+            expect(toast.info).toHaveBeenCalledWith(
+                'Prompt copied to clipboard!'
+            );
         });
 
         it('triggers image stitching flow and composite clipboard when images exist', async () => {
-            const imgQ = { ...mockQuestionTemplate, question: '![alt](test.png)' };
+            const imgQ = {
+                ...mockQuestionTemplate,
+                question: '![alt](test.png)',
+            };
 
             // Mock Image loading success
             vi.stubGlobal(
@@ -149,7 +170,7 @@ describe('aiPromptUtils', () => {
                         height: 100,
                     };
                     return img;
-                }),
+                })
             );
 
             await openInAI(imgQ, 'chatgpt', '');
@@ -157,18 +178,21 @@ describe('aiPromptUtils', () => {
             // Should use navigator.clipboard.write (Composite) not writeText
             expect(navigator.clipboard.write).toHaveBeenCalled();
             expect(toast.success).toHaveBeenCalledWith(
-                expect.stringContaining('Prompt & Diagrams copied!'),
+                expect.stringContaining('Prompt & Diagrams copied!')
             );
             // Should redirect to base URL (no query params) to prevent auto-send
             expect(window.open).toHaveBeenCalledWith(
                 'https://chatgpt.com/',
                 '_blank',
-                expect.any(String),
+                expect.any(String)
             );
         });
 
         it('gracefully falls back to text-only if stitching/CORS fails', async () => {
-            const imgQ = { ...mockQuestionTemplate, question: '![alt](test.png)' };
+            const imgQ = {
+                ...mockQuestionTemplate,
+                question: '![alt](test.png)',
+            };
 
             // Mock Image loading failure (CORS)
             vi.stubGlobal(
@@ -181,7 +205,7 @@ describe('aiPromptUtils', () => {
                         set src(_s: string) {},
                     };
                     return img;
-                }),
+                })
             );
 
             await openInAI(imgQ, 'chatgpt', '');
@@ -189,9 +213,9 @@ describe('aiPromptUtils', () => {
             expect(navigator.clipboard.writeText).toHaveBeenCalled();
             expect(toast.info).toHaveBeenCalledWith(
                 expect.stringContaining(
-                    "Prompt copied! Note: Diagrams couldn't be auto-copied. Please right-click the image and 'Copy Image' manually.",
+                    "Prompt copied! Note: Diagrams couldn't be auto-copied. Please right-click the image and 'Copy Image' manually."
                 ),
-                expect.objectContaining({ duration: 10000 }),
+                expect.objectContaining({ duration: 10000 })
             );
         });
     });

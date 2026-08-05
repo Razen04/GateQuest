@@ -18,7 +18,14 @@ import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import type { Attempt, Question, TestSession } from '@/shared/types/storage';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+} from 'recharts';
 import { QuestionGrid } from '../components/test-result/QuestionGrid';
 import { formatTime } from '@/shared/utils/helper';
 
@@ -59,8 +66,12 @@ const StatCard = ({
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
                 {label}
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</h3>
-            {subValue && <p className="text-xs text-slate-400 mt-1">{subValue}</p>}
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {value}
+            </h3>
+            {subValue && (
+                <p className="text-xs text-slate-400 mt-1">{subValue}</p>
+            )}
         </div>
         <Icon size={22} weight="duotone" />
     </div>
@@ -78,7 +89,11 @@ function SectionHeading({
     return (
         <div className="flex items-center gap-3">
             <Icon size={22} className={color} weight="duotone" />
-            <h2 className={`font-black uppercase tracking-widest text-xs ${color}`}>{title}</h2>
+            <h2
+                className={`font-black uppercase tracking-widest text-xs ${color}`}
+            >
+                {title}
+            </h2>
         </div>
     );
 }
@@ -144,8 +159,15 @@ export default function TopicTestResult() {
             (attempts.length || 1);
 
         const timeSinks = attempts
-            .filter((a) => !a.is_correct && (a.time_spent_seconds || 0) > globalAvg * 1.5)
-            .sort((a, b) => (b.time_spent_seconds || 0) - (a.time_spent_seconds || 0))
+            .filter(
+                (a) =>
+                    !a.is_correct &&
+                    (a.time_spent_seconds || 0) > globalAvg * 1.5
+            )
+            .sort(
+                (a, b) =>
+                    (b.time_spent_seconds || 0) - (a.time_spent_seconds || 0)
+            )
             .slice(0, 3);
 
         // Inside the analysis useMemo in TopicTestResult.tsx
@@ -219,7 +241,10 @@ export default function TopicTestResult() {
                     <StatCard
                         label="Time Taken"
                         value={formatTime(
-                            attempts.reduce((sum, a) => sum + (a.time_spent_seconds ?? 0), 0),
+                            attempts.reduce(
+                                (sum, a) => sum + (a.time_spent_seconds ?? 0),
+                                0
+                            )
                         )}
                         icon={Timer}
                     />
@@ -232,7 +257,10 @@ export default function TopicTestResult() {
 
                 {/* 3. Difficulty-Wise Analysis (With Buttons) */}
                 <motion.div variants={itemVariants} className="space-y-6">
-                    <SectionHeading icon={PresentationChart} title="Difficulty Analysis" />
+                    <SectionHeading
+                        icon={PresentationChart}
+                        title="Difficulty Analysis"
+                    />
                     {Object.entries(analysis.diffGroups).map(
                         ([diff, data]: [string, GroupData]) =>
                             data.attempts.length > 0 && (
@@ -243,7 +271,7 @@ export default function TopicTestResult() {
                                     testId={testId!}
                                     navigate={navigate}
                                 />
-                            ),
+                            )
                     )}
                 </motion.div>
 
@@ -261,7 +289,7 @@ export default function TopicTestResult() {
                                     navigate={navigate}
                                     isTopic
                                 />
-                            ),
+                            )
                         )}
                     </div>
                 </motion.div>
@@ -295,16 +323,22 @@ export default function TopicTestResult() {
                                 <Tooltip
                                     cursor={{ fill: 'transparent' }}
                                     content={({ active, payload }) => {
-                                        if (active && payload && payload.length) {
+                                        if (
+                                            active &&
+                                            payload &&
+                                            payload.length
+                                        ) {
                                             const data = payload[0]?.payload;
                                             return (
                                                 <div className="bg-slate-900 text-white p-2 text-[10px] font-bold rounded shadow-xl border border-slate-700">
-                                                    QUESTION {data.name}: {data.time}s
+                                                    QUESTION {data.name}:{' '}
+                                                    {data.time}s
                                                     <br />
                                                     RESULT:{' '}
                                                     {data.isCorrect
                                                         ? 'CORRECT'
-                                                        : data.isCorrect === false
+                                                        : data.isCorrect ===
+                                                            false
                                                           ? 'INCORRECT'
                                                           : 'SKIPPED'}
                                                 </div>
@@ -343,11 +377,14 @@ export default function TopicTestResult() {
                                                 #{attempts.indexOf(sink) + 1}
                                             </div>
                                             <p className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase">
-                                                {(sink as any).questions?.topic || 'Unknown Topic'}
+                                                {(sink as any).questions
+                                                    ?.topic || 'Unknown Topic'}
                                             </p>
                                         </div>
                                         <p className="font-mono font-black text-rose-600">
-                                            {formatTime(sink.time_spent_seconds)}
+                                            {formatTime(
+                                                sink.time_spent_seconds
+                                            )}
                                         </p>
                                     </div>
                                 ))
@@ -356,7 +393,10 @@ export default function TopicTestResult() {
                     </motion.div>
 
                     <motion.div variants={itemVariants} className="space-y-6">
-                        <SectionHeading icon={Shapes} title="Question Type Accuracy" />
+                        <SectionHeading
+                            icon={Shapes}
+                            title="Question Type Accuracy"
+                        />
                         <div className="grid grid-cols-3 gap-4">
                             {Object.entries(analysis.typeGroups).map(
                                 ([type, data]: [string, TypeGroupData]) =>
@@ -369,22 +409,38 @@ export default function TopicTestResult() {
                                                 {type}
                                             </p>
                                             <p className="text-xl font-black text-blue-600">
-                                                {((data.correct / data.total) * 100).toFixed(0)}%
+                                                {(
+                                                    (data.correct /
+                                                        data.total) *
+                                                    100
+                                                ).toFixed(0)}
+                                                %
                                             </p>
                                         </div>
-                                    ),
+                                    )
                             )}
                         </div>
                     </motion.div>
                 </div>
 
                 {/* Navigation Footer */}
-                <motion.div variants={itemVariants} className="flex justify-center gap-4 pt-8">
-                    <Button variant="outline" onClick={() => navigate('/topic-test')}>
+                <motion.div
+                    variants={itemVariants}
+                    className="flex justify-center gap-4 pt-8"
+                >
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate('/topic-test')}
+                    >
                         <House size={20} className="mr-2" /> Back to TestHub
                     </Button>
-                    <Button onClick={() => navigate(`/topic-test-review/${testId}/0`)}>
-                        Review Solutions <ArrowRight size={20} className="ml-2" />
+                    <Button
+                        onClick={() =>
+                            navigate(`/topic-test-review/${testId}/0`)
+                        }
+                    >
+                        Review Solutions{' '}
+                        <ArrowRight size={20} className="ml-2" />
                     </Button>
                 </motion.div>
             </motion.main>

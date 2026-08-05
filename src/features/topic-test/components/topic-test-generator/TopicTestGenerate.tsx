@@ -30,7 +30,9 @@ const TopicTestGeneratePage = () => {
     const { getPracticeSubjects, userGoal } = useGoals();
     const subjects = getPracticeSubjects();
 
-    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
+        null
+    );
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -146,7 +148,10 @@ const TopicTestGeneratePage = () => {
                                     ] as React.ElementType;
 
                                     return (
-                                        <SelectItem key={s.id} value={s.id.toString()}>
+                                        <SelectItem
+                                            key={s.id}
+                                            value={s.id.toString()}
+                                        >
                                             <SubjectIcon className="h-4 w-4 mr-2 inline" />
                                             {s.name}
                                         </SelectItem>

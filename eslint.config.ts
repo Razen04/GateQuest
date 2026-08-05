@@ -29,7 +29,10 @@ export default [
             ...tsPlugin.configs.recommended.rules, // TypeScript recommended rules
             'no-unused-vars': 'off',
             indent: 'off',
-            'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+            'react-refresh/only-export-components': [
+                'warn',
+                { allowConstantExport: true },
+            ],
         },
     },
 ];

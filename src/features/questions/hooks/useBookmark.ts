@@ -27,9 +27,12 @@ export default function useBookmark() {
     const fetchBookmarks = useCallback(async (subjectSlug: string) => {
         try {
             setLoading(true);
-            const { data: bookmarks, error } = await supabase.rpc('get_user_bookmarks', {
-                p_subject_slug: subjectSlug,
-            });
+            const { data: bookmarks, error } = await supabase.rpc(
+                'get_user_bookmarks',
+                {
+                    p_subject_slug: subjectSlug,
+                }
+            );
 
             if (error) throw error;
 
@@ -62,10 +65,13 @@ export default function useBookmark() {
         try {
             setLoading(true);
 
-            const { data: added, error } = await supabase.rpc('toggle_question_bookmark', {
-                p_question_id: questionId,
-                ...(note ? { p_note: note } : {}),
-            });
+            const { data: added, error } = await supabase.rpc(
+                'toggle_question_bookmark',
+                {
+                    p_question_id: questionId,
+                    ...(note ? { p_note: note } : {}),
+                }
+            );
 
             if (error) throw error;
 
@@ -80,16 +86,23 @@ export default function useBookmark() {
         }
     };
 
-    const updateBookmarkNote = async ({ subjectSlug, questionId, note }: BookmarkPropTypes) => {
+    const updateBookmarkNote = async ({
+        subjectSlug,
+        questionId,
+        note,
+    }: BookmarkPropTypes) => {
         validateNote(note);
 
         try {
             setLoading(true);
 
-            const { error } = await supabase.rpc('update_question_bookmark_note', {
-                p_question_id: questionId,
-                p_note: note,
-            });
+            const { error } = await supabase.rpc(
+                'update_question_bookmark_note',
+                {
+                    p_question_id: questionId,
+                    p_note: note,
+                }
+            );
 
             if (error) throw error;
 

@@ -52,7 +52,11 @@ export default function AppRoutes() {
                         element={
                             // If the user is logged in, redirect them to the dashboard.
                             // Otherwise, show the public landing page.
-                            isLogin ? <Navigate to="/dashboard" replace /> : <LandingPage />
+                            isLogin ? (
+                                <Navigate to="/dashboard" replace />
+                            ) : (
+                                <LandingPage />
+                            )
                         }
                     />
 
@@ -63,16 +67,28 @@ export default function AppRoutes() {
                         <Route path="dashboard" element={<Dashboard />} />
                         {/* The practice section has nested routes for subjects and individual questions. */}
                         <Route path="practice" element={<Practice />} />
-                        <Route path="practice/:subject" element={<PracticeList />} />
-                        <Route path="practice/:subject/:qid" element={<PracticeCard />} />
+                        <Route
+                            path="practice/:subject"
+                            element={<PracticeList />}
+                        />
+                        <Route
+                            path="practice/:subject/:qid"
+                            element={<PracticeCard />}
+                        />
                         {/* Settings routes are modularized into their own component for clarity. */}
                         <Route path="settings/*" element={<SettingsRoutes />} />
                         {/* A static 'About' page. */}
-                        <Route path="about" element={<About landing={false} />} />
+                        <Route
+                            path="about"
+                            element={<About landing={false} />}
+                        />
                         <Route path="donate" element={<DonationPage />} />
                         {/* The revision section has nested routes for revision list and individual questions. */}
                         <Route path="revision" element={<SmartRevision />} />
-                        <Route path="revision/:rid" element={<SmartRevisionQuestionList />} />
+                        <Route
+                            path="revision/:rid"
+                            element={<SmartRevisionQuestionList />}
+                        />
                         <Route
                             path="revision/:rid/:subject/:qid"
                             element={<SmartRevisionQuestionCard />}
@@ -80,14 +96,23 @@ export default function AppRoutes() {
 
                         {/* Topic Test */}
                         <Route path="topic-test" element={<TopicTest />} />
-                        <Route path="topic-test-generate" element={<TopicTestGeneratePage />} />
-                        <Route path="topic-test/:testId" element={<TopicTestLobby />} />
+                        <Route
+                            path="topic-test-generate"
+                            element={<TopicTestGeneratePage />}
+                        />
+                        <Route
+                            path="topic-test/:testId"
+                            element={<TopicTestLobby />}
+                        />
                         <Route
                             path="topic-test/:testId/attempt"
                             element={<TopicTestSessionPage />}
                         />
                         <Route element={<TopicReviewLayout />}>
-                            <Route path="topic-test-result/:testId" element={<TopicTestResult />} />
+                            <Route
+                                path="topic-test-result/:testId"
+                                element={<TopicTestResult />}
+                            />
                             <Route
                                 path="topic-test-review/:testId/:questionIndex"
                                 element={<TestSolutionView />}

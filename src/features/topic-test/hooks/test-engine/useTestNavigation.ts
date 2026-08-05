@@ -9,7 +9,9 @@ interface useTestNavigationResult {
 }
 const useTestNavigation = (totalQuestions: number): useTestNavigationResult => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [visitedIndices, setVisitedIndices] = useState<Set<number>>(() => new Set([0]));
+    const [visitedIndices, setVisitedIndices] = useState<Set<number>>(
+        () => new Set([0])
+    );
 
     const markAsVisited = (index: number) => {
         setVisitedIndices((prev) => {

@@ -30,7 +30,10 @@ const isQuestionInActiveExams = (q: Question, activeExams: string[]) => {
     return normalizedActive.includes(examData.toUpperCase());
 };
 
-const getLatestTimestamp = (questions: Question[], currentMax: string | undefined) => {
+const getLatestTimestamp = (
+    questions: Question[],
+    currentMax: string | undefined
+) => {
     if (!questions.length) return currentMax;
 
     let max = currentMax || '';
@@ -46,7 +49,7 @@ const getLatestTimestamp = (questions: Question[], currentMax: string | undefine
 const fetchQuestionsBySubject = async (
     subject_id: string | undefined,
     last_fetched_at: string | undefined,
-    examId: string | undefined,
+    examId: string | undefined
 ) => {
     let query = supabase
         .from('questions')
@@ -86,7 +89,9 @@ const useQuestions = (subjectId: string | undefined) => {
     const filteredQuestions = useMemo(() => {
         const activeExams = (userGoal?.target_exams as string[]) || [];
 
-        return allQuestions.filter((q) => isQuestionInActiveExams(q, activeExams));
+        return allQuestions.filter((q) =>
+            isQuestionInActiveExams(q, activeExams)
+        );
     }, [allQuestions, userGoal?.target_exams, getPracticeSubjects, subjectId]);
 
     useEffect(() => {
@@ -116,11 +121,14 @@ const useQuestions = (subjectId: string | undefined) => {
 
                 let remoteUpdates: Question[] = [];
                 let remotedFetched = false;
-                if (!lastSynced || Date.now() - Number(lastSynced) >= 1 * 60 * 60 * 1000) {
+                if (
+                    !lastSynced ||
+                    Date.now() - Number(lastSynced) >= 1 * 60 * 60 * 1000
+                ) {
                     remoteUpdates = await fetchQuestionsBySubject(
                         subjectId,
                         lastFetched,
-                        undefined,
+                        undefined
                     ); // we will sync everything
                     await updateSubjectSyncMetadata(subjectId);
                     remotedFetched = true;
@@ -128,16 +136,21 @@ const useQuestions = (subjectId: string | undefined) => {
 
                 if (remoteUpdates.length > 0) {
                     await bulkUpsertQuestions(remoteUpdates);
-                    const newMaxTime = getLatestTimestamp(remoteUpdates, lastFetched);
+                    const newMaxTime = getLatestTimestamp(
+                        remoteUpdates,
+                        lastFetched
+                    );
                     if (newMaxTime) {
                         await updateSubjectSyncMetadata(subjectId, newMaxTime);
                     }
 
                     // refresh UI
                     const updatedLocal = await getQuestionsBySubject(subjectId);
-                    if (isMounted) setAllQuestions(sortQuestionsByYear(updatedLocal));
+                    if (isMounted)
+                        setAllQuestions(sortQuestionsByYear(updatedLocal));
 
-                    if (isMounted && remotedFetched) toast.success('Questions updated.');
+                    if (isMounted && remotedFetched)
+                        toast.success('Questions updated.');
                 }
             } catch (err) {
                 if (err instanceof Error) {
@@ -145,7 +158,9 @@ const useQuestions = (subjectId: string | undefined) => {
                 } else {
                     console.error(String(err)); // fallback for non-Error objects
                 }
-                toast.error('Could not load questions. Try clearing cache and fetch again.');
+                toast.error(
+                    'Could not load questions. Try clearing cache and fetch again.'
+                );
             } finally {
                 // Ensure the loading state is set to false in all cases (success or error).
                 if (isMounted) setIsLoading(false);

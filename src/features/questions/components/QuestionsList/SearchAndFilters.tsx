@@ -80,8 +80,12 @@ const SearchAndFilters = ({
     const { subject } = useParams();
     const { getPracticeSubjects } = useGoals();
 
-    const currentSubject = getPracticeSubjects().find((s) => s.slug === subject);
-    const displayExams = currentSubject?.is_universal ? ['GATE', 'ISRO'] : availableExams;
+    const currentSubject = getPracticeSubjects().find(
+        (s) => s.slug === subject
+    );
+    const displayExams = currentSubject?.is_universal
+        ? ['GATE', 'ISRO']
+        : availableExams;
     const difficulties = ['Easy', 'Medium', 'Hard'];
 
     const glass =
@@ -131,7 +135,10 @@ const SearchAndFilters = ({
                         onClick={() => setShowFilters(!showFilters)}
                         className="px-2 sm:px-4 py-2 w-fit hover:bg-white/30 dark:hover:bg-zinc-800/50 rounded-none relative"
                     >
-                        <Funnel className="mr-2" weight={showFilters ? 'fill' : 'duotone'} />
+                        <Funnel
+                            className="mr-2"
+                            weight={showFilters ? 'fill' : 'duotone'}
+                        />
                         <span>Filter</span>
                         {hasActiveFilters && (
                             <span className="ml-1.5 flex h-2 w-2 rounded-full bg-blue-500" />
@@ -214,8 +221,13 @@ const SearchAndFilters = ({
                                     render: (v: string) => v,
                                 },
                             ].map((filter) => (
-                                <div key={filter.label} className={`${glass} p-3`}>
-                                    <Label className="mb-2">{filter.label}</Label>
+                                <div
+                                    key={filter.label}
+                                    className={`${glass} p-3`}
+                                >
+                                    <Label className="mb-2">
+                                        {filter.label}
+                                    </Label>
 
                                     <Combobox
                                         items={filter.items}
@@ -244,7 +256,8 @@ const SearchAndFilters = ({
 
                                         <ComboboxContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 rounded-none border border-white/20">
                                             <ComboboxEmpty>
-                                                No {filter.label.toLowerCase()} found.
+                                                No {filter.label.toLowerCase()}{' '}
+                                                found.
                                             </ComboboxEmpty>
 
                                             <ComboboxList className="rounded-none">
@@ -264,10 +277,17 @@ const SearchAndFilters = ({
                             ))}
 
                             <div className={`${glass} p-3 rounded-none`}>
-                                <Label className="mb-2">Type of questions</Label>
+                                <Label className="mb-2">
+                                    Type of questions
+                                </Label>
 
-                                <Select value={attemptFilter} onValueChange={setAttemptFilter}>
-                                    <SelectTrigger className={`${inputGlass} w-full rounded-none`}>
+                                <Select
+                                    value={attemptFilter}
+                                    onValueChange={setAttemptFilter}
+                                >
+                                    <SelectTrigger
+                                        className={`${inputGlass} w-full rounded-none`}
+                                    >
                                         <SelectValue
                                             placeholder="Select a type"
                                             className="rounded-none"
@@ -276,13 +296,21 @@ const SearchAndFilters = ({
 
                                     <SelectContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20 rounded-none">
                                         <SelectGroup>
-                                            <SelectLabel>Type of question</SelectLabel>
+                                            <SelectLabel>
+                                                Type of question
+                                            </SelectLabel>
 
-                                            <SelectItem value="all" className="rounded-none">
+                                            <SelectItem
+                                                value="all"
+                                                className="rounded-none"
+                                            >
                                                 All
                                             </SelectItem>
 
-                                            <SelectItem value="attempted" className="rounded-none">
+                                            <SelectItem
+                                                value="attempted"
+                                                className="rounded-none"
+                                            >
                                                 Attempted Questions
                                             </SelectItem>
 
@@ -293,7 +321,10 @@ const SearchAndFilters = ({
                                                 Unattempted Questions
                                             </SelectItem>
 
-                                            <SelectItem value="bookmarked" className="rounded-none">
+                                            <SelectItem
+                                                value="bookmarked"
+                                                className="rounded-none"
+                                            >
                                                 Bookmarked Questions
                                             </SelectItem>
                                         </SelectGroup>

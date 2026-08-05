@@ -18,8 +18,10 @@ export function useDonations() {
             const formatted: DonationData[] = rawData.map(
                 (d): DonationData => ({
                     ...d,
-                    user_name: d.anonymous ? 'Anonymous' : d.user_name || 'Anonymous',
-                }),
+                    user_name: d.anonymous
+                        ? 'Anonymous'
+                        : d.user_name || 'Anonymous',
+                })
             );
 
             setDonations(formatted);
@@ -34,9 +36,15 @@ export function useDonations() {
     // Add new donation
     const addDonation = useCallback(
         async ({ userId, amount, message, anonymous, utr }: newDonation) => {
-            return await insertDonation({ userId, amount, message, anonymous, utr });
+            return await insertDonation({
+                userId,
+                amount,
+                message,
+                anonymous,
+                utr,
+            });
         },
-        [],
+        []
     );
 
     return { donations, loading, error, addDonation, loadDonations };

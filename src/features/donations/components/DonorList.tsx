@@ -34,7 +34,8 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold text-sm truncate">
-                                        {donation.anonymous || !donation.user_name
+                                        {donation.anonymous ||
+                                        !donation.user_name
                                             ? 'Anonymous'
                                             : donation.user_name}
                                     </span>
@@ -42,10 +43,12 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                                     <span className="text-xs text-muted-foreground whitespace-nowrap">
                                         {formatDistanceToNow(
                                             new Date(
-                                                donation.created_at.endsWith('Z')
+                                                donation.created_at.endsWith(
+                                                    'Z'
+                                                )
                                                     ? donation.created_at
-                                                    : donation.created_at + 'Z',
-                                            ),
+                                                    : donation.created_at + 'Z'
+                                            )
                                         )}{' '}
                                         ago
                                     </span>

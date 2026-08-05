@@ -8,7 +8,8 @@ import { handleDonationReminder } from './handlers/donationReminder.ts';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Headers':
+        'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
 
         if (!incomingSecret || incomingSecret !== expectedSecret) {
             console.warn(
-                'Unauthorized function invocation intercepted! Rejected malicious signature.',
+                'Unauthorized function invocation intercepted! Rejected malicious signature.'
             );
             return new Response(
                 JSON.stringify({
@@ -31,8 +32,11 @@ Deno.serve(async (req) => {
                 }),
                 {
                     status: 401,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                },
+                    headers: {
+                        ...corsHeaders,
+                        'Content-Type': 'application/json',
+                    },
+                }
             );
         }
 
@@ -40,35 +44,54 @@ Deno.serve(async (req) => {
         const task = url.searchParams.get('task');
 
         if (!task) {
-            throw new Error('Missing required ?task= parameter in the routing URL request.');
+            throw new Error(
+                'Missing required ?task= parameter in the routing URL request.'
+            );
         }
 
         const supabaseAdmin = createClient(
             Deno.env.get('SUPABASE_URL'),
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
         );
 
         webpush.setVapidDetails(
             'mailto:support@gatequest.in',
             Deno.env.get('VAPID_PUBLIC_KEY'),
-            Deno.env.get('VAPID_PRIVATE_KEY'),
+            Deno.env.get('VAPID_PRIVATE_KEY')
         );
 
         switch (task) {
             case 'revision-hourly': {
-                return await handleHourlyRevision({ supabaseAdmin, corsHeaders });
+                return await handleHourlyRevision({
+                    supabaseAdmin,
+                    corsHeaders,
+                });
             }
             case 'report-created': {
-                return await handleReportCreated({ req, supabaseAdmin, corsHeaders });
+                return await handleReportCreated({
+                    req,
+                    supabaseAdmin,
+                    corsHeaders,
+                });
             }
             case 'report-resolved': {
-                return await handleReportResolved({ req, supabaseAdmin, corsHeaders });
+                return await handleReportResolved({
+                    req,
+                    supabaseAdmin,
+                    corsHeaders,
+                });
             }
             case 'weekend-topic-test': {
-                return await handleTopicTestReminder({ supabaseAdmin, corsHeaders });
+                return await handleTopicTestReminder({
+                    supabaseAdmin,
+                    corsHeaders,
+                });
             }
             case 'donation-reminder': {
-                return await handleDonationReminder({ supabaseAdmin, corsHeaders });
+                return await handleDonationReminder({
+                    supabaseAdmin,
+                    corsHeaders,
+                });
             }
             default:
                 throw new Error('Invalid task');
@@ -82,7 +105,7 @@ Deno.serve(async (req) => {
             {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            },
+            }
         );
     }
 });

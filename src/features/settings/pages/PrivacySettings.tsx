@@ -31,8 +31,12 @@ import type { Settings } from '@/shared/types/Settings';
 
 const PrivacySettings = () => {
     const { logout, showLogin, setShowLogin, user } = useAuth();
-    const { settings, handleSettingToggle, isUpdatingSettings, handleUserAnonymity } =
-        useSettings();
+    const {
+        settings,
+        handleSettingToggle,
+        isUpdatingSettings,
+        handleUserAnonymity,
+    } = useSettings();
     const userSettings = user?.settings as Settings | undefined;
 
     const handleClearData = async () => {
@@ -42,7 +46,9 @@ const PrivacySettings = () => {
 
             const result = data as { version?: number } | null;
 
-            toast.success(`Data cleared. Starting Profile Version ${result?.version ?? ''}.`);
+            toast.success(
+                `Data cleared. Starting Profile Version ${result?.version ?? ''}.`
+            );
             logout();
         } catch (error) {
             console.error('Unable to clear data: ', error);
@@ -101,7 +107,9 @@ const PrivacySettings = () => {
                             title="Share Progress & Global Ranking"
                             description="Broadcast study metrics, daily streaks, and leaderboard rank to peers"
                             isOn={settings.shareProgress}
-                            onToggle={() => handleSettingToggle('shareProgress')}
+                            onToggle={() =>
+                                handleSettingToggle('shareProgress')
+                            }
                             disabled={isUpdatingSettings}
                         />
 
@@ -139,15 +147,18 @@ const PrivacySettings = () => {
 
                         {user && user.version_number !== undefined && (
                             <span className="font-['JetBrains_Mono',monospace] text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                                RESET QUOTA: <span className="text-red-500">{versionNum}/5</span>{' '}
+                                RESET QUOTA:{' '}
+                                <span className="text-red-500">
+                                    {versionNum}/5
+                                </span>{' '}
                                 USED
                             </span>
                         )}
                     </div>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Manage your raw database records, profile snapshot resets, and active
-                        session tokens.
+                        Manage your raw database records, profile snapshot
+                        resets, and active session tokens.
                     </p>
 
                     <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-3">
@@ -159,7 +170,10 @@ const PrivacySettings = () => {
                                         variant="outline"
                                         className="h-12 w-full justify-start gap-2.5 border-slate-900/10 font-['Space_Grotesk',sans-serif] rounded-none font-bold text-slate-800 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5"
                                     >
-                                        <Broom size={18} className="text-amber-500" />
+                                        <Broom
+                                            size={18}
+                                            className="text-amber-500"
+                                        />
                                         Clear Profile Data
                                     </Button>
                                 </AlertDialogTrigger>
@@ -170,13 +184,15 @@ const PrivacySettings = () => {
                                             Re-initialize Profile Data?
                                         </AlertDialogTitle>
                                         <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
-                                            This action will flush your active progress, resetting
-                                            you to a clean slate. You are currently on{' '}
+                                            This action will flush your active
+                                            progress, resetting you to a clean
+                                            slate. You are currently on{' '}
                                             <span className="font-['JetBrains_Mono',monospace] font-bold text-slate-900 dark:text-white">
                                                 Version {versionNum}
                                             </span>
-                                            . This reset can only be performed 5 times total. You
-                                            will be logged out automatically.
+                                            . This reset can only be performed 5
+                                            times total. You will be logged out
+                                            automatically.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
 
@@ -215,9 +231,11 @@ const PrivacySettings = () => {
                                             Permanently Delete Account?
                                         </AlertDialogTitle>
                                         <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
-                                            This operation is non-reversible. All account ownership,
-                                            personalized preferences, and linked records will be
-                                            purged immediately from primary storage.
+                                            This operation is non-reversible.
+                                            All account ownership, personalized
+                                            preferences, and linked records will
+                                            be purged immediately from primary
+                                            storage.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
 

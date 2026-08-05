@@ -7,7 +7,15 @@ import {
 } from '../../utils/questionUtils.js';
 import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
-import { Warning, ShareFat, Dot, Eye, Flag, Trash, Check } from '@phosphor-icons/react';
+import {
+    Warning,
+    ShareFat,
+    Dot,
+    Eye,
+    Flag,
+    Trash,
+    Check,
+} from '@phosphor-icons/react';
 import type { Question } from '@/shared/types/storage.js';
 
 import {
@@ -42,7 +50,11 @@ type QuestionHeaderProps = {
 };
 
 const Divider = () => (
-    <Dot size={14} weight="fill" className="text-slate-300 dark:text-slate-600" />
+    <Dot
+        size={14}
+        weight="fill"
+        className="text-slate-300 dark:text-slate-600"
+    />
 );
 
 const QuestionHeader = ({
@@ -57,8 +69,13 @@ const QuestionHeader = ({
     isAnswered,
     userCount,
 }: QuestionHeaderProps) => {
-    const { bookmarksMap, fetchBookmarks, toggleBookmark, updateBookmarkNote, loading } =
-        useBookmark();
+    const {
+        bookmarksMap,
+        fetchBookmarks,
+        toggleBookmark,
+        updateBookmarkNote,
+        loading,
+    } = useBookmark();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [noteText, setNoteText] = useState('');
@@ -211,7 +228,7 @@ const QuestionHeader = ({
 
                     <span
                         className={`px-2.5 py-1 text-xs font-semibold ${getDifficultyClassNames(
-                            question.difficulty,
+                            question.difficulty
                         )}`}
                     >
                         {getDifficultyDisplayText()}
@@ -231,7 +248,9 @@ const QuestionHeader = ({
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Eye size={14} />
 
-                    <span className="flex items-center gap-1">{userCount ?? 1} studying now</span>
+                    <span className="flex items-center gap-1">
+                        {userCount ?? 1} studying now
+                    </span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -258,7 +277,9 @@ const QuestionHeader = ({
                 <DialogContent className="sm:max-w-[425px] rounded-none">
                     <DialogHeader>
                         <DialogTitle>
-                            {isBookmarked ? 'Edit Bookmark Note' : 'Add Bookmark'}
+                            {isBookmarked
+                                ? 'Edit Bookmark Note'
+                                : 'Add Bookmark'}
                         </DialogTitle>
                     </DialogHeader>
 

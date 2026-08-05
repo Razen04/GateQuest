@@ -5,7 +5,10 @@ import { ArrowLeft } from '@phosphor-icons/react';
 import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
 
 // Utils
-import { isNumericalQuestion, getCorrectAnswerText } from '../../utils/questionUtils';
+import {
+    isNumericalQuestion,
+    getCorrectAnswerText,
+} from '../../utils/questionUtils';
 import QuestionHeader from './QuestionHeader';
 import QuestionContent from './QuestionContent';
 import ResultMessage from './ResultMessage';
@@ -150,8 +153,9 @@ const QuestionCard = ({
                 <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
                     <p className="font-bold">Branch Mismatch</p>
                     <p>
-                        This question belongs to a different branch. You can view it, but answering
-                        is disabled to protect your current branch progress.
+                        This question belongs to a different branch. You can
+                        view it, but answering is disabled to protect your
+                        current branch progress.
                     </p>
                 </div>
             )}
@@ -208,11 +212,13 @@ const QuestionCard = ({
                                 placeholder="Enter your answer"
                                 disabled={showAnswer}
                             />
-                            {showAnswer && numericalAnswer === Number(correctAnswerText) && (
-                                <p className="mt-2 text-sm text-green-600">
-                                    Correct answer: {correctAnswerText}
-                                </p>
-                            )}
+                            {showAnswer &&
+                                numericalAnswer ===
+                                    Number(correctAnswerText) && (
+                                    <p className="mt-2 text-sm text-green-600">
+                                        Correct answer: {correctAnswerText}
+                                    </p>
+                                )}
                         </div>
                     )}
 
@@ -238,7 +244,12 @@ const QuestionCard = ({
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
 
-                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
+                    {showAnswer && (
+                        <AskAIBanner
+                            provider={aiProvider}
+                            onClick={handleAskAI}
+                        />
+                    )}
 
                     {/* Action Buttons */}
                     <ActionButtons

@@ -5,7 +5,10 @@ import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler'
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question } from '@/shared/types/storage';
-import { invalidateProfileCache, useProfile } from '@/features/profile/hooks/useProfile';
+import {
+    invalidateProfileCache,
+    useProfile,
+} from '@/features/profile/hooks/useProfile';
 
 type useAnswerFlowProps = {
     currentQuestion: Question;
@@ -15,7 +18,9 @@ type useAnswerFlowProps = {
     user: AppUser | null;
     isLogin: boolean;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
-    setResult: React.Dispatch<React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>>;
+    setResult: React.Dispatch<
+        React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>
+    >;
     stop: () => void;
     showAnswer: boolean;
 };

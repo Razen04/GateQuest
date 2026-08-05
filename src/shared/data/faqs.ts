@@ -120,7 +120,8 @@ export const faqs: Faq[] = [
             },
             {
                 type: 'text',
-                content: '. This helps us track all feedback in one place. You can also join our ',
+                content:
+                    '. This helps us track all feedback in one place. You can also join our ',
             },
             {
                 type: 'link',

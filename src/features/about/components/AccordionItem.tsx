@@ -19,7 +19,11 @@ type AccordionItemProps = {
     renderAnswer: (answer: Answer[]) => React.ReactNode;
 };
 
-const AccordionItem = ({ question, answer, renderAnswer }: AccordionItemProps) => {
+const AccordionItem = ({
+    question,
+    answer,
+    renderAnswer,
+}: AccordionItemProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const variants = {
@@ -39,7 +43,10 @@ const AccordionItem = ({ question, answer, renderAnswer }: AccordionItemProps) =
                 className="w-full flex justify-between items-center text-left text-lg font-medium text-gray-800 dark:text-gray-100"
             >
                 <span>{question}</span>
-                <motion.div animate={{ rotate: isOpen ? 45 : 0 }} transition={{ duration: 0.3 }}>
+                <motion.div
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ duration: 0.3 }}
+                >
                     <Plus className="text-gray-500" />
                 </motion.div>
             </button>
