@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-    Timer,
-    Question,
-    Play,
-    WarningCircle,
-    CheckCircle,
     ArrowLeft,
+    CheckCircle,
+    Play,
+    Question,
+    Timer,
+    WarningCircle,
 } from '@phosphor-icons/react';
-import { Button } from '@/shared/components/ui/button';
-import PageHeader from '@/shared/components/PageHeader';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import type { TestSession } from '@/shared/types/storage';
-import ModernLoader from '@/shared/components/ModernLoader';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { fetchTestById, updateTestStatus } from '../api/topicTest';
 import { getCurrentUser } from '@/shared/api/auth';
+import ModernLoader from '@/shared/components/ModernLoader';
+import PageHeader from '@/shared/components/PageHeader';
+import { Button } from '@/shared/components/ui/button';
+import { useGoals } from '@/shared/hooks/useGoals';
+import type { TestSession } from '@/shared/types/storage';
+import { fetchTestById, updateTestStatus } from '../api/topicTest';
 
 type InstructionRule = {
     id: string;
@@ -45,8 +45,8 @@ const INSTRUCTION_RULES: InstructionRule[] = [
         id: 'pause',
         text: (
             <>
-                Closing the app will <strong>Pause</strong> the timer, but try to finish in one
-                sitting.
+                Closing the app will <strong>Pause</strong> the timer, but try
+                to finish in one sitting.
             </>
         ),
         type: 'warning',
@@ -60,7 +60,11 @@ const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
 
     return (
         <div className="flex gap-3">
-            <Icon size={18} weight="fill" className={`${iconColor} shrink-0 mt-0.5`} />
+            <Icon
+                size={18}
+                weight="fill"
+                className={`${iconColor} shrink-0 mt-0.5`}
+            />
             <p>{rule.text}</p>
         </div>
     );
@@ -145,24 +149,28 @@ const TopicTestLobby = () => {
                     caption="Review the test parameters below."
                 />
             </div>
+
             <main className="px-6 flex-1 flex flex-col gap-6">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm"
+                    className="rounded-3xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
                 >
-                    <h2 className="text-xl font-bold mb-1">Custom Topic Test</h2>
+                    <h2 className="text-xl font-bold mb-1">
+                        Custom Topic Test
+                    </h2>
+
                     <p className="text-sm truncate text-slate-500 dark:text-slate-400 mb-6 max-w-md">
                         {testData.topics.join(', ')}
                     </p>
 
                     <div className="flex flex-wrap gap-3">
-                        <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-2 text-sm font-medium">
+                        <div className="flex items-center gap-2 rounded-xl border border-blue-200/40 dark:border-blue-400/20 bg-blue-500/10 backdrop-blur-xl px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-300">
                             <Question size={20} weight="bold" />
                             {testData.total_questions} Questions
                         </div>
 
-                        <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 px-4 py-2 text-sm font-medium">
+                        <div className="flex items-center gap-2 rounded-xl border border-orange-200/40 dark:border-orange-400/20 bg-orange-500/10 backdrop-blur-xl px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-300">
                             <Timer size={20} weight="bold" />
                             {timeInMinutes} Mins
                         </div>
@@ -179,7 +187,7 @@ const TopicTestLobby = () => {
                         Instructions
                     </h3>
 
-                    <div className="bg-white dark:bg-zinc-900 p-5 border border-slate-200 dark:border-zinc-800 space-y-3 text-sm">
+                    <div className="rounded-3xl border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-xl p-5 space-y-3 text-sm">
                         {INSTRUCTION_RULES.map((rule) => (
                             <InstructionItem key={rule.id} rule={rule} />
                         ))}
@@ -189,7 +197,11 @@ const TopicTestLobby = () => {
 
             <div className="mt-4 p-6">
                 <div className="w-full mx-auto">
-                    <Button onClick={handleStartTest} disabled={starting} className="w-full">
+                    <Button
+                        onClick={handleStartTest}
+                        disabled={starting}
+                        className="w-full rounded-2xl shadow-lg"
+                    >
                         <Play className="mr-2" weight="fill" />
                         Start Test
                     </Button>

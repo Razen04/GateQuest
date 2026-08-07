@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/Razen04/GateQuest">
-    <img src="public/animated_logo.svg" alt="GATEQuest Logo" width="120" />
+    <img src="public/icons/animated_logo.svg" alt="GATEQuest Logo" width="120" />
   </a>
   <h1 align="center">GATEQuest</h1>
   <p align="center">
@@ -26,31 +26,31 @@
 
 GATEQuest is a feature-rich, user-friendly application built to provide a comprehensive and engaging platform for GATE exam aspirants. It offers a clean, modern interface with a focus on usability and performance.
 
-<details>
+<details open>
 <summary>Screenshots</summary>
 <br>
 <table>
   <tr>
-    <td><img src="public/screenshots/Landing.png" alt="Landing Page" width="400"></td>
-    <td><img src="public/screenshots/Dashboard.png" alt="Dashboard" width="400"></td>
+    <td><img src="public/screenshots/Landing.png" alt="Landing Page" width="250"></td>
+    <td><img src="public/screenshots/Dashboard.png" alt="Dashboard" width="250"></td>
   </tr>
   <tr>
-    <td><img src="public/screenshots/Practice.png" alt="Practice Page" width="400"></td>
-    <td><img src="public/screenshots/Questions.png" alt="Questions Page" width="400"></td>
+    <td><img src="public/screenshots/Practice.png" alt="Practice Page" width="250"></td>
+    <td><img src="public/screenshots/Questions.png" alt="Questions Page" width="250"></td>
   </tr>
    <tr>
-    <td><img src="public/screenshots/MCQ.png" alt="MCQ Page" width="400"></td>
-    <td><img src="public/screenshots/About.png" alt="About Page" width="400"></td>
+    <td><img src="public/screenshots/MCQ.png" alt="MCQ Page" width="250"></td>
+    <td><img src="public/screenshots/About.png" alt="About Page" width="250"></td>
   </tr>
   <tr>
-      <td><img src="public/screenshots/Settings.png" alt="Settings Page" width="400"></td>
+      <td><img src="public/screenshots/Settings.png" alt="Settings Page" width="250"></td>
   </tr>
 </table>
 </details>
 
 ## Features
 
-- **Practice Questions**: Access a vast library of GATE and ISRO PYQ questions across multiple branches (**CS, DA, EC, EE**), neatly organized by subject, year, and difficulty.
+- **Practice Questions**: Access a vast library of GATE and ISRO PYQ questions across multiple branches (**CS, DA, EC, EE, ME**), neatly organized by subject, year, and difficulty.
 - **Multi-Branch Support**: Seamlessly switch between target branches, with universal subjects (like General Aptitude and Engineering Math) dynamically syncing your progress and mistakes across your profiles.
 - **Bookmarking**: Save challenging questions for later review and focused practice.
 - **Performance Tracking**: Monitor your progress with detailed statistics on accuracy and overall progress count.
@@ -158,19 +158,19 @@ To get a local copy up and running, follow these simple steps.
     ```
 3.  **Set up local Supabase instance:**
     - Start the Supabase services (need Docker installed, read more about it in the guide):
-        ```sh
-        supabase start
-        ```
+      ```sh
+      supabase start
+      ```
     - The CLI will output your local Supabase URL, anon key, and service role key.
     - Read more about the Supabase Setup in [SUPABASE_GUIDE](SUPABASE_GUIDE.md)
     - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](SUPABASE_DOCUMENTATION.md)
 4.  **Set up environment variables:**
     - Create a `.env` file in the root directory.
     - Add your Supabase project URL and anon key:
-        ```env
-        VITE_SUPABASE_PROJECT_URL=your_supabase_url
-        VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
-        ```
+      ```env
+      VITE_SUPABASE_PROJECT_URL=your_supabase_url
+      VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
+      ```
 5.  **Run the development server:**
     ```sh
     npm run dev

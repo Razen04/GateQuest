@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export default function ModernLoader() {
     return (
         <div
-            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-900"
+            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-950"
             role="status"
             aria-busy="true"
         >
@@ -49,6 +49,7 @@ export default function ModernLoader() {
                             className="flex gap-2 items-center"
                             target="_blank"
                             href="https://discord.gg/dFmg3g52c5"
+                            rel="noopener"
                         >
                             <DiscordLogoIcon className="w-4 h-4" />{' '}
                             <h1 className="font-bold">DISCORD</h1>

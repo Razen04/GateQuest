@@ -1,7 +1,7 @@
-import { useNavigate, useParams } from 'react-router-dom';
 import { decompress } from 'lz-string';
-import QuestionsList from '@/features/questions/components/QuestionsList/QuestionsList';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import QuestionsList from '@/features/questions/components/QuestionsList/QuestionsList';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
 
 const SmartRevisionQuestionList = () => {
@@ -25,7 +25,10 @@ const SmartRevisionQuestionList = () => {
     };
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
+    const handleQuestionClick = (
+        id: string,
+        currentFilteredList: Question[]
+    ) => {
         const subject = currentFilteredList.find((q) => q.id === id)?.subject;
 
         const currentQueryString = window.location.search;

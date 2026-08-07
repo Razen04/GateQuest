@@ -1,12 +1,17 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { getDifficultyClassNames, getQuestionDisplayText } from '../../utils/questionUtils.ts';
-import Pagination from './Pagination.tsx';
-import MathRenderer from '../Renderers/MathRenderer.tsx';
-import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
+import React from 'react';
+import ModernLoader from '@/shared/components/ModernLoader.tsx';
 import type { Question } from '@/shared/types/storage.ts';
+import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
+import {
+    getDifficultyClassNames,
+    getQuestionDisplayText,
+} from '../../utils/questionUtils.ts';
+import MathRenderer from '../Renderers/MathRenderer.tsx';
+import Pagination from './Pagination.tsx';
 
 type ListProps = {
+    loading: boolean;
     listRef: React.RefObject<HTMLDivElement | null>;
     questions: Question[];
     handleQuestionClick: (id: string) => void;
@@ -16,6 +21,7 @@ type ListProps = {
 };
 
 const List = ({
+    loading,
     listRef,
     questions,
     handleQuestionClick,
@@ -23,6 +29,7 @@ const List = ({
     totalPages,
     setCurrentPage,
 }: ListProps) => {
+    if (loading) return <ModernLoader />;
     return (
         <motion.div
             initial="initial"
@@ -37,20 +44,22 @@ const List = ({
                     key={index}
                     variants={fadeInUp}
                     onClick={() => handleQuestionClick(question.id)}
-                    className="cursor-pointer border border-border-primary dark:border-border-primary-dark p-4 shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-zinc-800"
+                    className="cursor-pointer border border-white/20 bg-white/20 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-xl hover:bg-white/30 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition-all"
                 >
-                    <h3 className="font-medium mb-3 text-sm md:text-base">
+                    <h3 className="font-medium mb-3 text-sm md:text-base text-gray-800 dark:text-gray-200">
                         <MathRenderer text={getQuestionDisplayText(question)} />
                     </h3>
+
                     <div className="flex justify-between items-center text-xs">
                         <span
-                            className={`font-bold md:font-normal px-2 py-1 ${getDifficultyClassNames(
-                                question.difficulty,
+                            className={`font-bold md:font-normal px-2 py-1 backdrop-blur-md border border-white/20 ${getDifficultyClassNames(
+                                question.difficulty
                             )}`}
                         >
                             {question.difficulty}
                         </span>
-                        <span className="font-semibold">
+
+                        <span className="font-semibold text-gray-600 dark:text-gray-300">
                             {question.year
                                 ? `${(Array.isArray(question.metadata.exam)
                                       ? question.metadata.exam
@@ -63,6 +72,7 @@ const List = ({
                     </div>
                 </motion.div>
             ))}
+
             <Pagination
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}

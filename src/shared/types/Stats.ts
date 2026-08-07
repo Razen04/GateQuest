@@ -1,17 +1,22 @@
 export interface SubjectStat {
-    subjectName?: string; // This is the subject slug
-    subject?: string;
-    accuracy: number;
-    progress: number;
-    attemptedQuestionIds: Set<string>;
-    revisionAttemptedQuestionIds: Set<string>;
+    subject_name: string;
+    subject_slug: string;
+    icon_name: string;
+    theme_color: string;
     attempted: number;
-    totalAvailable: number;
+    correct: number;
+    accuracy: number;
+    total_available: number;
+    progress: number;
+    attemptedQuestionIds?: Set<string>;
+    revisionAttemptedQuestionIds?: Set<string>;
 }
 
 export interface Streaks {
-    current: number;
-    longest: number;
+    study_current: number;
+    study_longest: number;
+    learning_current: number;
+    learning_longest: number;
 }
 
 export interface Heatmap {

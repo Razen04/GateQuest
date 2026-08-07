@@ -1,24 +1,29 @@
 // This custom hook manages all the local state related to a single question,such as the user's selected answer, the result, and whether the answer is revealed.
-import React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { isMultipleSelection } from '../utils/questionUtils.ts';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Question } from '@/shared/types/storage.ts';
+import { isMultipleSelection } from '../utils/questionUtils.ts';
 
 // Manages the interactive state for a question card.
 export const useQuestionState = (currentQuestion: Question) => {
     // State for single-choice questions.
     const [userAnswerIndex, setUserAnswerIndex] = useState<number | null>(null);
     // State for multiple-choice questions.
-    const [selectedOptionIndices, setSelectedOptionIndices] = useState<number[]>([]);
+    const [selectedOptionIndices, setSelectedOptionIndices] = useState<
+        number[]
+    >([]);
     // State for numerical answer type questions.
     const [numericalAnswer, setNumericalAnswer] = useState<number | null>(null);
     // State to control the visibility of the correct answer and explanation.
     const [showAnswer, setShowAnswer] = useState(false);
     // State to store the result of the user's answer (e.g., 'Correct', 'Incorrect').
-    const [result, setResult] = useState<'correct' | 'incorrect' | 'unattempted'>('unattempted');
+    const [result, setResult] = useState<
+        'correct' | 'incorrect' | 'unattempted'
+    >('unattempted');
 
     // Handles changes to the numerical input field.
-    const handleNumericalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNumericalInputChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
         // Prevent input changes after the answer has been revealed.
         if (showAnswer) return;
         setNumericalAnswer(e.target.valueAsNumber);
@@ -33,7 +38,9 @@ export const useQuestionState = (currentQuestion: Question) => {
         if (isMultipleSelection(currentQuestion)) {
             // If it is, toggle the selected index in the array.
             setSelectedOptionIndices((prev) =>
-                prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
+                prev.includes(index)
+                    ? prev.filter((i) => i !== index)
+                    : [...prev, index]
             );
         } else {
             // For single-choice, selecting the same option deselects it.

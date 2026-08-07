@@ -1,3 +1,15 @@
+# v0.10.9 - 2026-08-07 (Latest)
+
+- **Fresh UI**: A cleaner, more modern look across the app.
+- **Better Bookmarks**: Add optional notes (up to 100 characters), edit them anytime, and filter to bookmarked questions only. Existing bookmarks are preserved. Implements [#85](https://github.com/Razen04/GateQuest/discussions/85) and [#17](https://github.com/Razen04/GateQuest/issues/17).
+- **Faster Dashboard**: Improved dashboard fetching logic. Fixes [#81](https://github.com/Razen04/GateQuest/issues/81).
+- **Beta Channel**: Opt into beta builds from **Settings** to try upcoming features.
+- **Profile (Beta)**: Added a new Profile section. Implements [#47](https://github.com/Razen04/GateQuest/issues/47).
+- **Account Deletion (Beta)**: You can now safely delete your account. Implements [#80](https://github.com/Razen04/GateQuest/issues/80).
+- **Smart Revision**: Create revision sets every 3 days.
+- **Topic Test**: This is resumed, but may have to stop again if any anamoly is found.
+- **Bug Fix**: Route Space/Enter to Submit when option is selected. Fixes [#71](https://github.com/Razen04/GateQuest/issues/71) by [@kd-prashant](https://github.com/kd-prashant).
+
 # v0.10.8 - 2026-05-23
 
 - Refactored the codebase for better maintainability.

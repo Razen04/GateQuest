@@ -1,8 +1,11 @@
-import ModernLoader from '@/shared/components/ModernLoader';
-import { getTestSession, initializeTestSession } from '@/features/topic-test/services/testSession';
-import type { Question, TestSession } from '@/shared/types/storage';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import {
+    getTestSession,
+    initializeTestSession,
+} from '@/features/topic-test/services/testSession';
+import ModernLoader from '@/shared/components/ModernLoader';
+import type { Question, TestSession } from '@/shared/types/storage';
 import { fetchAttemptsWithQuestions, fetchTestById } from '../api/topicTest';
 
 type AttemptWithQuestion = {
@@ -41,22 +44,24 @@ const TestReviewLayout = () => {
                 const localData = await getTestSession(testId);
 
                 const hasAllQuestions = localData?.attempts?.every((attempt) =>
-                    localData.questions.some((q) => q.id === attempt.question_id),
+                    localData.questions.some(
+                        (q) => q.id === attempt.question_id
+                    )
                 );
 
                 if (
-                    localData &&
-                    localData.session &&
-                    localData.session.status === 'completed' &&
+                    localData?.session?.status === 'completed' &&
                     localData.attempts.length > 0 &&
                     hasAllQuestions
                 ) {
-                    const mappedAttempts = localData.attempts.map((attempt) => ({
-                        ...attempt,
-                        questions: localData.questions.find(
-                            (q) => q.id === attempt.question_id,
-                        ) as Question,
-                    }));
+                    const mappedAttempts = localData.attempts.map(
+                        (attempt) => ({
+                            ...attempt,
+                            questions: localData.questions.find(
+                                (q) => q.id === attempt.question_id
+                            ) as Question,
+                        })
+                    );
 
                     if (isMounted) {
                         setSession(localData.session);
@@ -66,7 +71,8 @@ const TestReviewLayout = () => {
                     return;
                 }
 
-                const { data: sessionData, error: sessionError } = await fetchTestById(testId);
+                const { data: sessionData, error: sessionError } =
+                    await fetchTestById(testId);
 
                 if (sessionError || !sessionData) {
                     throw new Error('Test not found.');
@@ -87,12 +93,22 @@ const TestReviewLayout = () => {
 
                 if (sessionData && attemptsData) {
                     const questionsToCache = attemptsData
-                        .flatMap((a) => (Array.isArray(a.questions) ? a.questions : [a.questions]))
+                        .flatMap((a) =>
+                            Array.isArray(a.questions)
+                                ? a.questions
+                                : [a.questions]
+                        )
                         .filter((q): q is Question => !!q);
 
-                    const pureAttemptsToCache = attemptsData.map(({ questions, ...a }) => a);
+                    const pureAttemptsToCache = attemptsData.map(
+                        ({ questions, ...a }) => a
+                    );
 
-                    await initializeTestSession(sessionData, pureAttemptsToCache, questionsToCache);
+                    await initializeTestSession(
+                        sessionData,
+                        pureAttemptsToCache,
+                        questionsToCache
+                    );
                 }
 
                 if (isMounted) {
@@ -102,7 +118,11 @@ const TestReviewLayout = () => {
             } catch (err) {
                 console.error(err);
                 if (isMounted) {
-                    setError(err instanceof Error ? err.message : 'Failed to load test results.');
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : 'Failed to load test results.'
+                    );
                 }
             } finally {
                 if (isMounted) {

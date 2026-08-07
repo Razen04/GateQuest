@@ -2,11 +2,17 @@
 // It handles loading settings from the user's profile, updating them in the local state, and persisting those changes back to localStorage and Supabase.
 
 import React, { useEffect, useState } from 'react';
-import AppSettingContext from './AppSettingContext.ts';
-import { getUserProfile, syncUserToSupabase, updateUserProfile } from '@/shared/utils/helper.ts';
-import type { Settings } from '@/shared/types/Settings.ts';
-import useAuth from '@/shared/hooks/useAuth.ts';
+import { getCurrentUser } from '@/shared/api/auth.ts';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template.ts';
+import useAuth from '@/shared/hooks/useAuth.ts';
+import type { Settings } from '@/shared/types/Settings.ts';
+import {
+    getUserProfile,
+    syncUserToSupabase,
+    updateUserProfile,
+} from '@/shared/utils/helper.ts';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import AppSettingContext from './AppSettingContext.ts';
 
 const defaultSettings: Settings = {
     sound: true,
@@ -17,11 +23,12 @@ const defaultSettings: Settings = {
     aiProvider: 'chatgpt',
     aiCustomPrompt: DEFAULT_TEMPLATE,
     notifications: false,
+    is_beta: false,
 };
 
 // The AppProvider component manages application-specific settings like sound, timers and dark mode.
 const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isLogin } = useAuth();
+    const { isLogin, user, setUser } = useAuth();
 
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
 
@@ -33,10 +40,31 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
 
     // A generic function to toggle any boolean setting by its key, or explicitly set its value.
-    const handleSettingToggle = <K extends keyof Settings>(key: K, value?: Settings[K]) => {
+    const handleSettingToggle = <K extends keyof Settings>(
+        key: K,
+        value?: Settings[K]
+    ) => {
         setSettings((prev) => ({
             ...prev,
             [key]: value !== undefined ? value : !prev[key],
+        }));
+    };
+
+    // function to handle updating is_public for user anonymity
+    const handleUserAnonymity = async (isPublic: boolean) => {
+        const user = await getCurrentUser();
+        if (!user?.id) return;
+
+        const { error } = await supabase
+            .from('users')
+            .update({ is_public: isPublic })
+            .eq('id', user.id);
+
+        if (error) throw error;
+
+        setUser((prev) => ({
+            ...prev,
+            is_public: isPublic,
         }));
     };
 
@@ -45,7 +73,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         if (profile) {
             updateUserProfile({ ...profile, settings });
         }
-    }, [settings]);
+    }, [settings, user]);
 
     useEffect(() => {
         if (!isLogin) return;
@@ -73,7 +101,14 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     // The context provider makes the settings state and the toggle function available to child components.
     return (
-        <AppSettingContext.Provider value={{ settings, handleSettingToggle, isUpdatingSettings }}>
+        <AppSettingContext.Provider
+            value={{
+                settings,
+                handleSettingToggle,
+                handleUserAnonymity,
+                isUpdatingSettings,
+            }}
+        >
             {children}
         </AppSettingContext.Provider>
     );

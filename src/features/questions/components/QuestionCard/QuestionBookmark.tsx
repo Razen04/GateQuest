@@ -1,19 +1,36 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { Bookmark } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 type QuestionBookmarkProps = {
     onClick: () => void;
-    isBookmarked?: boolean; // Optional: If you want to style it differently when active later
+    isBookmarked?: boolean;
+    hasNote?: boolean;
 };
 
-const QuestionBookmark = ({ onClick }: QuestionBookmarkProps) => {
+const QuestionBookmark = ({
+    onClick,
+    isBookmarked = false,
+    hasNote = false,
+}: QuestionBookmarkProps) => {
     return (
         <div>
             <button
-                className="flex items-center justify-center bg-blue-400 px-3 py-1 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 relative text-base"
+                type="button"
+                className={`flex items-center justify-center px-3 py-1 cursor-pointer transition-all duration-300 focus:outline-none focus:ring-2 relative text-base ${
+                    isBookmarked
+                        ? 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-400'
+                        : 'bg-blue-400 text-white hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:ring-blue-400'
+                }`}
                 onClick={onClick}
+                title={
+                    hasNote
+                        ? 'Edit Bookmark Note'
+                        : isBookmarked
+                          ? 'Remove Bookmark'
+                          : 'Add Bookmark'
+                }
             >
-                <Bookmark />
+                <Bookmark weight={isBookmarked ? 'fill' : 'regular'} />
                 <AnimatePresence>
                     <motion.span
                         key="label"
@@ -25,10 +42,14 @@ const QuestionBookmark = ({ onClick }: QuestionBookmarkProps) => {
                             type: 'spring',
                             stiffness: 500,
                             damping: 20,
-                            duration: 30,
+                            duration: 0.3,
                         }}
                     >
-                        Bookmark
+                        {isBookmarked
+                            ? hasNote
+                                ? 'Note Added'
+                                : 'Bookmarked'
+                            : 'Bookmark'}
                     </motion.span>
                 </AnimatePresence>
             </button>

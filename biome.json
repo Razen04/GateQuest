@@ -1,0 +1,138 @@
+{
+    "$schema": "https://biomejs.dev/schemas/latest/schema.json",
+    "vcs": {
+        "enabled": true,
+        "clientKind": "git",
+        "useIgnoreFile": true,
+        "defaultBranch": "main"
+    },
+    "files": {
+        "includes": ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css}"],
+        "maxSize": 1048576,
+        "ignoreUnknown": true
+    },
+    "formatter": {
+        "lineWidth": 80,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineEnding": "lf"
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "preset": "recommended",
+            "a11y": {
+                "noSvgWithoutTitle": "off",
+                "useIframeTitle": "off",
+                "noStaticElementInteractions": "off",
+                "noLabelWithoutControl": "off",
+                "useKeyWithClickEvents": "off",
+                "useKeyWithMouseEvents": "off",
+                "useAltText": "off",
+                "useButtonType": "off",
+                "useAnchorContent": "off",
+                "useSemanticElements": "off"
+            },
+            "correctness": {
+                "useExhaustiveDependencies": "off",
+                "noUnusedVariables": "off"
+            },
+            "security": {
+                "noDangerouslySetInnerHtml": "off"
+            },
+            "suspicious": {
+                "noImplicitAnyLet": "off",
+                "noAssignInExpressions": "off",
+                "noExplicitAny": "off",
+                "noArrayIndexKey": "off",
+                "useIterableCallbackReturn": "warn",
+                "noCommentText": "off"
+            },
+            "style": {
+                "noNonNullAssertion": "off",
+                "noParameterAssign": "warn",
+                "useImportType": "off"
+            }
+        }
+    },
+    "javascript": {
+        "globals": [
+            "console",
+            "process",
+            "Buffer",
+            "__dirname",
+            "__filename",
+            "Bun"
+        ],
+        "formatter": {
+            "quoteStyle": "single",
+            "semicolons": "always",
+            "trailingCommas": "es5"
+        }
+    },
+    "json": {
+        "parser": {
+            "allowComments": true
+        }
+    },
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": "on"
+            }
+        }
+    },
+    "css": {
+        "parser": {
+            "tailwindDirectives": true
+        }
+    },
+    "overrides": [
+        {
+            "includes": [
+                "*.test.{js,ts,jsx,tsx}",
+                "*.spec.{js,ts,jsx,tsx}",
+                "**/__tests__/**",
+                "**/test/**",
+                "**/tests/**"
+            ],
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noConsole": "off"
+                    },
+                    "style": {
+                        "noImplicitBoolean": "off"
+                    }
+                }
+            }
+        },
+        {
+            "includes": [
+                "*.config.{js,ts,mjs}",
+                "*.setup.{js,ts}",
+                "vite.config.*",
+                "vitest.config.*",
+                "playwright.config.*"
+            ],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noDefaultExport": "off"
+                    },
+                    "suspicious": {
+                        "noConsole": "off"
+                    }
+                }
+            }
+        },
+        {
+            "includes": ["package.json"],
+            "json": {
+                "parser": {
+                    "allowComments": false
+                }
+            }
+        }
+    ]
+}

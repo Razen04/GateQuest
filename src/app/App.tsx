@@ -6,13 +6,13 @@
  * contexts like authentication, application settings, stats, and theme.
  */
 
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppProvider from '@/app/providers/AppProvider.tsx';
 import AuthProvider from '@/app/providers/AuthProvider.tsx';
+import { GoalProvider } from '@/app/providers/GoalProvider.tsx';
 import StatsProvider from '@/app/providers/StatsProvider.tsx';
 import AppRoutes from '@/app/routes/AppRoutes.tsx';
-import { SpeedInsights } from '@vercel/speed-insights/react';
-import { GoalProvider } from '@/app/providers/GoalProvider.tsx';
 
 /**
  * @function App

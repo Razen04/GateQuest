@@ -2,9 +2,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
-import App from './App.tsx';
-import { Toaster } from 'sonner';
 import { registerSW } from 'virtual:pwa-register';
+import { Toaster } from 'sonner';
+import App from './App.tsx';
 
 // --- helper to clear localStorage + Cache Storage ---
 const clearStaleData = async () => {
@@ -57,7 +57,10 @@ if ('serviceWorker' in navigator) {
                     const newWorker = registration.installing;
                     if (newWorker) {
                         newWorker.addEventListener('statechange', () => {
-                            console.log('installing worker statechange:', newWorker.state);
+                            console.log(
+                                'installing worker statechange:',
+                                newWorker.state
+                            );
                         });
                     }
                 });
@@ -79,5 +82,5 @@ createRoot(rootEl).render(
     <StrictMode>
         <Toaster richColors position="top-right" closeButton />
         <App />
-    </StrictMode>,
+    </StrictMode>
 );

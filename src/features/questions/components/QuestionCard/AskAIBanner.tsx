@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
 import {
-    CircleNotchIcon,
     ArrowSquareOutIcon,
     ChatTeardropTextIcon,
+    CircleNotchIcon,
     XIcon,
 } from '@phosphor-icons/react';
-import type { AIProvider } from '@/shared/types/Settings';
+import React, { useState } from 'react';
 import { Textarea } from '@/shared/components/ui/textarea.tsx';
+import type { AIProvider } from '@/shared/types/Settings';
 
 interface AskAIBannerProps {
     provider: AIProvider;
@@ -20,21 +20,41 @@ const PROVIDER_UI: Record<
     chatgpt: {
         label: 'ChatGPT',
         badgeBg: 'bg-[#10a37f]',
-        btnClass: 'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
-        icon: <img src="/ai_providers/chatgpt.svg" alt="ChatGPT" className="h-4 w-4" />,
+        btnClass:
+            'bg-[#10a37f] hover:bg-[#0e8f6f] text-white focus:ring-[#10a37f]',
+        icon: (
+            <img
+                src="/ai_providers/chatgpt.svg"
+                alt="ChatGPT"
+                className="h-4 w-4"
+            />
+        ),
     },
     claude: {
         label: 'Claude',
         badgeBg: 'bg-[#cc785c]',
-        btnClass: 'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
-        icon: <img src="/ai_providers/claude.svg" alt="Claude" className="h-4 w-4" />,
+        btnClass:
+            'bg-[#cc785c] hover:bg-[#b5694f] text-white focus:ring-[#cc785c]',
+        icon: (
+            <img
+                src="/ai_providers/claude.svg"
+                alt="Claude"
+                className="h-4 w-4"
+            />
+        ),
     },
     grok: {
         label: 'Grok',
         badgeBg: 'bg-zinc-900 dark:bg-zinc-100',
         btnClass:
             'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 focus:ring-zinc-500',
-        icon: <img src="/ai_providers/grok.svg" alt="Grok" className="h-4 w-4 dark:invert" />,
+        icon: (
+            <img
+                src="/ai_providers/grok.svg"
+                alt="Grok"
+                className="h-4 w-4 dark:invert"
+            />
+        ),
     },
 };
 
@@ -55,12 +75,12 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
     };
 
     return (
-        <div className="mt-5 mb-2 flex flex-col gap-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 p-4 shadow-sm transition-all duration-300">
+        <div className="mt-5 mb-2 flex flex-col gap-3 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 p-4 shadow-sm transition-all duration-300">
             {/* Top Row: Info and Toggle */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div
-                        className={`shrink-0 flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full shadow-sm ${ui.badgeBg}`}
+                        className={`shrink-0 flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center shadow-sm ${ui.badgeBg}`}
                     >
                         {ui.icon}
                     </div>
@@ -91,14 +111,20 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                     <button
                         disabled={isProcessing}
                         onClick={handleAction}
-                        className={`shrink-0 flex-1 sm:flex-none flex items-center justify-center gap-2 text-xs md:text-sm rounded-xl sm:rounded-full px-5 py-2.5 sm:py-1.5 font-bold sm:font-semibold active:scale-[0.98] transition-all duration-150 ${ui.btnClass}`}
+                        className={`shrink-0 flex-1 sm:flex-none flex items-center justify-center gap-2 text-xs md:text-sm px-5 py-2.5 sm:py-1.5 font-bold sm:font-semibold active:scale-[0.98] transition-all duration-150 ${ui.btnClass}`}
                     >
                         {isProcessing ? (
-                            <CircleNotchIcon size={16} className="animate-spin" />
+                            <CircleNotchIcon
+                                size={16}
+                                className="animate-spin"
+                            />
                         ) : (
                             <>
                                 Ask {ui.label}
-                                <ArrowSquareOutIcon className="text-base shrink-0" weight="bold" />
+                                <ArrowSquareOutIcon
+                                    className="text-base shrink-0"
+                                    weight="bold"
+                                />
                             </>
                         )}
                     </button>

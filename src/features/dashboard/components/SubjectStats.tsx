@@ -1,9 +1,20 @@
 import { motion } from 'framer-motion';
+import type React from 'react';
+import { useGoals } from '@/shared/hooks/useGoals';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
-import type { SubjectStat } from '@/shared/types/Stats.ts';
-import { useGoals } from '@/shared/hooks/useGoals.ts';
-import type React from 'react';
+
+// Using the exact structure returned by your new RPC
+type SubjectStat = {
+    subject_name: string;
+    subject_slug: string;
+    icon_name: string;
+    theme_color: string;
+    attempted: number;
+    accuracy: number;
+    total_available: number;
+    progress: number;
+};
 
 type SubjectStatsPropsType = {
     subjectStats: SubjectStat[];
@@ -15,102 +26,108 @@ const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
 
     return (
         <motion.div
-            className="lg:col-span-2 space-y-8"
+            className="lg:col-span-2 space-y-6"
             variants={itemVariants}
             initial="initial"
             animate="animate"
         >
-            <motion.div className="p-6 shadow-sm border border-border-primary dark:border-border-primary-dark">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-                        Subject Stats
-                    </h2>
-                </div>
+            <motion.div className="relative overflow-hidden">
+                <div className="relative overflow-x-auto no-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                        {subjectStats?.map((subject, index) => {
+                            const progress = Number(subject.progress) || 0;
+                            const accuracy = Number(subject.accuracy) || 0;
 
-                <div className="space-y-4 flex justify-around">
-                    {/* Courses */}
-                    <div className="overflow-x-auto">
-                        <div className="flex gap-4 sm:gap-6 md:gap-8 px-2 py-4 w-full">
-                            {subjectStats?.map((subject, index) => {
-                                const progress = Number(subject.progress) || 0;
-                                const accuracy = Number(subject.accuracy) || 0;
+                            const subjectMeta = subjects.find(
+                                (s) => s.slug === subject.subject_slug
+                            );
 
-                                // Find the subject meta info
-                                const subjectMeta = subjects.find(
-                                    (s) => s.slug === subject.subject,
-                                );
-                                const SubjectIcon = SubjectIconMap[
-                                    subjectMeta?.icon_name || 'default'
-                                ] as React.ElementType;
-                                const questionCount =
-                                    subject.totalAvailable || subjectMeta?.question_count;
-                                const subjectColor = subjectMeta?.theme_color;
-                                const bgClass = getBackgroundColor(subjectColor as string);
+                            const SubjectIcon = SubjectIconMap[
+                                subjectMeta?.icon_name || 'default'
+                            ] as React.ElementType;
 
-                                return (
-                                    <motion.div
-                                        key={index}
-                                        className="min-w-[250px] sm:min-w-[280px] md:min-w-[300px] shadow-md border border-gray-100 dark:border-zinc-800 p-5 flex flex-col justify-between hover:shadow-lg hover:bg-blue-50 dark:hover:bg-zinc-800 transition-all cursor-pointer"
-                                        whileHover={{ scale: 1.03 }}
-                                    >
-                                        <div className="flex items-center mb-4">
-                                            <div className={`p-3 ${bgClass} text-white mr-3`}>
-                                                <SubjectIcon className={`h-6 w-6`} />
-                                            </div>
-                                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                                                {subject.subjectName}
-                                            </h3>
+                            const questionCount =
+                                subject.total_available ||
+                                subjectMeta?.question_count;
+
+                            const bgClass = getBackgroundColor(
+                                subjectMeta?.theme_color as string
+                            );
+
+                            return (
+                                <motion.div
+                                    key={index}
+                                    transition={{
+                                        type: 'spring',
+                                        stiffness: 300,
+                                        damping: 25,
+                                    }}
+                                    className="w-full border border-black/10 bg-white/40 backdrop-blue-2xl shadow-sm p-4 dark:border-white/10 dark:bg-white/[0.05]"
+                                >
+                                    <div className="mb-3 flex items-center gap-3">
+                                        <div
+                                            className={`flex h-10 w-10 items-center justify-center ${bgClass}`}
+                                        >
+                                            <SubjectIcon className="h-5 w-5 dark:text-white text-black" />
                                         </div>
 
-                                        {/* Progress Bar */}
-                                        <div className="mb-2">
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                Progress
-                                            </span>
-                                            <div className="w-full h-2 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                                        <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                                            {subject.subject_name}
+                                        </h3>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div>
+                                            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                                                <span>Progress</span>
+                                                <span>{progress}%</span>
+                                            </div>
+
+                                            <div className="h-2 overflow-hidden bg-black/10 dark:bg-white/10">
                                                 <div
-                                                    className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
+                                                    className="h-full bg-gradient-to-r from-blue-400 to-blue-600"
                                                     style={{
                                                         width: `${progress}%`,
                                                     }}
-                                                ></div>
+                                                />
                                             </div>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-block">
-                                                {progress}% complete
-                                            </span>
                                         </div>
 
-                                        {/* Accuracy */}
-                                        <div className="mb-2">
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                Accuracy
-                                            </span>
-                                            <div className="w-full h-2 bg-gray-200 rounded-full mt-1 overflow-hidden">
+                                        <div>
+                                            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                                                <span>Accuracy</span>
+                                                <span>{accuracy}%</span>
+                                            </div>
+
+                                            <div className="h-2 overflow-hidden bg-black/10 dark:bg-white/10">
                                                 <div
-                                                    className="h-full bg-green-500 rounded-full transition-all duration-300 ease-out"
+                                                    className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600"
                                                     style={{
                                                         width: `${accuracy}%`,
                                                     }}
-                                                ></div>
+                                                />
                                             </div>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 inline-block">
-                                                {accuracy}% correct
-                                            </span>
                                         </div>
+                                    </div>
 
-                                        {/* Subject Info */}
-                                        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                            <p>
-                                                Attempted: <strong>{subject.attempted}</strong>
-                                            </p>
-                                            <p>
-                                                Total Questions: <strong>{questionCount}</strong>
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
+                                    <div className="mt-3 border-t border-white/10 pt-2 text-xs text-muted-foreground">
+                                        <p>
+                                            Attempted:{' '}
+                                            <strong className="text-foreground">
+                                                {subject.attempted}
+                                            </strong>
+                                        </p>
+
+                                        <p>
+                                            Total Questions:{' '}
+                                            <strong className="text-foreground">
+                                                {questionCount}
+                                            </strong>
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
             </motion.div>

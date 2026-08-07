@@ -1,25 +1,26 @@
-import React, { useEffect, useRef } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-
+import React, { useEffect, useRef } from 'react';
+import useSettings from '@/features/settings/hooks/useSettings';
+import Branding from '@/shared/components/Branding';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { usePresence } from '@/shared/hooks/usePresence';
+import type { Question } from '@/shared/types/storage';
 // Types
 import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
-
-// Utils
-import { isNumericalQuestion, getCorrectAnswerText } from '../../utils/questionUtils';
-import QuestionHeader from './QuestionHeader';
-import QuestionContent from './QuestionContent';
-import ResultMessage from './ResultMessage';
-import QuestionPeerStats from './QuestionPeerStats';
-import ActionButtons from './ActionButtons';
-import QuestionBadge from './QuestionBadge';
-import QuestionExplanation from './QuestionExplanation';
-import type { Question } from '@/shared/types/storage';
 import { openInAI } from '@/shared/utils/aiPromptUtils';
+// Utils
+import {
+    getCorrectAnswerText,
+    isNumericalQuestion,
+} from '../../utils/questionUtils';
+import ActionButtons from './ActionButtons';
 import AskAIBanner from './AskAIBanner';
-import useSettings from '@/features/settings/hooks/useSettings';
-import { useGoals } from '@/shared/hooks/useGoals';
-import Branding from '@/shared/components/Branding';
-import { usePresence } from '@/shared/hooks/usePresence';
+import QuestionBadge from './QuestionBadge';
+import QuestionContent from './QuestionContent';
+import QuestionExplanation from './QuestionExplanation';
+import QuestionHeader from './QuestionHeader';
+import QuestionPeerStats from './QuestionPeerStats';
+import ResultMessage from './ResultMessage';
 
 // Child Components
 
@@ -43,6 +44,7 @@ type QuestionCardProps = {
     question: Question;
     totalQuestions: number;
     questionNumber: number;
+    subjectSlug: string | undefined;
 
     // User State
     userAnswerIndex: number | null;
@@ -67,7 +69,6 @@ type QuestionCardProps = {
     onPrev: () => void;
     onReport: () => void;
     onShare: () => void;
-    onBookmark: () => void;
     onExplanationClick: () => void;
     onBack: () => void;
 
@@ -96,7 +97,7 @@ const QuestionCard = ({
     onPrev,
     onReport,
     onShare,
-    onBookmark,
+    subjectSlug,
     onExplanationClick,
     onBack,
     isFirst,
@@ -133,8 +134,12 @@ const QuestionCard = ({
     // check if the question belong to the user goal
     const isCompatible = isSubjectInGoal(question.subject_id);
 
+    // Derived: true when the user has selected an option or typed a numerical answer
+    const hasSelection =
+        selectedOptionIndices.length > 0 || numericalAnswer !== null;
+
     return (
-        <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6">
+        <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6 pb-20">
             {/* Top Back Button */}
             <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
                 <button
@@ -150,8 +155,9 @@ const QuestionCard = ({
                 <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
                     <p className="font-bold">Branch Mismatch</p>
                     <p>
-                        This question belongs to a different branch. You can view it, but answering
-                        is disabled to protect your current branch progress.
+                        This question belongs to a different branch. You can
+                        view it, but answering is disabled to protect your
+                        current branch progress.
                     </p>
                 </div>
             )}
@@ -159,7 +165,7 @@ const QuestionCard = ({
             {/* Main Card Container */}
             <div
                 ref={pageRef}
-                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto pb-20 mt-6 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
+                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto mt-6 pb-4 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
             >
                 {/* Header Section */}
                 <QuestionHeader
@@ -169,10 +175,10 @@ const QuestionCard = ({
                     timer={timer}
                     onReport={onReport}
                     onShare={onShare}
-                    onBookmark={onBookmark}
                     marked={marked}
                     isAnswered={showAnswer}
                     userCount={count}
+                    subjectSlug={subjectSlug}
                 />
 
                 <div className="p-4 sm:p-6">
@@ -208,11 +214,13 @@ const QuestionCard = ({
                                 placeholder="Enter your answer"
                                 disabled={showAnswer}
                             />
-                            {showAnswer && numericalAnswer === Number(correctAnswerText) && (
-                                <p className="mt-2 text-sm text-green-600">
-                                    Correct answer: {correctAnswerText}
-                                </p>
-                            )}
+                            {showAnswer &&
+                                numericalAnswer ===
+                                    Number(correctAnswerText) && (
+                                    <p className="mt-2 text-sm text-green-600">
+                                        Correct answer: {correctAnswerText}
+                                    </p>
+                                )}
                         </div>
                     )}
 
@@ -238,7 +246,12 @@ const QuestionCard = ({
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
 
-                    {showAnswer && <AskAIBanner provider={aiProvider} onClick={handleAskAI} />}
+                    {showAnswer && (
+                        <AskAIBanner
+                            provider={aiProvider}
+                            onClick={handleAskAI}
+                        />
+                    )}
 
                     {/* Action Buttons */}
                     <ActionButtons
@@ -251,6 +264,7 @@ const QuestionCard = ({
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
                         isCompatible={isCompatible}
+                        hasSelection={hasSelection}
                     />
                 </div>
 

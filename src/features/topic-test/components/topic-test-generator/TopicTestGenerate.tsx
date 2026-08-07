@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import PageHeader from '@/shared/components/PageHeader';
 import {
     Select,
@@ -13,24 +14,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/shared/components/ui/select';
-
+import { useGoals } from '@/shared/hooks/useGoals';
+import { SubjectIconMap } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { supabase } from '@/shared/utils/supabaseClient';
-
 import TopicsSelection from './TopicsSelection';
 import TopicTestConfiguration from './TopicTestConfiguration';
 import TopicTestFooter from './TopicTestFooter';
-
-import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { SubjectIconMap } from '@/shared/utils/helper';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();
     const { getPracticeSubjects, userGoal } = useGoals();
     const subjects = getPracticeSubjects();
 
-    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+    const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
+        null
+    );
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -91,7 +90,7 @@ const TopicTestGeneratePage = () => {
     const onBack = () => navigate('/topic-test');
 
     return (
-        <div className="max-h-screen overflow-y-auto flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="h-dvh overflow-y-auto flex flex-col text-slate-900 dark:text-slate-100">
             <div className="p-6">
                 <button
                     onClick={onBack}
@@ -123,6 +122,7 @@ const TopicTestGeneratePage = () => {
                         ))}
                     </div>
                 )}
+
                 <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
                     <BookIcon className="w-4 h-4 text-blue-500" />
                     Select Subject
@@ -145,7 +145,10 @@ const TopicTestGeneratePage = () => {
                                     ] as React.ElementType;
 
                                     return (
-                                        <SelectItem key={s.id} value={s.id.toString()}>
+                                        <SelectItem
+                                            key={s.id}
+                                            value={s.id.toString()}
+                                        >
                                             <SubjectIcon className="h-4 w-4 mr-2 inline" />
                                             {s.name}
                                         </SelectItem>

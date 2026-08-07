@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/shared/utils/supabaseClient';
 import type {
     Branch,
     BranchExam,
@@ -12,7 +18,9 @@ import type {
 } from './GoalContext';
 import GoalContext from './GoalContext';
 
-export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [exams, setExams] = useState<Exam[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -49,7 +57,11 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 supabase.from('branches').select('*'),
                 supabase.from('exams').select('*'),
                 supabase.from('subjects').select('*'),
-                supabase.from('user_goals').select('*').eq('is_active', true).maybeSingle(),
+                supabase
+                    .from('user_goals')
+                    .select('*')
+                    .eq('is_active', true)
+                    .maybeSingle(),
                 supabase.from('branch_subjects').select('*'),
                 supabase.from('exams_subjects').select('*'),
                 supabase.from('branch_exams').select('*'),
@@ -106,7 +118,11 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // API: Create a new goal record
     const setInitialGoal = useCallback(
-        async (branchId: string, examIds: string[], silent = false): Promise<void> => {
+        async (
+            branchId: string,
+            examIds: string[],
+            silent = false
+        ): Promise<void> => {
             const {
                 data: { user },
             } = await supabase.auth.getUser();
@@ -130,7 +146,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             target_exams: examIds,
                             is_active: true,
                         },
-                        { onConflict: 'user_id, branch_id' },
+                        { onConflict: 'user_id, branch_id' }
                     )
                     .select()
                     .single();
@@ -150,7 +166,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setLoading(false);
             }
         },
-        [],
+        []
     );
 
     /**
@@ -194,10 +210,12 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (subject?.is_universal) return true;
 
             return branchSubjects.some(
-                (bs) => bs.branch_id === userGoal.branch_id && bs.subject_id === subjectId,
+                (bs) =>
+                    bs.branch_id === userGoal.branch_id &&
+                    bs.subject_id === subjectId
             );
         },
-        [userGoal, subjects, branchSubjects],
+        [userGoal, subjects, branchSubjects]
     );
 
     const value = useMemo(
@@ -226,8 +244,10 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({ children
             getPracticeSubjects,
             isSubjectInGoal,
             fetchData,
-        ],
+        ]
     );
 
-    return <GoalContext.Provider value={value}>{children}</GoalContext.Provider>;
+    return (
+        <GoalContext.Provider value={value}>{children}</GoalContext.Provider>
+    );
 };

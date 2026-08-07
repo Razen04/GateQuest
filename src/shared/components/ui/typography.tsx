@@ -1,6 +1,6 @@
-import { cn } from '@/shared/utils/cn';
 import { cva } from 'class-variance-authority';
 import type React from 'react';
+import { cn } from '@/shared/utils/cn';
 
 const titleVariants = cva('font-bold tracking-tighter', {
     variants: {
@@ -24,6 +24,11 @@ export const Title = ({ className, size, ...props }: TitleProps) => {
     return <h1 className={cn(titleVariants({ size, className }))} {...props} />;
 };
 
-export const Text = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => {
-    return <p className={cn('text-base leading-relaxed', className)} {...props} />;
+export const Text = ({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) => {
+    return (
+        <p className={cn('text-base leading-relaxed', className)} {...props} />
+    );
 };

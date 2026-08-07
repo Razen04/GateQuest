@@ -1,4 +1,10 @@
-import { ArrowLeft, ArrowRight, ChatCircle, Eye, Flag } from '@phosphor-icons/react';
+import {
+    ArrowLeft,
+    ArrowRight,
+    ChatCircle,
+    Eye,
+    Flag,
+} from '@phosphor-icons/react';
 import { Button } from '@/shared/components/ui/button.tsx';
 
 type ActionButtonsProps = {
@@ -11,6 +17,7 @@ type ActionButtonsProps = {
     handleSubmit?: (() => void) | undefined;
     handleExplainationClick: () => void;
     isCompatible: boolean | undefined;
+    hasSelection: boolean;
 };
 
 const ActionButtons = ({
@@ -23,12 +30,13 @@ const ActionButtons = ({
     handleSubmit,
     handleExplainationClick,
     isCompatible,
+    hasSelection,
 }: ActionButtonsProps) => {
     return (
         <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
             {/* Previous */}
             <Button
-                className={`flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
+                className={`rounded-none flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
                     ${
                         isFirstQuestion
                             ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
@@ -49,45 +57,49 @@ const ActionButtons = ({
             {!showAnswer && handleSubmit && handleShowAnswer ? (
                 <>
                     <Button
-                        className="flex-1 px-2 py-3 bg-blue-100 text-blue-700 text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"
+                        className="flex-1 rounded-none px-2 py-3 bg-blue-100 text-blue-700 text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"
                         onClick={() => handleSubmit()}
                         title="Submit"
-                        disabled={!isCompatible}
+                        disabled={!isCompatible || !hasSelection}
                     >
                         <Eye className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Submit <span className="font-mono">[⎵/↵]</span>
+                            Submit
+                            {hasSelection && (
+                                <span className="font-mono"> [⎵/↵]</span>
+                            )}
                         </span>
                     </Button>
                     <Button
-                        className="flex-1 px-2 py-3 bg-purple-100 text-purple-700 text-base font-semibold hover:bg-purple-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 active:scale-95 active:bg-purple-200"
+                        className="flex-1 px-2 py-3 rounded-none bg-purple-100 text-purple-700 text-base font-semibold hover:bg-purple-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 active:scale-95 active:bg-purple-200"
                         onClick={() => handleShowAnswer()}
                         title="Show Answer"
                         disabled={!isCompatible}
                     >
                         <Flag className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Answer <span className="font-mono">[⎵/↵]</span>
+                            Show Answer
+                            {!hasSelection && (
+                                <span className="font-mono"> [⎵/↵]</span>
+                            )}
                         </span>
                     </Button>
                 </>
             ) : (
-                <>
-                    <Button
-                        className="flex-1 px-2 py-3 bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
-                        onClick={() => handleExplainationClick()}
-                        title="Show Explanation"
-                    >
-                        <ChatCircle className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">
-                            Show Explanation <span className="font-mono">[/]</span>
-                        </span>
-                    </Button>
-                </>
+                <Button
+                    className="flex-1 px-2 py-3 rounded-none bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
+                    onClick={() => handleExplainationClick()}
+                    title="Show Explanation"
+                >
+                    <ChatCircle className="inline text-lg" />
+                    <span className="hidden md:inline ml-2">
+                        Show Explanation <span className="font-mono">[/]</span>
+                    </span>
+                </Button>
             )}
             {/* Next */}
             <Button
-                className={`flex-1 px-2 py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
+                className={`flex-1 px-2 rounded-none py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
                     ${
                         !isLastQuestion
                             ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'

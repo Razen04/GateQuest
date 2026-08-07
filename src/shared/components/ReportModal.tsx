@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { X } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import {
     Select,
@@ -57,11 +57,14 @@ const ReportModal = ({
             >
                 <div className="flex justify-between items-start mb-4">
                     <div>
-                        <h1 className="text-lg font-bold">Report This Question</h1>
+                        <h1 className="text-lg font-bold">
+                            Report This Question
+                        </h1>
                         <div className="italic text-xs mt-4  text-red-400">
                             <p>
-                                Only report if there is a genuine discrepancy, and always refer to
-                                GateOverflow as the authoritative source.
+                                Only report if there is a genuine discrepancy,
+                                and always refer to GateOverflow as the
+                                authoritative source.
                             </p>
                             <p>I follow the answers as they appear there.</p>
                         </div>
@@ -76,15 +79,22 @@ const ReportModal = ({
                 </div>
 
                 {/* Dropdown */}
-                <Select value={reportType} onValueChange={(value) => setReportType(value)}>
-                    <SelectTrigger className="w-full mb-2 rounded-md">
+                <Select
+                    value={reportType}
+                    onValueChange={(value) => setReportType(value)}
+                >
+                    <SelectTrigger className="w-full mb-2 rounded-none">
                         <SelectValue placeholder="Report Type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-none">
                         <SelectGroup>
                             <SelectLabel>Select a reason</SelectLabel>
                             {reasons.map((r, i) => (
-                                <SelectItem key={i} value={r}>
+                                <SelectItem
+                                    key={i}
+                                    value={r}
+                                    className="rounded-none"
+                                >
                                     {r}
                                 </SelectItem>
                             ))}
@@ -93,7 +103,7 @@ const ReportModal = ({
                 </Select>
 
                 <Textarea
-                    className="w-full rounded-md"
+                    className="w-full rounded-none"
                     placeholder="Please describe the issue..."
                     value={reportText}
                     onChange={(e) => setReportText(e.target.value)}
@@ -103,14 +113,18 @@ const ReportModal = ({
                 <div className="mt-4 flex justify-end gap-2">
                     <Button
                         onClick={onClose}
-                        className="rounded-md text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
+                        className="rounded-none text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
                     >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={!reportType || !reportText.trim() || reportSubmitting}
-                        className="rounded-md text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                        disabled={
+                            !reportType ||
+                            !reportText.trim() ||
+                            reportSubmitting
+                        }
+                        className="rounded-none text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
                     >
                         Submit
                     </Button>

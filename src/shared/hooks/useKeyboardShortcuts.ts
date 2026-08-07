@@ -1,12 +1,12 @@
 // This custom hook sets up global keyboard shortcuts for navigating and interacting with the practice question interface.
 
-import { useEffect, type DependencyList } from 'react';
+import { type DependencyList, useEffect } from 'react';
 
 /**
  * Attaches global keyboard event listeners for practice card actions.
  * - Q: previous question
  * - W: next question
- * - Enter/Space: show answer
+ * - Enter/Space: submit if an option is selected, otherwise show answer
  * - Slash (/): open explanation
  * - Option selection using A/B/C/D/E or 1/2/3/4/5
  * The hook ensures these shortcuts don't interfere with text inputs.
@@ -16,11 +16,20 @@ type useKeyboardShortcutsProps = {
     onPrev: () => void;
     onNext: () => void;
     onShowAnswer: () => void;
+    onSubmit?: () => void;
+    canSubmit?: boolean;
     onExplain?: () => void;
 };
 export default function useKeyboardShortcuts(
-    { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,
-    deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
+    {
+        onPrev,
+        onNext,
+        onShowAnswer,
+        onSubmit,
+        canSubmit,
+        onExplain,
+    }: useKeyboardShortcutsProps,
+    deps: DependencyList = [] // Dependencies for the useEffect hook, passed from the calling component.
 ) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
@@ -48,7 +57,13 @@ export default function useKeyboardShortcuts(
         const handleKeyStroke = (e: KeyboardEvent) => {
             const tag = (e.target as HTMLElement)?.tagName;
             // We prevent the shortcuts from firing if the user is typing in an input field or if a modifier key (like Ctrl or Alt) is pressed.
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey || e.altKey) {
+            if (
+                tag === 'INPUT' ||
+                tag === 'TEXTAREA' ||
+                e.metaKey ||
+                e.ctrlKey ||
+                e.altKey
+            ) {
                 return;
             }
 
@@ -58,7 +73,7 @@ export default function useKeyboardShortcuts(
                 window.dispatchEvent(
                     new CustomEvent('selectOptionByIndex', {
                         detail: optionIndex,
-                    }),
+                    })
                 );
                 return;
             }
@@ -75,10 +90,11 @@ export default function useKeyboardShortcuts(
                     e.preventDefault();
                     onNext?.();
                     break;
-                case 'Enter': // 'Enter' to submit/show answer
+                case 'Enter': // 'Enter'/'Space': submit if selected, else show answer
                 case 'Space':
                     e.preventDefault();
-                    onShowAnswer?.();
+                    if (canSubmit && onSubmit) onSubmit();
+                    else onShowAnswer?.();
                     break;
                 case 'Slash': // 'E' for explanation
                     e.preventDefault();

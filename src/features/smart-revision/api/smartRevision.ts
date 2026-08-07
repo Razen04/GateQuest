@@ -1,5 +1,5 @@
-import { supabase } from '@/shared/utils/supabaseClient';
 import type { RevisionQuestion } from '@/shared/types/storage';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 // --- Types ---
 export type WeeklySet = {
@@ -37,7 +37,7 @@ export const fetchWeeklySet = async (branchId: string) => {
 export const generateWeeklySet = async (
     validSubjects: string[],
     targetExams: string[],
-    branchId: string,
+    branchId: string
 ) => {
     const { data, error } = await supabase.rpc('generate_weekly_revision_set', {
         p_valid_subjects: validSubjects,
@@ -58,7 +58,7 @@ export const startWeeklySet = async (setId: string) => {
 
 export const fetchCriticalQuestionCount = async (
     validSubjects: string[],
-    targetExams: string[],
+    targetExams: string[]
 ) => {
     return await supabase.rpc('get_critical_question_count', {
         p_valid_subjects: validSubjects,

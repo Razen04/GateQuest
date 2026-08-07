@@ -1,67 +1,74 @@
-import * as React from 'react';
 import { UserCircle } from '@phosphor-icons/react';
-import type { DonationData } from '@/shared/types/Donation.ts';
 import { formatDistanceToNow } from 'date-fns';
+import * as React from 'react';
+import type { DonationData } from '../types/donationType';
 
 type DonorListProps = {
     donations: DonationData[];
 };
 
-const DonorList: React.FC<DonorListProps> = ({ donations }: DonorListProps) => {
+const DonorList: React.FC<DonorListProps> = ({ donations }) => {
     return (
-        <div>
-            <div>
-                <ul className="space-y-4">
-                    {donations.map((donation) => (
-                        <li
-                            key={donation.donation_id}
-                            className="flex items-start gap-4 p-4 bg-gradient-to-tr from-blue-50 to-white dark:from-zinc-700/70 dark:to-zinc-800 border border-blue-100 dark:border-zinc-700 hover:scale-[1.02] hover:shadow-lg transition-transform duration-200"
-                        >
-                            <div className="w-12 h-12 flex items-center justify-center text-white font-bold text-lg shadow-md rounded-full">
-                                {donation.anonymous || !donation.user_avatar ? (
-                                    <UserCircle size={32} color="blue" />
-                                ) : (
-                                    <img src={donation.user_avatar} />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-semibold">
-                                        {donation.anonymous || !donation.user_name
+        <ul className="space-y-3">
+            {donations.map((donation) => (
+                <li
+                    key={donation.donation_id}
+                    className="relative overflow-hidden flex items-start gap-3 p-3 border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-white/[0.06] dark:border-white/10 transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/[0.1] hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+
+                    <div className="relative flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full overflow-hidden border border-white/20 bg-white/10 dark:bg-white/[0.08]">
+                        {donation.anonymous || !donation.user_avatar ? (
+                            <UserCircle size={32} className="text-blue-500" />
+                        ) : (
+                            <img
+                                src={donation.user_avatar}
+                                alt="Donor avatar"
+                                className="w-full h-full object-cover"
+                            />
+                        )}
+                    </div>
+
+                    <div className="relative flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-sm truncate">
+                                        {donation.anonymous ||
+                                        !donation.user_name
                                             ? 'Anonymous'
                                             : donation.user_name}
-
-                                        <span className="text-gray-500 ml-2 text-xs">
-                                            {/* Supabase sends timestamps without a 'Z', so browsers
-                                                might treat them as local time instead of UTC — we
-                                                append 'Z' if it's missing to force correct parsing */}
-                                            {formatDistanceToNow(
-                                                new Date(
-                                                    donation.created_at.endsWith('Z')
-                                                        ? donation.created_at
-                                                        : donation.created_at + 'Z',
-                                                ),
-                                            )}{' '}
-                                            ago
-                                        </span>
                                     </span>
 
-                                    <span className="bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 font-semibold text-sm px-2 py-1">
-                                        ₹{donation.actual_amount}
+                                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                        {formatDistanceToNow(
+                                            new Date(
+                                                donation.created_at.endsWith(
+                                                    'Z'
+                                                )
+                                                    ? donation.created_at
+                                                    : donation.created_at + 'Z'
+                                            )
+                                        )}{' '}
+                                        ago
                                     </span>
                                 </div>
-
-                                {donation.message && (
-                                    <p className="mt-1 text-gray-600 dark:text-gray-300 text-pretty">
-                                        {donation.message}
-                                    </p>
-                                )}
                             </div>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
+
+                            <span className="flex-shrink-0 px-2.5 py-1 text-xs font-semibold border border-emerald-400/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                ₹{donation.actual_amount}
+                            </span>
+                        </div>
+
+                        {donation.message && (
+                            <p className="mt-1 text-sm text-muted-foreground text-pretty">
+                                {donation.message}
+                            </p>
+                        )}
+                    </div>
+                </li>
+            ))}
+        </ul>
     );
 };
 

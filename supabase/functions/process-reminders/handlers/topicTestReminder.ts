@@ -1,5 +1,5 @@
-import webpush from 'npm:web-push';
 import { SupabaseClient } from 'npm:@supabase/supabase-js';
+import webpush from 'npm:web-push';
 import { WEEKLY_PAYLOADS } from '../payloads/weeklyTestPayloads.ts';
 
 interface TopicTestReminderArgs {
@@ -8,7 +8,9 @@ interface TopicTestReminderArgs {
 }
 
 const getWeekNumber = (date: Date): number => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const d = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+    );
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
@@ -34,7 +36,7 @@ export const handleTopicTestReminder = async ({
             {
                 status: 200,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            },
+            }
         );
     }
 
@@ -65,7 +67,7 @@ export const handleTopicTestReminder = async ({
                         endpoint: sub.endpoint,
                         keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
                     },
-                    payload,
+                    payload
                 );
                 successfulPings++;
             } catch (err) {
@@ -79,14 +81,19 @@ export const handleTopicTestReminder = async ({
 
     // Execute chunks in parallel pools of 10
     for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CHUNKS) {
-        const pool = chunks.slice(i, i + MAX_CONCURRENT_CHUNKS).map(processChunk);
+        const pool = chunks
+            .slice(i, i + MAX_CONCURRENT_CHUNKS)
+            .map(processChunk);
         await Promise.all(pool);
     }
 
     // Bulk delete all dead tokens in exactly ONE database call
     if (deadEndpoints.length > 0) {
         console.warn(`Bulk deleting ${deadEndpoints.length} dead tokens...`);
-        await supabaseAdmin.from('push_subscriptions').delete().in('endpoint', deadEndpoints);
+        await supabaseAdmin
+            .from('push_subscriptions')
+            .delete()
+            .in('endpoint', deadEndpoints);
     }
 
     return new Response(
@@ -98,6 +105,6 @@ export const handleTopicTestReminder = async ({
         {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
+        }
     );
 };

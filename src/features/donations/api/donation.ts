@@ -12,7 +12,13 @@ export const getVerifiedDonation = async () => {
     return data ?? [];
 };
 
-export const insertDonation = async ({ userId, amount, message, anonymous, utr }: newDonation) => {
+export const insertDonation = async ({
+    userId,
+    amount,
+    message,
+    anonymous,
+    utr,
+}: newDonation) => {
     const { data, error } = await supabase.from('donations').insert([
         {
             user_id: userId ?? null,

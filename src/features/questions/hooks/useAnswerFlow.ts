@@ -1,9 +1,10 @@
 // This custom hook encapsulates the logic for handling the entire answer submission process, from revealing the correct answer to recording the user's attempt.
 import React from 'react';
-import type { AppUser } from '@/shared/types/AppUser';
-import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
+import { invalidateProfileCache } from '@/features/profile/hooks/useProfile';
+import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
 import { useGoals } from '@/shared/hooks/useGoals';
+import type { AppUser } from '@/shared/types/AppUser';
 import type { Question } from '@/shared/types/storage';
 
 type useAnswerFlowProps = {
@@ -14,7 +15,9 @@ type useAnswerFlowProps = {
     user: AppUser | null;
     isLogin: boolean;
     setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
-    setResult: React.Dispatch<React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>>;
+    setResult: React.Dispatch<
+        React.SetStateAction<'correct' | 'incorrect' | 'unattempted'>
+    >;
     stop: () => void;
     showAnswer: boolean;
 };
@@ -60,6 +63,10 @@ export default function useAnswerFlow({
 
         // Update the UI with the result (e.g., 'Correct' or 'Incorrect').
         setResult(resultStatus);
+
+        if (user?.username) {
+            invalidateProfileCache(user.username);
+        }
     };
 
     // The handleSubmit function is an alias for handleShowAnswer.

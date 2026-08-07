@@ -1,13 +1,16 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { getCorrectAnswerText, isNumericalQuestion } from '../../utils/questionUtils.ts';
+import { AnimatePresence, motion } from 'framer-motion';
 import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
 import type { Question } from '@/shared/types/storage.ts';
+import {
+    getCorrectAnswerText,
+    isNumericalQuestion,
+} from '../../utils/questionUtils.ts';
 
 type ResultMessageProps = {
     showAnswer: boolean;
     result: string;
     currentQuestion: Question;
-    numericalAnswer: number;
+    numericalAnswer: number | null;
 };
 
 const ResultMessage = ({

@@ -1,6 +1,6 @@
+import { useCallback, useMemo, useState } from 'react';
 import { saveAttempt } from '@/features/topic-test/services/testSession';
 import type { Attempt } from '@/shared/types/storage';
-import { useCallback, useMemo, useState } from 'react';
 
 interface useTestAnswerPropType {
     testId: string;
@@ -30,7 +30,11 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
     const [isSaving, setIsSaving] = useState(false);
 
     const selectOption = useCallback(
-        (questionId: string, userAnswer: number | number[] | null, attemptOrder: number) => {
+        (
+            questionId: string,
+            userAnswer: number | number[] | null,
+            attemptOrder: number
+        ) => {
             setAnswers((prev) => {
                 const next = new Map(prev);
                 const existing = prev.get(questionId);
@@ -56,7 +60,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 return next;
             });
         },
-        [testId],
+        [testId]
     );
 
     const updateTimeSpent = useCallback(
@@ -68,7 +72,8 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 const updatedAttempt: Attempt = existing
                     ? {
                           ...existing,
-                          time_spent_seconds: (existing.time_spent_seconds || 0) + secondsToAdd,
+                          time_spent_seconds:
+                              (existing.time_spent_seconds || 0) + secondsToAdd,
                           is_synced: 0,
                       }
                     : {
@@ -92,7 +97,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 return next;
             });
         },
-        [testId],
+        [testId]
     );
 
     const markAsVisited = useCallback(
@@ -126,7 +131,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 return next;
             });
         },
-        [testId],
+        [testId]
     );
 
     const toggleReview = useCallback(
@@ -177,14 +182,18 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 return next;
             });
         },
-        [testId, reviewList],
+        [testId, reviewList]
     );
 
     // no. of questions answered
     const answeredCount = useMemo(() => {
         let count = 0;
         for (const attempt of answers.values()) {
-            if (attempt.user_answer !== null && attempt.user_answer !== undefined) count++;
+            if (
+                attempt.user_answer !== null &&
+                attempt.user_answer !== undefined
+            )
+                count++;
         }
 
         return count;
@@ -200,15 +209,17 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         (questionId: string) => {
             return reviewList.has(questionId);
         },
-        [reviewList],
+        [reviewList]
     );
 
     const isAnswered = useCallback(
         (questionId: string) => {
             const answer = answers.get(questionId);
-            return answer?.user_answer != null && answer?.user_answer !== undefined;
+            return (
+                answer?.user_answer != null && answer?.user_answer !== undefined
+            );
         },
-        [answers],
+        [answers]
     );
 
     const isVisited = useCallback(
@@ -217,7 +228,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
 
             return attempt ? attempt.status !== 'unvisited' : false;
         },
-        [answers],
+        [answers]
     );
 
     return {

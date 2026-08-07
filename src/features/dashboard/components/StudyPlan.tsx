@@ -1,13 +1,13 @@
 import { motion } from 'framer-motion';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.ts';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import ModernLoader from '@/shared/components/ModernLoader';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { useExamCountdown } from '../hooks/useExamCountdown';
 
 interface StudyPlanData {
     loading: boolean;
     todayUniqueAttemptCount: number;
     dailyQuestionTarget: number;
-    daysLeft: number;
     isTargetMetToday: boolean;
     todayProgressPercent: number;
 }
@@ -17,16 +17,18 @@ const StudyPlan = () => {
         loading,
         todayUniqueAttemptCount,
         dailyQuestionTarget,
-        daysLeft,
         isTargetMetToday,
         todayProgressPercent,
     }: StudyPlanData = useStudyPlan();
+
+    const { days, hours, minutes, seconds } = useExamCountdown(
+        '2027-02-08T09:00:00'
+    );
 
     if (loading) {
         return <ModernLoader />;
     }
 
-    // Status message logic
     const statusMessage = isTargetMetToday
         ? "Great job! You've met today's target."
         : `You should attempt ${dailyQuestionTarget - todayUniqueAttemptCount} more unique questions today to stay on track.`;
@@ -36,68 +38,71 @@ const StudyPlan = () => {
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="mx-auto p-6 shadow-sm border border-border-primary dark:border-border-primary-dark mb-4"
+            className="relative border border-white/20 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-sm p-4 overflow-visible"
         >
-            <div className="flex justify-between items-start mb-4">
-                <div>
-                    <h2 className="text-2xl font-bold mb-1 text-gray-800 dark:text-gray-100">
-                        Smart Study Plan
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {daysLeft} day{daysLeft === 1 ? '' : 's'} left until exam
-                    </p>
-                </div>
-            </div>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5" />
 
-            <div className="">
-                {/* Today's target */}
+            <div className="relative">
+                <p className="mt-0.5 flex items-center gap-2 font-['JetBrains_Mono'] text-sm text-muted-foreground">
+                    <span>{days} days</span>
+                    <span>:</span>
+                    <span>{String(hours).padStart(2, '0')} hours</span>
+                    <span>:</span>
+                    <span>{String(minutes).padStart(2, '0')} minutes</span>
+                    <span>:</span>
+                    <span>{String(seconds).padStart(2, '0')} seconds</span>
+                </p>
+
                 <div>
-                    <div className="flex items-center justify-between mb-1">
-                        <span className="text-base text-text-primary dark:text-text-primary-dark">
+                    <div className="mb-1.5 flex items-center justify-between">
+                        <span className="text-sm font-medium text-text-primary dark:text-text-primary-dark">
                             Today's progress
                         </span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+
+                        <span className="text-xs text-muted-foreground">
                             {todayUniqueAttemptCount} / {dailyQuestionTarget}
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-gray-200 dark:bg-zinc-800 overflow-hidden">
-                        <div
-                            className="h-full"
-                            style={{
+
+                    <div className="h-2.5 w-full overflow-hidden border border-white/10 bg-black/10 dark:bg-white/10">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{
                                 width: `${Math.min(100, todayProgressPercent)}%`,
-                                background: isTargetMetToday
-                                    ? 'linear-gradient(to right, #60a5fa, #1d4ed8)' // stronger blue
-                                    : 'linear-gradient(to right, #dbeafe, #60a5fa)', // softer blue
-                                transition: 'width .5s ease',
                             }}
-                        ></div>
+                            transition={{ duration: 0.6, ease: 'easeOut' }}
+                            className={`h-full ${
+                                isTargetMetToday
+                                    ? 'bg-gradient-to-r from-blue-400 to-blue-600'
+                                    : 'bg-gradient-to-r from-blue-200 to-blue-500'
+                            }`}
+                        />
                     </div>
-                    <div className="flex justify-between mt-1 text-xs">
-                        <span className="text-gray-500 dark:text-gray-400">
-                            {todayProgressPercent}% of today's goal
-                        </span>
-                        <span className="text-gray-500 dark:text-gray-400">
+
+                    <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
+                        <span>{todayProgressPercent}% of today's goal</span>
+
+                        <span>
                             {isTargetMetToday
                                 ? 'Target met'
                                 : `Need ${Math.max(0, dailyQuestionTarget - todayUniqueAttemptCount)} more`}
                         </span>
                     </div>
                 </div>
-            </div>
 
-            {/* Status */}
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className={`mt-6 p-4 text-center font-medium ${
-                    isTargetMetToday
-                        ? 'bg-green-50 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300'
-                        : 'bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300'
-                }`}
-            >
-                {statusMessage}
-            </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className={`mt-5 border p-3 text-center text-sm font-medium backdrop-blur-md ${
+                        isTargetMetToday
+                            ? 'border-green-400/20 bg-green-500/10 text-green-700 dark:text-green-300'
+                            : 'border-yellow-400/20 bg-yellow-500/10 text-yellow-700 dark:text-yellow-300'
+                    }`}
+                >
+                    {statusMessage}
+                </motion.div>
+            </div>
         </motion.div>
     );
 };

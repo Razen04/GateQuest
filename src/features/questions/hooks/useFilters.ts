@@ -1,85 +1,121 @@
 // This custom hook provides comprehensive filtering and sorting logic for question lists.
 // It manages filter states and efficiently computes the filtered list based on user selections.
 
-import { useContext, useMemo, useState } from 'react';
-import StatsContext from '@/app/providers/StatsContext';
-import { normalizeTag, sortQuestionsByYear } from '@/shared/utils/helper';
+import { useEffect, useMemo, useState } from 'react';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
+import { normalizeTag, sortQuestionsByYear } from '@/shared/utils/helper';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 // Type of filter mode for smart-Revision
 type FilterMode = 'practice' | 'revision';
+
+type AttemptFilterMode = 'all' | 'attempted' | 'unattempted' | 'bookmarked';
 
 // The main hook function that encapsulates all filtering logic.
 const useFilters = (
     sourceQuestions: Question[] | RevisionQuestion[],
     subject: string | null,
     selectedQuestion: string | null,
-    mode: FilterMode,
+    mode: FilterMode
 ) => {
+    const [loading, setLoading] = useState(false);
     // State for each available filter option.
     const [searchQuery, setSearchQuery] = useState('');
     const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
     const [yearFilter, setYearFilter] = useState<string[]>([]);
     const [topicFilter, setTopicFilter] = useState<string[]>([]);
-    const [attemptFilter, setAttemptFilter] = useState('unattempted');
+    const [attemptFilter, setAttemptFilter] =
+        useState<AttemptFilterMode>('unattempted');
     const [examFilter, setExamFilter] = useState<string[]>([]);
     const [tagFilter, setTagFilter] = useState<string[]>([]);
 
-    // Access the global stats context to get information about attempted questions.
-    const { stats } = useContext(StatsContext)!;
-    const subjectStats = stats?.subjectStats;
+    const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
+    const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
 
-    // Memoize the set of attempted question IDs for the current subject.
-    // This prevents recalculating this set on every render, only when stats or the subject changes.
-    const attemptedIds = useMemo(() => {
-        if (!stats) return new Set<string>();
+    // Fetch attempted question IDs on mount/change & listen for updates
+    useEffect(() => {
+        async function fetchAttemptedIds() {
+            if (!subject && mode === 'practice') return;
 
-        const ids = new Set<string>();
+            setLoading(true);
 
-        switch (mode) {
-            case 'practice': {
-                if (!subject) break;
+            try {
+                const { data, error } = await supabase.rpc(
+                    'get_user_attempted_ids',
+                    {
+                        p_subject_slug: subject,
+                        p_mode: mode,
+                    }
+                );
 
-                // Check if the map exists to aggregate across all active exams (GATE, ISRO, etc.)
-                if (stats.subjectStatsMap) {
-                    Object.values(stats.subjectStatsMap).forEach((examStats) => {
-                        examStats
-                            .filter((s) => s.subject === subject)
-                            .forEach((s) => {
-                                s.attemptedQuestionIds.forEach((id) => ids.add(id));
-                            });
-                    });
-                } else if (stats.subjectStats) {
-                    // Fallback to legacy single array if map isn't available
-                    stats.subjectStats
-                        .filter((s) => s.subject === subject)
-                        .forEach((s) => {
-                            s.attemptedQuestionIds.forEach((id) => ids.add(id));
-                        });
-                }
-                break;
-            }
+                if (error) throw error;
 
-            case 'revision': {
-                if (stats.subjectStatsMap) {
-                    Object.values(stats.subjectStatsMap).forEach((examStats) => {
-                        examStats.forEach((s) => {
-                            if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
-                        });
-                    });
-                } else if (stats.subjectStats) {
-                    stats.subjectStats.forEach((s) => {
-                        if (s) s.revisionAttemptedQuestionIds.forEach((id) => ids.add(id));
-                    });
-                }
-                break;
+                setAttemptedIds(
+                    new Set(
+                        (data ?? []).map(
+                            (row: { question_id: string }) => row.question_id
+                        )
+                    )
+                );
+            } catch (error) {
+                console.error('Failed to fetch attempted questions:', error);
+                setAttemptedIds(new Set());
+            } finally {
+                setLoading(false);
             }
         }
 
-        return ids;
-    }, [stats, subject, mode]);
+        fetchAttemptedIds();
 
-    // This is the core of the hook. useMemo ensures that the filtering logic only re-runs when the source data or any of the filter dependencies change. This is crucial for performance.
+        window.addEventListener('STATS_UPDATED', fetchAttemptedIds);
+
+        return () =>
+            window.removeEventListener('STATS_UPDATED', fetchAttemptedIds);
+    }, [subject, mode]);
+
+    // Fetch bookmarked question IDs when needed & listen for updates
+    useEffect(() => {
+        async function fetchBookmarkedIds() {
+            if (!subject && mode === 'practice') return;
+
+            setLoading(true);
+
+            try {
+                const { data, error } = await supabase.rpc(
+                    'get_user_bookmarks',
+                    {
+                        p_subject_slug: subject,
+                    }
+                );
+
+                if (error) throw error;
+
+                setBookmarkedIds(
+                    new Set(
+                        (data ?? []).map(
+                            (row: { question_id: string }) => row.question_id
+                        )
+                    )
+                );
+            } catch (error) {
+                console.error('Failed to fetch bookmarks:', error);
+                setBookmarkedIds(new Set());
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        if (attemptFilter === 'bookmarked') {
+            fetchBookmarkedIds();
+        }
+
+        window.addEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+
+        return () =>
+            window.removeEventListener('BOOKMARKS_UPDATED', fetchBookmarkedIds);
+    }, [subject, mode, attemptFilter]);
+
+    // Core filtering logic
     const filteredQuestions = useMemo(() => {
         let filtered = [...sourceQuestions];
 
@@ -89,32 +125,45 @@ const useFilters = (
             filtered = filtered.filter(
                 (qn) =>
                     qn.question?.toLowerCase().includes(q) ||
-                    qn.tags?.some((tag) => tag.toLowerCase().includes(q)),
+                    qn.tags?.some((tag) => tag.toLowerCase().includes(q))
             );
         }
 
         // Apply difficulty filter.
         if (difficultyFilter.length > 0) {
-            filtered = filtered.filter((qn) => difficultyFilter.includes(qn.difficulty || ''));
+            filtered = filtered.filter((qn) =>
+                difficultyFilter.includes(qn.difficulty || '')
+            );
         }
 
         // Apply year filter.
         if (yearFilter.length > 0) {
-            filtered = filtered.filter((qn) => yearFilter.includes(qn.year?.toString() || ''));
+            filtered = filtered.filter((qn) =>
+                yearFilter.includes(qn.year?.toString() || '')
+            );
         }
 
         // Apply topic filter.
         if (topicFilter.length > 0) {
-            filtered = filtered.filter((qn) => topicFilter.includes(qn.topic || ''));
+            filtered = filtered.filter((qn) =>
+                topicFilter.includes(qn.topic || '')
+            );
         }
 
         // Apply filter for attempted/unattempted questions.
         if (attemptFilter && attemptFilter !== 'all') {
             filtered = filtered.filter((qn) => {
-                const isAttempted = attemptedIds?.has(qn.id);
-                // This ensures the currently selected question remains visible even if it's attempted and the filter is set to 'unattempted'.
                 const isActive = qn.id === selectedQuestion;
-                return attemptFilter === 'attempted' ? isAttempted : !isAttempted || isActive;
+                const isAttempted = attemptedIds.has(qn.id);
+
+                if (attemptFilter === 'bookmarked') {
+                    return bookmarkedIds.has(qn.id) || isActive;
+                }
+
+                // Ensures currently active question remains visible even if attempted
+                return attemptFilter === 'attempted'
+                    ? isAttempted
+                    : !isAttempted || isActive;
             });
         }
 
@@ -124,14 +173,16 @@ const useFilters = (
                 if (!examData) return false;
                 const exams = Array.isArray(examData) ? examData : [examData];
                 return exams.some((e) =>
-                    examFilter.some((f) => f.toUpperCase() === e.toUpperCase()),
+                    examFilter.some((f) => f.toUpperCase() === e.toUpperCase())
                 );
             });
         }
 
         if (tagFilter.length > 0) {
             filtered = filtered.filter((qn) => {
-                return qn.tags?.some((tag) => tagFilter.includes(normalizeTag(tag)));
+                return qn.tags?.some((tag) =>
+                    tagFilter.includes(normalizeTag(tag))
+                );
             });
         }
 
@@ -147,10 +198,12 @@ const useFilters = (
         examFilter,
         selectedQuestion,
         tagFilter,
+        bookmarkedIds,
     ]);
 
-    // Expose the filtered data and the state setters for the UI components to use.
+    // Expose the filtered data and state setters to UI components
     return {
+        loading,
         filteredQuestions,
         searchQuery,
         setSearchQuery,

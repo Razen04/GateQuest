@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
-import type { Question } from '@/shared/types/storage';
-
-import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
-import ReportModal from '@/shared/components/ReportModal';
-import ModernLoader from '@/shared/components/ModernLoader';
-import { useQuestionController } from '@/features/questions/api/useQuestionController';
 import { decompress } from 'lz-string';
+import { useEffect, useState } from 'react';
+import {
+    useLocation,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
+import { useQuestionController } from '@/features/questions/api/useQuestionController';
+import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
+import ModernLoader from '@/shared/components/ModernLoader';
+import ReportModal from '@/shared/components/ReportModal';
+import type { Question } from '@/shared/types/storage';
 
 const SmartRevisionQuestionCard = () => {
     const navigate = useNavigate();
@@ -25,19 +28,29 @@ const SmartRevisionQuestionCard = () => {
             return;
         }
 
-        const lastSavedSession = localStorage.getItem('gatequest_last_active_session') || '';
-        const isMyOwnRevisionSession = rid && lastSavedSession.includes(`/revision/${rid}`);
+        const lastSavedSession =
+            localStorage.getItem('gatequest_last_active_session') || '';
+        const isMyOwnRevisionSession =
+            rid && lastSavedSession.includes(`/revision/${rid}`);
 
         if (isMyOwnRevisionSession) {
             try {
                 const stored = localStorage.getItem('weekly_set_info');
-                const recoveredQuestions = stored ? JSON.parse(decompress(stored)).questions : [];
+                const recoveredQuestions = stored
+                    ? JSON.parse(decompress(stored)).questions
+                    : [];
 
-                if (Array.isArray(recoveredQuestions) && recoveredQuestions.length > 0) {
+                if (
+                    Array.isArray(recoveredQuestions) &&
+                    recoveredQuestions.length > 0
+                ) {
                     setQuestions(recoveredQuestions);
                 }
             } catch (err) {
-                console.error('Error recovering questions on resume context:', err);
+                console.error(
+                    'Error recovering questions on resume context:',
+                    err
+                );
             }
             return;
         }
