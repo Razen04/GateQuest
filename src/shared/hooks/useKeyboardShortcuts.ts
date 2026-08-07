@@ -21,8 +21,15 @@ type useKeyboardShortcutsProps = {
     onExplain?: () => void;
 };
 export default function useKeyboardShortcuts(
-    { onPrev, onNext, onShowAnswer, onSubmit, canSubmit, onExplain }: useKeyboardShortcutsProps,
-    deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
+    {
+        onPrev,
+        onNext,
+        onShowAnswer,
+        onSubmit,
+        canSubmit,
+        onExplain,
+    }: useKeyboardShortcutsProps,
+    deps: DependencyList = [] // Dependencies for the useEffect hook, passed from the calling component.
 ) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
