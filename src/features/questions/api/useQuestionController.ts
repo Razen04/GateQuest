@@ -197,14 +197,18 @@ export const useQuestionController = ({
         navigate(`${path}?${qs}`);
     };
 
+    const canSubmit = !showAnswer && (selectedOptionIndices.length > 0 || numericalAnswer !== null);
+
     useKeyboardShortcuts(
         {
             onPrev: handlePrevious,
             onNext: handleNext,
             onShowAnswer: handleShowAnswer,
+            onSubmit: handleSubmit,
+            canSubmit,
             onExplain: onExplanationClick,
         },
-        [safeQuestion]
+        [safeQuestion, canSubmit],
     );
 
     return {

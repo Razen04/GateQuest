@@ -136,6 +136,9 @@ const QuestionCard = ({
     // check if the question belong to the user goal
     const isCompatible = isSubjectInGoal(question.subject_id);
 
+    // Derived: true when the user has selected an option or typed a numerical answer
+    const hasSelection = selectedOptionIndices.length > 0 || numericalAnswer !== null;
+
     return (
         <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6 pb-20">
             {/* Top Back Button */}
@@ -262,6 +265,7 @@ const QuestionCard = ({
                         handleSubmit={handleSubmit}
                         handleExplainationClick={onExplanationClick}
                         isCompatible={isCompatible}
+                        hasSelection={hasSelection}
                     />
                 </div>
 

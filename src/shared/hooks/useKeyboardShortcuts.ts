@@ -6,7 +6,7 @@ import { type DependencyList, useEffect } from 'react';
  * Attaches global keyboard event listeners for practice card actions.
  * - Q: previous question
  * - W: next question
- * - Enter/Space: show answer
+ * - Enter/Space: submit if an option is selected, otherwise show answer
  * - Slash (/): open explanation
  * - Option selection using A/B/C/D/E or 1/2/3/4/5
  * The hook ensures these shortcuts don't interfere with text inputs.
@@ -16,11 +16,13 @@ type useKeyboardShortcutsProps = {
     onPrev: () => void;
     onNext: () => void;
     onShowAnswer: () => void;
+    onSubmit?: () => void;
+    canSubmit?: boolean;
     onExplain?: () => void;
 };
 export default function useKeyboardShortcuts(
-    { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,
-    deps: DependencyList = [] // Dependencies for the useEffect hook, passed from the calling component.
+    { onPrev, onNext, onShowAnswer, onSubmit, canSubmit, onExplain }: useKeyboardShortcutsProps,
+    deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
 ) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
@@ -81,10 +83,11 @@ export default function useKeyboardShortcuts(
                     e.preventDefault();
                     onNext?.();
                     break;
-                case 'Enter': // 'Enter' to submit/show answer
+                case 'Enter': // 'Enter'/'Space': submit if selected, else show answer
                 case 'Space':
                     e.preventDefault();
-                    onShowAnswer?.();
+                    if (canSubmit && onSubmit) onSubmit();
+                    else onShowAnswer?.();
                     break;
                 case 'Slash': // 'E' for explanation
                     e.preventDefault();
