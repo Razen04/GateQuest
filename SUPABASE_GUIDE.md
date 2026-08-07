@@ -125,14 +125,14 @@ Commit the new migration file along with any other code changes. The migration f
 ## Troubleshooting
 
 - **If you get a `500 Internal Server Error` or your local services act strangely:** The most reliable fix is to completely reset the Docker containers.
-    ```bash
-    supabase stop --no-backup
-    supabase start
-    ```
+  ```bash
+  supabase stop --no-backup
+  supabase start
+  ```
 - **If you mess up your local data and want a clean slate:** The `db reset` command is your best friend.
-    ```bash
-    supabase db reset
-    ```
+  ```bash
+  supabase db reset
+  ```
 
 ---
 

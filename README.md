@@ -158,19 +158,19 @@ To get a local copy up and running, follow these simple steps.
     ```
 3.  **Set up local Supabase instance:**
     - Start the Supabase services (need Docker installed, read more about it in the guide):
-        ```sh
-        supabase start
-        ```
+      ```sh
+      supabase start
+      ```
     - The CLI will output your local Supabase URL, anon key, and service role key.
     - Read more about the Supabase Setup in [SUPABASE_GUIDE](SUPABASE_GUIDE.md)
     - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](SUPABASE_DOCUMENTATION.md)
 4.  **Set up environment variables:**
     - Create a `.env` file in the root directory.
     - Add your Supabase project URL and anon key:
-        ```env
-        VITE_SUPABASE_PROJECT_URL=your_supabase_url
-        VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
-        ```
+      ```env
+      VITE_SUPABASE_PROJECT_URL=your_supabase_url
+      VITE_SUPABASE_ANON_PUBLIC_KEY=your_supabase_anon_key
+      ```
 5.  **Run the development server:**
     ```sh
     npm run dev

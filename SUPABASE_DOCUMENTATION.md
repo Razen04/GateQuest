@@ -244,13 +244,13 @@ Tracks questions a user has answered incorrectly and schedules them for future r
 **Row Level Security (RLS) Policies:**
 
 - **Select:** Users can only read their own incorrect questions.
-    - `FOR SELECT USING (user_id = auth.uid())`
+  - `FOR SELECT USING (user_id = auth.uid())`
 - **Insert:** Users can only insert rows for themselves.
-    - `FOR INSERT WITH CHECK (user_id = auth.uid())`
+  - `FOR INSERT WITH CHECK (user_id = auth.uid())`
 - **Update:** Users can only update their own rows.
-    - `FOR UPDATE USING (user_id = auth.uid())`
+  - `FOR UPDATE USING (user_id = auth.uid())`
 - **Delete:** Users can only delete their own rows.
-    - `FOR DELETE USING (user_id = auth.uid())`
+  - `FOR DELETE USING (user_id = auth.uid())`
 
 **Indexes:**
 
@@ -546,14 +546,14 @@ Each user can bookmark a question **only once**, enforced by the composite prima
 ### Constraints
 
 - **Primary Key:** (`user_id`, `question_id`)
-    - Prevents duplicate bookmarks for the same question by the same user.
+  - Prevents duplicate bookmarks for the same question by the same user.
 
 - **Foreign Keys**
-    - `user_id` → `users.id` (`ON DELETE CASCADE`)
-    - `question_id` → `questions.id` (`ON DELETE CASCADE`)
+  - `user_id` → `users.id` (`ON DELETE CASCADE`)
+  - `question_id` → `questions.id` (`ON DELETE CASCADE`)
 
 - **Notes Length**
-    - `notes` is optional but cannot exceed **100 characters**.
+  - `notes` is optional but cannot exceed **100 characters**.
 
 ### Indexes
 
@@ -657,17 +657,17 @@ Calculates and updates aggregate performance statistics for all questions in the
 **Logic Flow:**
 
 1. **Select First Attempts:**
-    - Queries `user_question_activity` filtering only the **first attempt** for each user/question (`attempt_number = 1`).
+   - Queries `user_question_activity` filtering only the **first attempt** for each user/question (`attempt_number = 1`).
 
 2. **Aggregate Metrics per Question:**
-    - `total_attempts` – Number of first attempts.
-    - `correct_attempts` – Number of first attempts answered correctly.
-    - `wrong_attempts` – Number of first attempts answered incorrectly.
-    - `avg_time_seconds` – Average time spent on first attempts (ignores nulls).
+   - `total_attempts` – Number of first attempts.
+   - `correct_attempts` – Number of first attempts answered correctly.
+   - `wrong_attempts` – Number of first attempts answered incorrectly.
+   - `avg_time_seconds` – Average time spent on first attempts (ignores nulls).
 
 3. **Insert or Update:**
-    - Uses `ON CONFLICT (question_id) DO UPDATE` to insert new rows or update existing ones.
-    - Ensures `updated_at` always reflects the latest refresh.
+   - Uses `ON CONFLICT (question_id) DO UPDATE` to insert new rows or update existing ones.
+   - Ensures `updated_at` always reflects the latest refresh.
 
 **Key Notes:**
 
@@ -714,8 +714,8 @@ Calculates and updates aggregate performance statistics for all questions in the
     - **Mistake Retrieval**: Joins `user_incorrect_queue` with `questions` and `subjects` to find questions where `next_review_at` has passed.
     - **Strict Verification**: Implements a mandatory `verified = true` filter. Unverified or "draft" questions are ignored even if the user got them wrong previously.
     - **Branch & Exam Relevance**:
-        - Always includes mistakes from **Universal** subjects (e.g., General Aptitude).
-        - For core subjects, it filters based on the user's `branch_id` (via the metadata `'set'` tag) or by matching the `p_target_exams` array.
+      - Always includes mistakes from **Universal** subjects (e.g., General Aptitude).
+      - For core subjects, it filters based on the user's `branch_id` (via the metadata `'set'` tag) or by matching the `p_target_exams` array.
 
 5.  **Prioritization & Batching**:
     - Selects a maximum of **30 questions**.
@@ -757,146 +757,146 @@ SELECT generate_weekly_revision_set(
 ### Function: `update_status_of_weekly_set(v_set_id uuid)`
 
 - **Purpose:**
-    - To update the status of a weekly revision set to `expired` after 24 hours have passed from the `started_at` time. This function is invoked from the client-side to ensure that the set cannot be used after the expiration period has passed. It provides feedback on whether the set was updated successfully or if there was an issue (e.g., set not found or already expired).
+  - To update the status of a weekly revision set to `expired` after 24 hours have passed from the `started_at` time. This function is invoked from the client-side to ensure that the set cannot be used after the expiration period has passed. It provides feedback on whether the set was updated successfully or if there was an issue (e.g., set not found or already expired).
 
 - **Arguments:**
-    - **v_set_id (uuid):** The unique identifier of the weekly revision set to be updated.
+  - **v_set_id (uuid):** The unique identifier of the weekly revision set to be updated.
 
 - **Logic:**
-    - **Authentication Check:**
-        - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
-    - **Set Status Update:**
-        - The function attempts to update the status of the revision set with the given `v_set_id` to `'expired'`. The update happens only if the `generated_for` matches the authenticated user’s ID (`v_user_id`).
-    - **Rows Affected Check:**
-        - If no rows are affected by the `UPDATE` (i.e., the set was not found or has already been expired), the function returns a message indicating that the set was not found or is already expired.
-    - **Return Success or Failure:**
-        - If the status is successfully updated, a success message is returned indicating the revision set is now marked as expired.
-        - If the set could not be found, a failure message is returned.
+  - **Authentication Check:**
+    - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+  - **Set Status Update:**
+    - The function attempts to update the status of the revision set with the given `v_set_id` to `'expired'`. The update happens only if the `generated_for` matches the authenticated user’s ID (`v_user_id`).
+  - **Rows Affected Check:**
+    - If no rows are affected by the `UPDATE` (i.e., the set was not found or has already been expired), the function returns a message indicating that the set was not found or is already expired.
+  - **Return Success or Failure:**
+    - If the status is successfully updated, a success message is returned indicating the revision set is now marked as expired.
+    - If the set could not be found, a failure message is returned.
 
 - **Return Value:**
-    - A `json` object with the following keys:
-        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
-        - **message (string):** A message providing additional information about the outcome. It can either confirm the successful update or explain why the update was not performed (e.g., "No such weekly set found or already expired").
+  - A `json` object with the following keys:
+    - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+    - **message (string):** A message providing additional information about the outcome. It can either confirm the successful update or explain why the update was not performed (e.g., "No such weekly set found or already expired").
 
 - **Example:**
-    - **Success:**
-        ```json
-        {
-            "success": true,
-            "message": "Weekly set status updated to expired."
-        }
-        ```
-    - **Failure:**
-        ```json
-        {
-            "success": false,
-            "message": "No such weekly set found or already expired."
-        }
-        ```
+  - **Success:**
+    ```json
+    {
+      "success": true,
+      "message": "Weekly set status updated to expired."
+    }
+    ```
+  - **Failure:**
+    ```json
+    {
+      "success": false,
+      "message": "No such weekly set found or already expired."
+    }
+    ```
 - **Exceptions**:
-    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
-    - If no matching revision set is found or it is already expired, the function returns a failure message instead of an exception.
+  - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+  - If no matching revision set is found or it is already expired, the function returns a failure message instead of an exception.
 
 ### Function: `start_weekly_revision_set(v_set_id uuid)`
 
 - **Purpose:**
-    - To mark the weekly revision set as "started" by setting the `started_at` and `expires_at` timestamps. This function is invoked when the user starts revising a weekly set. It ensures that the set's status changes from `pending` to `started` and calculates an expiration time of 24 hours from the start time.
+  - To mark the weekly revision set as "started" by setting the `started_at` and `expires_at` timestamps. This function is invoked when the user starts revising a weekly set. It ensures that the set's status changes from `pending` to `started` and calculates an expiration time of 24 hours from the start time.
 
 - **Arguments:**
-    - **v_set_id (uuid):** The unique identifier of the weekly revision set that is being started.
+  - **v_set_id (uuid):** The unique identifier of the weekly revision set that is being started.
 
 - **Logic:**
-    - **Authentication Check:**
-        - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
-    - **Update Status:**
-        - The function attempts to update the `status` of the weekly revision set with the given `v_set_id` to `'started'` and sets the `started_at` and `expires_at` timestamps.
-        - The update occurs only if the set is currently in the `pending` state.
-    - **Check if Update Was Successful:**
-        - The function checks whether any rows were affected by the update (i.e., if the set was in `pending` status). If no rows were updated, it returns a failure message indicating that the set could not be started.
-    - **Return Success or Failure:**
-        - If the status is successfully updated, a success message is returned indicating the revision set has been started along with the `set_id`, `started_at`, and `expires_at` timestamps.
-        - If no matching set was found (i.e., it was not in `pending` status), a failure message is returned.
+  - **Authentication Check:**
+    - The function first retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+  - **Update Status:**
+    - The function attempts to update the `status` of the weekly revision set with the given `v_set_id` to `'started'` and sets the `started_at` and `expires_at` timestamps.
+    - The update occurs only if the set is currently in the `pending` state.
+  - **Check if Update Was Successful:**
+    - The function checks whether any rows were affected by the update (i.e., if the set was in `pending` status). If no rows were updated, it returns a failure message indicating that the set could not be started.
+  - **Return Success or Failure:**
+    - If the status is successfully updated, a success message is returned indicating the revision set has been started along with the `set_id`, `started_at`, and `expires_at` timestamps.
+    - If no matching set was found (i.e., it was not in `pending` status), a failure message is returned.
 
 - **Return Value:**
-    - A `json` object with the following keys:
-        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
-        - **set_id (uuid):** The ID of the set that was updated.
-        - **started_at (timestamp):** The timestamp when the revision set was started.
-        - **expires_at (timestamp):** The timestamp when the revision set expires (24 hours from the start).
-        - **message (string):** A message providing additional information about the outcome.
+  - A `json` object with the following keys:
+    - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+    - **set_id (uuid):** The ID of the set that was updated.
+    - **started_at (timestamp):** The timestamp when the revision set was started.
+    - **expires_at (timestamp):** The timestamp when the revision set expires (24 hours from the start).
+    - **message (string):** A message providing additional information about the outcome.
 
 - **Example:**
-    - **Success:**
-        ```json
-        {
-            "success": true,
-            "set_id": "some-uuid",
-            "started_at": "2025-12-08T10:00:00Z",
-            "expires_at": "2025-12-09T10:00:00Z",
-            "message": "Weekly set started."
-        }
-        ```
-    - **Failure:**
-        ```json
-        {
-            "success": false,
-            "message": "Could not start the weekly set. It may not be in pending status or does not exist."
-        }
-        ```
+  - **Success:**
+    ```json
+    {
+      "success": true,
+      "set_id": "some-uuid",
+      "started_at": "2025-12-08T10:00:00Z",
+      "expires_at": "2025-12-09T10:00:00Z",
+      "message": "Weekly set started."
+    }
+    ```
+  - **Failure:**
+    ```json
+    {
+      "success": false,
+      "message": "Could not start the weekly set. It may not be in pending status or does not exist."
+    }
+    ```
 - **Exception**
-    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
-    - If no matching revision set is found or if the set is not in the pending status, the function returns a failure message.
+  - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+  - If no matching revision set is found or if the set is not in the pending status, the function returns a failure message.
 
 ### Function: `get_weekly_set()`
 
 - **Purpose:**
-    - To retrieve the currently available weekly revision set for the user. The function checks if the user has an active (pending or started) weekly revision set, and returns the set's details. If the set has expired, it is updated to an `expired` status before returning the set.
+  - To retrieve the currently available weekly revision set for the user. The function checks if the user has an active (pending or started) weekly revision set, and returns the set's details. If the set has expired, it is updated to an `expired` status before returning the set.
 
 - **Arguments:**
-    - **None.**
+  - **None.**
 
 - **Logic:**
-    - **Authentication Check:**
-        - The function retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
-    - **Status Update:**
-        - The function calls the `update_status_of_weekly_set()` function to update any `pending` or `started` weekly revision set to `expired` if the time window has passed (24 hours from the `started_at` time).
-    - **Fetch Weekly Set:**
-        - After ensuring expired sets are updated, the function fetches the user's `weekly_revision_set` that is either `pending` or `started`.
-    - **Return Success or Failure:**
-        - If no matching revision set is found, the function returns a failure message (`No weekly set available for the user`).
-        - If a valid revision set is found, the function returns the set's details in JSON format, including the `success` status and the revision set details (`set_info`).
+  - **Authentication Check:**
+    - The function retrieves the current authenticated user's ID using `auth.uid()`. If the user is not authenticated (i.e., `v_user_id` is `NULL`), an exception is raised with the message `Not authenticated`.
+  - **Status Update:**
+    - The function calls the `update_status_of_weekly_set()` function to update any `pending` or `started` weekly revision set to `expired` if the time window has passed (24 hours from the `started_at` time).
+  - **Fetch Weekly Set:**
+    - After ensuring expired sets are updated, the function fetches the user's `weekly_revision_set` that is either `pending` or `started`.
+  - **Return Success or Failure:**
+    - If no matching revision set is found, the function returns a failure message (`No weekly set available for the user`).
+    - If a valid revision set is found, the function returns the set's details in JSON format, including the `success` status and the revision set details (`set_info`).
 
 - **Return Value:**
-    - A `json` object with the following keys:
-        - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
-        - **set_info (jsonb):** The details of the found weekly revision set (if available).
-        - **message (string):** A message providing additional information about the outcome.
+  - A `json` object with the following keys:
+    - **success (boolean):** Indicates whether the operation was successful (`true`) or failed (`false`).
+    - **set_info (jsonb):** The details of the found weekly revision set (if available).
+    - **message (string):** A message providing additional information about the outcome.
 
 - **Example:**
-    - **Success:**
-        ```json
-        {
-            "success": true,
-            "set_info": {
-                "id": "some-uuid",
-                "generated_for": "some-uuid",
-                "start_of_week": "2025-12-07",
-                "status": "pending",
-                "created_at": "2025-12-07T00:00:00Z"
-            },
-            "message": "Weekly set available"
-        }
-        ```
-    - **Failure:**
-        ```json
-        {
-            "success": false,
-            "message": "No weekly set available for the user"
-        }
-        ```
+  - **Success:**
+    ```json
+    {
+      "success": true,
+      "set_info": {
+        "id": "some-uuid",
+        "generated_for": "some-uuid",
+        "start_of_week": "2025-12-07",
+        "status": "pending",
+        "created_at": "2025-12-07T00:00:00Z"
+      },
+      "message": "Weekly set available"
+    }
+    ```
+  - **Failure:**
+    ```json
+    {
+      "success": false,
+      "message": "No weekly set available for the user"
+    }
+    ```
 - **Exception**
-    - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
-    - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
+  - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
+  - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
 
 ### Function: `submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)`
 
@@ -949,10 +949,10 @@ Each object inside the JSON array must follow:
 ### Question Types
 
 - **numerical (NAT)** → evaluated using:
-    - exact match
-    - multiple valid answers
-    - range-based validation
-    - tolerance-based validation
+  - exact match
+  - multiple valid answers
+  - range-based validation
+  - tolerance-based validation
 
 - **multiple-choice (MCQ)** → single correct option with negative marking
 - **multiple-select (MSQ)** → multi-option exact match, no negative marking
@@ -1193,7 +1193,7 @@ accuracy = (correct_count / attempted_count) * 100
 
 ```json
 {
-    "status": "already_completed"
+  "status": "already_completed"
 }
 ```
 
@@ -1214,10 +1214,10 @@ SELECT submit_test_grading(
 ## **Example Frontend Call:**
 
 ```typescript
-await supabase.rpc('submit_test_grading', {
-    p_session_id: sessionId,
-    p_payload: attempts,
-    p_remaining_time_seconds: remainingTime,
+await supabase.rpc("submit_test_grading", {
+  p_session_id: sessionId,
+  p_payload: attempts,
+  p_remaining_time_seconds: remainingTime,
 });
 ```
 
@@ -1257,8 +1257,8 @@ Returns a table with the following columns:
 
 ```typescript
 //
-const { data, error } = await supabase.rpc('get_exam_subject_counts', {
-    target_exams: ['GATE', 'ESE'],
+const { data, error } = await supabase.rpc("get_exam_subject_counts", {
+  target_exams: ["GATE", "ESE"],
 });
 ```
 
@@ -1280,30 +1280,30 @@ Retrieves a granular breakdown of verified question counts for every topic assoc
 ### Logic Flow:
 
 1. **User Version Resolution**
-    - The function first retrieves the current user's `version_number` from the `users` table using `auth.uid()`.
-    - This ensures question attempt tracking is scoped correctly per user version.
+   - The function first retrieves the current user's `version_number` from the `users` table using `auth.uid()`.
+   - This ensures question attempt tracking is scoped correctly per user version.
 
 2. **Subject Filtering**
-    - Queries the `questions` table and filters records by the provided `p_subject_id`.
+   - Queries the `questions` table and filters records by the provided `p_subject_id`.
 
 3. **Data Cleaning**
-    - Excludes questions where `topic IS NULL`, ensuring only valid syllabus topics are included.
+   - Excludes questions where `topic IS NULL`, ensuring only valid syllabus topics are included.
 
 4. **Verification Filter**
-    - Only includes questions where `verified = true`, ensuring unvetted content does not affect counts.
+   - Only includes questions where `verified = true`, ensuring unvetted content does not affect counts.
 
 5. **Total Question Count**
-    - Groups results by `topic` and computes `COUNT(*)` to determine total verified questions per topic.
+   - Groups results by `topic` and computes `COUNT(*)` to determine total verified questions per topic.
 
 6. **Unattempted Question Calculation**
-    - For each question, checks `user_question_activity` to determine whether the current user (and version) has attempted it.
-    - Uses a `NOT EXISTS` filter to count only **unattempted questions per topic**.
+   - For each question, checks `user_question_activity` to determine whether the current user (and version) has attempted it.
+   - Uses a `NOT EXISTS` filter to count only **unattempted questions per topic**.
 
 7. **Grouping & Aggregation**
-    - Results are grouped by `q.topic` to produce per-topic summaries.
+   - Results are grouped by `q.topic` to produce per-topic summaries.
 
 8. **Contextual Mapping**
-    - The original `p_subject_id` is returned in each row as `subject_id` for frontend state mapping.
+   - The original `p_subject_id` is returned in each row as `subject_id` for frontend state mapping.
 
 ---
 
@@ -1352,8 +1352,8 @@ FROM get_topic_counts('22222222-2222-2222-2222-000000000009');
 ### Example Frontend Integration:
 
 ```typescript
-const { data, error } = await supabase.rpc('get_topic_counts', {
-    p_subject_id: 'your-subject-uuid',
+const { data, error } = await supabase.rpc("get_topic_counts", {
+  p_subject_id: "your-subject-uuid",
 });
 ```
 
@@ -1426,42 +1426,42 @@ This function is used to support user-initiated account deletion while complying
 **Logic Flow:**
 
 1. **Authentication & Target User Retrieval**:
-    - The function identifies the currently authenticated user using `auth.uid()`.
-    - If no authenticated user exists, the function raises a `Not authenticated` exception and stops execution.
-    - The authenticated user's UUID is stored as the target account identifier for all subsequent operations.
+   - The function identifies the currently authenticated user using `auth.uid()`.
+   - If no authenticated user exists, the function raises a `Not authenticated` exception and stops execution.
+   - The authenticated user's UUID is stored as the target account identifier for all subsequent operations.
 
 2. **Removal of User-Specific Engagement Data**:
-    - Deletes records from tables that contain user-generated or temporary engagement data which does not provide long-term analytical value after account deletion.
+   - Deletes records from tables that contain user-generated or temporary engagement data which does not provide long-term analytical value after account deletion.
 
-    The following data is permanently removed:
-    - **Topic Tests**:
-        - Deletes all records from `topic_tests` associated with the user.
-        - Removes generated test sessions and their related user-specific test data.
+   The following data is permanently removed:
+   - **Topic Tests**:
+     - Deletes all records from `topic_tests` associated with the user.
+     - Removes generated test sessions and their related user-specific test data.
 
-    - **Weekly Revision Sets**:
-        - Deletes generated revision sets from `weekly_revision_set`.
-        - Removes personalised revision schedules created for the user.
+   - **Weekly Revision Sets**:
+     - Deletes generated revision sets from `weekly_revision_set`.
+     - Removes personalised revision schedules created for the user.
 
-    - **Incorrect Question Queue**:
-        - Deletes all records from `user_incorrect_queue`.
-        - Removes the user's spaced-repetition mistake tracking data.
+   - **Incorrect Question Queue**:
+     - Deletes all records from `user_incorrect_queue`.
+     - Removes the user's spaced-repetition mistake tracking data.
 
-    - **Push Subscriptions**:
-        - Deletes all registered push notification subscriptions from `push_subscriptions`.
-        - Prevents future notifications from being delivered to the deleted account.
+   - **Push Subscriptions**:
+     - Deletes all registered push notification subscriptions from `push_subscriptions`.
+     - Prevents future notifications from being delivered to the deleted account.
 
-    - **User Goals**:
-        - Deletes records from `user_goals`.
-        - Removes the user's selected academic goals, branches, and practice preferences.
+   - **User Goals**:
+     - Deletes records from `user_goals`.
+     - Removes the user's selected academic goals, branches, and practice preferences.
 
 3. **Preservation of Donation History**:
-    - Donation records are retained for historical.
-    - The `user_id` field is set to `NULL` for all donations associated with the deleted account.
-    - This removes the identity relationship while preserving donation records.
+   - Donation records are retained for historical.
+   - The `user_id` field is set to `NULL` for all donations associated with the deleted account.
+   - This removes the identity relationship while preserving donation records.
 
 4. **User Data Anonymisation**:
-    - Updates the user's record in the `users` table instead of deleting it.
-    - The following personal information is replaced or cleared:
+   - Updates the user's record in the `users` table instead of deleting it.
+   - The following personal information is replaced or cleared:
 
 | Field                | New Value                           | Purpose                                                 |
 | :------------------- | :---------------------------------- | :------------------------------------------------------ |
@@ -1475,40 +1475,40 @@ This function is used to support user-initiated account deletion while complying
 This allows internal references from historical data to remain valid while ensuring no personally identifiable information remains.
 
 5. **Preservation of Historical Activity Data**:
-    - Certain records are intentionally preserved because they contribute to platform analytics and historical insights.
-    - These records remain linked to the anonymised user identity.
+   - Certain records are intentionally preserved because they contribute to platform analytics and historical insights.
+   - These records remain linked to the anonymised user identity.
 
-    Preserved tables:
-    - `user_question_activity`:
-        - Existing activity records remain available.
-        - They continue referencing the anonymised user record for engagement analytics.
+   Preserved tables:
+   - `user_question_activity`:
+     - Existing activity records remain available.
+     - They continue referencing the anonymised user record for engagement analytics.
 
-    - `question_reports` :
-        - Existing reports remain linked to the anonymised user so they can still be fixed.
+   - `question_reports` :
+     - Existing reports remain linked to the anonymised user so they can still be fixed.
 
 6. **Authentication Account Removal**:
-    - Deletes the user's record from `auth.users`.
-    - Removes access credentials and prevents future authentication using the deleted account so that they can signup again with the same credential into a new account.
+   - Deletes the user's record from `auth.users`.
+   - Removes access credentials and prevents future authentication using the deleted account so that they can signup again with the same credential into a new account.
 
 **Key Behaviors & Guarantees:**
 
 - **Complete Account Removal**:
-    - The user's authentication identity is removed permanently from the system.
+  - The user's authentication identity is removed permanently from the system.
 
 - **Privacy Protection Through Anonymisation**:
-    - Personal information is removed while preserving necessary historical records.
+  - Personal information is removed while preserving necessary historical records.
 
 - **Data Minimisation**:
-    - Temporary and engagement-specific data is deleted when it no longer provides value.
+  - Temporary and engagement-specific data is deleted when it no longer provides value.
 
 - **Historical Integrity Preservation**:
-    - Donation records, user activity, and reports remain available without retaining personal identity.
+  - Donation records, user activity, and reports remain available without retaining personal identity.
 
 - **Safe Deletion Ordering**:
-    - User-generated and dependent data is removed before deleting the authentication record to avoid orphaned references.
+  - User-generated and dependent data is removed before deleting the authentication record to avoid orphaned references.
 
 - **Authentication Safety**:
-    - The function can only execute for the currently authenticated user and cannot delete another user's account.
+  - The function can only execute for the currently authenticated user and cannot delete another user's account.
 
 **Return Value:**
 
@@ -1610,15 +1610,15 @@ Users can only toggle bookmarks belonging to themselves.
 ### Example
 
 ```ts
-const { data, error } = await supabase.rpc('toggle_question_bookmark', {
-    p_question_id: questionId,
-    p_note: 'Important question for revision',
+const { data, error } = await supabase.rpc("toggle_question_bookmark", {
+  p_question_id: questionId,
+  p_note: "Important question for revision",
 });
 
 if (data) {
-    // Bookmark added
+  // Bookmark added
 } else {
-    // Bookmark removed
+  // Bookmark removed
 }
 ```
 
@@ -1708,9 +1708,9 @@ Users can only update notes on their own bookmarks.
 ### Example
 
 ```ts
-const { error } = await supabase.rpc('update_question_bookmark_note', {
-    p_question_id: questionId,
-    p_note: 'Important for revision',
+const { error } = await supabase.rpc("update_question_bookmark_note", {
+  p_question_id: questionId,
+  p_note: "Important for revision",
 });
 ```
 
@@ -1809,16 +1809,16 @@ The newest bookmarked questions appear first.
 ### Example
 
 ```ts
-const { data, error } = await supabase.rpc('get_user_bookmarks', {
-    p_subject: null,
+const { data, error } = await supabase.rpc("get_user_bookmarks", {
+  p_subject: null,
 });
 ```
 
 Filter by subject:
 
 ```ts
-const { data, error } = await supabase.rpc('get_user_bookmarks', {
-    p_subject: 'dsa',
+const { data, error } = await supabase.rpc("get_user_bookmarks", {
+  p_subject: "dsa",
 });
 ```
 

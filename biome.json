@@ -7,7 +7,7 @@
         "defaultBranch": "main"
     },
     "files": {
-        "includes": ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc}"],
+        "includes": ["**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css}"],
         "maxSize": 1048576,
         "ignoreUnknown": true
     },
