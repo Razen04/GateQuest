@@ -8,7 +8,7 @@ import {
     Sparkle,
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ModernLoader from '@/shared/components/ModernLoader';

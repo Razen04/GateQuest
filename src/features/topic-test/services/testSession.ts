@@ -140,15 +140,15 @@ const markAttemptsSynced = async (attempts: Attempt[]) => {
 };
 
 export {
-    initializeTestSession,
-    getTestSession,
-    saveAttempt,
-    updateSessionTimeAndStatus,
+    cacheTestSessions,
+    getCompletedTestSessions,
+    getOngoingTestSession,
     getPendingAttempts,
     getPendingSessions,
+    getTestSession,
+    initializeTestSession,
     markAttemptsSynced,
+    saveAttempt,
     updateAttempts,
-    getOngoingTestSession,
-    getCompletedTestSessions,
-    cacheTestSessions,
+    updateSessionTimeAndStatus,
 };

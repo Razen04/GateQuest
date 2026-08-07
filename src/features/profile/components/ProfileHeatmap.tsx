@@ -1,11 +1,11 @@
-import { useContext, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { ChartBar } from '@phosphor-icons/react';
 import { ResponsiveTimeRange } from '@nivo/calendar';
+import { ChartBar } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { useContext, useMemo } from 'react';
 import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
-import { glassPanel, eyebrow } from '../styles/profileTheme';
 
 interface ProfileHeatmapProps {
     heatmapData: ProfileData['heatmap'];

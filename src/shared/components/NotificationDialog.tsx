@@ -1,6 +1,3 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import {
     BookOpen,
     Calendar,
@@ -8,8 +5,11 @@ import {
     SealCheck,
 } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
-import { supabase } from '../utils/supabaseClient.js';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import type { Database } from '../types/supabase.js';
+import { supabase } from '../utils/supabaseClient.js';
 
 type NotificationDialogProp = {
     isOpen: boolean;

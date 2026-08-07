@@ -1,47 +1,48 @@
 // This file contains various utility functions used throughout the application,such as interacting with localStorage, styling, and syncing data with Supabase.
+
+import {
+    AppWindowIcon,
+    Bicycle,
+    BinaryIcon,
+    Books,
+    Brain,
+    BroadcastIcon,
+    BrowsersIcon,
+    Calculator,
+    CircuitryIcon,
+    Code,
+    CpuIcon,
+    Database,
+    EmptyIcon,
+    EngineIcon,
+    FactoryIcon,
+    FileCodeIcon,
+    FlameIcon,
+    GaugeIcon,
+    GitBranchIcon,
+    Globe,
+    GraphIcon,
+    HeadCircuitIcon,
+    LightbulbIcon,
+    LinuxLogoIcon,
+    MagnetIcon,
+    PiIcon,
+    PlugChargingIcon,
+    PowerIcon,
+    PulseIcon,
+    SlidersIcon,
+    TerminalWindow,
+    TreeStructure,
+    WaveformIcon,
+    WaveSineIcon,
+    WavesIcon,
+    WrenchIcon,
+} from '@phosphor-icons/react';
 import React from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/shared/utils/supabaseClient.js';
 import type { AppUser } from '@/shared/types/AppUser.js';
-import {
-    Calculator,
-    Code,
-    Database,
-    Globe,
-    TreeStructure,
-    Bicycle,
-    Brain,
-    TerminalWindow,
-    Books,
-    FlameIcon,
-    LightbulbIcon,
-} from '@phosphor-icons/react';
-import { EmptyIcon } from '@phosphor-icons/react';
-import { PiIcon } from '@phosphor-icons/react';
-import { BinaryIcon } from '@phosphor-icons/react';
-import { CpuIcon } from '@phosphor-icons/react';
-import { GraphIcon } from '@phosphor-icons/react';
-import { GitBranchIcon } from '@phosphor-icons/react';
-import { FileCodeIcon } from '@phosphor-icons/react';
-import { LinuxLogoIcon } from '@phosphor-icons/react';
-import { AppWindowIcon } from '@phosphor-icons/react';
-import { BrowsersIcon } from '@phosphor-icons/react';
 import type { Question } from '@/shared/types/storage.js';
-import { HeadCircuitIcon } from '@phosphor-icons/react';
-import { PulseIcon } from '@phosphor-icons/react';
-import { WaveSineIcon } from '@phosphor-icons/react';
-import { SlidersIcon } from '@phosphor-icons/react';
-import { BroadcastIcon } from '@phosphor-icons/react';
-import { MagnetIcon } from '@phosphor-icons/react';
-import { WaveformIcon } from '@phosphor-icons/react';
-import { PowerIcon } from '@phosphor-icons/react';
-import { PlugChargingIcon } from '@phosphor-icons/react';
-import { GaugeIcon } from '@phosphor-icons/react';
-import { CircuitryIcon } from '@phosphor-icons/react';
-import { EngineIcon } from '@phosphor-icons/react';
-import { WrenchIcon } from '@phosphor-icons/react';
-import { WavesIcon } from '@phosphor-icons/react';
-import { FactoryIcon } from '@phosphor-icons/react';
+import { supabase } from '@/shared/utils/supabaseClient.js';
 
 // Safely retrieves and parses the user profile from localStorage.
 // Returns null if the profile doesn't exist or if there's a parsing error.
@@ -245,7 +246,7 @@ export const recordAttemptLocally = async ({
     refresh,
 }: recordAttemptLocallyProps) => {
     // A check to ensure attempts are only recorded for logged-in users.
-    if (!user || !user.id) {
+    if (!user?.id) {
         toast.error('No valid user profile found.');
         return;
     }
@@ -276,7 +277,7 @@ export const recordAttemptLocally = async ({
     if (buffer.length >= 1) {
         const error = await recordAttempt({ buffer, user, refresh });
         if (error) {
-            toast.error('Failed to record attempt: ' + error.message);
+            toast.error(`Failed·to·record·attempt:·${error.message}`);
             return;
         }
         localStorage.removeItem(LOCAL_KEY); // Clear the buffer after a successful sync.
@@ -297,7 +298,7 @@ export const recordAttempt = async ({
     user,
     refresh,
 }: recordAttemptProp) => {
-    if (!user || !user.id) {
+    if (!user?.id) {
         toast.error('No valid user profile found.');
         return;
     }

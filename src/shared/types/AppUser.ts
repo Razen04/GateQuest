@@ -1,5 +1,5 @@
-import type { Database, Json } from './supabase.js';
 import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
+import type { Database, Json } from './supabase.js';
 
 type DbUser = Database['public']['Tables']['users']['Row'];
 

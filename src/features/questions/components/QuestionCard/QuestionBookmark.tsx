@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import { Bookmark } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 type QuestionBookmarkProps = {
     onClick: () => void;

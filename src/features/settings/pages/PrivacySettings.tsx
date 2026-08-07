@@ -1,20 +1,17 @@
-import { toast } from 'sonner';
 import {
-    ShieldCheck,
-    GlobeSimple,
-    ChartLineUp,
     Broom,
-    Trash,
-    SignOut,
-    SignIn,
+    ChartLineUp,
+    GlobeSimple,
     LockKey,
+    ShieldCheck,
+    SignIn,
+    SignOut,
+    Trash,
     Warning,
 } from '@phosphor-icons/react';
-
-import useAuth from '@/shared/hooks/useAuth';
+import { toast } from 'sonner';
 import useSettings from '@/features/settings/hooks/useSettings';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
-import { Button } from '@/shared/components/ui/button';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -26,8 +23,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
-import { supabase } from '@/shared/utils/supabaseClient';
+import { Button } from '@/shared/components/ui/button';
+import useAuth from '@/shared/hooks/useAuth';
 import type { Settings } from '@/shared/types/Settings';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
     const { logout, showLogin, setShowLogin, user } = useAuth();

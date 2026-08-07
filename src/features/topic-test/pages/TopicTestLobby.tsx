@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-    Timer,
-    Question,
-    Play,
-    WarningCircle,
-    CheckCircle,
     ArrowLeft,
+    CheckCircle,
+    Play,
+    Question,
+    Timer,
+    WarningCircle,
 } from '@phosphor-icons/react';
-import { Button } from '@/shared/components/ui/button';
-import PageHeader from '@/shared/components/PageHeader';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import type { TestSession } from '@/shared/types/storage';
-import ModernLoader from '@/shared/components/ModernLoader';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { fetchTestById, updateTestStatus } from '../api/topicTest';
 import { getCurrentUser } from '@/shared/api/auth';
+import ModernLoader from '@/shared/components/ModernLoader';
+import PageHeader from '@/shared/components/PageHeader';
+import { Button } from '@/shared/components/ui/button';
+import { useGoals } from '@/shared/hooks/useGoals';
+import type { TestSession } from '@/shared/types/storage';
+import { fetchTestById, updateTestStatus } from '../api/topicTest';
 
 type InstructionRule = {
     id: string;

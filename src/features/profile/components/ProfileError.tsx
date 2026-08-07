@@ -1,5 +1,5 @@
+import { ArrowLeft, House, LockKey, UserMinus } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { UserMinus, LockKey, ArrowLeft, House } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { glassPanel } from '../styles/profileTheme';
 

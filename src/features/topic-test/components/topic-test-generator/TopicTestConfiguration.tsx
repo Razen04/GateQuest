@@ -1,8 +1,8 @@
-import type React from 'react';
 import { Funnel, X } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import ToggleSwitch from '@/shared/components/ToggleSwitch';
+import type React from 'react';
 import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import { Button } from '@/shared/components/ui/button';
 
 interface TopicTestConfigurationProps {

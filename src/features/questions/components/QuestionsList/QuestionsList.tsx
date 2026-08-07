@@ -1,15 +1,15 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useMemo, useState } from 'react';
 import useFilters from '@/features/questions/hooks/useFilters';
 import usePagination from '@/features/questions/hooks/usePagination';
-import { AnimatePresence, motion } from 'framer-motion';
-import Header from './Header';
-import SearchAndFilters from './SearchAndFilters';
-import List from './List';
 import useUrlFilters from '@/features/questions/hooks/useUrlFilters';
+import { notMeaningfulTags } from '@/shared/data/notMeaningfulTags';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
-import { notMeaningfulTags } from '@/shared/data/notMeaningfulTags';
 import { normalizeTag } from '@/shared/utils/helper';
+import Header from './Header';
+import List from './List';
+import SearchAndFilters from './SearchAndFilters';
 
 type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
@@ -97,7 +97,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const years = useMemo(() => {
         const allYears = questions
             .map((q) => String(q.year))
-            .filter((y) => !isNaN(Number(y)));
+            .filter((y) => !Number.isNaN(Number(y)));
         return [...new Set(allYears)].sort((a, b) => Number(b) - Number(a));
     }, [questions]);
 

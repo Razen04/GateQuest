@@ -1,33 +1,32 @@
+import {
+    Check,
+    Dot,
+    Eye,
+    Flag,
+    ShareFat,
+    Trash,
+    Warning,
+} from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/shared/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/shared/components/ui/dialog';
+import { Textarea } from '@/shared/components/ui/textarea';
+import type { Question } from '@/shared/types/storage.js';
+import useBookmark from '../../hooks/useBookmark';
 import {
     getDifficultyClassNames,
     getQuestionTypeText,
     isMultipleSelection,
 } from '../../utils/questionUtils.js';
-import QuestionTimer from './QuestionTimer.js';
 import QuestionBookmark from './QuestionBookmark.js';
-import {
-    Warning,
-    ShareFat,
-    Dot,
-    Eye,
-    Flag,
-    Trash,
-    Check,
-} from '@phosphor-icons/react';
-import type { Question } from '@/shared/types/storage.js';
-
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
-import useBookmark from '../../hooks/useBookmark';
+import QuestionTimer from './QuestionTimer.js';
 
 type TimerProps = {
     minutes: string;

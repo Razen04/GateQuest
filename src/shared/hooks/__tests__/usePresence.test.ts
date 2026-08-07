@@ -1,7 +1,7 @@
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
-import { renderHook, act } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { usePresence } from '../usePresence';
 
 // Mocking the external dependencies

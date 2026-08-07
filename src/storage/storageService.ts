@@ -1,3 +1,4 @@
+import Dexie, { type Table } from 'dexie';
 import type {
     Attempt,
     Question,
@@ -5,7 +6,6 @@ import type {
     TestSession,
 } from '@/shared/types/storage';
 import type { Database } from '@/shared/types/supabase';
-import Dexie, { type Table } from 'dexie';
 
 export type BenchmarkRow =
     Database['public']['Tables']['question_peer_stats']['Row'];

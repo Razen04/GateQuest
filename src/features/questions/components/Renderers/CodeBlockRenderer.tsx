@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import Prism from 'prismjs';
+import { useEffect, useRef } from 'react';
 
 type CodeBlockRendererProps = {
     code: string | undefined;

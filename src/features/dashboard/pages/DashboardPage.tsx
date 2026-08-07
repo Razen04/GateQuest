@@ -1,32 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
-    ChartLine,
-    Medal,
-    LightningIcon,
     ArrowClockwiseIcon,
+    ArrowRightIcon,
     CaretDownIcon,
+    ChartLine,
     Compass,
+    LightningIcon,
+    Medal,
 } from '@phosphor-icons/react';
-
-// Hooks & Utilities
-import useAuth from '@/shared/hooks/useAuth';
-import useStats from '../hooks/useStats';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { getUserProfile } from '@/shared/utils/helper';
-import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // UI Components
 import Login from '@/features/auth/components/Login';
-import ModernLoader from '@/shared/components/ModernLoader';
-import StudyPlan from '../components/StudyPlan';
-import StreakMap from '../components/StreakMap';
-import StatCard from '../components/StatCard';
-import SubjectStats from '../components/SubjectStats';
 import Branding from '@/shared/components/Branding';
-import { WebNotificationToggle } from '../components/WebNotificationToggle';
-import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import ModernLoader from '@/shared/components/ModernLoader';
 import { Button } from '@/shared/components/ui/button';
 import {
     DropdownMenu,
@@ -34,7 +21,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
-import { ArrowRightIcon } from '@phosphor-icons/react';
+// Hooks & Utilities
+import useAuth from '@/shared/hooks/useAuth';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { getUserProfile } from '@/shared/utils/helper';
+import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
+import StatCard from '../components/StatCard';
+import StreakMap from '../components/StreakMap';
+import StudyPlan from '../components/StudyPlan';
+import SubjectStats from '../components/SubjectStats';
+import { WebNotificationToggle } from '../components/WebNotificationToggle';
+import useStats from '../hooks/useStats';
 
 const Dashboard = () => {
     const { isLogin, loading } = useAuth();

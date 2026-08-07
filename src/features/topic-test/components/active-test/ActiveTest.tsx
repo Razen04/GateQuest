@@ -1,16 +1,15 @@
+import { CalculatorIcon, XIcon } from '@phosphor-icons/react';
 import React, { useState } from 'react';
-import useTest from '@/features/topic-test/hooks/test-engine/useTest';
 import QuestionContent from '@/features/questions/components/QuestionCard/QuestionContent';
 import {
     isMultipleSelection,
     isNumericalQuestion,
 } from '@/features/questions/utils/questionUtils';
-
+import useTest from '@/features/topic-test/hooks/test-engine/useTest';
+import QuestionPalette from './QuestionPallete';
+import TestControlBar from './TestControlBar';
 // Sub-components
 import TestHeader from './TestHeader';
-import TestControlBar from './TestControlBar';
-import QuestionPalette from './QuestionPallete';
-import { CalculatorIcon, XIcon } from '@phosphor-icons/react';
 
 const ActiveTest = () => {
     const {

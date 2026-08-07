@@ -1,28 +1,26 @@
-import React, { useEffect, useRef } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-
+import React, { useEffect, useRef } from 'react';
+import useSettings from '@/features/settings/hooks/useSettings';
+import Branding from '@/shared/components/Branding';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { usePresence } from '@/shared/hooks/usePresence';
+import type { Question } from '@/shared/types/storage';
 // Types
 import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
-
+import { openInAI } from '@/shared/utils/aiPromptUtils';
 // Utils
 import {
-    isNumericalQuestion,
     getCorrectAnswerText,
+    isNumericalQuestion,
 } from '../../utils/questionUtils';
-import QuestionHeader from './QuestionHeader';
-import QuestionContent from './QuestionContent';
-import ResultMessage from './ResultMessage';
-import QuestionPeerStats from './QuestionPeerStats';
 import ActionButtons from './ActionButtons';
-import QuestionBadge from './QuestionBadge';
-import QuestionExplanation from './QuestionExplanation';
-import type { Question } from '@/shared/types/storage';
-import { openInAI } from '@/shared/utils/aiPromptUtils';
 import AskAIBanner from './AskAIBanner';
-import useSettings from '@/features/settings/hooks/useSettings';
-import { useGoals } from '@/shared/hooks/useGoals';
-import Branding from '@/shared/components/Branding';
-import { usePresence } from '@/shared/hooks/usePresence';
+import QuestionBadge from './QuestionBadge';
+import QuestionContent from './QuestionContent';
+import QuestionExplanation from './QuestionExplanation';
+import QuestionHeader from './QuestionHeader';
+import QuestionPeerStats from './QuestionPeerStats';
+import ResultMessage from './ResultMessage';
 
 // Child Components
 
@@ -137,7 +135,8 @@ const QuestionCard = ({
     const isCompatible = isSubjectInGoal(question.subject_id);
 
     // Derived: true when the user has selected an option or typed a numerical answer
-    const hasSelection = selectedOptionIndices.length > 0 || numericalAnswer !== null;
+    const hasSelection =
+        selectedOptionIndices.length > 0 || numericalAnswer !== null;
 
     return (
         <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6 pb-20">

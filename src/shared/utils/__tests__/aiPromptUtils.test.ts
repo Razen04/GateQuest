@@ -1,5 +1,5 @@
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { toast } from 'sonner';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MCQQuestion } from '@/shared/types/storage';
 import {
     buildGateAIPrompt,

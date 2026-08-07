@@ -1,5 +1,5 @@
-import webpush from 'npm:web-push';
 import { SupabaseClient } from 'npm:@supabase/supabase-js';
+import webpush from 'npm:web-push';
 
 interface RevisionHourlyArgs {
     supabaseAdmin: SupabaseClient;

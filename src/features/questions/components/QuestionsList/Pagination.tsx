@@ -1,5 +1,5 @@
-import React from 'react';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import React from 'react';
 import { Button } from '@/shared/components/ui/button';
 
 type PaginationProps = {

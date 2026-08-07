@@ -1,12 +1,12 @@
+import type React from 'react';
+import { toast } from 'sonner';
+import { isNumericalQuestion } from '@/features/questions/utils/questionUtils';
+import type { AIProvider } from '@/shared/types/Settings';
 import type {
-    Question,
     MCQQuestion,
     MSQQuestion,
+    Question,
 } from '@/shared/types/storage';
-import type { AIProvider } from '@/shared/types/Settings';
-import { toast } from 'sonner';
-import type React from 'react';
-import { isNumericalQuestion } from '@/features/questions/utils/questionUtils';
 import { DEFAULT_TEMPLATE } from '../data/ai_prompt_template';
 
 // ---------------------------------------------------------------------------

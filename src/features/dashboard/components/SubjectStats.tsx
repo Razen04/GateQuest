@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import type React from 'react';
 import { useGoals } from '@/shared/hooks/useGoals';
+import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
 // Using the exact structure returned by your new RPC
 type SubjectStat = {

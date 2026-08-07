@@ -1,17 +1,16 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { faqs } from '@/shared/data/faqs.js';
 import {
-    GithubLogo,
-    DiscordLogo,
-    Coffee,
-    SealCheck,
-    CaretDown,
     ArrowUpRight,
+    CaretDown,
+    Coffee,
+    DiscordLogo,
+    GithubLogo,
 } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/shared/components/ui/button.js';
 import useSettings from '@/features/settings/hooks/useSettings';
+import { Button } from '@/shared/components/ui/button.js';
+import { faqs } from '@/shared/data/faqs.js';
 
 const ink = '#12151B';
 const signal = '#2A5CFF';

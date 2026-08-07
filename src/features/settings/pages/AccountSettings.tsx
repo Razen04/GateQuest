@@ -1,49 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 import {
-    CircleNotch,
-    User,
-    UserGear,
-    GraduationCap,
     Check,
+    CircleNotch,
     FloppyDisk,
+    GraduationCap,
     IdentificationCard,
     Info,
+    User,
+    UserGear,
 } from '@phosphor-icons/react';
-
-import useAuth from '@/shared/hooks/useAuth';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { getSocialSettingsValue } from '../api/social-settings';
-import {
-    getUserProfile,
-    syncUserToSupabase,
-    updateUserProfile,
-} from '@/shared/utils/helper';
-
-import SocialSettingsForm from '../components/SocialSettingsForm';
-import SocialLinksDisplay from '../components/SocialLinksDisplay';
-
+import { motion } from 'framer-motion';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { useProfile } from '@/features/profile/hooks/useProfile';
 import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/components/ui/dialog';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/shared/components/ui/select';
 import {
     Combobox,
     ComboboxChip,
@@ -55,8 +24,36 @@ import {
     ComboboxList,
     ComboboxValue,
 } from '@/shared/components/ui/combobox';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/shared/components/ui/select';
+import { Textarea } from '@/shared/components/ui/textarea';
+import useAuth from '@/shared/hooks/useAuth';
+import { useGoals } from '@/shared/hooks/useGoals';
 import type { Settings } from '@/shared/types/Settings';
-import { useProfile } from '@/features/profile/hooks/useProfile';
+import {
+    getUserProfile,
+    syncUserToSupabase,
+    updateUserProfile,
+} from '@/shared/utils/helper';
+import { getSocialSettingsValue } from '../api/social-settings';
+import SocialLinksDisplay from '../components/SocialLinksDisplay';
+import SocialSettingsForm from '../components/SocialSettingsForm';
 
 type FormFieldProps = {
     label: string;

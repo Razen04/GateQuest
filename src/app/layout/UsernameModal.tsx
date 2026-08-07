@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import useAuth from '@/shared/hooks/useAuth';
+import { Button } from '@/shared/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
-import { Button } from '@/shared/components/ui/button';
+import useAuth from '@/shared/hooks/useAuth';
 import {
     doesUsernameExists,
     handleUsernameSubmittion,

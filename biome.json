@@ -45,7 +45,8 @@
                 "noAssignInExpressions": "off",
                 "noExplicitAny": "off",
                 "noArrayIndexKey": "off",
-                "useIterableCallbackReturn": "warn"
+                "useIterableCallbackReturn": "warn",
+                "noCommentText": "off"
             },
             "style": {
                 "noNonNullAssertion": "off",

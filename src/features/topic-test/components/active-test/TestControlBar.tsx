@@ -1,13 +1,13 @@
-import { Button } from '@/shared/components/ui/button';
 import {
-    CaretUpIcon,
-    ArrowRightIcon,
-    CaretDownIcon,
     ArrowLeftIcon,
+    ArrowRightIcon,
     BookmarkSimpleIcon,
+    CaretDownIcon,
+    CaretUpIcon,
     TrashSimpleIcon,
 } from '@phosphor-icons/react';
 import React from 'react';
+import { Button } from '@/shared/components/ui/button';
 
 interface TestControlBarProps {
     isFirst: boolean;

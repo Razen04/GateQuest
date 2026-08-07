@@ -1,8 +1,8 @@
 import { X } from '@phosphor-icons/react';
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { toast } from 'sonner';
 import useAuth from '@/shared/hooks/useAuth.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { toast } from 'sonner';
 
 type LoginProp = {
     canClose?: boolean;

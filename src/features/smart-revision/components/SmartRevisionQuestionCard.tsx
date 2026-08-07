@@ -1,3 +1,4 @@
+import { decompress } from 'lz-string';
 import { useEffect, useState } from 'react';
 import {
     useLocation,
@@ -5,14 +6,11 @@ import {
     useParams,
     useSearchParams,
 } from 'react-router-dom';
-
-import type { Question } from '@/shared/types/storage';
-
-import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
-import ReportModal from '@/shared/components/ReportModal';
-import ModernLoader from '@/shared/components/ModernLoader';
 import { useQuestionController } from '@/features/questions/api/useQuestionController';
-import { decompress } from 'lz-string';
+import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
+import ModernLoader from '@/shared/components/ModernLoader';
+import ReportModal from '@/shared/components/ReportModal';
+import type { Question } from '@/shared/types/storage';
 
 const SmartRevisionQuestionCard = () => {
     const navigate = useNavigate();

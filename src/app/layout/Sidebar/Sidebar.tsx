@@ -1,17 +1,17 @@
-import React, { type JSX } from 'react';
-import { type Variants } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
-    ChartPieSlice,
     BookOpen,
+    ChartPieSlice,
     Gear,
     Info,
     UserCircleDashedIcon,
 } from '@phosphor-icons/react';
-import useWindowSize from '@/shared/hooks/useWindowSize';
-import MobileDock from './MobileDock';
+import { type Variants } from 'framer-motion';
+import React, { type JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ModernLoader from '@/shared/components/ModernLoader';
 import useAuth from '@/shared/hooks/useAuth';
+import useWindowSize from '@/shared/hooks/useWindowSize';
+import MobileDock from './MobileDock';
 
 type SidebarProp = {
     showSidebar?: boolean;

@@ -1,11 +1,11 @@
-import { urlBase64ToUint8Array } from '@/shared/utils/cryptoUtils';
 import { useEffect, useState } from 'react';
+import useSettings from '@/features/settings/hooks/useSettings';
+import { urlBase64ToUint8Array } from '@/shared/utils/cryptoUtils';
 import {
     deleteNotificationDetails,
     pushNotificationDetails,
     triggerWelcomeNotification,
 } from '../api/webpush';
-import useSettings from '@/features/settings/hooks/useSettings';
 
 // State tracking types for the internal state machine
 type PushStatus =

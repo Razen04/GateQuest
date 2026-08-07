@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ProfileData } from '../types/profile';
 import { getPublicProfile } from '../api/profileApi';
+import type { ProfileData } from '../types/profile';
 
 const profileCache = new Map<string, ProfileData>();
 

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { motion } from 'framer-motion';
+import * as React from 'react';
 import { containerVariants } from '@/shared/utils/motionVariants';
 import { Text, Title } from './ui/typography';
 

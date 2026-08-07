@@ -1,9 +1,9 @@
-import { useContext, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import { ResponsiveTimeRange } from '@nivo/calendar';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { motion } from 'framer-motion';
+import { useContext, useMemo } from 'react';
+import AppSettingContext from '@/app/providers/AppSettingContext.ts';
 import type { Stats } from '@/shared/types/Stats.ts';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
 type StreakMapType = {
     stats: Stats;

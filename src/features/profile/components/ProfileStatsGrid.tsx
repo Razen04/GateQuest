@@ -1,6 +1,6 @@
-import { BookOpen, Target, Fire, Lightning } from '@phosphor-icons/react';
-import type { ProfileData } from '../types/profile';
+import { BookOpen, Fire, Lightning, Target } from '@phosphor-icons/react';
 import { glassPanel, palette } from '../styles/profileTheme';
+import type { ProfileData } from '../types/profile';
 
 interface ProfileStatsGridProps {
     globalStats: ProfileData['global_stats'];

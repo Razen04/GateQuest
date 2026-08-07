@@ -2,8 +2,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import useBookmark from '../hooks/useBookmark';
 import { supabase } from '@/shared/utils/supabaseClient';
+import useBookmark from '../hooks/useBookmark';
 
 const mockRpc = <T>(data: T) => ({
     data,

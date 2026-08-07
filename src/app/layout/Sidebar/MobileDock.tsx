@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import type { Tab } from './Sidebar';
 import useAuth from '@/shared/hooks/useAuth';
+import type { Tab } from './Sidebar';
 
 type MobileDockProp = {
     tabs: Tab[];

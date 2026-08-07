@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import StatsContext from './StatsContext.js';
-import { supabase } from '@/shared/utils/supabaseClient.ts';
-import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
+import React, { useCallback, useEffect, useState } from 'react';
 import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
-import { getUserProfile } from '@/shared/utils/helper.ts';
 import { useGoals } from '@/shared/hooks/useGoals.js';
+import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
 import type { DashboardResponse } from '@/shared/types/StatsType.js';
+import { getUserProfile } from '@/shared/utils/helper.ts';
+import { supabase } from '@/shared/utils/supabaseClient.ts';
+import StatsContext from './StatsContext.js';
 
 export const StatsProvider: React.FC<{ children: React.ReactNode }> = ({
     children,

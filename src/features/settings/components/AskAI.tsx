@@ -1,23 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Robot,
     ArrowCounterClockwise,
-    Info,
     Check,
     FloppyDisk,
+    Info,
+    Robot,
     Sparkle,
     Warning,
 } from '@phosphor-icons/react';
-
-import { PROVIDERS } from '@/shared/data/ai_providers';
-import { RadioGroup, RadioGroupItem } from '@/shared/components/ui/radio-group';
-import type { AIProvider } from '@/shared/types/Settings';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Button } from '@/shared/components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import useSettings from '@/features/settings/hooks/useSettings';
+import { Button } from '@/shared/components/ui/button';
+import { Label } from '@/shared/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/shared/components/ui/radio-group';
+import { Textarea } from '@/shared/components/ui/textarea';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template';
+import { PROVIDERS } from '@/shared/data/ai_providers';
+import type { AIProvider } from '@/shared/types/Settings';
 
 const PROMPT_TAGS = [
     { label: 'Subject', tag: '{{SUBJECT}}' },

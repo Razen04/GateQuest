@@ -1,19 +1,19 @@
-import { useState, type JSX } from 'react';
-import { CheckCircle, XCircle, Clock, ClockIcon } from '@phosphor-icons/react';
+import { CheckCircle, Clock, ClockIcon, XCircle } from '@phosphor-icons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
-import type { ProfileData } from '../types/profile';
+import { type JSX, useState } from 'react';
+import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
 import {
     Tabs,
+    TabsContent,
     TabsList,
     TabsTrigger,
-    TabsContent,
 } from '@/shared/components/ui/tabs';
-import { accuracyColor, accuracyTextColor } from '../utils';
-import { Badge } from '@/shared/components/ui/badge';
-import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
 import { formatTime } from '@/shared/utils/helper';
 import { glassPanel, palette } from '../styles/profileTheme';
-import { Button } from '@/shared/components/ui/button';
+import type { ProfileData } from '../types/profile';
+import { accuracyTextColor } from '../utils';
 
 type AttemptStatus = 'Correct' | 'Wrong' | 'Skipped';
 

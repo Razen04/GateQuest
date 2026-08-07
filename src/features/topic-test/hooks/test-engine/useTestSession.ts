@@ -1,10 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import useTestAnswer from './useTestAnswer';
-import useTestNavigation from './useTestNavigation';
-import useTestTimer from './useTestTimer';
-import useTestGrading from './useTestGrading';
-import type { TestData } from './useTestLoader';
-import type { Question } from '@/shared/types/storage';
 import { useNavigate } from 'react-router-dom';
 import {
     getPendingAttempts,
@@ -12,7 +6,13 @@ import {
     markAttemptsSynced,
     updateSessionTimeAndStatus,
 } from '@/features/topic-test/services/testSession';
+import type { Question } from '@/shared/types/storage';
 import { updateTestTime, upsertAttempts } from '../../api/topicTest';
+import useTestAnswer from './useTestAnswer';
+import useTestGrading from './useTestGrading';
+import type { TestData } from './useTestLoader';
+import useTestNavigation from './useTestNavigation';
+import useTestTimer from './useTestTimer';
 
 export interface UseTestSessionReturn {
     status: 'ready' | 'error' | 'submitting' | 'completed';

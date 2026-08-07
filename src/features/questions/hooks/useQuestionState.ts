@@ -1,8 +1,7 @@
 // This custom hook manages all the local state related to a single question,such as the user's selected answer, the result, and whether the answer is revealed.
-import React from 'react';
-import { useState, useEffect, useCallback } from 'react';
-import { isMultipleSelection } from '../utils/questionUtils.ts';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { Question } from '@/shared/types/storage.ts';
+import { isMultipleSelection } from '../utils/questionUtils.ts';
 
 // Manages the interactive state for a question card.
 export const useQuestionState = (currentQuestion: Question) => {

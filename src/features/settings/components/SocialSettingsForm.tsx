@@ -1,20 +1,20 @@
+import {
+    DiscordLogoIcon,
+    FediverseLogoIcon,
+    GithubLogoIcon,
+    LinkedinLogoIcon,
+    MastodonLogoIcon,
+    RedditLogoIcon,
+    SpotifyLogoIcon,
+    XLogoIcon,
+    YoutubeLogoIcon,
+} from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
-import useAuth from '@/shared/hooks/useAuth';
 import { toast } from 'sonner';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import {
-    GithubLogoIcon,
-    LinkedinLogoIcon,
-    RedditLogoIcon,
-    SpotifyLogoIcon,
-    DiscordLogoIcon,
-    XLogoIcon,
-    MastodonLogoIcon,
-    FediverseLogoIcon,
-    YoutubeLogoIcon,
-} from '@phosphor-icons/react';
+import useAuth from '@/shared/hooks/useAuth';
 import {
     getSocialSettingsValue,
     handleUpdateSocialSettings,

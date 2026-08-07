@@ -1,6 +1,6 @@
+import { useEffect } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { useWebPush } from '../hooks/useWebPush';
-import { useEffect } from 'react';
 
 export const WebNotificationToggle = () => {
     const {

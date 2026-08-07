@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
 import {
-    CircleNotchIcon,
     ArrowSquareOutIcon,
     ChatTeardropTextIcon,
+    CircleNotchIcon,
     XIcon,
 } from '@phosphor-icons/react';
-import type { AIProvider } from '@/shared/types/Settings';
+import React, { useState } from 'react';
 import { Textarea } from '@/shared/components/ui/textarea.tsx';
+import type { AIProvider } from '@/shared/types/Settings';
 
 interface AskAIBannerProps {
     provider: AIProvider;

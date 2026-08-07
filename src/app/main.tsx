@@ -2,9 +2,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
-import App from './App.tsx';
-import { Toaster } from 'sonner';
 import { registerSW } from 'virtual:pwa-register';
+import { Toaster } from 'sonner';
+import App from './App.tsx';
 
 // --- helper to clear localStorage + Cache Storage ---
 const clearStaleData = async () => {

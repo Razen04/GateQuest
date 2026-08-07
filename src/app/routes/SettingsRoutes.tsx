@@ -1,8 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Settings from '@/features/settings/pages/SettingsPage';
-import PrivacySettings from '@/features/settings/pages/PrivacySettings';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import AccountSettings from '@/features/settings/pages/AccountSettings';
 import AppSettings from '@/features/settings/pages/AppSettings';
+import PrivacySettings from '@/features/settings/pages/PrivacySettings';
+import Settings from '@/features/settings/pages/SettingsPage';
 
 /**
  * @function SettingsRoutes

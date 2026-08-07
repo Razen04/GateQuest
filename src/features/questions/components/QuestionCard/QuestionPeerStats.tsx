@@ -1,4 +1,4 @@
-import { SpinnerGap, ChartBar } from '@phosphor-icons/react';
+import { ChartBar, SpinnerGap } from '@phosphor-icons/react';
 import type { Database } from '@/shared/types/supabase.ts';
 import { formatTime } from '@/shared/utils/helper';
 

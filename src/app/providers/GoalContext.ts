@@ -1,5 +1,5 @@
-import type { Database } from '@/shared/types/supabase';
 import { createContext } from 'react';
+import type { Database } from '@/shared/types/supabase';
 
 type Tables = Database['public']['Tables'];
 export type Branch = Tables['branches']['Row'];

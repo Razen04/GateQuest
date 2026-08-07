@@ -1,20 +1,13 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
+    ArrowCounterClockwiseIcon,
     CaretDown,
     Funnel,
     MagnifyingGlass,
-    ArrowCounterClockwiseIcon,
 } from '@phosphor-icons/react';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/shared/components/ui/select';
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { Button } from '@/shared/components/ui/button';
 import {
     Combobox,
     ComboboxChip,
@@ -26,10 +19,17 @@ import {
     ComboboxList,
     ComboboxValue,
 } from '@/shared/components/ui/combobox';
-import { Label } from '@/shared/components/ui/label';
-import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
-import { useParams } from 'react-router-dom';
+import { Label } from '@/shared/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/shared/components/ui/select';
 import { useGoals } from '@/shared/hooks/useGoals';
 
 type SearchAndFiltersProps = {

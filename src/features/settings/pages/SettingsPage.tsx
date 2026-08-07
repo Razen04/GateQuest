@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { Faders, ShieldCheck, User } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { User, ShieldCheck, Faders } from '@phosphor-icons/react';
+import { useEffect, useRef } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Login from '@/features/auth/components/Login';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { itemVariants } from '@/shared/utils/motionVariants';
-import useAuth from '@/shared/hooks/useAuth';
-import PageHeader from '@/shared/components/PageHeader';
 import AnimatedTabs from '@/shared/components/AnimatedTabs';
+import PageHeader from '@/shared/components/PageHeader';
+import useAuth from '@/shared/hooks/useAuth';
+import { itemVariants } from '@/shared/utils/motionVariants';
 
 const Settings = () => {
     const location = useLocation();

@@ -2,8 +2,10 @@
 // It handles loading and error states, and implements a caching strategy using localStorage to reduce network requests.
 // It also compresses data to save space in localStorage and handles migration for existing uncompressed data.
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useGoals } from '@/shared/hooks/useGoals';
+import type { Question } from '@/shared/types/storage';
 import { sortQuestionsByYear } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import {
@@ -12,8 +14,6 @@ import {
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
 } from '@/storage/questionRepository';
-import { useGoals } from '@/shared/hooks/useGoals';
-import type { Question } from '@/shared/types/storage';
 
 // We normalise the mixed "exam" metadata (string or string[])
 const isQuestionInActiveExams = (q: Question, activeExams: string[]) => {

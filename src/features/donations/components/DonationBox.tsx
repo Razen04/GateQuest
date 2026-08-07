@@ -1,18 +1,18 @@
-import React, { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
+    ArrowRight,
     CaretDown,
     CaretUp,
-    ArrowRight,
     CurrencyInr,
-    Info,
     EyeSlash,
+    Info,
 } from '@phosphor-icons/react';
-import instructions from '@/shared/data/donationInstructions.ts';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useRef, useState } from 'react';
 import ToggleSwitch from '@/shared/components/ToggleSwitch.tsx';
 import { Button } from '@/shared/components/ui/button.tsx';
-import { Textarea } from '@/shared/components/ui/textarea.tsx';
 import { Input } from '@/shared/components/ui/input.tsx';
+import { Textarea } from '@/shared/components/ui/textarea.tsx';
+import instructions from '@/shared/data/donationInstructions.ts';
 
 type DonationBoxProps = {
     setStep: React.Dispatch<

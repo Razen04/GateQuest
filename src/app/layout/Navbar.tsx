@@ -1,22 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import {
-    Notification,
+    BookOpen,
+    ChartPieSlice,
     Coffee,
     DiscordLogo,
-    GithubLogo,
-    ChartPieSlice,
-    BookOpen,
     Gear,
+    GithubLogo,
     Info,
+    Notification,
     Star,
     UserCircleDashedIcon,
 } from '@phosphor-icons/react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import NotificationDialog from '@/shared/components/NotificationDialog';
-import useWindowSize from '@/shared/hooks/useWindowSize';
+import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Changelog from '@/shared/components/Changelog';
+import NotificationDialog from '@/shared/components/NotificationDialog';
 import useAuth from '@/shared/hooks/useAuth';
+import useWindowSize from '@/shared/hooks/useWindowSize';
 
 const springTransition = {
     type: 'spring' as const,

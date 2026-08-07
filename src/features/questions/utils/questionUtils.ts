@@ -1,10 +1,4 @@
 import type { NumericalQuestion, Question } from '@/shared/types/storage.js';
-import {
-    getUserProfile,
-    updateUserProfile,
-    syncUserToSupabase,
-} from '@/shared/utils/helper.js';
-import { toast } from 'sonner';
 
 // Get difficulty class names
 export const getDifficultyClassNames = (difficulty: string) => {
@@ -24,9 +18,9 @@ export const getDifficultyClassNames = (difficulty: string) => {
 export const isMultipleSelection = (currentQuestion: Question) => {
     if (!currentQuestion) return false;
 
-    const isTypeMatch =
-        currentQuestion.question_type &&
-        currentQuestion.question_type.toLowerCase().includes('multiple-select');
+    const isTypeMatch = currentQuestion.question_type
+        ?.toLowerCase()
+        .includes('multiple-select');
 
     const isTagMatch =
         currentQuestion.tags &&
@@ -120,7 +114,7 @@ export const getCorrectAnswerText = (
 };
 
 export const getQuestionDisplayText = (question: Question) => {
-    if (!question || !question.question) return 'Question content unavailable';
+    if (!question?.question) return 'Question content unavailable';
 
     const maxLength = 120;
     if (question.question.length <= maxLength) {

@@ -1,6 +1,6 @@
 import * as React from 'react';
+import type { Question, RevisionQuestion } from '@/shared/types/storage';
 import MathRenderer from '../Renderers/MathRenderer';
-import type { RevisionQuestion, Question } from '@/shared/types/storage';
 
 interface QuestionExplanationProps {
     question: RevisionQuestion | Question;

@@ -1,26 +1,26 @@
+import {
+    CalendarBlank,
+    DiscordLogo,
+    FediverseLogoIcon,
+    GithubLogo,
+    Globe,
+    GraduationCap,
+    LinkedinLogo,
+    MastodonLogoIcon,
+    RedditLogo,
+    SpotifyLogo,
+    XLogoIcon,
+    YoutubeLogo,
+} from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import type { ProfileData } from '../types/profile';
+import type { JSX } from 'react';
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from '@/shared/components/ui/avatar';
-import {
-    CalendarBlank,
-    GraduationCap,
-    GithubLogo,
-    LinkedinLogo,
-    Globe,
-    XLogoIcon,
-    DiscordLogo,
-    RedditLogo,
-    SpotifyLogo,
-    YoutubeLogo,
-    FediverseLogoIcon,
-    MastodonLogoIcon,
-} from '@phosphor-icons/react';
-import type { JSX } from 'react';
-import { glassPanel, eyebrow } from '../styles/profileTheme';
+import { eyebrow, glassPanel } from '../styles/profileTheme';
+import type { ProfileData } from '../types/profile';
 
 const SOCIAL_ICONS: Record<string, JSX.Element> = {
     github: <GithubLogo size={15} />,

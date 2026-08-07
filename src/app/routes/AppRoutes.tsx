@@ -4,29 +4,29 @@
  * It handles route protection based on authentication status, ensuring that users are directed appropriately based on whether they are logged in or not. It also orchestrates the overall page layout.
  */
 
-import ModernLoader from '@/shared/components/ModernLoader.js';
-import LandingPage from '@/features/landing/pages/LandingPage.tsx';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from '@/app/layout/Layout.jsx';
-import Dashboard from '@/features/dashboard/pages/DashboardPage';
 import SettingsRoutes from '@/app/routes/SettingsRoutes';
 import About from '@/features/about/pages/AboutPage';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import useAuth from '@/shared/hooks/useAuth';
+import Dashboard from '@/features/dashboard/pages/DashboardPage';
 import DonationPage from '@/features/donations/pages/DonationsPage';
-import PracticeList from '@/features/practice/components/PracticeList';
-import SmartRevision from '@/features/smart-revision/pages/SmartRevisionPage';
-import SmartRevisionQuestionList from '@/features/smart-revision/components/SmartRevisionQuestionList';
+import LandingPage from '@/features/landing/pages/LandingPage.tsx';
 import PracticeCard from '@/features/practice/components/PracticeCard';
-import SmartRevisionQuestionCard from '@/features/smart-revision/components/SmartRevisionQuestionCard';
-import TopicTest from '@/features/topic-test/pages/TopicTest';
-import TopicTestGeneratePage from '@/features/topic-test/components/topic-test-generator/TopicTestGenerate';
-import TopicTestLobby from '@/features/topic-test/pages/TopicTestLobby';
-import TopicTestSessionPage from '@/features/topic-test/pages/TopicTestSession';
-import TopicTestResult from '@/features/topic-test/pages/TopicTestResult';
-import TestSolutionView from '@/features/topic-test/components/TestSolutionView';
-import TopicReviewLayout from '@/features/topic-test/components/TopicReviewLayout';
+import PracticeList from '@/features/practice/components/PracticeList';
 import Practice from '@/features/practice/pages/PracticePage';
 import ProfilePage from '@/features/profile/ProfilePage';
+import SmartRevisionQuestionCard from '@/features/smart-revision/components/SmartRevisionQuestionCard';
+import SmartRevisionQuestionList from '@/features/smart-revision/components/SmartRevisionQuestionList';
+import SmartRevision from '@/features/smart-revision/pages/SmartRevisionPage';
+import TestSolutionView from '@/features/topic-test/components/TestSolutionView';
+import TopicReviewLayout from '@/features/topic-test/components/TopicReviewLayout';
+import TopicTestGeneratePage from '@/features/topic-test/components/topic-test-generator/TopicTestGenerate';
+import TopicTest from '@/features/topic-test/pages/TopicTest';
+import TopicTestLobby from '@/features/topic-test/pages/TopicTestLobby';
+import TopicTestResult from '@/features/topic-test/pages/TopicTestResult';
+import TopicTestSessionPage from '@/features/topic-test/pages/TopicTestSession';
+import ModernLoader from '@/shared/components/ModernLoader.js';
+import useAuth from '@/shared/hooks/useAuth';
 
 /**
  * @function AppRoutes

@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { SidebarItem } from './SidebarItem';
-import { Button } from '@/shared/components/ui/button';
 import {
     CaretLeft,
+    Coffee,
     DiscordLogo,
     GithubLogo,
-    Coffee,
 } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import Changelog from '@/shared/components/Changelog';
+import { Button } from '@/shared/components/ui/button';
 import { Text, Title } from '@/shared/components/ui/typography';
 import type { Tab } from './Sidebar';
-import Changelog from '@/shared/components/Changelog';
-import { useLocation } from 'react-router-dom';
+import { SidebarItem } from './SidebarItem';
 
 type SidebarDesktopProps = {
     showSidebar: boolean;

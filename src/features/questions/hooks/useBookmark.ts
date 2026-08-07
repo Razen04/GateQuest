@@ -1,5 +1,5 @@
-import { supabase } from '@/shared/utils/supabaseClient';
 import { useCallback, useState } from 'react';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 type Bookmarks = {
     notes: string | null;

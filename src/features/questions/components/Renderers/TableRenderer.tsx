@@ -156,15 +156,14 @@ const TableRenderer: React.FC<TableRendererProps> = ({ tableText }) => {
                     <table className="min-w-[360px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
                         <thead className="bg-gray-50 dark:bg-zinc-800/40">
                             <tr>
-                                {tbl.headers &&
-                                    tbl.headers.map((header, i) => (
-                                        <th
-                                            key={i}
-                                            className="px-2 sm:px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-200 border-b whitespace-nowrap"
-                                        >
-                                            <MathRenderer text={header} />
-                                        </th>
-                                    ))}
+                                {tbl.headers?.map((header, i) => (
+                                    <th
+                                        key={i}
+                                        className="px-2 sm:px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-200 border-b whitespace-nowrap"
+                                    >
+                                        <MathRenderer text={header} />
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>

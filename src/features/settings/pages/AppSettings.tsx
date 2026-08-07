@@ -1,24 +1,22 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
 import {
-    SpeakerHigh,
-    Timer,
-    MoonStars,
     BellRinging,
-    WarningCircle,
+    Clock,
     Cpu,
     GitBranch,
-    Clock,
+    MoonStars,
     Sliders,
     Sparkle,
+    SpeakerHigh,
+    Timer,
+    WarningCircle,
 } from '@phosphor-icons/react';
-
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
+import AskAI from '@/features/settings/components/AskAI';
 import useSettings from '@/features/settings/hooks/useSettings';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
-import AskAI from '@/features/settings/components/AskAI';
-import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
-import { version, last_updated } from '../../../../package.json';
+import { last_updated, version } from '../../../../package.json';
 
 const AppSettings = () => {
     const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();

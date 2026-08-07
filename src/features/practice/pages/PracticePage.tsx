@@ -1,25 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-    getBackgroundColor,
-    getUserProfile,
-    SubjectIconMap,
-} from '@/shared/utils/helper';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
-import type { SubjectStat } from '@/shared/types/Stats';
-import { Button } from '@/shared/components/ui/button';
-import {
-    Card,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Progress } from '@/shared/components/ui/progress';
-import PageHeader from '@/shared/components/PageHeader';
 import AnimatedTabs from '@/shared/components/AnimatedTabs';
-import { useGoals } from '@/shared/hooks/useGoals';
+import PageHeader from '@/shared/components/PageHeader';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,6 +13,23 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/shared/components/ui/alert-dialog';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
+import {
+    Card,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/shared/components/ui/card';
+import { Progress } from '@/shared/components/ui/progress';
+import { useGoals } from '@/shared/hooks/useGoals';
+import type { SubjectStat } from '@/shared/types/Stats';
+import {
+    getBackgroundColor,
+    getUserProfile,
+    SubjectIconMap,
+} from '@/shared/utils/helper';
+import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
 
 const Practice = () => {
     const navigate = useNavigate();

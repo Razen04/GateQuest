@@ -1,9 +1,9 @@
+import { useCallback, useState } from 'react';
 import {
     getTestSession,
     updateAttempts,
 } from '@/features/topic-test/services/testSession';
 import type { Attempt } from '@/shared/types/storage';
-import { useCallback, useState } from 'react';
 import { submitTestGrading } from '../../api/topicTest';
 
 const useTestGrading = () => {
@@ -36,7 +36,7 @@ const useTestGrading = () => {
                     if (retryCount < maxRetries) {
                         retryCount++;
                         await new Promise((res) =>
-                            setTimeout(res, Math.pow(2, retryCount) * 1000)
+                            setTimeout(res, 2 ** retryCount * 1000)
                         );
                         return rpcCall();
                     }

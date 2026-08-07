@@ -1,5 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import React from 'react';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
 type StatCardType = {

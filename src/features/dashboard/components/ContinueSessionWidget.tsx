@@ -1,17 +1,17 @@
 import {
+    ArrowRightIcon,
     BookmarkIcon,
-    TargetIcon,
-    SlidersIcon,
+    BookOpenIcon,
+    ChartBarIcon,
+    ClockIcon,
     EyeIcon,
     HeartIcon,
-    XIcon,
-    ArrowRightIcon,
-    ClockIcon,
-    ChartBarIcon,
-    BookOpenIcon,
     HighlighterIcon,
+    SlidersIcon,
+    TargetIcon,
+    XIcon,
 } from '@phosphor-icons/react';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const ContinueSessionWidget = () => {

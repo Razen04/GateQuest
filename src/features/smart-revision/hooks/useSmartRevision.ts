@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { compress } from 'lz-string';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useGoals } from '@/shared/hooks/useGoals';
 import type { RevisionQuestion } from '@/shared/types/storage';
+import { getUserProfile } from '@/shared/utils/helper';
 import {
     fetchCriticalQuestionCount,
     fetchWeeklySet,
@@ -11,7 +12,6 @@ import {
     startWeeklySet,
     type WeeklySet,
 } from '../api/smartRevision';
-import { getUserProfile } from '@/shared/utils/helper';
 
 const useSmartRevision = () => {
     // Getting the user

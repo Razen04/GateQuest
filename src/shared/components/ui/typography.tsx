@@ -1,6 +1,6 @@
-import { cn } from '@/shared/utils/cn';
 import { cva } from 'class-variance-authority';
 import type React from 'react';
+import { cn } from '@/shared/utils/cn';
 
 const titleVariants = cva('font-bold tracking-tighter', {
     variants: {

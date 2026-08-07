@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { UserCircle } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
+import * as React from 'react';
 import type { DonationData } from '../types/donationType';
 
 type DonorListProps = {

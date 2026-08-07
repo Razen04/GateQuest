@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
 
 type Answer =
     | {

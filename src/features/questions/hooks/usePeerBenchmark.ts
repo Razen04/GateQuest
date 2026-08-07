@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { appStorage } from '@/storage/storageService';
-import { fetchQuestionPeerStats, type Benchmark } from '../api/quesitons';
+import { type Benchmark, fetchQuestionPeerStats } from '../api/quesitons';
 
 // 12 hours in milliseconds
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
@@ -14,7 +14,7 @@ export function usePeerBenchmark(questionId: string | number) {
     const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!questionId || questionId == 0) return;
+        if (!questionId || questionId === 0) return;
 
         let isMounted = true;
         const strQuestionId = String(questionId);

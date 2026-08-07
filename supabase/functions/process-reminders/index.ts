@@ -1,10 +1,10 @@
-import webpush from 'npm:web-push';
 import { createClient } from 'npm:@supabase/supabase-js';
+import webpush from 'npm:web-push';
+import { handleDonationReminder } from './handlers/donationReminder.ts';
 import { handleReportCreated } from './handlers/reportCreated.ts';
 import { handleReportResolved } from './handlers/reportResolved.ts';
 import { handleHourlyRevision } from './handlers/revisionHourly.ts';
 import { handleTopicTestReminder } from './handlers/topicTestReminder.ts';
-import { handleDonationReminder } from './handlers/donationReminder.ts';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',

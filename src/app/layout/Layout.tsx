@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Sidebar from './Sidebar/Sidebar.tsx';
-import Navbar from './Navbar.tsx';
-import { getUserProfile } from '@/shared/utils/helper';
-import { supabase } from '@/shared/utils/supabaseClient';
-import type { AppUser } from '@/shared/types/AppUser';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
+import type { AppUser } from '@/shared/types/AppUser';
+import { getUserProfile } from '@/shared/utils/helper';
+import { supabase } from '@/shared/utils/supabaseClient';
+import Navbar from './Navbar.tsx';
+import Sidebar from './Sidebar/Sidebar.tsx';
 import { UsernameModal } from './UsernameModal.tsx';
 
 type SyncOnUnloadProps = {

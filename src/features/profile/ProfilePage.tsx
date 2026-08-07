@@ -1,16 +1,14 @@
+import { motion } from 'framer-motion';
 import { useParams } from 'react-router-dom';
 import ModernLoader from '@/shared/components/ModernLoader';
-import { useProfile } from './hooks/useProfile';
-
+import { containerVariants } from '@/shared/utils/motionVariants';
+import ProfileActivityTabs from './components/ProfileActivityTabs';
+import ProfileError from './components/ProfileError';
+import ProfileHeatmap from './components/ProfileHeatmap';
 import ProfileHero from './components/ProfileHero';
 import ProfileSidePanel from './components/ProfileSidePanel';
 import ProfileStatsGrid from './components/ProfileStatsGrid';
-import ProfileHeatmap from './components/ProfileHeatmap';
-import ProfileActivityTabs from './components/ProfileActivityTabs';
-import ProfileError from './components/ProfileError';
-
-import { motion } from 'framer-motion';
-import { containerVariants } from '@/shared/utils/motionVariants';
+import { useProfile } from './hooks/useProfile';
 
 export default function ProfilePage() {
     const { username } = useParams<{ username: string }>();

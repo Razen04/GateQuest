@@ -1,9 +1,9 @@
-import ModernLoader from '@/shared/components/ModernLoader';
+import React from 'react';
 import useTestLoader, {
     type TestData,
 } from '@/features/topic-test/hooks/test-engine/useTestLoader';
 import useTestSession from '@/features/topic-test/hooks/test-engine/useTestSession';
-import React from 'react';
+import ModernLoader from '@/shared/components/ModernLoader';
 import TestSessionContext from './TestSessionContext';
 
 interface TestSessionProviderPropTypes {

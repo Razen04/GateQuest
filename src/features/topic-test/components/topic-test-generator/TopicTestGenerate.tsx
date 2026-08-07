@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import PageHeader from '@/shared/components/PageHeader';
 import {
     Select,
@@ -13,17 +14,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/shared/components/ui/select';
-
+import { useGoals } from '@/shared/hooks/useGoals';
+import { SubjectIconMap } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { supabase } from '@/shared/utils/supabaseClient';
-
 import TopicsSelection from './TopicsSelection';
 import TopicTestConfiguration from './TopicTestConfiguration';
 import TopicTestFooter from './TopicTestFooter';
-
-import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
-import { useGoals } from '@/shared/hooks/useGoals';
-import { SubjectIconMap } from '@/shared/utils/helper';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();

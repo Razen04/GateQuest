@@ -1,8 +1,8 @@
 // This custom hook provides a flexible timer functionality for questions.
 // It can be started, stopped, and reset, and supports an auto-start feature.
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Question } from '@/shared/types/storage';
-import { useState, useRef, useEffect, useCallback } from 'react';
 
 // Manages the state and logic for a question timer.
 export const useQuestionTimer = (

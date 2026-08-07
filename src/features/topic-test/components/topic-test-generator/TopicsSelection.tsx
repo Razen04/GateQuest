@@ -1,14 +1,14 @@
-import { AnimatePresence, motion } from 'framer-motion';
 import {
-    Check,
-    StackIcon,
     CaretDown,
+    Check,
     EraserIcon,
     ListChecksIcon,
+    StackIcon,
 } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
 import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import { Button } from '@/shared/components/ui/button';
 
 interface TopicsSelectionProps {
     selectedSubjectId: string | null;

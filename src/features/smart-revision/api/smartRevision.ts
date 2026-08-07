@@ -1,5 +1,5 @@
-import { supabase } from '@/shared/utils/supabaseClient';
 import type { RevisionQuestion } from '@/shared/types/storage';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 // --- Types ---
 export type WeeklySet = {

@@ -1,22 +1,22 @@
-import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import changelog from '/CHANGELOG.md?raw';
-import {
-    Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/components/ui/dialog';
-import { ScrollArea } from '@/shared/components/ui/scroll-area';
 import {
     ArticleIcon,
     GithubLogoIcon,
     LinkIcon,
     MegaphoneIcon,
 } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/shared/components/ui/dialog';
+import { ScrollArea } from '@/shared/components/ui/scroll-area';
+import changelog from '/CHANGELOG.md?raw';
 import { version } from '../../../package.json';
 
 function Changelog() {

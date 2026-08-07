@@ -1,5 +1,5 @@
-import { formatTime } from '@/shared/utils/helper';
 import { useEffect, useRef, useState } from 'react';
+import { formatTime } from '@/shared/utils/helper';
 
 interface useTestTimerPropsType {
     initialSeconds: number;

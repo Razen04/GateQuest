@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
-    Heart,
-    ShieldCheck,
     ArrowRight,
-    Receipt,
     CheckCircle2,
     Crown,
+    Heart,
+    Receipt,
+    ShieldCheck,
 } from 'lucide-react';
-
-import { useDonations } from '../hooks/useDonations.ts';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { getUserProfile } from '@/shared/utils/helper';
 import DonationBox from '../components/DonationBox';
 import DonorList from '../components/DonorList';
 import UpiQRCode from '../components/UpiQRCode';
-import { getUserProfile } from '@/shared/utils/helper';
+import { useDonations } from '../hooks/useDonations.ts';
 
 // Shared Palette Accents
 const signal = '#2A5CFF';

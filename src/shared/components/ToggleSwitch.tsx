@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
 import { Check, X } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import type React from 'react';
 import { cn } from '../utils/cn';
 

@@ -1,8 +1,8 @@
 import React from 'react';
-import { InlineMath, BlockMath } from 'react-katex';
+import { BlockMath, InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
-import TableRenderer from '../Renderers/TableRenderer.js';
 import CodeBlockRenderer from '../Renderers/CodeBlockRenderer.js';
+import TableRenderer from '../Renderers/TableRenderer.js';
 import parseContent from './parseContent.js';
 import 'prismjs/themes/prism-tomorrow.css';
 // @ts-expect-error Don't really know why TS is showing error (help me)

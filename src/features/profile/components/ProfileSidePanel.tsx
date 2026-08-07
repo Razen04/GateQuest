@@ -1,5 +1,5 @@
+import { eyebrow, glassPanel, palette } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
-import { glassPanel, eyebrow, palette } from '../styles/profileTheme';
 
 interface ProfileSidePanelProps {
     globalStats: ProfileData['global_stats'];

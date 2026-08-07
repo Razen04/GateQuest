@@ -1,5 +1,6 @@
 import type { Question } from '@/shared/types/storage';
 import { appStorage } from './storageService';
+
 const db = appStorage;
 
 const getQuestionsBySubject = async (subjectId: string) => {
@@ -43,10 +44,10 @@ const updateSubjectSyncMetadata = async (
 };
 
 export {
-    getQuestionsBySubject,
+    bulkUpsertQuestions,
     getAllQuestions,
     getQuestionByIds,
-    bulkUpsertQuestions,
+    getQuestionsBySubject,
     getSubjectSyncMetadata,
     updateSubjectSyncMetadata,
 };

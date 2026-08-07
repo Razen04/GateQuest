@@ -1,22 +1,21 @@
-import type React from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
+    ArrowUpRight,
     Brain,
     ChartLineUp,
     Fingerprint,
     Lightning,
+    MoonIcon,
     SealCheck,
+    SunIcon,
     Timer,
-    ArrowUpRight,
 } from '@phosphor-icons/react';
-
-import { Button } from '@/shared/components/ui/button';
+import { motion } from 'framer-motion';
+import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import About from '@/features/about/pages/AboutPage';
-import { SunIcon } from '@phosphor-icons/react';
-import { MoonIcon } from '@phosphor-icons/react';
 import useSettings from '@/features/settings/hooks/useSettings';
+import { Button } from '@/shared/components/ui/button';
 import type { Settings } from '@/shared/types/Settings';
 
 const signal = '#2A5CFF';

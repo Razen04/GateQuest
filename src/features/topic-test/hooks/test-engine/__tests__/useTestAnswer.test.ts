@@ -1,8 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Attempt } from '@/shared/types/storage';
 import useTestAnswer from '@/features/topic-test/hooks/test-engine/useTestAnswer';
 import { saveAttempt } from '@/features/topic-test/services/testSession';
+import type { Attempt } from '@/shared/types/storage';
 
 // mock saveAttempt
 vi.mock('@/features/topic-test/services/testSession', () => ({

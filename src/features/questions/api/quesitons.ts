@@ -1,5 +1,5 @@
-import { supabase } from '@/shared/utils/supabaseClient';
 import type { Database } from '@/shared/types/supabase';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 export type Benchmark =
     Database['public']['Tables']['question_peer_stats']['Row'];

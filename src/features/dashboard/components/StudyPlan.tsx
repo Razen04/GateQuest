@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.ts';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import ModernLoader from '@/shared/components/ModernLoader';
+import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import { useExamCountdown } from '../hooks/useExamCountdown';
 
 interface StudyPlanData {

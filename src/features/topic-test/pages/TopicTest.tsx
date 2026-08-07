@@ -1,37 +1,37 @@
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import {
+    ArrowLeftIcon,
+    ChartLineUpIcon,
+    CheckCircle,
     Clock,
     Play,
-    CheckCircle,
-    XCircle,
     Plus,
     Timer,
+    XCircle,
 } from '@phosphor-icons/react';
-import PageHeader from '@/shared/components/PageHeader';
-import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-import { Button } from '@/shared/components/ui/button';
-import { ArrowLeftIcon } from '@phosphor-icons/react';
-import useTopicTestHubData from '@/features/topic-test/hooks/useTopicTestHubData';
-import useAuth from '@/shared/hooks/useAuth';
-import { toast } from 'sonner';
-import { formatTime, getUserProfile } from '@/shared/utils/helper';
-import ModernLoader from '@/shared/components/ModernLoader';
-import { useGoals } from '@/shared/hooks/useGoals';
+import { motion } from 'framer-motion';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
+    Area,
+    AreaChart,
+    CartesianGrid,
+    ResponsiveContainer,
+    Tooltip,
     XAxis,
     YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area,
 } from 'recharts';
-import { ChartLineUpIcon } from '@phosphor-icons/react';
+import { toast } from 'sonner';
+import useTopicTestHubData from '@/features/topic-test/hooks/useTopicTestHubData';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
-import { updateTestStatus } from '../api/topicTest';
 import { getCurrentUser } from '@/shared/api/auth';
+import ModernLoader from '@/shared/components/ModernLoader';
+import PageHeader from '@/shared/components/PageHeader';
+import { Button } from '@/shared/components/ui/button';
+import useAuth from '@/shared/hooks/useAuth';
+import { useGoals } from '@/shared/hooks/useGoals';
+import { formatTime, getUserProfile } from '@/shared/utils/helper';
+import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+import { updateTestStatus } from '../api/topicTest';
 
 const getTestName = (completedAt?: string | null) => {
     if (!completedAt) return 'Untitled Test';
@@ -146,8 +146,6 @@ const TopicTest = () => {
                     darkBg: 'dark:bg-red-900/30',
                     darkText: 'dark:text-red-400',
                 };
-            case 'ongoing':
-            case 'paused':
             default:
                 return {
                     icon: <Clock size={20} />,

@@ -1,16 +1,15 @@
-import { useState, useMemo } from 'react';
-import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { useMemo, useState } from 'react';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '@/shared/utils/supabaseClient';
-import useAuth from '@/shared/hooks/useAuth';
 import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
+import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
 import {
     isMultipleSelection,
     isNumericalQuestion,
 } from '@/features/questions/utils/questionUtils';
-
-import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
 import ReportModal from '@/shared/components/ReportModal';
+import useAuth from '@/shared/hooks/useAuth';
+import { supabase } from '@/shared/utils/supabaseClient';
 
 const TestSolutionView = () => {
     const { testId, questionIndex } = useParams<{

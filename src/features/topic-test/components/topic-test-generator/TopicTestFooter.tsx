@@ -1,6 +1,6 @@
-import { Button } from '@/shared/components/ui/button';
-import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import { ClockIcon } from '@phosphor-icons/react';
+import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import { Button } from '@/shared/components/ui/button';
 
 interface TopicTestFooterProps {
     estimatedTime: number;

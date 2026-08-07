@@ -1,33 +1,33 @@
-import { useMemo } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-    Trophy,
-    Target,
-    Timer,
-    ListChecks,
-    ArrowRight,
-    House,
     ArrowLeftIcon,
-    WarningCircle,
+    ArrowRight,
+    Clock,
+    House,
+    ListChecks,
     PresentationChart,
     Shapes,
-    Clock,
+    Target,
+    Timer,
+    Trophy,
+    WarningCircle,
 } from '@phosphor-icons/react';
-import PageHeader from '@/shared/components/PageHeader';
-import { Button } from '@/shared/components/ui/button';
-import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-import type { Attempt, Question, TestSession } from '@/shared/types/storage';
+import { motion } from 'framer-motion';
+import { useMemo } from 'react';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import {
-    BarChart,
     Bar,
+    BarChart,
+    ResponsiveContainer,
+    Tooltip,
     XAxis,
     YAxis,
-    Tooltip,
-    ResponsiveContainer,
 } from 'recharts';
-import { QuestionGrid } from '../components/test-result/QuestionGrid';
+import PageHeader from '@/shared/components/PageHeader';
+import { Button } from '@/shared/components/ui/button';
+import type { Attempt, Question, TestSession } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
+import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+import { QuestionGrid } from '../components/test-result/QuestionGrid';
 
 type OutletContext = {
     session: TestSession;
@@ -323,11 +323,7 @@ export default function TopicTestResult() {
                                 <Tooltip
                                     cursor={{ fill: 'transparent' }}
                                     content={({ active, payload }) => {
-                                        if (
-                                            active &&
-                                            payload &&
-                                            payload.length
-                                        ) {
+                                        if (active && payload?.length) {
                                             const data = payload[0]?.payload;
                                             return (
                                                 <div className="bg-slate-900 text-white p-2 text-[10px] font-bold rounded shadow-xl border border-slate-700">
@@ -362,7 +358,7 @@ export default function TopicTestResult() {
                             color="text-rose-500"
                         />
                         <div className="space-y-3">
-                            {analysis.timeSinks.length == 0 ? (
+                            {analysis.timeSinks.length === 0 ? (
                                 <p className="text-gray-500 text-sm">
                                     There are no timesinks in this test.
                                 </p>

@@ -1,11 +1,11 @@
-import ModernLoader from '@/shared/components/ModernLoader';
+import { useEffect, useState } from 'react';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import {
     getTestSession,
     initializeTestSession,
 } from '@/features/topic-test/services/testSession';
+import ModernLoader from '@/shared/components/ModernLoader';
 import type { Question, TestSession } from '@/shared/types/storage';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { fetchAttemptsWithQuestions, fetchTestById } from '../api/topicTest';
 
 type AttemptWithQuestion = {
@@ -50,9 +50,7 @@ const TestReviewLayout = () => {
                 );
 
                 if (
-                    localData &&
-                    localData.session &&
-                    localData.session.status === 'completed' &&
+                    localData?.session?.status === 'completed' &&
                     localData.attempts.length > 0 &&
                     hasAllQuestions
                 ) {

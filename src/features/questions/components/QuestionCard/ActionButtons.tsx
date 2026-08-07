@@ -64,7 +64,10 @@ const ActionButtons = ({
                     >
                         <Eye className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Submit{hasSelection && <span className="font-mono"> [⎵/↵]</span>}
+                            Submit
+                            {hasSelection && (
+                                <span className="font-mono"> [⎵/↵]</span>
+                            )}
                         </span>
                     </Button>
                     <Button
@@ -75,24 +78,24 @@ const ActionButtons = ({
                     >
                         <Flag className="inline text-lg" />
                         <span className="hidden md:inline ml-2">
-                            Show Answer{!hasSelection && <span className="font-mono"> [⎵/↵]</span>}
+                            Show Answer
+                            {!hasSelection && (
+                                <span className="font-mono"> [⎵/↵]</span>
+                            )}
                         </span>
                     </Button>
                 </>
             ) : (
-                <>
-                    <Button
-                        className="flex-1 px-2 py-3 rounded-none bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
-                        onClick={() => handleExplainationClick()}
-                        title="Show Explanation"
-                    >
-                        <ChatCircle className="inline text-lg" />
-                        <span className="hidden md:inline ml-2">
-                            Show Explanation{' '}
-                            <span className="font-mono">[/]</span>
-                        </span>
-                    </Button>
-                </>
+                <Button
+                    className="flex-1 px-2 py-3 rounded-none bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
+                    onClick={() => handleExplainationClick()}
+                    title="Show Explanation"
+                >
+                    <ChatCircle className="inline text-lg" />
+                    <span className="hidden md:inline ml-2">
+                        Show Explanation <span className="font-mono">[/]</span>
+                    </span>
+                </Button>
             )}
             {/* Next */}
             <Button

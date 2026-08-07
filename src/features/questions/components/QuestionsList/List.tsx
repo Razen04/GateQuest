@@ -1,14 +1,14 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import React from 'react';
+import ModernLoader from '@/shared/components/ModernLoader.tsx';
+import type { Question } from '@/shared/types/storage.ts';
+import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
 import {
     getDifficultyClassNames,
     getQuestionDisplayText,
 } from '../../utils/questionUtils.ts';
-import Pagination from './Pagination.tsx';
 import MathRenderer from '../Renderers/MathRenderer.tsx';
-import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
-import type { Question } from '@/shared/types/storage.ts';
-import ModernLoader from '@/shared/components/ModernLoader.tsx';
+import Pagination from './Pagination.tsx';
 
 type ListProps = {
     loading: boolean;

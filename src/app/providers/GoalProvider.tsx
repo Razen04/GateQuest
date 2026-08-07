@@ -1,12 +1,12 @@
 import React, {
-    useState,
+    useCallback,
     useEffect,
     useMemo,
-    useCallback,
     useRef,
+    useState,
 } from 'react';
-import { supabase } from '@/shared/utils/supabaseClient';
 import { toast } from 'sonner';
+import { supabase } from '@/shared/utils/supabaseClient';
 import type {
     Branch,
     BranchExam,

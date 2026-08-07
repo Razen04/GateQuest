@@ -1,17 +1,16 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-
-import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
-import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
-import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import useAnswerFlow from '@/features/questions/hooks/useAnswerFlow';
-import useAuth from '@/shared/hooks/useAuth';
+import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
+import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
 import useSettings from '@/features/settings/hooks/useSettings';
+import useAuth from '@/shared/hooks/useAuth';
+import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import type { Question } from '@/shared/types/storage';
-import { handleReport } from './quesitons';
 import { useQuestionState } from '../hooks/useQuestionState';
 import { useQuestionTimer } from '../hooks/useQuestionTimer';
+import { handleReport } from './quesitons';
 
 interface UseQuestionControllerProps {
     questions: Question[];
@@ -197,7 +196,9 @@ export const useQuestionController = ({
         navigate(`${path}?${qs}`);
     };
 
-    const canSubmit = !showAnswer && (selectedOptionIndices.length > 0 || numericalAnswer !== null);
+    const canSubmit =
+        !showAnswer &&
+        (selectedOptionIndices.length > 0 || numericalAnswer !== null);
 
     useKeyboardShortcuts(
         {
@@ -208,7 +209,7 @@ export const useQuestionController = ({
             canSubmit,
             onExplain: onExplanationClick,
         },
-        [safeQuestion, canSubmit],
+        [safeQuestion, canSubmit]
     );
 
     return {
