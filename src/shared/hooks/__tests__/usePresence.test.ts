@@ -56,14 +56,17 @@ describe('usePresence hook', () => {
     it('should subscribe and track user on mount', async () => {
         renderHook(() => usePresence('test'));
 
-        expect(supabase.channel).toHaveBeenCalledWith('presence:test', expect.any(Object));
+        expect(supabase.channel).toHaveBeenCalledWith(
+            'presence:test',
+            expect.any(Object)
+        );
         expect(mockChannel.subscribe).toHaveBeenCalled();
 
         await act(async () => {
             expect(mockChannel.track).toHaveBeenCalledWith(
                 expect.objectContaining({
                     user_id: 'user-1',
-                }),
+                })
             );
         });
     });
@@ -100,7 +103,7 @@ describe('usePresence hook', () => {
                         key: 'user-1',
                     },
                 },
-            }),
+            })
         );
     });
 

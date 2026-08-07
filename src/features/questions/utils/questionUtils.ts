@@ -1,5 +1,9 @@
 import type { NumericalQuestion, Question } from '@/shared/types/storage.js';
-import { getUserProfile, updateUserProfile, syncUserToSupabase } from '@/shared/utils/helper.js';
+import {
+    getUserProfile,
+    updateUserProfile,
+    syncUserToSupabase,
+} from '@/shared/utils/helper.js';
 import { toast } from 'sonner';
 
 // Get difficulty class names
@@ -16,34 +20,6 @@ export const getDifficultyClassNames = (difficulty: string) => {
     return 'bg-gray-100 text-gray-700'; // Default fallback
 };
 
-// Handle bookmark
-type Bookmark = { id: string | number; subject: string | undefined };
-export const handleBookmark = (
-    isLogin: boolean,
-    questionId: string | number,
-    subject: string | undefined,
-) => {
-    const profile = getUserProfile();
-
-    if (profile && 'bookmark_questions' in profile) {
-        const oldBookmark: Bookmark[] = Array.isArray(profile.bookmark_questions)
-            ? (profile.bookmark_questions as Bookmark[])
-            : [];
-
-        const bookmark_questions: Bookmark[] = [
-            ...oldBookmark,
-            { id: questionId, subject: subject },
-        ];
-
-        const updatedProfile = { ...profile, bookmark_questions };
-        updateUserProfile(updatedProfile);
-        syncUserToSupabase(isLogin);
-        toast.success('Question successfully bookmarked.');
-    } else {
-        toast.error('Unable to bookmark, try again later.');
-    }
-};
-
 // Determine if current question is a multiple selection question
 export const isMultipleSelection = (currentQuestion: Question) => {
     if (!currentQuestion) return false;
@@ -57,7 +33,9 @@ export const isMultipleSelection = (currentQuestion: Question) => {
         Array.isArray(currentQuestion.tags) &&
         currentQuestion.tags.some((tag) => {
             const t = tag.toLowerCase();
-            return t.includes('multiple-select') || t.includes('multiple select');
+            return (
+                t.includes('multiple-select') || t.includes('multiple select')
+            );
         });
 
     return isTypeMatch || isTagMatch;
@@ -81,7 +59,9 @@ export const getQuestionTypeText = (q: Question) => {
 };
 
 // Get correct answer text
-export const getCorrectAnswerText = (currentQuestion: Question): number | number[] | string => {
+export const getCorrectAnswerText = (
+    currentQuestion: Question
+): number | number[] | string => {
     if (!currentQuestion) return '';
 
     try {
@@ -104,7 +84,10 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             }
         }
 
-        if (isMultipleSelection(currentQuestion) && Array.isArray(currentQuestion.correct_answer)) {
+        if (
+            isMultipleSelection(currentQuestion) &&
+            Array.isArray(currentQuestion.correct_answer)
+        ) {
             // For multiple selection, show all correct options
             const correctIndices = currentQuestion.correct_answer;
             if (Array.isArray(currentQuestion.options)) {
@@ -121,7 +104,10 @@ export const getCorrectAnswerText = (currentQuestion: Question): number | number
             Array.isArray(currentQuestion.options)
         ) {
             const index = currentQuestion.correct_answer[0];
-            if (index !== undefined && currentQuestion.options[index] !== undefined) {
+            if (
+                index !== undefined &&
+                currentQuestion.options[index] !== undefined
+            ) {
                 return currentQuestion.options[index];
             }
         }

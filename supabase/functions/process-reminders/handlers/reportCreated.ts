@@ -15,7 +15,9 @@ export const handleReportCreated = async ({
     const ADMIN_USER_ID = Deno.env.get('ADMIN_USER_ID');
 
     if (!ADMIN_USER_ID) {
-        throw new Error('ADMIN_USER_ID is missing from the environment variables.');
+        throw new Error(
+            'ADMIN_USER_ID is missing from the environment variables.'
+        );
     }
 
     const { data: adminSubs, error: adminErr } = await supabaseAdmin
@@ -32,12 +34,13 @@ export const handleReportCreated = async ({
             {
                 status: 200,
                 headers: corsHeaders,
-            },
+            }
         );
     }
 
     const { record } = await req.json();
-    const sampleDetails = record?.report_text || 'No additional notes provided.';
+    const sampleDetails =
+        record?.report_text || 'No additional notes provided.';
 
     const adminPayload = JSON.stringify({
         title: 'New Report Filed!',
@@ -55,7 +58,7 @@ export const handleReportCreated = async ({
                         p256dh: sub.p256dh_key,
                     },
                 },
-                adminPayload,
+                adminPayload
             );
         } catch (err) {
             if (err.statusCode === 410 || err.statusCode === 404) {
@@ -75,6 +78,6 @@ export const handleReportCreated = async ({
         {
             status: 200,
             headers: corsHeaders,
-        },
+        }
     );
 };

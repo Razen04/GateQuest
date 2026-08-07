@@ -26,8 +26,13 @@ export interface UseTestSessionReturn {
     handleSubmit: () => void;
 }
 
-const useTestSession = (testId: string, data: TestData): UseTestSessionReturn => {
-    const [status, setStatus] = useState<'ready' | 'error' | 'submitting' | 'completed'>('ready');
+const useTestSession = (
+    testId: string,
+    data: TestData
+): UseTestSessionReturn => {
+    const [status, setStatus] = useState<
+        'ready' | 'error' | 'submitting' | 'completed'
+    >('ready');
     const navigate = useNavigate();
 
     // for tracking time_spent_seconds for each Attempt
@@ -52,9 +57,12 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
         const questionId = question.id;
 
-        const deltaSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const deltaSeconds = Math.floor(
+            (Date.now() - startTimeRef.current) / 1000
+        );
 
-        const attemptOrder = data.questions.findIndex((q) => q.id === question.id) + 1;
+        const attemptOrder =
+            data.questions.findIndex((q) => q.id === question.id) + 1;
         answers.updateTimeSpent(questionId, deltaSeconds, attemptOrder);
         startTimeRef.current = Date.now();
     }, [answers, navigation.currentIndex, data.questions]);
@@ -75,15 +83,18 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
             commitCurrentTime();
             navigation.jumpTo(index);
         },
-        [navigation, commitCurrentTime],
+        [navigation, commitCurrentTime]
     );
 
     const { currentIndex } = navigation;
     useEffect(() => {
         const question = data.questions[currentIndex];
         if (question) {
-            const realIndex = data.questions.findIndex((q) => q.id === question.id);
-            const attemptOrder = realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
+            const realIndex = data.questions.findIndex(
+                (q) => q.id === question.id
+            );
+            const attemptOrder =
+                realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
             answers.markAsVisited(question.id, attemptOrder);
         }
     }, [currentIndex, data.questions, answers, status]);
@@ -138,11 +149,14 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
                     const payload = dirtyAttempts.map((a) => {
                         // Find the REAL index from the master list
-                        const realIndex = data.questions.findIndex((q) => q.id === a.question_id);
+                        const realIndex = data.questions.findIndex(
+                            (q) => q.id === a.question_id
+                        );
 
                         // Calculate the order (1-based)
                         // Fallback to a.attempt_order only if not found
-                        const finalOrder = realIndex !== -1 ? realIndex + 1 : a.attempt_order;
+                        const finalOrder =
+                            realIndex !== -1 ? realIndex + 1 : a.attempt_order;
 
                         return {
                             session_id: a.session_id,
@@ -185,7 +199,12 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
     }, [testId, status, data.questions]);
 
     useEffect(() => {
-        if (timer.isExpired && status !== 'completed' && status !== 'submitting') handleSubmit();
+        if (
+            timer.isExpired &&
+            status !== 'completed' &&
+            status !== 'submitting'
+        )
+            handleSubmit();
     }, [timer.isExpired, status, handleSubmit]);
 
     // to save the timer value to appStorage every 5s
@@ -194,7 +213,11 @@ const useTestSession = (testId: string, data: TestData): UseTestSessionReturn =>
 
         timerRef.current = timer.secondsRemaining;
         const saveTimer = async () => {
-            await updateSessionTimeAndStatus(testId, timer.secondsRemaining, status);
+            await updateSessionTimeAndStatus(
+                testId,
+                timer.secondsRemaining,
+                status
+            );
         };
 
         if (timer.secondsRemaining % 5 === 0) {

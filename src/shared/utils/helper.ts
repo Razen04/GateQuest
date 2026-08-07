@@ -109,21 +109,28 @@ const colors = {
 
     // New colors
     lime: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400',
-    emerald: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    emerald:
+        'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
     teal: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400',
     sky: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400',
     violet: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400',
-    fuchsia: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
+    fuchsia:
+        'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400',
     rose: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400',
     amber: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
     slate: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400',
     zinc: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400',
-    neutral: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400',
+    neutral:
+        'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400',
     stone: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400',
-    trueGray: 'bg-trueGray-100 text-trueGray-600 dark:bg-trueGray-900/30 dark:text-trueGray-400',
-    coolGray: 'bg-coolGray-100 text-coolGray-600 dark:bg-coolGray-900/30 dark:text-coolGray-400',
-    blueGray: 'bg-blueGray-100 text-blueGray-600 dark:bg-blueGray-900/30 dark:text-blueGray-400',
-    turquoise: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+    trueGray:
+        'bg-trueGray-100 text-trueGray-600 dark:bg-trueGray-900/30 dark:text-trueGray-400',
+    coolGray:
+        'bg-coolGray-100 text-coolGray-600 dark:bg-coolGray-900/30 dark:text-coolGray-400',
+    blueGray:
+        'bg-blueGray-100 text-blueGray-600 dark:bg-blueGray-900/30 dark:text-blueGray-400',
+    turquoise:
+        'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
     brown: 'bg-amber-200 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
     black: 'bg-black/10 text-black dark:bg-white/10 dark:text-white',
 
@@ -161,12 +168,32 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     // A check to ensure there is a valid user to sync.
     if (!isLogin) return; // don’t even try until login is true
     const user = getUserProfile();
+
     if (!user?.id) {
         console.warn('User missing id');
         return;
     }
 
-    const { error } = await supabase.from('users').update(user).eq('id', user.id);
+    // 1. Create a clean payload with strictly database columns.
+    // We use `?? null` to satisfy TypeScript's strict optional property types.
+    const dbPayload = {
+        name: user.name ?? null,
+        avatar: user.avatar ?? null,
+        college: user.college ?? null,
+        targetYear: user.targetYear || null, // Fallback chain
+        settings: user.settings ?? {}, // Assuming settings is a JSONB object, default to {}
+        show_name: user.show_name ?? true,
+        username: user.username ?? null,
+        is_public: user.is_public ?? false,
+        about: user?.about ?? null,
+    };
+
+    // 2. Send only the clean payload to the database
+    const { error } = await supabase
+        .from('users')
+        .update(dbPayload)
+        .eq('id', user.id);
+
     if (error) {
         console.error('Sync failed', error);
         toast.error('Profile update failed, try again later.');
@@ -232,7 +259,9 @@ export const recordAttemptLocally = async ({
     const LOCAL_KEY = `attempt_buffer_${user.id}`;
     const storedBuffer = localStorage.getItem(LOCAL_KEY);
 
-    const buffer = storedBuffer ? (JSON.parse(storedBuffer) as AttemptBufferItem[]) : [];
+    const buffer = storedBuffer
+        ? (JSON.parse(storedBuffer) as AttemptBufferItem[])
+        : [];
 
     // Add the new attempt to the buffer.
     buffer.push({
@@ -263,7 +292,11 @@ type recordAttemptProp = {
     refresh: () => void;
 };
 
-export const recordAttempt = async ({ buffer, user, refresh }: recordAttemptProp) => {
+export const recordAttempt = async ({
+    buffer,
+    user,
+    refresh,
+}: recordAttemptProp) => {
     if (!user || !user.id) {
         toast.error('No valid user profile found.');
         return;
@@ -277,9 +310,12 @@ export const recordAttempt = async ({ buffer, user, refresh }: recordAttemptProp
 
     // Insert the entire buffer as new rows in the activity table.
     if (buffer.length !== 0) {
-        const { error } = await supabase.rpc('insert_user_question_activity_batch', {
-            batch: buffer,
-        });
+        const { error } = await supabase.rpc(
+            'insert_user_question_activity_batch',
+            {
+                batch: buffer,
+            }
+        );
 
         if (error) {
             console.error('Batch insert error:', error);

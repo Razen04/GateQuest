@@ -35,7 +35,9 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     subject,
     mode,
 }) => {
-    const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+    const [selectedQuestion, setSelectedQuestion] = useState<string | null>(
+        null
+    );
     const [showFilters, setShowFilters] = useState(false);
 
     const { userGoal } = useGoals();
@@ -43,6 +45,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
     // Filters
     const {
+        loading,
         filteredQuestions,
         searchQuery,
         setSearchQuery,
@@ -79,10 +82,8 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     });
 
     // Pagination
-    const { currentPage, setCurrentPage, totalPages, pageItems, listRef } = usePagination(
-        filteredQuestions,
-        20,
-    );
+    const { currentPage, setCurrentPage, totalPages, pageItems, listRef } =
+        usePagination(filteredQuestions, 20);
 
     const handleQuestionClick = (id: string) => {
         setSelectedQuestion(id);
@@ -94,12 +95,16 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
     // Derived data for filter dropdowns
     const years = useMemo(() => {
-        const allYears = questions.map((q) => String(q.year)).filter((y) => !isNaN(Number(y)));
+        const allYears = questions
+            .map((q) => String(q.year))
+            .filter((y) => !isNaN(Number(y)));
         return [...new Set(allYears)].sort((a, b) => Number(b) - Number(a));
     }, [questions]);
 
     const topics = useMemo(() => {
-        const allTopics = questions.map((q) => q.topic || '').filter((t) => t.trim() !== '');
+        const allTopics = questions
+            .map((q) => q.topic || '')
+            .filter((t) => t.trim() !== '');
         return [...new Set(allTopics)];
     }, [questions]);
 
@@ -160,11 +165,14 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
                 <div>
                     <div className="overflow-hidden">
                         <div className="mb-2">
-                            <h2 className="font-semibold text-blue-500 text-xl">{title}</h2>
+                            <h2 className="font-semibold text-blue-500 text-xl">
+                                {title}
+                            </h2>
                         </div>
 
                         {filteredQuestions.length > 0 ? (
                             <List
+                                loading={loading}
                                 listRef={listRef}
                                 questions={pageItems}
                                 handleQuestionClick={handleQuestionClick}

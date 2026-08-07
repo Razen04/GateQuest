@@ -38,16 +38,23 @@ export const getActiveTest = async (userId: string, branchId: string) => {
 export const updateTestStatus = async (
     testId: string,
     status: 'ongoing' | 'paused' | 'completed',
-    extraFields?: Record<string, any>,
+    extraFields?: Record<string, any>
 ) => {
     const { error } = await supabase
         .from('topic_tests')
-        .update({ status, ...extraFields, updated_at: new Date().toISOString() })
+        .update({
+            status,
+            ...extraFields,
+            updated_at: new Date().toISOString(),
+        })
         .eq('id', testId);
     return { error };
 };
 
-export const updateTestTime = async (testId: string, remainingSeconds: number) => {
+export const updateTestTime = async (
+    testId: string,
+    remainingSeconds: number
+) => {
     const { error } = await supabase
         .from('topic_tests')
         .update({ remaining_time_seconds: remainingSeconds })
@@ -76,7 +83,7 @@ export const upsertAttempts = async (payload: any[]) => {
 export const submitTestGrading = async (
     sessionId: string,
     payload: Attempt[],
-    remainingTime: number,
+    remainingTime: number
 ) => {
     const { data, error } = await supabase.rpc('submit_test_grading', {
         p_session_id: sessionId,
@@ -96,7 +103,10 @@ export const fetchTopicCounts = async (subjectId: string) => {
 
 // ---------- Sync ----------
 export const fetchQuestionsByIds = async (ids: string[]) => {
-    const { data, error } = await supabase.from('questions').select('*').in('id', ids);
+    const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .in('id', ids);
     return { data, error };
 };
 
@@ -115,24 +125,29 @@ export const fetchFullTestData = async (userId: string, branchId: string) => {
                 *,
                 questions (*)
             )
-        `,
+        `
         )
         .eq('user_id', userId)
         .eq('branch_id', branchId)
         .in('status', ['ongoing', 'paused', 'created'])
         .maybeSingle();
 
-    if (error || !testSession) return { testSession: null, attempts: null, questions: null };
+    if (error || !testSession)
+        return { testSession: null, attempts: null, questions: null };
 
     const rawAttempts = testSession.topic_tests_attempts || [];
 
     // Safely extract questions, handling whether Supabase returned an object or a [array]
     const questions = rawAttempts
-        .flatMap((a: RawAttemptData) => (Array.isArray(a.questions) ? a.questions : [a.questions]))
+        .flatMap((a: RawAttemptData) =>
+            Array.isArray(a.questions) ? a.questions : [a.questions]
+        )
         .filter(Boolean);
 
     // Strip the nested 'questions' object out of attempts so Dexie doesn't crash
-    const pureAttempts = rawAttempts.map(({ questions, ...rest }: RawAttemptData) => rest);
+    const pureAttempts = rawAttempts.map(
+        ({ questions, ...rest }: RawAttemptData) => rest
+    );
 
     // Clean up the main testSession
     delete testSession.topic_tests_attempts;

@@ -57,7 +57,10 @@ export const useTopicTestGenerator = ({
     }, []);
 
     const writeCache = useCallback((subject: string, data: Topic[]) => {
-        localStorage.setItem(getCacheKey(subject), JSON.stringify({ timestamp: Date.now(), data }));
+        localStorage.setItem(
+            getCacheKey(subject),
+            JSON.stringify({ timestamp: Date.now(), data })
+        );
     }, []);
 
     // fetch topics from supabase
@@ -74,8 +77,6 @@ export const useTopicTestGenerator = ({
 
         const { data, error } = await fetchTopicCounts(subjectId);
 
-        console.log('Data: ', data);
-
         if (error) {
             console.error(error);
             setAvailableTopics([]);
@@ -87,8 +88,6 @@ export const useTopicTestGenerator = ({
                 questionCount: t.question_count,
                 unattemptedCount: t.unattempted_count,
             }));
-
-            console.log('Topics: ', topics);
 
             setAvailableTopics(topics);
             writeCache(subjectId, topics);
@@ -105,12 +104,17 @@ export const useTopicTestGenerator = ({
     const toggleTopic = (topic: Topic) => {
         setSelectedTopics((prev) => {
             const exists = prev.find(
-                (t) => t.name === topic.name && t.subjectName === topic.subjectName,
+                (t) =>
+                    t.name === topic.name && t.subjectName === topic.subjectName
             );
 
             if (exists) {
                 return prev.filter(
-                    (t) => !(t.name === topic.name && t.subjectName === topic.subjectName),
+                    (t) =>
+                        !(
+                            t.name === topic.name &&
+                            t.subjectName === topic.subjectName
+                        )
                 );
             }
 
@@ -119,7 +123,9 @@ export const useTopicTestGenerator = ({
     };
 
     const removeTopic = (topicName: string) => {
-        setSelectedTopics((prev) => prev.filter((t) => !(t.name === topicName)));
+        setSelectedTopics((prev) =>
+            prev.filter((t) => !(t.name === topicName))
+        );
     };
 
     const clearSelection = () => setSelectedTopics([]);
@@ -128,7 +134,9 @@ export const useTopicTestGenerator = ({
     const poolSize = useMemo(() => {
         return selectedTopics.reduce((sum, t) => {
             // If includeAttempted is false, use unattemptedCount
-            return sum + (includeAttempted ? t.questionCount : t.unattemptedCount);
+            return (
+                sum + (includeAttempted ? t.questionCount : t.unattemptedCount)
+            );
         }, 0);
     }, [selectedTopics, includeAttempted]);
 
@@ -138,7 +146,9 @@ export const useTopicTestGenerator = ({
         const w: string[] = [];
 
         if (poolSize < requestedQuestionCount) {
-            w.push(`Selected topics contain only ${poolSize}/${requestedQuestionCount} questions.`);
+            w.push(
+                `Selected topics contain only ${poolSize}/${requestedQuestionCount} questions.`
+            );
         }
 
         setWarnings(w);

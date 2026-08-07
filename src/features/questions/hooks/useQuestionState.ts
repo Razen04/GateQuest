@@ -9,16 +9,22 @@ export const useQuestionState = (currentQuestion: Question) => {
     // State for single-choice questions.
     const [userAnswerIndex, setUserAnswerIndex] = useState<number | null>(null);
     // State for multiple-choice questions.
-    const [selectedOptionIndices, setSelectedOptionIndices] = useState<number[]>([]);
+    const [selectedOptionIndices, setSelectedOptionIndices] = useState<
+        number[]
+    >([]);
     // State for numerical answer type questions.
     const [numericalAnswer, setNumericalAnswer] = useState<number | null>(null);
     // State to control the visibility of the correct answer and explanation.
     const [showAnswer, setShowAnswer] = useState(false);
     // State to store the result of the user's answer (e.g., 'Correct', 'Incorrect').
-    const [result, setResult] = useState<'correct' | 'incorrect' | 'unattempted'>('unattempted');
+    const [result, setResult] = useState<
+        'correct' | 'incorrect' | 'unattempted'
+    >('unattempted');
 
     // Handles changes to the numerical input field.
-    const handleNumericalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNumericalInputChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
         // Prevent input changes after the answer has been revealed.
         if (showAnswer) return;
         setNumericalAnswer(e.target.valueAsNumber);
@@ -33,7 +39,9 @@ export const useQuestionState = (currentQuestion: Question) => {
         if (isMultipleSelection(currentQuestion)) {
             // If it is, toggle the selected index in the array.
             setSelectedOptionIndices((prev) =>
-                prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
+                prev.includes(index)
+                    ? prev.filter((i) => i !== index)
+                    : [...prev, index]
             );
         } else {
             // For single-choice, selecting the same option deselects it.

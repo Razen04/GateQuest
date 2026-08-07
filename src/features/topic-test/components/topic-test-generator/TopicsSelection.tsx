@@ -1,5 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, StackIcon, CaretDown, EraserIcon, ListChecksIcon } from '@phosphor-icons/react';
+import {
+    Check,
+    StackIcon,
+    CaretDown,
+    EraserIcon,
+    ListChecksIcon,
+} from '@phosphor-icons/react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import type { Topic } from '@/features/topic-test/hooks/useTopicTestGenerator';
@@ -23,7 +29,6 @@ const TopicsSelection = ({
     handleTopicToggle,
     includeAttempted,
 }: TopicsSelectionProps) => {
-    console.log('includeAttempted: ', includeAttempted);
     const [showAllPrimary, setShowAllPrimary] = useState(false);
     const [showMinorTopics, setShowMinorTopics] = useState(false);
 
@@ -31,7 +36,9 @@ const TopicsSelection = ({
     const isAllSelected = useMemo(() => {
         if (availableTopics.length === 0) return false;
         return availableTopics.every((at) =>
-            selectedTopics.some((st) => st.name === at.name && st.subjectId === at.subjectId),
+            selectedTopics.some(
+                (st) => st.name === at.name && st.subjectId === at.subjectId
+            )
         );
     }, [availableTopics, selectedTopics]);
 
@@ -41,7 +48,9 @@ const TopicsSelection = ({
             // Deselect All: Toggle only those that are currently selected
             availableTopics.forEach((topic) => {
                 const isSelected = selectedTopics.some(
-                    (st) => st.name === topic.name && st.subjectId === topic.subjectId,
+                    (st) =>
+                        st.name === topic.name &&
+                        st.subjectId === topic.subjectId
                 );
                 if (isSelected) handleTopicToggle(topic);
             });
@@ -49,7 +58,9 @@ const TopicsSelection = ({
             // Select All: Toggle only those that are NOT currently selected
             availableTopics.forEach((topic) => {
                 const isSelected = selectedTopics.some(
-                    (st) => st.name === topic.name && st.subjectId === topic.subjectId,
+                    (st) =>
+                        st.name === topic.name &&
+                        st.subjectId === topic.subjectId
                 );
                 if (!isSelected) handleTopicToggle(topic);
             });
@@ -82,7 +93,7 @@ const TopicsSelection = ({
                             variant="ghost"
                             size="sm"
                             onClick={handleSelectAll}
-                            className="h-10 px-2 font-bold uppercase tracking-tighter hover:bg-blue-50 hover:text-white dark:hover:bg-blue-500/20 bg-blue-500"
+                            className="h-10 px-3 rounded-xl font-bold uppercase tracking-tighter bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-500/80"
                         >
                             {isAllSelected ? (
                                 <span className="flex items-center gap-1">
@@ -97,12 +108,12 @@ const TopicsSelection = ({
                     )}
 
                     <div className="flex justify-between items-end">
-                        <label className="text-sm font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                        <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
                             <StackIcon className="w-4 h-4 text-purple-500" />
                             Step 2: Select Topics
                         </label>
 
-                        <span className="text-xs font-medium px-2 py-1 bg-gray-100 text-gray-500 dark:bg-zinc-800 dark:text-gray-400">
+                        <span className="rounded-xl border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                             {selectedTopics.length} selected
                         </span>
                     </div>
@@ -112,7 +123,7 @@ const TopicsSelection = ({
                             {[...Array(6)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="h-14 bg-gray-200 dark:bg-zinc-800 animate-pulse"
+                                    className="h-14 rounded-xl bg-gray-200 dark:bg-zinc-800 animate-pulse"
                                 />
                             ))}
                         </div>
@@ -123,51 +134,35 @@ const TopicsSelection = ({
                                     const isSelected = selectedTopics.some(
                                         (t) =>
                                             t.name === topic.name &&
-                                            t.subjectId === topic.subjectId,
+                                            t.subjectId === topic.subjectId
                                     );
-
-                                    const displayedCount = includeAttempted
-                                        ? topic.questionCount
-                                        : topic.unattemptedCount;
-
-                                    console.debug(
-                                        '[TopicCard] includeAttempted:',
-                                        includeAttempted,
-                                    );
-                                    console.debug('[TopicCard] topic:', topic);
-                                    console.debug('[TopicCard] displayedCount:', displayedCount);
 
                                     return (
                                         <div
                                             key={`${topic.subjectName}-${topic.name}`}
-                                            onClick={() => handleTopicToggle(topic)}
-                                            className={`p-3 border cursor-pointer transition-all select-none flex items-center justify-between
-                        ${
-                            isSelected
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                                : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 hover:border-blue-300'
-                        }`}
+                                            onClick={() =>
+                                                handleTopicToggle(topic)
+                                            }
+                                            className={`rounded-2xl border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10 hover:border-blue-300'}`}
                                         >
                                             <div>
                                                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                                                     {topic.name}
                                                 </p>
                                                 <p className="text-xs text-gray-400">
-                                                    {/* Toggle the displayed count based on includeAttempted prop */}
                                                     {includeAttempted
                                                         ? `${topic.questionCount} total questions`
                                                         : `${topic.unattemptedCount} available questions`}
                                                 </p>
                                             </div>
+
                                             <div
-                                                className={`w-5 h-5 border flex items-center justify-center
-                          ${
-                              isSelected
-                                  ? 'bg-blue-500 border-blue-500 text-white'
-                                  : 'border-gray-300 dark:border-zinc-700'
-                          }`}
+                                                className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 dark:border-zinc-700'}`}
                                             >
-                                                <Check className="w-3 h-3" strokeWidth={3} />
+                                                <Check
+                                                    className="w-3 h-3"
+                                                    strokeWidth={3}
+                                                />
                                             </div>
                                         </div>
                                     );
@@ -189,57 +184,67 @@ const TopicsSelection = ({
                             {minorTopics.length > 0 && (
                                 <div>
                                     <Button
-                                        onClick={() => setShowMinorTopics((v) => !v)}
+                                        onClick={() =>
+                                            setShowMinorTopics((v) => !v)
+                                        }
                                         variant="ghost"
                                         className="flex items-center gap-1 font-medium"
                                     >
                                         Other topics ({minorTopics.length})
                                         <CaretDown
-                                            className={`transition-transform ${
-                                                showMinorTopics ? 'rotate-180' : ''
-                                            }`}
+                                            className={`transition-transform ${showMinorTopics ? 'rotate-180' : ''}`}
                                         />
                                     </Button>
 
                                     <AnimatePresence>
                                         {showMinorTopics && (
                                             <motion.div
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: 'auto' }}
+                                                initial={{
+                                                    opacity: 0,
+                                                    height: 0,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    height: 'auto',
+                                                }}
                                                 exit={{ opacity: 0, height: 0 }}
                                                 className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2"
                                             >
                                                 {minorTopics.map((topic) => {
-                                                    const isSelected = selectedTopics.some(
-                                                        (t) =>
-                                                            t.name === topic.name &&
-                                                            t.subjectId === topic.subjectId,
-                                                    );
+                                                    const isSelected =
+                                                        selectedTopics.some(
+                                                            (t) =>
+                                                                t.name ===
+                                                                    topic.name &&
+                                                                t.subjectId ===
+                                                                    topic.subjectId
+                                                        );
 
                                                     return (
                                                         <div
                                                             key={`${topic.subjectName}-${topic.name}`}
-                                                            onClick={() => handleTopicToggle(topic)}
-                                                            className={`p-2 border text-sm cursor-pointer flex justify-between items-center
-                                ${
-                                    isSelected
-                                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                                        : 'border-gray-200 dark:border-zinc-800'
-                                }`}
+                                                            onClick={() =>
+                                                                handleTopicToggle(
+                                                                    topic
+                                                                )
+                                                            }
+                                                            className={`rounded-xl border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10'}`}
                                                         >
                                                             <div>
-                                                                <span>{topic.name}: </span>
+                                                                <span>
+                                                                    {topic.name}
+                                                                    :{' '}
+                                                                </span>
                                                                 <span className="text-stone-400">
-                                                                    {topic.questionCount} questions
+                                                                    {
+                                                                        topic.questionCount
+                                                                    }{' '}
+                                                                    questions
                                                                 </span>
                                                             </div>
 
                                                             <Check
-                                                                className={`w-3 h-3 ${
-                                                                    isSelected
-                                                                        ? 'text-blue-600'
-                                                                        : 'text-transparent'
-                                                                }`}
+                                                                className={`w-3 h-3 ${isSelected ? 'text-blue-600' : 'text-transparent'}`}
                                                             />
                                                         </div>
                                                     );

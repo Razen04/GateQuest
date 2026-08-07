@@ -65,7 +65,9 @@ const QuestionContent = ({
                             // For MSQ: selectedOptionIndices, for MCQ: userAnswerIndex
                             let isSelected;
                             if (isMultipleSelection(currentQuestion)) {
-                                isSelected = selectedOptionIndices?.includes(index) ?? false;
+                                isSelected =
+                                    selectedOptionIndices?.includes(index) ??
+                                    false;
                             } else {
                                 isSelected = userAnswerIndex === index;
                             }
@@ -85,28 +87,41 @@ const QuestionContent = ({
                                 'border-gray-200 dark:border-zinc-700 hover:border-blue-200';
                             if (showAnswer) {
                                 if (isCorrect)
-                                    optionStyle = 'border-green-500 bg-green-50 dark:bg-green-600';
+                                    optionStyle =
+                                        'border-green-500 bg-green-50 dark:bg-green-600';
                                 else if (isSelected)
-                                    optionStyle = 'border-red-500 bg-red-50 dark:bg-red-600';
+                                    optionStyle =
+                                        'border-red-500 bg-red-50 dark:bg-red-600';
                             } else if (isSelected) {
-                                optionStyle = 'border-blue-500 ring ring-blue-500 ring-offset-0';
+                                optionStyle =
+                                    'border-blue-500 ring ring-blue-500 ring-offset-0';
                             }
 
                             return (
                                 <motion.div
                                     key={index}
-                                    whileHover={{ scale: showAnswer ? 1 : 1.01 }}
+                                    whileHover={{
+                                        scale: showAnswer ? 1 : 1.01,
+                                    }}
                                     whileTap={{ scale: showAnswer ? 1 : 0.99 }}
                                     className={`p-4 border transition-all ${showAnswer ? 'cursor-default' : 'cursor-pointer'} ${optionStyle}`}
-                                    onClick={() => !showAnswer && onOptionSelect(index)}
+                                    onClick={() =>
+                                        !showAnswer && onOptionSelect(index)
+                                    }
                                 >
                                     <div className="flex items-center">
                                         {env === 'Practice' && (
                                             <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
-                                                [{String.fromCharCode(index + 65)}/{index + 1}]
+                                                [
+                                                {String.fromCharCode(
+                                                    index + 65
+                                                )}
+                                                /{index + 1}]
                                             </span>
                                         )}
-                                        {isMultipleSelection(currentQuestion) ? (
+                                        {isMultipleSelection(
+                                            currentQuestion
+                                        ) ? (
                                             // Checkbox for multiple selection
                                             <div
                                                 className={`w-5 h-5 border rounded flex items-center justify-center mr-3 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-700'}`}

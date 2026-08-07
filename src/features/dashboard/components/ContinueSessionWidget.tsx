@@ -19,8 +19,12 @@ export const ContinueSessionWidget = () => {
     const [sessionUrl, setSessionUrl] = useState<string | null>(null);
 
     useEffect(() => {
-        const lastSessionUrl = localStorage.getItem('gatequest_last_active_session');
-        const lastTimestamp = localStorage.getItem('gatequest_last_active_timestamp');
+        const lastSessionUrl = localStorage.getItem(
+            'gatequest_last_active_session'
+        );
+        const lastTimestamp = localStorage.getItem(
+            'gatequest_last_active_timestamp'
+        );
 
         if (lastSessionUrl && lastTimestamp) {
             const threeDays = 3 * 24 * 60 * 60 * 1000;
@@ -35,8 +39,7 @@ export const ContinueSessionWidget = () => {
     const [pathPart, searchPart] = sessionUrl.split('?');
     const segments = pathPart?.split('/').filter(Boolean) || [];
     const queryParams = new URLSearchParams(searchPart || '');
-    const isBookmarkMode =
-        queryParams.get('bookmark') === 'true' || queryParams.get('bookmarked') === 'true';
+    const isBookmarkMode = queryParams.get('attempt') === 'bookmarked';
 
     let cardTitle = 'Continue Learning';
     let cardSubtitle = 'Pick up exactly where you paused.';
@@ -60,7 +63,8 @@ export const ContinueSessionWidget = () => {
     if (segments[0] === 'practice') {
         iconColorClass = 'text-blue-600 dark:text-blue-400';
         iconBgClass = 'bg-blue-50 dark:bg-blue-500/10';
-        hoverBorderClass = 'hover:border-blue-200 dark:hover:border-blue-900/50';
+        hoverBorderClass =
+            'hover:border-blue-200 dark:hover:border-blue-900/50';
         badgeClass =
             'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/50';
 
@@ -72,17 +76,20 @@ export const ContinueSessionWidget = () => {
             Icon = BookmarkIcon;
         } else if (segments[1] && segments[2]) {
             cardTitle = `${formatSlug(segments[1])} • Active Session`;
-            cardSubtitle = 'You disappeared mid-session. The questions took it personally.';
+            cardSubtitle =
+                'You disappeared mid-session. The questions took it personally.';
             badgeText = 'Solving PYQ';
             Icon = TargetIcon;
         } else if (segments[1]) {
             cardTitle = `${formatSlug(segments[1])} Pool`;
-            cardSubtitle = 'Fresh questions waiting to test your confidence levels.';
+            cardSubtitle =
+                'Fresh questions waiting to test your confidence levels.';
             badgeText = 'Question List';
             Icon = BookOpenIcon;
         } else {
             cardTitle = 'Practice Arena';
-            cardSubtitle = 'Welcome back soldier, today we fight silly little MCQs again.';
+            cardSubtitle =
+                'Welcome back soldier, today we fight silly little MCQs again.';
             badgeText = 'Practice Hub';
             Icon = BookOpenIcon;
         }
@@ -96,7 +103,8 @@ export const ContinueSessionWidget = () => {
 
         iconColorClass = 'text-amber-600 dark:text-amber-400';
         iconBgClass = 'bg-amber-50 dark:bg-amber-500/10';
-        hoverBorderClass = 'hover:border-amber-200 dark:hover:border-amber-900/50';
+        hoverBorderClass =
+            'hover:border-amber-200 dark:hover:border-amber-900/50';
         badgeClass =
             'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/50';
 
@@ -112,7 +120,8 @@ export const ContinueSessionWidget = () => {
             Icon = ListOfItemsIcon(HighlighterIcon);
         } else {
             cardTitle = 'Smart Revision Center';
-            cardSubtitle = 'Because your brain deletes information for fun apparently.';
+            cardSubtitle =
+                'Because your brain deletes information for fun apparently.';
             badgeText = 'Revision Hub';
             Icon = HighlighterIcon;
         }
@@ -127,23 +136,27 @@ export const ContinueSessionWidget = () => {
     ) {
         iconColorClass = 'text-rose-600 dark:text-rose-400';
         iconBgClass = 'bg-rose-50 dark:bg-rose-500/10';
-        hoverBorderClass = 'hover:border-rose-200 dark:hover:border-rose-900/50';
+        hoverBorderClass =
+            'hover:border-rose-200 dark:hover:border-rose-900/50';
         badgeClass =
             'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-900/50';
 
         if (segments[0] === 'topic-test-generate') {
             cardTitle = 'Configure Mock Paper';
-            cardSubtitle = 'Customizing the exact exam that may emotionally damage you.';
+            cardSubtitle =
+                'Customizing the exact exam that may emotionally damage you.';
             badgeText = 'Test Setup';
             Icon = SlidersIcon;
         } else if (segments[0] === 'topic-test-result') {
             cardTitle = 'Review Performance Analytics';
-            cardSubtitle = 'Some numbers went up. Hopefully the important ones.';
+            cardSubtitle =
+                'Some numbers went up. Hopefully the important ones.';
             badgeText = 'Score Card';
             Icon = ChartBarIcon;
         } else if (segments[0] === 'topic-test-review') {
             cardTitle = 'Analyzing Test Solutions';
-            cardSubtitle = 'Let’s calmly inspect where things became unfortunate.';
+            cardSubtitle =
+                'Let’s calmly inspect where things became unfortunate.';
             badgeText = 'Solution Audit';
             Icon = EyeIcon;
         } else if (segments[2] === 'attempt') {
@@ -156,12 +169,14 @@ export const ContinueSessionWidget = () => {
                 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200/50 dark:border-rose-900/50 animate-pulse font-bold';
         } else if (segments[1]) {
             cardTitle = 'Topic Test Lobby';
-            cardSubtitle = 'One last peaceful screen before the academic violence begins.';
+            cardSubtitle =
+                'One last peaceful screen before the academic violence begins.';
             badgeText = 'Exam Gate';
             Icon = ClockIcon;
         } else {
             cardTitle = 'Topic Test Center';
-            cardSubtitle = 'Mocks, panic attacks, comeback arcs — everything lives here.';
+            cardSubtitle =
+                'Mocks, panic attacks, comeback arcs — everything lives here.';
             badgeText = 'Test Hub';
             Icon = ClockIcon;
         }
@@ -170,13 +185,15 @@ export const ContinueSessionWidget = () => {
     // Donate Route
     else if (segments[0] === 'donate') {
         cardTitle = 'Support GATEQuest';
-        cardSubtitle = 'Aye, thanks for even thinking about donating. Means a lot genuinely 🫶';
+        cardSubtitle =
+            'Aye, thanks for even thinking about donating. Means a lot genuinely 🫶';
         badgeText = 'Contribution';
         Icon = HeartIcon;
 
         iconColorClass = 'text-emerald-600 dark:text-emerald-400';
         iconBgClass = 'bg-emerald-50 dark:bg-emerald-500/10';
-        hoverBorderClass = 'hover:border-emerald-200 dark:hover:border-emerald-900/50';
+        hoverBorderClass =
+            'hover:border-emerald-200 dark:hover:border-emerald-900/50';
 
         badgeClass =
             'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-900/50';
@@ -198,51 +215,57 @@ export const ContinueSessionWidget = () => {
 
     return (
         <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wide mb-1">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 Continue Where You Left Off
             </h2>
 
             <div
                 onClick={handleResume}
-                className={`relative overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-4 sm:p-5 mb-6 cursor-pointer shadow-sm transition-all duration-200 group ${hoverBorderClass}`}
+                className={`group relative mb-6 cursor-pointer overflow-hidden border border-white/20 bg-white/20 p-3.5 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-300 dark:border-white/10 dark:bg-white/[0.06] ${hoverBorderClass}`}
             >
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 pl-2">
-                    <div className="flex items-center gap-4">
+                {/* Glass reflection */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
                         <div
-                            className={`flex-shrink-0 p-2.5 rounded-lg border border-transparent transition-colors ${iconBgClass}`}
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center border border-white/10 backdrop-blur-md ${iconBgClass}`}
                         >
-                            <Icon className={`w-5 h-5 ${iconColorClass}`} />
+                            <Icon className={`h-5 w-5 ${iconColorClass}`} />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-2 mb-0.5">
+
+                        <div className="min-w-0">
+                            <div className="mb-1 flex items-center gap-2">
                                 <span
-                                    className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded border ${badgeClass}`}
+                                    className={`border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider backdrop-blur-md ${badgeClass}`}
                                 >
                                     {badgeText}
                                 </span>
                             </div>
-                            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">
+
+                            <h3 className="truncate text-sm font-semibold leading-tight text-zinc-900 transition-colors dark:text-zinc-50">
                                 {cardTitle}
                             </h3>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+
+                            <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
                                 {cardSubtitle}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-end sm:self-center">
-                        <button className="flex items-center gap-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-3.5 py-1.5 rounded-lg font-medium text-sm shadow-sm hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button className="flex items-center gap-1.5 border border-white/20 bg-white/30 px-3 py-1.5 text-sm font-medium text-zinc-900 shadow-sm backdrop-blur-md transition-all hover:bg-white/50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
                             Resume
-                            <ArrowRightIcon className="w-3.5 h-3.5" />
+                            <ArrowRightIcon className="h-3.5 w-3.5" />
                         </button>
 
                         <button
                             onClick={handleClear}
-                            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            className="p-2 text-zinc-400 transition-all hover:bg-white/20 hover:text-zinc-700 dark:hover:text-zinc-300"
                             title="Dismiss session"
                             aria-label="Dismiss session"
                         >
-                            <XIcon className="w-4 h-4" />
+                            <XIcon className="h-4 w-4" />
                         </button>
                     </div>
                 </div>

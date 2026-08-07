@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+    | string
+    | number
+    | boolean
+    | null
+    | { [key: string]: Json | undefined }
+    | Json[];
 
 export type Database = {
     graphql_public: {
@@ -252,6 +258,42 @@ export type Database = {
                 };
                 Relationships: [];
             };
+            question_bookmarks: {
+                Row: {
+                    created_at: string;
+                    notes: string | null;
+                    question_id: string;
+                    user_id: string;
+                };
+                Insert: {
+                    created_at?: string;
+                    notes?: string | null;
+                    question_id: string;
+                    user_id: string;
+                };
+                Update: {
+                    created_at?: string;
+                    notes?: string | null;
+                    question_id?: string;
+                    user_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'fk_bookmarks_question';
+                        columns: ['question_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'fk_bookmarks_user';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
             question_peer_stats: {
                 Row: {
                     avg_time_seconds: number | null;
@@ -491,7 +533,7 @@ export type Database = {
                 Row: {
                     accuracy: number | null;
                     attempted_count: number | null;
-                    branch_id: string | null;
+                    branch_id: string;
                     completed_at: string | null;
                     correct_count: number | null;
                     created_at: string | null;
@@ -508,7 +550,7 @@ export type Database = {
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id?: string | null;
+                    branch_id: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -525,7 +567,7 @@ export type Database = {
                 Update: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
-                    branch_id?: string | null;
+                    branch_id?: string;
                     completed_at?: string | null;
                     correct_count?: number | null;
                     created_at?: string | null;
@@ -744,48 +786,107 @@ export type Database = {
             };
             users: {
                 Row: {
+                    about: string | null;
                     avatar: string | null;
                     bookmark_questions: Json | null;
                     college: string | null;
+                    deleted_at: string | null;
                     email: string | null;
                     id: string;
+                    is_public: boolean | null;
                     joined_at: string;
                     name: string | null;
                     settings: Json | null;
                     show_name: boolean | null;
                     targetYear: number | null;
                     total_xp: number | null;
+                    username: string | null;
                     version_number: number;
                 };
                 Insert: {
+                    about?: string | null;
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
+                    deleted_at?: string | null;
                     email?: string | null;
                     id?: string;
+                    is_public?: boolean | null;
                     joined_at?: string;
                     name?: string | null;
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
                     total_xp?: number | null;
+                    username?: string | null;
                     version_number?: number;
                 };
                 Update: {
+                    about?: string | null;
                     avatar?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
+                    deleted_at?: string | null;
                     email?: string | null;
                     id?: string;
+                    is_public?: boolean | null;
                     joined_at?: string;
                     name?: string | null;
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
                     total_xp?: number | null;
+                    username?: string | null;
                     version_number?: number;
                 };
                 Relationships: [];
+            };
+            users_social: {
+                Row: {
+                    discord_url: string | null;
+                    github_url: string | null;
+                    lemmy_url: string | null;
+                    linkedin_url: string | null;
+                    mastodon_url: string | null;
+                    reddit_url: string | null;
+                    spotify_url: string | null;
+                    user_id: string;
+                    x_url: string | null;
+                    youtube_url: string | null;
+                };
+                Insert: {
+                    discord_url?: string | null;
+                    github_url?: string | null;
+                    lemmy_url?: string | null;
+                    linkedin_url?: string | null;
+                    mastodon_url?: string | null;
+                    reddit_url?: string | null;
+                    spotify_url?: string | null;
+                    user_id: string;
+                    x_url?: string | null;
+                    youtube_url?: string | null;
+                };
+                Update: {
+                    discord_url?: string | null;
+                    github_url?: string | null;
+                    lemmy_url?: string | null;
+                    linkedin_url?: string | null;
+                    mastodon_url?: string | null;
+                    reddit_url?: string | null;
+                    spotify_url?: string | null;
+                    user_id?: string;
+                    x_url?: string | null;
+                    youtube_url?: string | null;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'users_social_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: true;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
             };
             weekly_revision_set: {
                 Row: {
@@ -799,7 +900,9 @@ export type Database = {
                     id: string;
                     start_of_week: string;
                     started_at: string | null;
-                    status: Database['public']['Enums']['revision_status'] | null;
+                    status:
+                        | Database['public']['Enums']['revision_status']
+                        | null;
                     total_questions: number | null;
                 };
                 Insert: {
@@ -813,7 +916,9 @@ export type Database = {
                     id?: string;
                     start_of_week: string;
                     started_at?: string | null;
-                    status?: Database['public']['Enums']['revision_status'] | null;
+                    status?:
+                        | Database['public']['Enums']['revision_status']
+                        | null;
                     total_questions?: number | null;
                 };
                 Update: {
@@ -827,7 +932,9 @@ export type Database = {
                     id?: string;
                     start_of_week?: string;
                     started_at?: string | null;
-                    status?: Database['public']['Enums']['revision_status'] | null;
+                    status?:
+                        | Database['public']['Enums']['revision_status']
+                        | null;
                     total_questions?: number | null;
                 };
                 Relationships: [
@@ -849,6 +956,15 @@ export type Database = {
             };
         };
         Views: {
+            active_weekend_subscriptions: {
+                Row: {
+                    auth_key: string | null;
+                    endpoint: string | null;
+                    p256dh_key: string | null;
+                    user_id: string | null;
+                };
+                Relationships: [];
+            };
             dynamic_difficulty_stats: {
                 Row: {
                     question_id: string | null;
@@ -909,27 +1025,19 @@ export type Database = {
             };
         };
         Functions: {
+            calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
             clear_user_data: { Args: never; Returns: Json };
-            generate_topic_test:
-                | {
-                      Args: {
-                          p_already_attempted_questions: boolean;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_total_seconds: number;
-                      };
-                      Returns: Json;
-                  }
-                | {
-                      Args: {
-                          p_already_attempted_questions: boolean;
-                          p_branch_id: string;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_total_seconds: number;
-                      };
-                      Returns: Json;
-                  };
+            delete_account: { Args: never; Returns: undefined };
+            generate_topic_test: {
+                Args: {
+                    p_already_attempted_questions: boolean;
+                    p_branch_id: string;
+                    p_filters: Json;
+                    p_question_count: number;
+                    p_total_seconds: number;
+                };
+                Returns: Json;
+            };
             generate_weekly_revision_set: {
                 Args: {
                     p_branch_id: string;
@@ -941,7 +1049,10 @@ export type Database = {
             get_critical_question_count:
                 | { Args: { p_valid_subjects: string[] }; Returns: number }
                 | {
-                      Args: { p_target_exams: string[]; p_valid_subjects: string[] };
+                      Args: {
+                          p_target_exams: string[];
+                          p_valid_subjects: string[];
+                      };
                       Returns: number;
                   };
             get_exam_subject_counts: {
@@ -951,6 +1062,8 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
+            get_my_dashboard: { Args: never; Returns: Json };
+            get_public_profile: { Args: { p_username: string }; Returns: Json };
             get_topic_counts: {
                 Args: { p_subject_id: string };
                 Returns: {
@@ -958,6 +1071,27 @@ export type Database = {
                     subject_id: string;
                     topic: string;
                     unattempted_count: number;
+                }[];
+            };
+            get_user_attempted_ids: {
+                Args: { p_mode?: string; p_subject_slug?: string };
+                Returns: {
+                    question_id: string;
+                }[];
+            };
+            get_user_bookmarks: {
+                Args: { p_subject_slug?: string };
+                Returns: {
+                    created_at: string;
+                    difficulty: string;
+                    notes: string;
+                    question: string;
+                    question_id: string;
+                    question_type: string;
+                    subject_id: string;
+                    subject_name: string;
+                    subject_slug: string;
+                    topic: string;
                 }[];
             };
             get_verified_donations: {
@@ -981,9 +1115,37 @@ export type Database = {
                 Args: { batch: Json };
                 Returns: undefined;
             };
+            internal_calc_exam_stats: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_global_stats: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_recent_history: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_user_heatmap: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: Json;
+            };
+            internal_calc_user_streaks: {
+                Args: { p_user_id: string; p_version_number: number };
+                Returns: {
+                    learning_current_streak: number;
+                    learning_longest_streak: number;
+                    study_current_streak: number;
+                    study_longest_streak: number;
+                }[];
+            };
             refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
-            start_weekly_revision_set: { Args: { v_set_id: string }; Returns: Json };
+            start_weekly_revision_set: {
+                Args: { v_set_id: string };
+                Returns: Json;
+            };
             submit_test_grading: {
                 Args: {
                     p_payload: Json;
@@ -992,7 +1154,18 @@ export type Database = {
                 };
                 Returns: Json;
             };
-            update_status_of_weekly_set: { Args: { v_set_id: string }; Returns: Json };
+            toggle_question_bookmark: {
+                Args: { p_note?: string; p_question_id: string };
+                Returns: boolean;
+            };
+            update_question_bookmark_note: {
+                Args: { p_note: string; p_question_id: string };
+                Returns: undefined;
+            };
+            update_status_of_weekly_set: {
+                Args: { v_set_id: string };
+                Returns: Json;
+            };
         };
         Enums: {
             revision_status: 'pending' | 'started' | 'expired';
@@ -1005,7 +1178,10 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>];
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+    keyof Database,
+    'public'
+>];
 
 export type Tables<
     DefaultSchemaTableNameOrOptions extends

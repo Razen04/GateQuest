@@ -1,5 +1,5 @@
 // 1. Core and external library imports
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // 2. Custom hook imports - This is where we abstract all the heavy lifting.
 import useQuestions from '../hooks/useQuestions'; // Fetches the raw question data.
@@ -20,27 +20,24 @@ const PracticeList = () => {
 
     // Standard React Router hooks to get our bearings.
     const navigate = useNavigate();
-    const { subject, rid, qid } = useParams(); // e.g., 'aptitude', 'dsa' from the URL /practice/:subject
+    const { subject } = useParams(); // e.g., 'aptitude', 'dsa' from the URL /practice/:subject
     // get the subject_slug uuid from the subjects present in the GoalProvider
     const { subjects } = useGoals();
     const selectedSubject = subjects.filter((s) => s.slug === subject);
     const subjectId = selectedSubject[0]?.id;
     const subjectName = selectedSubject[0]?.name;
 
-    // We need to read URL params to initialize our state.
-    const [searchParams] = useSearchParams();
-    // Specifically pulling 'bookmarked' here because the initial data fetch depends on it.
-    // The other params are handled by the useUrlFilters hook.
-    const bookmarked = searchParams.get('bookmarked') === 'true';
-
     // Fetch the questions. This hook handles the loading and error states for us.
-    // It takes the subjectId and the bookmarked flag to get the base dataset.
-    const { questions, isLoading, error } = useQuestions(subjectId, bookmarked);
+    // It takes the subjectId to get the base dataset.
+    const { questions, isLoading, error } = useQuestions(subjectId);
 
     // --- Event Handlers ---
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
+    const handleQuestionClick = (
+        id: string,
+        currentFilteredList: Question[]
+    ) => {
         const currentQueryString = window.location.search;
 
         // Navigate to the specific question URL, making sure to include the current filter query string.
@@ -66,8 +63,8 @@ const PracticeList = () => {
     if (error) {
         return (
             <div>
-                Failed to load questions, please clear cache and try again, if this does not work,
-                hop on Discord and I might help.
+                Failed to load questions, please clear cache and try again, if
+                this does not work, hop on Discord and I might help.
             </div>
         );
     }

@@ -9,7 +9,7 @@ const instructions = [
                 text: 'Write an optional message (max 100 characters).',
             },
             {
-                text: 'Select a suggested amount: ₹20 | ₹69 | ₹169, or enter a custom amount.',
+                text: 'Select a suggested amount: ₹50 | ₹169 | ₹569, or enter a custom amount.',
             },
         ],
     },
