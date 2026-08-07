@@ -22,7 +22,7 @@ export const handleReportResolved = async ({
             {
                 status: 200,
                 headers: corsHeaders,
-            },
+            }
         );
     }
 
@@ -30,7 +30,9 @@ export const handleReportResolved = async ({
     const questionId = record.question_id;
 
     if (!studentId || !questionId) {
-        throw new Error('Webhook data missing target user_id or question_id tracking references.');
+        throw new Error(
+            'Webhook data missing target user_id or question_id tracking references.'
+        );
     }
 
     const { data: questionData, error: questionErr } = await supabaseAdmin
@@ -39,13 +41,16 @@ export const handleReportResolved = async ({
             `
 														id,
 														subjects (slug)
-														`,
+														`
         )
         .eq('id', questionId)
         .single();
 
     if (questionErr || !questionData) {
-        console.error(`Failed to find mapping for question ID ${questionId}:`, questionErr);
+        console.error(
+            `Failed to find mapping for question ID ${questionId}:`,
+            questionErr
+        );
         throw questionErr;
     }
 
@@ -65,7 +70,7 @@ export const handleReportResolved = async ({
             {
                 status: 200,
                 headers: corsHeaders,
-            },
+            }
         );
     }
 
@@ -85,7 +90,7 @@ export const handleReportResolved = async ({
                         p256dh: sub.p256dh_key,
                     },
                 },
-                studentPayload,
+                studentPayload
             );
         } catch (err) {
             if (err.statusCode === 410 || err.statusCode === 404) {
@@ -105,6 +110,6 @@ export const handleReportResolved = async ({
         {
             status: 200,
             headers: corsHeaders,
-        },
+        }
     );
 };

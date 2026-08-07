@@ -52,24 +52,31 @@ export const useWebPush = () => {
             // has the device physically blocked us in browser settings?
             if (Notification.permission === 'denied') {
                 setStatus('denied');
-                if (settings.notifications) handleSettingToggle('notifications', false);
+                if (settings.notifications)
+                    handleSettingToggle('notifications', false);
                 return;
             }
 
             try {
                 // Wait for worker to be ready, then check browser cache
                 const registration = await navigator.serviceWorker.ready;
-                const existingSubscription = await registration.pushManager.getSubscription();
+                const existingSubscription =
+                    await registration.pushManager.getSubscription();
 
                 if (existingSubscription) {
                     setStatus('subscribed');
-                    if (!settings.notifications) handleSettingToggle('notifications', true);
+                    if (!settings.notifications)
+                        handleSettingToggle('notifications', true);
                 } else {
                     setStatus('unsubscribed');
-                    if (settings.notifications) handleSettingToggle('notifications', false);
+                    if (settings.notifications)
+                        handleSettingToggle('notifications', false);
                 }
             } catch (error) {
-                console.error('Failed to inspect push manager system state:', error);
+                console.error(
+                    'Failed to inspect push manager system state:',
+                    error
+                );
                 setStatus('unsubscribed');
             }
         };
@@ -92,7 +99,8 @@ export const useWebPush = () => {
             const registration = await navigator.serviceWorker.ready;
 
             // Convert our public credential into raw binary format
-            const binaryApplicationKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+            const binaryApplicationKey =
+                urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
 
             // Request a pristine cryptographic routing endpoint string from browser engine
             const newSubscription = await registration.pushManager.subscribe({
@@ -107,7 +115,9 @@ export const useWebPush = () => {
             const p256dh_key = subscriptionJSON.keys?.p256dh;
 
             if (!endpoint || !auth_key || !p256dh_key) {
-                throw new Error('Browser network failed to construct public signature payload.');
+                throw new Error(
+                    'Browser network failed to construct public signature payload.'
+                );
             }
 
             // Securely push into your Postgres table using upsert (ignores structural duplicates)
@@ -131,7 +141,8 @@ export const useWebPush = () => {
         setIsProcessing(true);
         try {
             const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
+            const subscription =
+                await registration.pushManager.getSubscription();
 
             if (subscription) {
                 const storedEndpoint = subscription.endpoint;

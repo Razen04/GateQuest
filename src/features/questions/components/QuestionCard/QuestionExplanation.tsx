@@ -6,7 +6,9 @@ interface QuestionExplanationProps {
     question: RevisionQuestion | Question;
 }
 
-const QuestionExplanation: React.FC<QuestionExplanationProps> = ({ question }) => {
+const QuestionExplanation: React.FC<QuestionExplanationProps> = ({
+    question,
+}) => {
     const textToRender = question.answer_text;
 
     if (!textToRender) return null;
@@ -17,8 +19,9 @@ const QuestionExplanation: React.FC<QuestionExplanationProps> = ({ question }) =
                 Explanation
             </h4>
             <p className="text-xs text-red-400 dark:text-red-300 mb-4 italic">
-                This is AI-generated and may contain errors. If it seems incorrect or unclear,
-                please report it. You can look at GO explanation too.
+                This is AI-generated and may contain errors. If it seems
+                incorrect or unclear, please report it. You can look at GO
+                explanation too.
             </p>
             <div className="text-gray-800 dark:text-gray-200">
                 <MathRenderer text={textToRender} />

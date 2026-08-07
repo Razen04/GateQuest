@@ -17,7 +17,7 @@ const Settings = () => {
     // Tab Reference
     const tabRefs = useRef<Record<string, HTMLButtonElement>>({});
 
-    // This brings the active tab in view
+    // Bring active sub-tab into view on horizontal overflow (mobile / small screens)
     useEffect(() => {
         const activeEl = tabRefs.current[activeTab];
         if (activeEl) {
@@ -29,65 +29,67 @@ const Settings = () => {
         }
     }, [activeTab]);
 
-    // Tabs
+    // Sub-Navigation Tabs
     const tabs = [
         {
             id: 'account',
             label: 'Account',
-            icon: <User size={20} weight="duotone" />,
-            activeIcon: <User size={20} weight="fill" />,
-        },
-        {
-            id: 'privacy',
-            label: 'Privacy & Data',
-            icon: <ShieldCheck size={20} weight="duotone" />,
-            activeIcon: <ShieldCheck size={20} weight="fill" />,
+            icon: <User size={18} weight="duotone" />,
+            activeIcon: <User size={18} weight="fill" />,
         },
         {
             id: 'app-settings',
             label: 'App Settings',
-            icon: <Faders size={20} weight="duotone" />,
-            activeIcon: <Faders size={20} weight="fill" />,
+            icon: <Faders size={18} weight="duotone" />,
+            activeIcon: <Faders size={18} weight="fill" />,
+        },
+        {
+            id: 'privacy',
+            label: 'Privacy & Data',
+            icon: <ShieldCheck size={18} weight="duotone" />,
+            activeIcon: <ShieldCheck size={18} weight="fill" />,
         },
     ];
 
     return (
-        <div className="relative pb-10">
+        <div className="relative min-h-dvh select-none">
+            {/* Modal Overlay for Login */}
             {showLogin && (
-                <div className="w-full h-screen flex z-50 items-center justify-center bg-transparent bg-opacity-30">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm">
                     <Login onClose={() => setShowLogin(false)} />
                 </div>
             )}
+
             <div
-                className={`p-6 min-h-[100dvh] transition-colors duration-50 ${showLogin ? 'blur-2xl' : ''}`}
+                className={`max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-32 transition-all duration-200 ${
+                    showLogin ? 'blur-2xl pointer-events-none' : ''
+                }`}
             >
-                {/* Header Section */}
+                {/* SECTION PAGE HEADER */}
                 <PageHeader
-                    primaryTitle="Preferences &amp;"
+                    primaryTitle="Preferences &"
                     secondaryTitle="Settings"
-                    caption="Customize your GATE preparation experience"
+                    caption="Customize your GATE preparation environment and account controls"
                 />
 
-                {/* Settings Tabs Navigation */}
-                <div>
-                    <AnimatedTabs tabs={tabs} activeTab={activeTab} onChange={navigate} />
-
-                    <div className="mt-6">
-                        {activeTab === 'general' && <div>General content…</div>}
-                        {activeTab === 'appearance' && <div>Appearance content…</div>}
-                        {activeTab === 'advanced' && <div>Advanced settings…</div>}
-                    </div>
+                {/* STICKY SUB-NAVIGATION BAR */}
+                <div className="top-14 z-30 -mx-4 px-4 sm:-mx-8 sm:px-8 py-3 my-4 bg-slate-50/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-800/60">
+                    <AnimatedTabs
+                        tabs={tabs}
+                        activeTab={activeTab}
+                        onChange={(tabId) => navigate(`/settings/${tabId}`)}
+                    />
                 </div>
 
-                {/* Content Area */}
-                <motion.div
+                {/* NESTED ROUTE CONTENT AREA */}
+                <motion.main
                     initial="initial"
                     animate="animate"
                     variants={itemVariants}
-                    className="pb-20"
+                    className="mt-6"
                 >
                     <Outlet />
-                </motion.div>
+                </motion.main>
             </div>
         </div>
     );

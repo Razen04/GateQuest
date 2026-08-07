@@ -34,8 +34,11 @@ export default function useQuestionNav({
     // Find the numerical index of the current question in the filtered array.
     // Using String() ensures consistent comparison, as IDs might be numbers or strings.
     const index = useMemo(
-        () => filteredQuestions.findIndex((q) => String(q.id) === String(currentIndex)),
-        [filteredQuestions, currentIndex],
+        () =>
+            filteredQuestions.findIndex(
+                (q) => String(q.id) === String(currentIndex)
+            ),
+        [filteredQuestions, currentIndex]
     );
 
     // Determine if the current question is the first or last in the list.

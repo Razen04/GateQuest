@@ -26,7 +26,7 @@ const bulkUpsertQuestions = async (questions: Question[]) => {
 
 const updateSubjectSyncMetadata = async (
     subject_id: string,
-    last_fetched_at?: string | undefined,
+    last_fetched_at?: string | undefined
 ) => {
     let payload;
     if (!last_fetched_at) {

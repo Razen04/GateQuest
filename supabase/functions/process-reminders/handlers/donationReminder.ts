@@ -41,12 +41,14 @@ export const handleDonationReminder = async ({
             JSON.stringify({
                 message: 'Skipping this week. Not part of the 2-week cycle.',
             }),
-            { status: 200, headers: corsHeaders },
+            { status: 200, headers: corsHeaders }
         );
     }
 
     const selectedCopy =
-        DONATION_REMINDER_PAYLOADS[biWeeklyIndex % DONATION_REMINDER_PAYLOADS.length];
+        DONATION_REMINDER_PAYLOADS[
+            biWeeklyIndex % DONATION_REMINDER_PAYLOADS.length
+        ];
 
     const payload = JSON.stringify({
         title: selectedCopy.title,
@@ -72,7 +74,7 @@ export const handleDonationReminder = async ({
                         endpoint: sub.endpoint,
                         keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
                     },
-                    payload,
+                    payload
                 );
                 successfulPings++;
             } catch (err) {
@@ -86,14 +88,19 @@ export const handleDonationReminder = async ({
 
     // Execute chunks in parallel pools of 10
     for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CHUNKS) {
-        const pool = chunks.slice(i, i + MAX_CONCURRENT_CHUNKS).map(processChunk);
+        const pool = chunks
+            .slice(i, i + MAX_CONCURRENT_CHUNKS)
+            .map(processChunk);
         await Promise.all(pool);
     }
 
     // Bulk delete all dead tokens in exactly ONE database call
     if (deadEndpoints.length > 0) {
         console.warn(`Bulk deleting ${deadEndpoints.length} dead tokens...`);
-        await supabaseAdmin.from('push_subscriptions').delete().in('endpoint', deadEndpoints);
+        await supabaseAdmin
+            .from('push_subscriptions')
+            .delete()
+            .in('endpoint', deadEndpoints);
     }
 
     return new Response(
@@ -105,6 +112,6 @@ export const handleDonationReminder = async ({
         {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
+        }
     );
 };

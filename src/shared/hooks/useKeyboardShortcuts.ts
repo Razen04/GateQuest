@@ -1,6 +1,6 @@
 // This custom hook sets up global keyboard shortcuts for navigating and interacting with the practice question interface.
 
-import { useEffect, type DependencyList } from 'react';
+import { type DependencyList, useEffect } from 'react';
 
 /**
  * Attaches global keyboard event listeners for practice card actions.
@@ -20,7 +20,7 @@ type useKeyboardShortcutsProps = {
 };
 export default function useKeyboardShortcuts(
     { onPrev, onNext, onShowAnswer, onExplain }: useKeyboardShortcutsProps,
-    deps: DependencyList = [], // Dependencies for the useEffect hook, passed from the calling component.
+    deps: DependencyList = [] // Dependencies for the useEffect hook, passed from the calling component.
 ) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
@@ -48,7 +48,13 @@ export default function useKeyboardShortcuts(
         const handleKeyStroke = (e: KeyboardEvent) => {
             const tag = (e.target as HTMLElement)?.tagName;
             // We prevent the shortcuts from firing if the user is typing in an input field or if a modifier key (like Ctrl or Alt) is pressed.
-            if (tag === 'INPUT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey || e.altKey) {
+            if (
+                tag === 'INPUT' ||
+                tag === 'TEXTAREA' ||
+                e.metaKey ||
+                e.ctrlKey ||
+                e.altKey
+            ) {
                 return;
             }
 
@@ -58,7 +64,7 @@ export default function useKeyboardShortcuts(
                 window.dispatchEvent(
                     new CustomEvent('selectOptionByIndex', {
                         detail: optionIndex,
-                    }),
+                    })
                 );
                 return;
             }

@@ -25,7 +25,10 @@ const SmartRevisionQuestionList = () => {
     };
 
     // This is the crucial navigation step to the QuestionCard.
-    const handleQuestionClick = (id: string, currentFilteredList: Question[]) => {
+    const handleQuestionClick = (
+        id: string,
+        currentFilteredList: Question[]
+    ) => {
         const subject = currentFilteredList.find((q) => q.id === id)?.subject;
 
         const currentQueryString = window.location.search;

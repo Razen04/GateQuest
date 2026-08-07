@@ -49,7 +49,9 @@ export function QuestionGrid({
 
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
                         <div className="flex gap-3 text-[10px] font-mono font-bold">
-                            <span className="text-emerald-500">{accuracy}% ACC</span>
+                            <span className="text-emerald-500">
+                                {accuracy}% ACC
+                            </span>
                             <span className="text-slate-500">
                                 {formatTime(Number(avgTime))} AVG
                             </span>
@@ -59,7 +61,8 @@ export function QuestionGrid({
 
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-auto">
                     {data.attempts.map((attempt: FullAttempt) => {
-                        let styles = 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+                        let styles =
+                            'bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
                         if (attempt.status === 'answered' && attempt.is_correct)
                             styles =
                                 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400';
@@ -74,7 +77,7 @@ export function QuestionGrid({
                                 className={`relative flex items-center justify-center h-10 border rounded-sm transition-colors text-xs font-black ${styles}`}
                                 onClick={() =>
                                     navigate(
-                                        `/topic-test-review/${testId}/${attempt.originalIndex}`,
+                                        `/topic-test-review/${testId}/${attempt.originalIndex}`
                                     )
                                 }
                                 title={`Question ${attempt.originalIndex + 1} - ${formatTime(attempt.time_spent_seconds)}`}
@@ -108,7 +111,9 @@ export function QuestionGrid({
                 <div className="flex gap-6 text-[10px] md:text-xs font-bold font-mono text-right">
                     <div>
                         <p className="text-slate-400 uppercase">Avg Time</p>
-                        <p className="text-blue-500">{formatTime(Number(avgTime))}</p>
+                        <p className="text-blue-500">
+                            {formatTime(Number(avgTime))}
+                        </p>
                     </div>
                     <div>
                         <p className="text-slate-400 uppercase">Accuracy</p>
@@ -133,7 +138,9 @@ export function QuestionGrid({
                             whileHover={{ scale: 1.05 }}
                             className={`relative flex flex-col items-center justify-center h-14 border rounded-sm transition-colors ${styles}`}
                             onClick={() =>
-                                navigate(`/topic-test-review/${testId}/${attempt.originalIndex}`)
+                                navigate(
+                                    `/topic-test-review/${testId}/${attempt.originalIndex}`
+                                )
                             }
                         >
                             <span className="text-xs font-black mb-0.5">

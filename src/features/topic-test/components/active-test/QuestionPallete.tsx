@@ -60,13 +60,15 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             {/* DESKTOP */}
             <aside
                 className={clsx(
-                    'hidden md:flex flex-col border-l overflow-y-auto transition-all duration-300 h-full',
+                    'hidden md:flex flex-col border-l overflow-y-auto transition-all duration-300 h-full'
                 )}
             >
                 <div className="p-6 space-y-4">
                     {' '}
                     <div className="text-center space-y-1">
-                        <h1 className="text-lg font-semibold">Question Palette</h1>
+                        <h1 className="text-lg font-semibold">
+                            Question Palette
+                        </h1>
                         <p className="text-sm">{questions.length} questions</p>
                     </div>
                     <Stats />
@@ -86,9 +88,12 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
 
                                         active && 'ring-2 ring-blue-500',
 
-                                        review && 'bg-purple-100 text-purple-700',
+                                        review &&
+                                            'bg-purple-100 text-purple-700',
 
-                                        answered && !review && 'bg-green-100 text-green-700',
+                                        answered &&
+                                            !review &&
+                                            'bg-green-100 text-green-700',
 
                                         visited &&
                                             !answered &&
@@ -100,7 +105,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                             !review &&
                                             'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-100',
 
-                                        'hover:bg-gray-200 dark:hover:bg-gray-800',
+                                        'hover:bg-gray-200 dark:hover:bg-gray-800'
                                     )}
                                 >
                                     {idx + 1}
@@ -115,7 +120,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             <div
                 className={clsx(
                     'fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-zinc-900 border-t transition-transform duration-300 md:hidden',
-                    isOpen ? 'translate-y-0' : 'translate-y-full',
+                    isOpen ? 'translate-y-0' : 'translate-y-full'
                 )}
                 style={{ height: '70vh' }}
             >
@@ -124,7 +129,9 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                         <h1 className="w-full text-center text-xl font-bold border-b pb-4">
                             Question Palette
                         </h1>
-                        <div className="font-bold text-center m-2">Total: {questions.length}</div>
+                        <div className="font-bold text-center m-2">
+                            Total: {questions.length}
+                        </div>
                         <Stats />
                     </div>
 
@@ -148,9 +155,12 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
 
                                             active && 'ring-2 ring-blue-500',
 
-                                            review && 'bg-purple-100 text-purple-700',
+                                            review &&
+                                                'bg-purple-100 text-purple-700',
 
-                                            answered && !review && 'bg-green-100 text-green-700',
+                                            answered &&
+                                                !review &&
+                                                'bg-green-100 text-green-700',
 
                                             visited &&
                                                 !answered &&
@@ -162,7 +172,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                                 !review &&
                                                 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-100',
 
-                                            'hover:bg-gray-200 dark:hover:bg-gray-800',
+                                            'hover:bg-gray-200 dark:hover:bg-gray-800'
                                         )}
                                     >
                                         {idx + 1}

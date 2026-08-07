@@ -17,13 +17,24 @@ interface InitializeTestSessionPropTypes {
     children: React.ReactNode;
 }
 
-const InitializeTestSession = ({ testId, data, children }: InitializeTestSessionPropTypes) => {
+const InitializeTestSession = ({
+    testId,
+    data,
+    children,
+}: InitializeTestSessionPropTypes) => {
     const engine = useTestSession(testId, data);
 
-    return <TestSessionContext.Provider value={engine}>{children}</TestSessionContext.Provider>;
+    return (
+        <TestSessionContext.Provider value={engine}>
+            {children}
+        </TestSessionContext.Provider>
+    );
 };
 
-export const TestSessionProvider = ({ testId, children }: TestSessionProviderPropTypes) => {
+export const TestSessionProvider = ({
+    testId,
+    children,
+}: TestSessionProviderPropTypes) => {
     const { data, loading } = useTestLoader(testId);
 
     if (loading) {
