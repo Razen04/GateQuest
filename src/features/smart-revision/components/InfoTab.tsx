@@ -1,14 +1,14 @@
-import * as React from 'react';
-import { motion } from 'framer-motion';
 import {
-    Info,
-    CheckCircle,
-    ShieldCheck,
     ArrowsClockwise,
+    CheckCircle,
     Fire,
-    Sparkle,
+    Info,
     Lightning,
+    ShieldCheck,
+    Sparkle,
 } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
+import * as React from 'react';
 
 type BoxCardProps = {
     step: string;
@@ -62,7 +62,7 @@ const BoxCard = ({
             <h3 className="font-['Space_Grotesk',sans-serif] text-base font-bold text-slate-900 dark:text-white">
                 {title}
             </h3>
-            <p className="font-['Fraunces',serif] text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 {desc}
             </p>
         </div>
@@ -95,11 +95,11 @@ const InfoTab = () => {
                         <Fire
                             size={22}
                             weight="fill"
-                            className="text-rose-500 animate-pulse"
+                            className="text-rose-500"
                         />
                     }
                     title="Box 1: Critical Core"
-                    badge="EVERY 7 DAYS"
+                    badge="EVERY 3 DAYS"
                     desc="New errors and persistent failures. Automatically queued weekly until successfully overcome."
                     glowColor="bg-rose-500/20"
                     accentClass="border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -115,7 +115,7 @@ const InfoTab = () => {
                         />
                     }
                     title="Box 2: Intermediate"
-                    badge="EVERY 14 DAYS"
+                    badge="EVERY 6 DAYS"
                     desc="Questions cleared once. Subject to a 14-day hold pattern to verify long-term memory consolidation."
                     glowColor="bg-amber-500/20"
                     accentClass="border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400"
@@ -131,7 +131,7 @@ const InfoTab = () => {
                         />
                     }
                     title="Box 3: Mastery Vault"
-                    badge="EVERY 30 DAYS"
+                    badge="EVERY 12 DAYS"
                     desc="The final verification. Solve it once more here to permanently graduate the concept from your queue."
                     glowColor="bg-emerald-500/20"
                     accentClass="border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -175,7 +175,7 @@ const InfoTab = () => {
                             />
                             <span>Strict 30-Question Cap</span>
                         </div>
-                        <p className="font-['Fraunces',serif] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
                             Caps revision volume at 30 items per week so you can
                             reserve peak mental energy for learning unmastered
                             concepts.
@@ -191,7 +191,7 @@ const InfoTab = () => {
                             />
                             <span>Fresh Start Protocol</span>
                         </div>
-                        <p className="font-['Fraunces',serif] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
                             Missed a week? Backlogs are archived instantly
                             without penalty, serving you a clean set based on
                             immediate priority.

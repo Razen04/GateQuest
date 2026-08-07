@@ -1,23 +1,22 @@
-import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ShieldCheck,
-    Fire,
     ArrowLeft,
-    Sparkle,
-    Clock,
-    Lightning,
     CheckCircle,
+    Clock,
+    Fire,
+    Lightning,
+    ShieldCheck,
+    Sparkle,
 } from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
-import useSmartRevision from '../hooks/useSmartRevision';
 import ModernLoader from '@/shared/components/ModernLoader';
-import InfoTab from '../components/InfoTab';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
 import useAuth from '@/shared/hooks/useAuth';
+import InfoTab from '../components/InfoTab';
+import useSmartRevision from '../hooks/useSmartRevision';
 
 const getTimeRemaining = (expiresAt: string) => {
     const now = new Date();
@@ -197,7 +196,7 @@ const SmartRevision = () => {
                                         />
                                         <span>
                                             {criticalQuestionsCount} CRITICAL
-                                            ERRORS DETECTED
+                                            ERROR(S) DETECTED
                                         </span>
                                     </div>
 
@@ -205,7 +204,7 @@ const SmartRevision = () => {
                                         <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
                                             Ready to Recover Marks?
                                         </h3>
-                                        <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
                                             Generate an algorithmic revision
                                             queue targeted specifically at your
                                             recent missteps.
