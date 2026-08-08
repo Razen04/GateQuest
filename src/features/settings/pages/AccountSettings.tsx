@@ -248,7 +248,7 @@ const AccountSettings = () => {
                                 size={16}
                                 className="transition-transform group-hover:rotate-45"
                             />
-                            <span>Manage Profiles</span>
+                            <span>Manage Socials</span>
                         </Button>
                     )}
                 </div>
@@ -289,8 +289,7 @@ const AccountSettings = () => {
                             Social Media Presence
                         </DialogTitle>
                         <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 rounded-none">
-                            Connect your profiles so peers and mentors can find
-                            your work.
+                            Connect your profiles so peers can find your work.
                         </DialogDescription>
                     </DialogHeader>
                     <SocialSettingsForm

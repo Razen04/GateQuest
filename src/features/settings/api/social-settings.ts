@@ -32,6 +32,8 @@ export const handleUpdateSocialSettings = async (
         mastodon_url: formData.get('mastodon_url')?.toString() || null,
         youtube_url: formData.get('youtube_url')?.toString() || null,
         lemmy_url: formData.get('lemmy_url')?.toString() || null,
+        leetcode_url: formData.get('leetcode_url')?.toString() || null,
+        codeforces_url: formData.get('codeforces_url')?.toString() || null,
     });
 
     return error;

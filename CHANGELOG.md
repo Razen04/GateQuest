@@ -1,4 +1,10 @@
-# v0.10.9 - 2026-08-07 (Latest)
+# v0.10.9_1 - 2026-08-08 (Latest)
+
+- Fixed the accuracy calculation. I think. Fixes [#94](https://github.com/Razen04/GateQuest/issues/94).
+- Improved dashboard loading speed by adding database indexes.
+- Added LeetCode and Codeforces to social links (currently in beta).
+
+# v0.10.9 - 2026-08-07
 
 - **Fresh UI**: A cleaner, more modern look across the app.
 - **Better Bookmarks**: Add optional notes (up to 100 characters), edit them anytime, and filter to bookmarked questions only. Existing bookmarks are preserved. Implements [#85](https://github.com/Razen04/GateQuest/discussions/85) and [#17](https://github.com/Razen04/GateQuest/issues/17).

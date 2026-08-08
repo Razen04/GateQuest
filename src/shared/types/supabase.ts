@@ -843,8 +843,10 @@ export type Database = {
             };
             users_social: {
                 Row: {
+                    codeforces_url: string | null;
                     discord_url: string | null;
                     github_url: string | null;
+                    leetcode_url: string | null;
                     lemmy_url: string | null;
                     linkedin_url: string | null;
                     mastodon_url: string | null;
@@ -855,8 +857,10 @@ export type Database = {
                     youtube_url: string | null;
                 };
                 Insert: {
+                    codeforces_url?: string | null;
                     discord_url?: string | null;
                     github_url?: string | null;
+                    leetcode_url?: string | null;
                     lemmy_url?: string | null;
                     linkedin_url?: string | null;
                     mastodon_url?: string | null;
@@ -867,8 +871,10 @@ export type Database = {
                     youtube_url?: string | null;
                 };
                 Update: {
+                    codeforces_url?: string | null;
                     discord_url?: string | null;
                     github_url?: string | null;
+                    leetcode_url?: string | null;
                     lemmy_url?: string | null;
                     linkedin_url?: string | null;
                     mastodon_url?: string | null;

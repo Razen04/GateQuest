@@ -14,6 +14,8 @@ import {
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import type { JSX } from 'react';
+import CodeforcesIcon from '@/icons/codeforces.svg';
+import LeetcodeIcon from '@/icons/leetcode.svg';
 import {
     Avatar,
     AvatarFallback,
@@ -32,6 +34,18 @@ const SOCIAL_ICONS: Record<string, JSX.Element> = {
     youtube: <YoutubeLogo size={15} />,
     lemmy: <FediverseLogoIcon size={15} />,
     mastodon: <MastodonLogoIcon size={15} />,
+    codeforces: (
+        <img
+            src={CodeforcesIcon}
+            className="w-3 h-3 dark:brightness-0 dark:invert"
+        />
+    ),
+    leetcode: (
+        <img
+            src={LeetcodeIcon}
+            className="w-3 h-3 dark:brightness-0 dark:invert"
+        />
+    ),
 };
 
 interface ProfileHeroProps {
