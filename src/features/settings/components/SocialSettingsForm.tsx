@@ -11,6 +11,8 @@ import {
 } from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import CodeforcesIcon from '@/icons/codeforces.svg';
+import LeetcodeIcon from '@/icons/leetcode.svg';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -41,6 +43,8 @@ export default function SocialSettingsForm({
         mastodon_url: '',
         youtube_url: '',
         lemmy_url: '',
+        leetcode_url: '',
+        codeforces_url: '',
     });
 
     useEffect(() => {
@@ -60,6 +64,8 @@ export default function SocialSettingsForm({
                     mastodon_url: data.mastodon_url || '',
                     youtube_url: data.youtube_url || '',
                     lemmy_url: data.lemmy_url || '',
+                    leetcode_url: data.leetcode_url || '',
+                    codeforces_url: data.codeforces_url || '',
                 });
             }
             setIsLoading(false);
@@ -147,6 +153,28 @@ export default function SocialSettingsForm({
             placeholder: 'e.g., user@lemmy.world',
             icon: <FediverseLogoIcon size={18} />,
             value: socials.lemmy_url,
+        },
+        {
+            name: 'leetcode_url',
+            label: 'Leetcode URL',
+            icon: (
+                <img
+                    src={LeetcodeIcon}
+                    className="w-4 h-4 dark:brightness-0 dark:invert"
+                />
+            ),
+            value: socials.leetcode_url,
+        },
+        {
+            name: 'codeforces_url',
+            label: 'Codeforces URL',
+            icon: (
+                <img
+                    src={CodeforcesIcon}
+                    className="w-4 h-4 dark:brightness-0 dark:invert"
+                />
+            ),
+            value: socials.codeforces_url,
         },
     ] as const;
 

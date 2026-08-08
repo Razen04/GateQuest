@@ -10,6 +10,8 @@ import {
     YoutubeLogoIcon,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import CodeforcesIcon from '@/icons/codeforces.svg';
+import LeetcodeIcon from '@/icons/leetcode.svg';
 
 interface SocialLinksDisplayProps {
     links: Record<string, string>;
@@ -113,6 +115,22 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                 >
                     <FediverseLogoIcon size={20} />
                 </button>
+            )}
+            {links.leetcode_url && (
+                <a href={links.leetcode_url} target="_blank" rel="noreferrer">
+                    <img
+                        src={LeetcodeIcon}
+                        className="w-4 h-4 dark:brightness-0 dark:invert"
+                    />
+                </a>
+            )}
+            {links.codeforces_url && (
+                <a href={links.codeforces_url} target="_blank" rel="noreferrer">
+                    <img
+                        src={CodeforcesIcon}
+                        className="w-4 h-4 dark:brightness-0 dark:invert"
+                    />
+                </a>
             )}
         </div>
     );
