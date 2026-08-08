@@ -5,6 +5,8 @@ import { type Benchmark, fetchQuestionPeerStats } from '../api/quesitons';
 
 // 12 hours in milliseconds
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function usePeerBenchmark(questionId: string | number) {
     const [benchmarkDetails, setBenchmarkDetails] = useState<Benchmark | null>(
@@ -14,10 +16,11 @@ export function usePeerBenchmark(questionId: string | number) {
     const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!questionId || questionId === 0) return;
+        const strQuestionId = String(questionId);
+
+        if (!UUID_REGEX.test(strQuestionId)) return;
 
         let isMounted = true;
-        const strQuestionId = String(questionId);
 
         const loadBenchmark = async () => {
             try {
