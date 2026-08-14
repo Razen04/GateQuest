@@ -8,6 +8,7 @@ import {
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useRef, useState } from 'react';
+import { toast } from 'sonner';
 import ToggleSwitch from '@/shared/components/ToggleSwitch.tsx';
 import { Button } from '@/shared/components/ui/button.tsx';
 import { Input } from '@/shared/components/ui/input.tsx';
@@ -43,8 +44,10 @@ const DonationBox: React.FC<DonationBoxProps> = ({
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     const handleGenerateQR = () => {
-        if (!amount || amount <= 0)
-            return alert('Please enter or select a valid contribution amount!');
+        if (!amount || amount < 50)
+            return toast.error(
+                'Please enter or select a valid contribution amount!'
+            );
 
         containerRef?.current?.scrollTo({ behavior: 'smooth' });
         setAmount(amount);
