@@ -28,6 +28,7 @@ const useFilters = (
         useState<AttemptFilterMode>('unattempted');
     const [examFilter, setExamFilter] = useState<string[]>([]);
     const [tagFilter, setTagFilter] = useState<string[]>([]);
+    const [branchFilter, setBranchFilter] = useState<string[]>([]);
 
     const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
     const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
@@ -186,6 +187,26 @@ const useFilters = (
             });
         }
 
+        // Apply branch filter.
+        if (branchFilter.length > 0) {
+            filtered = filtered.filter((qn) => {
+                const branchData = qn.metadata?.set;
+
+                if (!branchData) return false;
+
+                const branches = Array.isArray(branchData)
+                    ? branchData
+                    : [branchData];
+
+                return branches.some((branch) =>
+                    branchFilter.some(
+                        (filter) =>
+                            filter.toUpperCase() === branch.toUpperCase()
+                    )
+                );
+            });
+        }
+
         return sortQuestionsByYear(filtered);
     }, [
         sourceQuestions,
@@ -198,6 +219,7 @@ const useFilters = (
         examFilter,
         selectedQuestion,
         tagFilter,
+        branchFilter,
         bookmarkedIds,
     ]);
 
@@ -219,6 +241,8 @@ const useFilters = (
         setExamFilter,
         tagFilter,
         setTagFilter,
+        branchFilter,
+        setBranchFilter,
     };
 };
 

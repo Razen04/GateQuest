@@ -52,6 +52,10 @@ type SearchAndFiltersProps = {
     tags: string[];
     tagFilter: string[];
     setTagFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    branches: string[];
+    branchFilter: string[];
+    setBranchFilter: React.Dispatch<React.SetStateAction<string[]>>;
+    showBranchFilter: boolean;
     availableExams: string[];
 };
 
@@ -76,6 +80,10 @@ const SearchAndFilters = ({
     tagFilter,
     setTagFilter,
     availableExams,
+    branches,
+    branchFilter,
+    setBranchFilter,
+    showBranchFilter,
 }: SearchAndFiltersProps) => {
     const { subject } = useParams();
     const { getPracticeSubjects } = useGoals();
@@ -101,6 +109,7 @@ const SearchAndFilters = ({
         topicFilter.length > 0 ||
         examFilter.length > 0 ||
         tagFilter.length > 0 ||
+        branchFilter.length > 0 ||
         attemptFilter !== 'unattempted';
 
     // Reset all filter states back to default
@@ -111,6 +120,7 @@ const SearchAndFilters = ({
         setTopicFilter([]);
         setExamFilter([]);
         setTagFilter([]);
+        setBranchFilter([]);
         setAttemptFilter('unattempted');
     };
 
@@ -180,6 +190,19 @@ const SearchAndFilters = ({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {[
+                                ...(showBranchFilter
+                                    ? [
+                                          {
+                                              label: 'Branches',
+                                              items: branches,
+                                              value: branchFilter,
+                                              setter: setBranchFilter,
+                                              placeholder: 'Select branches',
+                                              render: (v: string) =>
+                                                  v.toUpperCase(),
+                                          },
+                                      ]
+                                    : []),
                                 {
                                     label: 'Exams',
                                     items: displayExams,
