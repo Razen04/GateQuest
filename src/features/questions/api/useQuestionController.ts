@@ -165,17 +165,19 @@ export const useQuestionController = ({
     };
 
     const onShareClick = async () => {
+        const shareUrl = window.location.origin + window.location.pathname;
+
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'GATEQuest PYQ question',
-                    url: window.location.href,
+                    url: shareUrl,
                 });
             } catch (err) {
                 console.error(err);
             }
         } else {
-            await navigator.clipboard.writeText(window.location.href);
+            await navigator.clipboard.writeText(shareUrl);
             toast.message('Link copied.');
         }
     };
