@@ -1,5 +1,6 @@
 import {
     Check,
+    CopyIcon,
     Dot,
     Eye,
     Flag,
@@ -43,6 +44,7 @@ type QuestionHeaderProps = {
     timer?: TimerProps | undefined;
     onReport: () => void;
     onShare: () => void;
+    onCopy: () => void;
     marked?: boolean | undefined;
     isAnswered: boolean;
     userCount: number | undefined;
@@ -64,6 +66,7 @@ const QuestionHeader = ({
     timer,
     onReport,
     onShare,
+    onCopy,
     marked,
     isAnswered,
     userCount,
@@ -253,6 +256,14 @@ const QuestionHeader = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={onCopy}
+                        className="flex items-center gap-1.5 border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-500/20 dark:bg-gray-500/10 dark:text-gray-300 dark:hover:bg-gray-500/20"
+                    >
+                        <CopyIcon size={14} />
+                        Copy
+                    </button>
+
                     <button
                         onClick={onReport}
                         className="flex items-center gap-1.5 border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"

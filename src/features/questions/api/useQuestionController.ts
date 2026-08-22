@@ -182,6 +182,29 @@ export const useQuestionController = ({
         }
     };
 
+    // function to copy raw question and options
+    const onCopyQuestion = async () => {
+        try {
+            const question = currentQuestion?.question;
+            const options = currentQuestion?.options;
+            const questionType = currentQuestion?.question_type;
+
+            const content = {
+                questionType,
+                question,
+                ...(options?.length ? { options } : {}),
+            };
+
+            await navigator.clipboard.writeText(
+                JSON.stringify(content, null, 2)
+            );
+            toast.success('Question and options copied successfully.');
+        } catch (err) {
+            toast.error('Unable to copy.');
+            console.error('Unable to copy: ', err);
+        }
+    };
+
     const onExplanationClick = () => {
         const url =
             mode === 'practice'
@@ -250,6 +273,7 @@ export const useQuestionController = ({
             onPrev: handlePrevious,
             onReport: () => setShowReportModal(true),
             onShare: onShareClick,
+            onCopy: onCopyQuestion,
             onExplanationClick,
             onBack: handleBack,
             isFirst,

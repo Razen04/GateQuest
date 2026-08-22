@@ -155,7 +155,7 @@ const Practice = () => {
                 />
 
                 {/* STICKY SUB-HEADER FILTER TABS */}
-                <div className="top-14 z-50">
+                <div className="top-14">
                     <AnimatedTabs
                         tabs={filterTabs}
                         activeTab={activeFilter}

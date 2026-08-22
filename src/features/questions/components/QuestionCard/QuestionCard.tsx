@@ -69,6 +69,7 @@ type QuestionCardProps = {
     onPrev: () => void;
     onReport: () => void;
     onShare: () => void;
+    onCopy: () => void;
     onExplanationClick: () => void;
     onBack: () => void;
 
@@ -97,6 +98,7 @@ const QuestionCard = ({
     onPrev,
     onReport,
     onShare,
+    onCopy,
     subjectSlug,
     onExplanationClick,
     onBack,
@@ -175,6 +177,7 @@ const QuestionCard = ({
                     timer={timer}
                     onReport={onReport}
                     onShare={onShare}
+                    onCopy={onCopy}
                     marked={marked}
                     isAnswered={showAnswer}
                     userCount={count}
