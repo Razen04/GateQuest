@@ -1,6 +1,6 @@
 // This custom hook sets up global keyboard shortcuts for navigating and interacting with the practice question interface.
 
-import { type DependencyList, useEffect } from 'react';
+import { useEffect } from 'react';
 
 /**
  * Attaches global keyboard event listeners for practice card actions.
@@ -20,17 +20,14 @@ type useKeyboardShortcutsProps = {
     canSubmit?: boolean;
     onExplain?: () => void;
 };
-export default function useKeyboardShortcuts(
-    {
-        onPrev,
-        onNext,
-        onShowAnswer,
-        onSubmit,
-        canSubmit,
-        onExplain,
-    }: useKeyboardShortcutsProps,
-    deps: DependencyList = [] // Dependencies for the useEffect hook, passed from the calling component.
-) {
+export default function useKeyboardShortcuts({
+    onPrev,
+    onNext,
+    onShowAnswer,
+    onSubmit,
+    canSubmit,
+    onExplain,
+}: useKeyboardShortcutsProps) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
             KeyA: 0,
@@ -110,6 +107,5 @@ export default function useKeyboardShortcuts(
         // The cleanup function removes the event listener when the component unmounts to prevent memory leaks.
         return () => document.removeEventListener('keydown', handleKeyStroke);
         // The eslint-disable comment is here because the dependencies (`deps`) are intentionally passed from the parent component to control when the effect re-runs.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
+    }, [onPrev, onNext, onShowAnswer, onSubmit, canSubmit, onExplain]);
 }
