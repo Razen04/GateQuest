@@ -206,11 +206,11 @@ export const useQuestionController = ({
     };
 
     const onExplanationClick = () => {
-        const url =
-            mode === 'practice'
-                ? safeQuestion.source_url
-                : safeQuestion.explanation;
-        if (url) window.open(url, '_blank');
+        if (currentQuestion?.source_url) {
+            window.open(currentQuestion.source_url, '_blank');
+        } else {
+            toast.message('No explanation available. Please use AskAI.');
+        }
     };
 
     const handleBack = () => {
