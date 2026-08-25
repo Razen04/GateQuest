@@ -141,7 +141,7 @@ const QuestionCard = ({
         selectedOptionIndices.length > 0 || numericalAnswer !== null;
 
     return (
-        <div className="mx-auto max-w-5xl 2xl:max-w-7xl mt-4 p-6 pb-20">
+        <div className="mx-auto max-w-6xl 2xl:max-w-7xl mt-4 p-6 pb-20">
             {/* Top Back Button */}
             <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
                 <button
@@ -167,7 +167,7 @@ const QuestionCard = ({
             {/* Main Card Container */}
             <div
                 ref={pageRef}
-                className="flex-1 max-w-5xl 2xl:max-w-7xl mx-auto mt-6 pb-4 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
+                className="flex-1 max-w-6xl 2xl:max-w-7xl mx-auto mt-6 pb-4 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
             >
                 {/* Header Section */}
                 <QuestionHeader
