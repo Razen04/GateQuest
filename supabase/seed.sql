@@ -31,79 +31,417 @@ truncate table branches cascade;
 -- BRANCHES
 -- =====================================================
 
-insert into branches (id, name) values
-('cs', 'Computer Science'),
-('me', 'Mechanical Engineering'),
-('ee', 'Electrical Engineering')
-on conflict (id) do nothing;
+insert into public.branches (id, name)
+values
+    ('cs', 'Computer Science'),
+    ('me', 'Mechanical Engineering'),
+    ('ee', 'Electrical Engineering'),
+    ('xl', 'Life Sciences')
+on conflict (id) do update
+set name = excluded.name;
+
 
 -- =====================================================
 -- EXAMS
 -- =====================================================
 
-insert into exams (id, name, short_name) values
-('gate', 'Graduate Aptitude Test in Engineering', 'GATE'),
-('isro', 'ISRO Scientist Exam', 'ISRO'),
-('ese',  'Engineering Services Examination', 'ESE')
+insert into public.exams (id, name, short_name)
+values
+    ('gate', 'Graduate Aptitude Test in Engineering', 'GATE'),
+    ('isro', 'ISRO Scientist Exam', 'ISRO'),
+    ('ese', 'Engineering Services Examination', 'ESE')
 on conflict (id) do nothing;
+
 
 -- =====================================================
 -- SUBJECTS
 -- =====================================================
 
-insert into subjects (id, slug, name, icon_name, theme_color, question_count, category, is_universal) values
-('11111111-1111-1111-1111-111111111111', 'eng-maths', 'Engineering Mathematics', 'calculator', 'red', 10, 'maths', true),
-('22222222-2222-2222-2222-222222222222', 'aptitude', 'General Aptitude', 'brain', 'green', 20, 'general', true),
-('33333333-3333-3333-3333-333333333333', 'dsa', 'Data Structures & Algorithms', 'database', 'blue', 390, 'core', false),
-('44444444-4444-4444-4444-444444444444', 'os', 'Operating Systems', 'cpu', 'purple', 1000, 'core', false),
-('55555555-5555-5555-5555-555555555555', 'thermo', 'Thermodynamics', 'flame', 'cyan', 400, 'core', false),
-('66666666-6666-6666-6666-666666666666', 'power-systems', 'Power Systems', 'zap', 'teal', 500, 'core', false)
-on conflict (slug) do nothing;
+insert into public.subjects (
+    id,
+    slug,
+    name,
+    icon_name,
+    theme_color,
+    question_count,
+    category,
+    is_universal,
+    difficulty
+)
+values
+
+-- -----------------------------------------------------
+-- Universal
+-- -----------------------------------------------------
+
+(
+    '11111111-1111-1111-1111-111111111111',
+    'eng-maths',
+    'Engineering Mathematics',
+    'calculator',
+    'red',
+    10,
+    'maths',
+    true,
+    'Medium'
+),
+
+(
+    '22222222-2222-2222-2222-222222222222',
+    'aptitude',
+    'General Aptitude',
+    'brain',
+    'green',
+    20,
+    'general',
+    true,
+    'Medium'
+),
+
+-- -----------------------------------------------------
+-- Existing CS
+-- -----------------------------------------------------
+
+(
+    '33333333-3333-3333-3333-333333333333',
+    'dsa',
+    'Data Structures & Algorithms',
+    'database',
+    'blue',
+    390,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '44444444-4444-4444-4444-444444444444',
+    'os',
+    'Operating Systems',
+    'cpu',
+    'purple',
+    1000,
+    'core',
+    false,
+    'Medium'
+),
+
+-- -----------------------------------------------------
+-- Existing ME
+-- -----------------------------------------------------
+
+(
+    '55555555-5555-5555-5555-555555555555',
+    'thermo',
+    'Thermodynamics',
+    'flame',
+    'cyan',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+-- -----------------------------------------------------
+-- Existing EE
+-- -----------------------------------------------------
+
+(
+    '66666666-6666-6666-6666-666666666666',
+    'power-systems',
+    'Power Systems',
+    'zap',
+    'teal',
+    500,
+    'core',
+    false,
+    'Medium'
+),
+
+-- -----------------------------------------------------
+-- GATE XL
+-- -----------------------------------------------------
+
+(
+    '77777777-7777-7777-7777-777777777771',
+    'biochemistry',
+    'Biochemistry',
+    'dna',
+    'pink',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '77777777-7777-7777-7777-777777777772',
+    'botany',
+    'Botany',
+    'leaf',
+    'green',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '77777777-7777-7777-7777-777777777773',
+    'chemistry',
+    'Chemistry',
+    'flask',
+    'violet',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '77777777-7777-7777-7777-777777777774',
+    'food-technology',
+    'Food Technology',
+    'fork-knife',
+    'orange',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '77777777-7777-7777-7777-777777777775',
+    'microbiology',
+    'Microbiology',
+    'microscope',
+    'cyan',
+    400,
+    'core',
+    false,
+    'Medium'
+),
+
+(
+    '77777777-7777-7777-7777-777777777776',
+    'zoology',
+    'Zoology',
+    'paw-print',
+    'blue',
+    500,
+    'core',
+    false,
+    'Medium'
+)
+
+on conflict (slug) do update
+set
+    id = excluded.id,
+    name = excluded.name,
+    icon_name = excluded.icon_name,
+    theme_color = excluded.theme_color,
+    category = excluded.category,
+    is_universal = excluded.is_universal,
+    difficulty = excluded.difficulty;
+
 
 -- =====================================================
 -- BRANCH ↔ SUBJECT
 -- =====================================================
 
-insert into branch_subjects (branch_id, subject_id) values
-('cs', '33333333-3333-3333-3333-333333333333'),
-('cs', '44444444-4444-4444-4444-444444444444'),
-('me', '55555555-5555-5555-5555-555555555555'),
-('ee', '66666666-6666-6666-6666-666666666666')
+insert into public.branch_subjects (branch_id, subject_id)
+values
+
+-- CS
+(
+    'cs',
+    '33333333-3333-3333-3333-333333333333'
+),
+(
+    'cs',
+    '44444444-4444-4444-4444-444444444444'
+),
+
+-- ME
+(
+    'me',
+    '55555555-5555-5555-5555-555555555555'
+),
+
+-- EE
+(
+    'ee',
+    '66666666-6666-6666-6666-666666666666'
+),
+
+-- XL
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777771' -- Biochemistry
+),
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777772' -- Botany
+),
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777773' -- Chemistry
+),
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777774' -- Food Technology
+),
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777775' -- Microbiology
+),
+(
+    'xl',
+    '77777777-7777-7777-7777-777777777776' -- Zoology
+)
+
 on conflict do nothing;
+
 
 -- =====================================================
 -- EXAM ↔ SUBJECT
 -- =====================================================
 
-insert into exams_subjects (exams_id, subject_id) values
--- GATE (all)
-('gate', '11111111-1111-1111-1111-111111111111'),
-('gate', '22222222-2222-2222-2222-222222222222'),
-('gate', '33333333-3333-3333-3333-333333333333'),
-('gate', '44444444-4444-4444-4444-444444444444'),
-('gate', '55555555-5555-5555-5555-555555555555'),
-('gate', '66666666-6666-6666-6666-666666666666'),
+insert into public.exams_subjects (exams_id, subject_id)
+values
 
+-- -----------------------------------------------------
+-- GATE
+-- -----------------------------------------------------
+
+(
+    'gate',
+    '11111111-1111-1111-1111-111111111111'
+), -- Engineering Mathematics
+
+(
+    'gate',
+    '22222222-2222-2222-2222-222222222222'
+), -- General Aptitude
+
+(
+    'gate',
+    '33333333-3333-3333-3333-333333333333'
+), -- DSA
+
+(
+    'gate',
+    '44444444-4444-4444-4444-444444444444'
+), -- OS
+
+(
+    'gate',
+    '55555555-5555-5555-5555-555555555555'
+), -- Thermodynamics
+
+(
+    'gate',
+    '66666666-6666-6666-6666-666666666666'
+), -- Power Systems
+
+-- GATE XL
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777771'
+), -- Biochemistry
+
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777772'
+), -- Botany
+
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777773'
+), -- Chemistry
+
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777774'
+), -- Food Technology
+
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777775'
+), -- Microbiology
+
+(
+    'gate',
+    '77777777-7777-7777-7777-777777777776'
+), -- Zoology
+
+
+-- -----------------------------------------------------
 -- ISRO
-('isro', '11111111-1111-1111-1111-111111111111'),
-('isro', '33333333-3333-3333-3333-333333333333'),
-('isro', '44444444-4444-4444-4444-444444444444'),
+-- -----------------------------------------------------
 
+(
+    'isro',
+    '11111111-1111-1111-1111-111111111111'
+),
+
+(
+    'isro',
+    '33333333-3333-3333-3333-333333333333'
+),
+
+(
+    'isro',
+    '44444444-4444-4444-4444-444444444444'
+),
+
+
+-- -----------------------------------------------------
 -- ESE
-('ese', '11111111-1111-1111-1111-111111111111'),
-('ese', '22222222-2222-2222-2222-222222222222'),
-('ese', '55555555-5555-5555-5555-555555555555'),
-('ese', '66666666-6666-6666-6666-666666666666')
+-- -----------------------------------------------------
+
+(
+    'ese',
+    '11111111-1111-1111-1111-111111111111'
+),
+
+(
+    'ese',
+    '22222222-2222-2222-2222-222222222222'
+),
+
+(
+    'ese',
+    '55555555-5555-5555-5555-555555555555'
+),
+
+(
+    'ese',
+    '66666666-6666-6666-6666-666666666666'
+)
+
 on conflict do nothing;
+
 
 -- =====================================================
 -- BRANCH ↔ EXAMS
 -- =====================================================
 
-insert into branch_exams (branch_id, exam_id) values
-('cs', 'gate'), ('cs', 'isro'), ('cs', 'ese'),
-('me', 'gate'), ('me', 'ese'),
-('ee', 'gate'), ('ee', 'ese'), ('ee', 'isro')
+insert into public.branch_exams (branch_id, exam_id)
+values
+    ('cs', 'gate'),
+    ('cs', 'isro'),
+    ('cs', 'ese'),
+
+    ('me', 'gate'),
+    ('me', 'ese'),
+
+    ('ee', 'gate'),
+    ('ee', 'ese'),
+    ('ee', 'isro'),
+
+    ('xl', 'gate')
+
 on conflict do nothing;
 
 -- =====================================================
