@@ -266,13 +266,39 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
         });
     }, [userGoal, branchSubjects, examSubjects, subjects]);
 
-    // Check if a particular subject belong to the user goal for cases when they view the question shared to them belong to different branch
+    // Check whether a subject belongs to the user's current goal.
+    // GATE XL is special:
+    //   - General Aptitude
+    //   - Chemistry
+    //   - User's 2 selected additional subjects
     const isSubjectInGoal = useCallback(
         (subjectId: string) => {
-            if (!userGoal) return;
+            if (!userGoal) return false;
 
             const subject = subjects.find((s) => s.id === subjectId);
-            if (subject?.is_universal) return true;
+
+            if (!subject) return false;
+
+            const selectedExamIds = (userGoal.target_exams as string[]) ?? [];
+
+            const isGateXL =
+                userGoal.branch_id === 'xl' && selectedExamIds.includes('gate');
+
+            // GATE XL
+            if (isGateXL) {
+                const additionalSubjectIds =
+                    (userGoal.additional_subjects as string[] | null) ?? [];
+
+                const isAptitude = subject.slug === 'aptitude';
+                const isChemistry = subject.slug === 'chemistry';
+                const isSelectedAdditionalSubject =
+                    additionalSubjectIds.includes(subjectId);
+
+                return isAptitude || isChemistry || isSelectedAdditionalSubject;
+            }
+
+            // Normal branch/exam logic
+            if (subject.is_universal) return true;
 
             return branchSubjects.some(
                 (bs) =>
