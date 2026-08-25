@@ -41,9 +41,7 @@ const Practice = () => {
 
     // Get the subjects of the branch and exams selected by the user
     const { userGoal, getPracticeSubjects, loading } = useGoals();
-    const [showGoalAlert, setShowGoalAlert] = useState(
-        user === null ? true : false
-    );
+    const [showGoalAlert, setShowGoalAlert] = useState(user === null);
 
     const subjects = getPracticeSubjects();
 
@@ -78,10 +76,14 @@ const Practice = () => {
             label: `Core ${userGoal?.branch_id ? userGoal.branch_id.toUpperCase() : ''}`,
             id: 'core',
         },
-        {
-            label: 'Mathematics',
-            id: 'math',
-        },
+        ...(userGoal?.branch_id !== 'xl'
+            ? [
+                  {
+                      label: 'Mathematics',
+                      id: 'math',
+                  },
+              ]
+            : []),
         {
             label: 'Aptitude',
             id: 'aptitude',

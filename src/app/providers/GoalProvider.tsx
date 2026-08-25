@@ -94,6 +94,39 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, []);
 
+    console.log('userGoal: ', userGoal);
+    console.log('subjects: ', subjects);
+
+    const optionalSubjects = useMemo(() => {
+        const XL_MANDATORY_SUBJECTS = new Set([
+            'general-aptitude',
+            'chemistry',
+        ]);
+
+        const subjectsInXL = new Set(
+            branchSubjects
+                .filter((bs) => bs.branch_id === 'xl')
+                .map((bs) => bs.subject_id)
+        );
+
+        return subjects.filter(
+            (subject) =>
+                subjectsInXL.has(subject.id) &&
+                !XL_MANDATORY_SUBJECTS.has(subject.slug)
+        );
+    }, [userGoal, subjects, branchSubjects]);
+
+    const selectedOptionalSubjects = useMemo(() => {
+        const selectedIds =
+            (userGoal?.additional_subjects as string[] | null) ?? [];
+
+        return optionalSubjects.filter((subject) =>
+            selectedIds.includes(subject.id)
+        );
+    }, [userGoal, optionalSubjects]);
+
+    console.log('optionalSubjects: ', optionalSubjects);
+
     // Inside GoalProvider.tsx
     useEffect(() => {
         // Listen for auth changes to re-fetch goals when a user logs in
@@ -121,6 +154,7 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
         async (
             branchId: string,
             examIds: string[],
+            additionalSubjects: string[] = [],
             silent = false
         ): Promise<void> => {
             const {
@@ -144,6 +178,10 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
                             user_id: user.id,
                             branch_id: branchId,
                             target_exams: examIds,
+                            additional_subjects:
+                                branchId === 'xl' && examIds.includes('gate')
+                                    ? additionalSubjects
+                                    : null,
                             is_active: true,
                         },
                         { onConflict: 'user_id, branch_id' }
@@ -178,25 +216,52 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
     const getPracticeSubjects = useCallback(() => {
         if (!userGoal) return [];
 
-        const selectedExamIds = userGoal.target_exams as string[]; // JSONB cast
+        const selectedExamIds = userGoal.target_exams as string[];
 
-        // 1. IDs of subjects in the user's branch
+        const isGateXL =
+            userGoal.branch_id === 'xl' && selectedExamIds.includes('gate');
+
+        const additionalSubjectIds =
+            (userGoal.additional_subjects as string[] | null) ?? [];
+
+        // --------------------------------------------------
+        // GATE XL
+        // Only:
+        //   1. General Aptitude
+        //   2. Chemistry
+        //   3. User's 2 selected XL subjects
+        // --------------------------------------------------
+        if (isGateXL) {
+            return subjects.filter((subject) => {
+                const isAptitude = subject.slug === 'aptitude';
+
+                const isChemistry = subject.slug === 'chemistry';
+
+                const isSelectedOptional = additionalSubjectIds.includes(
+                    subject.id
+                );
+
+                return isAptitude || isChemistry || isSelectedOptional;
+            });
+        }
+
+        // --------------------------------------------------
+        // Normal branch/exam logic
+        // --------------------------------------------------
+
         const subjectsInBranch = branchSubjects
             .filter((bs) => bs.branch_id === userGoal.branch_id)
             .map((bs) => bs.subject_id);
 
-        // 2. IDs of subjects in any of the selected exams
         const subjectsInExams = examSubjects
             .filter((es) => selectedExamIds.includes(es.exams_id))
             .map((es) => es.subject_id);
 
-        // 3. Filter the main subjects list
         return subjects.filter((subject) => {
             const isUniversal = subject.is_universal;
             const belongsToBranch = subjectsInBranch.includes(subject.id);
             const belongsToExam = subjectsInExams.includes(subject.id);
 
-            // Rule: (Universal OR Branch-Linked) AND (Exam-Linked)
             return (isUniversal || belongsToBranch) && belongsToExam;
         });
     }, [userGoal, branchSubjects, examSubjects, subjects]);
@@ -225,6 +290,8 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
             branchExams,
             subjects,
             userGoal,
+            optionalSubjects,
+            selectedOptionalSubjects,
             loading,
             error,
             setInitialGoal,
@@ -238,6 +305,8 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
             branchExams,
             subjects,
             userGoal,
+            optionalSubjects,
+            selectedOptionalSubjects,
             loading,
             error,
             setInitialGoal,
