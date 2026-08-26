@@ -19,6 +19,7 @@ const ActiveTest = () => {
         timer,
         handleNext,
         handlePrev,
+        handleJumpTo,
         handleSubmit,
         questions,
     } = useTest();
@@ -238,7 +239,7 @@ const ActiveTest = () => {
                         isVisited={answers.isVisited}
                         isOpen={true} // always open on desktop
                         onToggle={() => {}}
-                        onJumpTo={(idx) => navigation.jumpTo(idx)}
+                        onJumpTo={handleJumpTo}
                         answeredCount={answeredCount}
                         markedCount={markedCount}
                         visitedNotAnswered={visitedNotAnswered}
@@ -256,7 +257,7 @@ const ActiveTest = () => {
                         isVisited={answers.isVisited}
                         isOpen={isPaletteOpen}
                         onToggle={() => setIsPaletteOpen(false)}
-                        onJumpTo={(idx) => navigation.jumpTo(idx)}
+                        onJumpTo={handleJumpTo}
                         answeredCount={answeredCount}
                         markedCount={markedCount}
                         visitedNotAnswered={visitedNotAnswered}

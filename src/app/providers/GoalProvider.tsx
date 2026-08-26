@@ -94,9 +94,6 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, []);
 
-    console.log('userGoal: ', userGoal);
-    console.log('subjects: ', subjects);
-
     const optionalSubjects = useMemo(() => {
         const XL_MANDATORY_SUBJECTS = new Set([
             'general-aptitude',
@@ -124,8 +121,6 @@ export const GoalProvider: React.FC<{ children: React.ReactNode }> = ({
             selectedIds.includes(subject.id)
         );
     }, [userGoal, optionalSubjects]);
-
-    console.log('optionalSubjects: ', optionalSubjects);
 
     // Inside GoalProvider.tsx
     useEffect(() => {
