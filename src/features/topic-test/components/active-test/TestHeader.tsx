@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from '@phosphor-icons/react';
+import { ArrowLeftIcon, ClockIcon } from '@phosphor-icons/react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -37,17 +37,17 @@ const TestHeader: React.FC<TestHeaderProps> = ({
         navigate('/topic-test');
     };
     return (
-        <header className="sticky top-0 z-10 border-b shadow-sm bg-white dark:bg-zinc-900">
+        <header className="sticky top-0 z-10 bg-white dark:bg-zinc-950">
             <div className="flex flex-col gap-3 px-6 py-3">
                 <div className="flex items-center">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="outline">
+                            <Button variant="outline" className="rounded-none">
                                 <ArrowLeftIcon />
                                 <span>Back</span>
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="rounded-none">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
                                     Are you absolutely sure?
@@ -59,8 +59,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onBack}>
+                                <AlertDialogCancel className="rounded-none">
+                                    Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="rounded-none"
+                                    onClick={onBack}
+                                >
                                     Leave Test
                                 </AlertDialogAction>
                             </AlertDialogFooter>
@@ -77,22 +82,25 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                     </div>
 
                     <div
-                        className={`px-4 py-1 text-xl font-mono font-bold tabular-nums transition
+                        className={`px-4 py-1 text-xl flex items-center gap-2 font-mono font-bold tabular-nums transition
                 ${
                     critical
                         ? 'animate-pulse bg-red-950 text-red-400'
-                        : 'dark:bg-gray-900 dark:text-gray-100'
+                        : 'dark:bg-gray-950 dark:text-gray-100'
                 }`}
                         aria-live="polite"
                     >
+                        <ClockIcon />
                         {timeDisplay}
                     </div>
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button className="bg-red-500">Finish</Button>
+                            <Button className="bg-red-500 rounded-none">
+                                Finish
+                            </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="rounded-none">
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
                                     Are you absolutely sure?
@@ -102,8 +110,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onEndTest}>
+                                <AlertDialogCancel className="rounded-none">
+                                    Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="rounded-none"
+                                    onClick={onEndTest}
+                                >
                                     Finish Test
                                 </AlertDialogAction>
                             </AlertDialogFooter>

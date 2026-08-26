@@ -151,6 +151,29 @@ const TestSolutionView = () => {
         }
     };
 
+    // function to copy raw question and options
+    const onCopyQuestion = async () => {
+        try {
+            const question = currentQuestion?.question;
+            const options = currentQuestion?.options;
+            const questionType = currentQuestion?.question_type;
+
+            const content = {
+                questionType,
+                question,
+                ...(options?.length ? { options } : {}),
+            };
+
+            await navigator.clipboard.writeText(
+                JSON.stringify(content, null, 2)
+            );
+            toast.success('Question and options copied successfully.');
+        } catch (err) {
+            toast.error('Unable to copy.');
+            console.error('Unable to copy: ', err);
+        }
+    };
+
     return (
         <div>
             <QuestionCard
@@ -178,6 +201,7 @@ const TestSolutionView = () => {
                 onBack={handleBack}
                 onReport={() => setShowReportModal(true)}
                 onShare={handleShare}
+                onCopy={onCopyQuestion}
                 isFirst={currentIndex === 0}
                 isLast={currentIndex === attempts.length - 1}
             />

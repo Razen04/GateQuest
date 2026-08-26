@@ -162,7 +162,7 @@ const TopicTest = () => {
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 px-3 py-2 border border-white/20 bg-white/10 dark:bg-white/[0.05] backdrop-blur-xl hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
+                    className="flex items-center mb-4 px-3 py-2 hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
                 >
                     <ArrowLeftIcon className="mr-2" />
                     <span>Back</span>
@@ -220,14 +220,14 @@ const TopicTest = () => {
                                         {activeTest.status === 'ongoing' ? (
                                             <Button
                                                 onClick={handleResume}
-                                                className="bg-white/90 text-blue-600 hover:bg-blue-100 rounded-none backdrop-blur-xl"
+                                                className="bg-white/90 text-blue-600 rounded-none backdrop-blur-xl"
                                             >
                                                 Resume <Play weight="fill" />
                                             </Button>
                                         ) : (
                                             <Button
                                                 onClick={handleStartTest}
-                                                className="bg-white/90 text-blue-600 rounded-none backdrop-blur-xl"
+                                                className="bg-white/90 text-black rounded-none backdrop-blur-xl"
                                             >
                                                 Start <Play weight="fill" />
                                             </Button>
@@ -252,7 +252,7 @@ const TopicTest = () => {
                                     </p>
                                     <Button
                                         onClick={handleGenerateNew}
-                                        className="bg-blue-600 text-white hover:bg-blue-700 rounded-none"
+                                        className="bg-blue-600 text-white rounded-none"
                                     >
                                         Start a New Test{' '}
                                         <Plus weight="bold" className="ml-2" />

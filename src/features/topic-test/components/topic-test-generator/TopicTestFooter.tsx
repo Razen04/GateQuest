@@ -19,8 +19,8 @@ const TopicTestFooter = ({
     isGenerating,
 }: TopicTestFooterProps) => {
     return (
-        <div className="fixed bottom-0 w-full h-18 backdrop-blur-lg border-t border-gray-200 dark:border-zinc-800 p-4 z-50">
-            <div className="max-w-6xl flex items-center justify-between">
+        <div className="fixed inset-x-0 bottom-0 max-w-7xl mx-auto h-18 backdrop-blur-lg border-t border-gray-200 dark:border-zinc-800 p-4 z-50">
+            <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                     <span className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">
                         Estimated Time of test
@@ -36,6 +36,7 @@ const TopicTestFooter = ({
                     </div>
                 </div>
                 <Button
+                    className="rounded-none"
                     disabled={isGenerating || !canGenerate}
                     onClick={handleStartTest}
                 >

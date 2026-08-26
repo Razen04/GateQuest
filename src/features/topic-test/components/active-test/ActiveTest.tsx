@@ -6,6 +6,7 @@ import {
     isNumericalQuestion,
 } from '@/features/questions/utils/questionUtils';
 import useTest from '@/features/topic-test/hooks/test-engine/useTest';
+import { Button } from '@/shared/components/ui/button';
 import QuestionPalette from './QuestionPallete';
 import TestControlBar from './TestControlBar';
 // Sub-components
@@ -120,45 +121,40 @@ const ActiveTest = () => {
         questions.length - (answeredCount + visitedNotAnswered);
 
     return (
-        <div className="flex flex-col h-full overflow-hidden text-slate-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto flex flex-col h-full overflow-hidden text-slate-900 dark:text-slate-100">
             <TestHeader
                 timeDisplay={timer.timeDisplay}
                 questionStatus={`${currentIndex + 1} of ${totalQuestions}`}
                 onEndTest={handleSubmit}
             />
 
-            {/*
-            <iframe
-                src="https://www.gatexplore.com/scientific-calculator/calculator.html"
-                className="w-full h-full"
-            /> */}
-
             <div className="flex flex-1 overflow-hidden relative">
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24">
                     <div className="max-w-4xl mx-auto">
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center pb-4">
                             <div className="w-fit flex gap-2 font-bold items-center mb-2 text-white">
-                                <p className="bg-blue-500 p-2 rounded-md">
+                                <p className="bg-blue-500 p-2">
                                     Marks: {currentQ.marks}
                                 </p>
                                 {!isMSQ && !isNAT && (
-                                    <p className="bg-red-500 p-2 rounded-md">
+                                    <p className="bg-red-500 p-2">
                                         Negative Marks: {currentQ.marks}/3
                                     </p>
                                 )}
                             </div>
 
                             <div className="relative">
-                                <button
+                                <Button
+                                    size="icon-lg"
                                     onClick={() => setShowCalc((prev) => !prev)}
-                                    className={`px-2 py-1 text-white ${showCalc ? 'bg-red-500' : 'bg-blue-500'} rounded-md`}
+                                    className={`px-2 py-1 rounded-none text-white ${showCalc ? 'bg-red-500' : 'bg-blue-500'}`}
                                 >
                                     {showCalc ? (
                                         <XIcon size={32} />
                                     ) : (
                                         <CalculatorIcon size={32} />
                                     )}
-                                </button>
+                                </Button>
 
                                 {showCalc && (
                                     <>
@@ -171,7 +167,7 @@ const ActiveTest = () => {
                                         {/* DESKTOP */}
                                         <div className="hidden md:block absolute right-0 mt-2 z-50">
                                             <div
-                                                className="relative w-[475px] h-[350px] bg-white dark:bg-zinc-950 shadow-2xl rounded-lg overflow-hidden"
+                                                className="relative w-[475px] h-[350px] bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
@@ -186,7 +182,7 @@ const ActiveTest = () => {
                                         {/* MOBILE */}
                                         <div className="md:hidden fixed inset-x-0 bottom-0 z-50 flex items-end">
                                             <div
-                                                className="w-full h-[60vh] bg-white dark:bg-gray-800 rounded-t-2xl overflow-hidden relative"
+                                                className="w-full h-[60vh] bg-white dark:bg-gray-800 overflow-hidden relative"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }

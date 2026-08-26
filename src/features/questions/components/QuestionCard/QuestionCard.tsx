@@ -15,7 +15,6 @@ import {
 } from '../../utils/questionUtils';
 import ActionButtons from './ActionButtons';
 import AskAIBanner from './AskAIBanner';
-import QuestionBadge from './QuestionBadge';
 import QuestionContent from './QuestionContent';
 import QuestionExplanation from './QuestionExplanation';
 import QuestionHeader from './QuestionHeader';
@@ -270,9 +269,6 @@ const QuestionCard = ({
                         hasSelection={hasSelection}
                     />
                 </div>
-
-                {/* 7. Footer Badge */}
-                <QuestionBadge currentQuestion={question} />
 
                 <Branding className="mx-4 md:mx-6" />
             </div>

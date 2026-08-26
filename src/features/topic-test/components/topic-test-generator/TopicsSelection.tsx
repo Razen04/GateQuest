@@ -93,7 +93,7 @@ const TopicsSelection = ({
                             variant="ghost"
                             size="sm"
                             onClick={handleSelectAll}
-                            className="h-10 px-3 rounded-xl font-bold uppercase tracking-tighter bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-500/80"
+                            className="h-10 px-3 rounded-none font-bold uppercase tracking-tighter bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-500/80"
                         >
                             {isAllSelected ? (
                                 <span className="flex items-center gap-1">
@@ -113,7 +113,7 @@ const TopicsSelection = ({
                             Step 2: Select Topics
                         </label>
 
-                        <span className="rounded-xl border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span className="border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                             {selectedTopics.length} selected
                         </span>
                     </div>
@@ -123,7 +123,7 @@ const TopicsSelection = ({
                             {[...Array(6)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="h-14 rounded-xl bg-gray-200 dark:bg-zinc-800 animate-pulse"
+                                    className="h-14 bg-gray-200 dark:bg-zinc-800 animate-pulse"
                                 />
                             ))}
                         </div>
@@ -143,7 +143,7 @@ const TopicsSelection = ({
                                             onClick={() =>
                                                 handleTopicToggle(topic)
                                             }
-                                            className={`rounded-2xl border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10 hover:border-blue-300'}`}
+                                            className={`border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10 hover:border-blue-300'}`}
                                         >
                                             <div>
                                                 <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
@@ -157,7 +157,7 @@ const TopicsSelection = ({
                                             </div>
 
                                             <div
-                                                className={`w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 dark:border-zinc-700'}`}
+                                                className={`w-5 h-5 border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 dark:border-zinc-700'}`}
                                             >
                                                 <Check
                                                     className="w-3 h-3"
@@ -188,7 +188,7 @@ const TopicsSelection = ({
                                             setShowMinorTopics((v) => !v)
                                         }
                                         variant="ghost"
-                                        className="flex items-center gap-1 font-medium"
+                                        className="rounded-none flex items-center gap-1 font-medium"
                                     >
                                         Other topics ({minorTopics.length})
                                         <CaretDown
@@ -228,7 +228,7 @@ const TopicsSelection = ({
                                                                     topic
                                                                 )
                                                             }
-                                                            className={`rounded-xl border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10'}`}
+                                                            className={`border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10'}`}
                                                         >
                                                             <div>
                                                                 <span>
