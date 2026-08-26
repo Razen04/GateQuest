@@ -39,6 +39,12 @@ const List = ({
             ref={listRef}
             className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:grid-cols-1 pb-20 box-border overscroll-none"
         >
+            <Pagination
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                totalPages={totalPages}
+            />
+
             {questions.map((question: Question, index: number) => (
                 <motion.div
                     key={index}
@@ -72,12 +78,6 @@ const List = ({
                     </div>
                 </motion.div>
             ))}
-
-            <Pagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={totalPages}
-            />
         </motion.div>
     );
 };

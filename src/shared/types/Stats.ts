@@ -20,8 +20,9 @@ export interface Streaks {
 }
 
 export interface Heatmap {
-    date: string;
-    count: number;
+    data: Record<string, number>;
+    from_date: string;
+    to_date: string;
 }
 
 export interface StudyPlan {
@@ -43,6 +44,6 @@ export interface Stats {
     subjectStatsMap: Record<string, SubjectStat[]>;
     question: Set<string>;
     streaks: Streaks;
-    heatmapData: Heatmap[];
+    heatmapData: Heatmap;
     studyPlan: StudyPlan;
 }

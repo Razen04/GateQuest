@@ -231,7 +231,7 @@ const Donations: React.FC = () => {
                                             12-Digit Reference / UTR Number
                                         </label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             placeholder="e.g. 4029XXXX1234"
                                             value={utr}
                                             onChange={(e) =>
@@ -279,7 +279,7 @@ const Donations: React.FC = () => {
                                         Patronage Recorded
                                     </h3>
 
-                                    <p className="font-['Fraunces',serif] text-base text-slate-600 dark:text-white/70">
+                                    <p className="text-base text-slate-600 dark:text-white/70">
                                         Your reference submission is being
                                         processed. It will reflect on the live
                                         donor ledger shortly.

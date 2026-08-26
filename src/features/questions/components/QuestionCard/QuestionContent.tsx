@@ -59,7 +59,7 @@ const QuestionContent = ({
             </div>
 
             {hasOptions && onOptionSelect && (
-                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
                     {currentQuestion.options?.map((option, index) => {
                         // For MSQ: selectedOptionIndices, for MCQ: userAnswerIndex
                         let isSelected;

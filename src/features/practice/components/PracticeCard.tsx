@@ -14,7 +14,7 @@ const PracticeCard = () => {
     const subjectId = subjects.find((s) => s.slug === subject)?.id;
 
     const { questions: fetchedQuestions, isLoading: isQuestionsLoading } =
-        useQuestions(subjectId, false);
+        useQuestions(subjectId);
 
     const passed = location.state?.questions;
     const questions =

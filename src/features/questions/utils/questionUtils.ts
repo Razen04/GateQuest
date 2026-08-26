@@ -28,7 +28,10 @@ export const isMultipleSelection = (currentQuestion: Question) => {
         currentQuestion.tags.some((tag) => {
             const t = tag.toLowerCase();
             return (
-                t.includes('multiple-select') || t.includes('multiple select')
+                t.includes('multiple-select') ||
+                t.includes('multiple select') ||
+                t.includes('multiple-selects') ||
+                t.includes('multiple selects')
             );
         });
 

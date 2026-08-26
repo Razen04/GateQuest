@@ -15,17 +15,18 @@ type OnQuestionClick =
     | ((id: string, filteredList: Question[]) => void)
     | ((id: string, filteredList: RevisionQuestion[]) => void);
 
-// Type of filter mode for smart-Revision
 type FilterMode = 'practice' | 'revision';
 
 interface QuestionsListProps {
-    questions: RevisionQuestion[]; // The list of questions from any source
-    title?: string; // Optional title (e.g., "Revision Questions")
-    onQuestionClick?: OnQuestionClick; // Callback when a question is clicked
+    questions: RevisionQuestion[];
+    title?: string;
+    onQuestionClick?: OnQuestionClick;
     onBack: () => void;
     subject?: string | undefined;
     mode: FilterMode;
 }
+
+const UNIVERSAL_SUBJECTS = ['aptitude', 'eng-maths'];
 
 const QuestionsList: React.FC<QuestionsListProps> = ({
     questions,
@@ -43,7 +44,10 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     const { userGoal } = useGoals();
     const availableExam = (userGoal?.target_exams as string[]) || [];
 
-    // Filters
+    const isUniversalSubject = subject
+        ? UNIVERSAL_SUBJECTS.includes(subject.toLowerCase())
+        : false;
+
     const {
         loading,
         filteredQuestions,
@@ -61,9 +65,10 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setExamFilter,
         tagFilter,
         setTagFilter,
+        branchFilter,
+        setBranchFilter,
     } = useFilters(questions, subject ?? null, selectedQuestion, mode);
 
-    // This ensures that when filters change, the URL updates
     useUrlFilters({
         searchQuery,
         setSearchQuery,
@@ -79,9 +84,10 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         setExamFilter,
         tagFilter,
         setTagFilter,
+        branchFilter,
+        setBranchFilter,
     });
 
-    // Pagination
     const { currentPage, setCurrentPage, totalPages, pageItems, listRef } =
         usePagination(filteredQuestions, 20);
 
@@ -93,11 +99,11 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         }
     };
 
-    // Derived data for filter dropdowns
     const years = useMemo(() => {
         const allYears = questions
             .map((q) => String(q.year))
             .filter((y) => !Number.isNaN(Number(y)));
+
         return [...new Set(allYears)].sort((a, b) => Number(b) - Number(a));
     }, [questions]);
 
@@ -105,6 +111,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
         const allTopics = questions
             .map((q) => q.topic || '')
             .filter((t) => t.trim() !== '');
+
         return [...new Set(allTopics)];
     }, [questions]);
 
@@ -115,12 +122,25 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
 
         allTags.forEach((tag) => {
             const clean = normalizeTag(tag);
+
             if (clean && !notMeaningfulTags.includes(clean)) {
                 uniqueCleanTags.add(clean);
             }
         });
 
         return Array.from(uniqueCleanTags).sort();
+    }, [questions]);
+
+    const branches = useMemo(() => {
+        const allBranches = questions.flatMap((q) => {
+            const branch = q.metadata?.set;
+
+            if (!branch) return [];
+
+            return Array.isArray(branch) ? branch : [branch];
+        });
+
+        return [...new Set(allBranches)].sort();
     }, [questions]);
 
     return (
@@ -160,6 +180,10 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
                     tagFilter={tagFilter}
                     setTagFilter={setTagFilter}
                     availableExams={availableExam}
+                    branchFilter={branchFilter}
+                    setBranchFilter={setBranchFilter}
+                    branches={branches}
+                    showBranchFilter={isUniversalSubject}
                 />
 
                 <div>

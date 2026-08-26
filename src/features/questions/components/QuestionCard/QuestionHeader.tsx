@@ -1,5 +1,6 @@
 import {
     Check,
+    CopyIcon,
     Dot,
     Eye,
     Flag,
@@ -43,6 +44,7 @@ type QuestionHeaderProps = {
     timer?: TimerProps | undefined;
     onReport: () => void;
     onShare: () => void;
+    onCopy: () => void;
     marked?: boolean | undefined;
     isAnswered: boolean;
     userCount: number | undefined;
@@ -64,6 +66,7 @@ const QuestionHeader = ({
     timer,
     onReport,
     onShare,
+    onCopy,
     marked,
     isAnswered,
     userCount,
@@ -169,7 +172,7 @@ const QuestionHeader = ({
         <div className="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-4 dark:border-white/10 dark:from-zinc-900 dark:to-zinc-950 sm:px-6">
             {/* TOP ROW */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
+                <div className="min-w-0 font-mono">
                     <h1 className="font-['Space_Grotesk',sans-serif] text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         Question {questionNumber}
                         <span className="ml-2 text-base font-medium text-slate-400">
@@ -204,6 +207,28 @@ const QuestionHeader = ({
                                 <span>Multiple Selection</span>
                             </>
                         )}
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                        <span title={question.id || 'Unknown'}>
+                            <span className="sm:hidden">
+                                ID:{' '}
+                                {question.id
+                                    ? `${question.id.slice(0, 8)}…`
+                                    : 'Unknown'}
+                            </span>
+
+                            <span className="hidden sm:inline">
+                                ID: {question.id || 'Unknown'}
+                            </span>
+                        </span>
+
+                        <Divider />
+
+                        <span>Subject: {question.subject}</span>
+
+                        <Divider />
+
+                        <span>Topic: {question.topic}</span>
                     </div>
                 </div>
 
@@ -247,12 +272,18 @@ const QuestionHeader = ({
                 <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Eye size={14} />
 
-                    <span className="flex items-center gap-1">
-                        {userCount ?? 1} studying now
-                    </span>
+                    <span>{userCount ?? 1} studying now</span>
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={onCopy}
+                        className="flex items-center gap-1.5 border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-500/20 dark:bg-gray-500/10 dark:text-gray-300 dark:hover:bg-gray-500/20"
+                    >
+                        <CopyIcon size={14} />
+                        Copy
+                    </button>
+
                     <button
                         onClick={onReport}
                         className="flex items-center gap-1.5 border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"

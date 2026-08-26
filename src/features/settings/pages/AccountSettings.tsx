@@ -92,6 +92,8 @@ const AccountSettings = () => {
 
     const {
         userGoal,
+        optionalSubjects,
+        selectedOptionalSubjects,
         branches,
         exams,
         branchExams,
@@ -101,6 +103,9 @@ const AccountSettings = () => {
 
     const [tempBranch, setTempBranch] = useState<string>('');
     const [tempExams, setTempExams] = useState<string[]>([]);
+    const [tempAdditionalSubjects, setTempAdditionalSubjects] = useState<
+        string[]
+    >([]);
     const [isSaving, setIsSaving] = useState(false);
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [openSocialSettings, setOpenSocialSettings] = useState(false);
@@ -139,25 +144,53 @@ const AccountSettings = () => {
         if (userGoal) {
             setTempBranch(userGoal.branch_id);
             setTempExams((userGoal?.target_exams as string[]) || []);
+
+            const savedSubjects =
+                (userGoal.additional_subjects as string[] | null) ?? [];
+
+            setTempAdditionalSubjects(savedSubjects);
         }
     }, [userGoal]);
 
     const handleSaveButton = async () => {
         if (!user) return;
+
         if (tempExams.length === 0) {
             toast.error('Select at least 1 target exam.');
             return;
         }
+
+        // GATE XL requires exactly 2 optional subjects.
+        const isGateXL = tempBranch === 'xl' && tempExams.includes('gate');
+
+        if (isGateXL && tempAdditionalSubjects.length !== 2) {
+            toast.error('Select exactly 2 optional subjects for GATE XL.');
+            return;
+        }
+
         setIsSaving(true);
 
         try {
-            const updated = { ...user, name, college, about, targetYear };
+            const updated = {
+                ...user,
+                name,
+                college,
+                about,
+                targetYear,
+            };
+
             updateUserProfile(updated);
             setUser(updated);
 
             if (tempBranch) {
-                await setInitialGoal(tempBranch, tempExams, true);
+                await setInitialGoal(
+                    tempBranch,
+                    tempExams,
+                    isGateXL ? tempAdditionalSubjects : [],
+                    true
+                );
             }
+
             await syncUserToSupabase(isLogin);
 
             setSavedSuccess(true);
@@ -399,70 +432,164 @@ const AccountSettings = () => {
                         </Select>
                     </FormField>
 
-                    <FormField
-                        label="Target Examinations"
-                        tag="// MULTI_SELECT"
-                    >
-                        <Combobox
-                            items={availableExams}
-                            multiple
-                            value={tempExams}
-                            onValueChange={setTempExams}
-                            disabled={goalsLoading || isSaving}
+                    <div className="flex flex-col gap-2">
+                        <FormField
+                            label="Target Examinations"
+                            tag="// MULTI_SELECT"
                         >
-                            <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
-                                <ComboboxValue>
-                                    {tempExams.map((id) => {
-                                        const exam = exams.find(
-                                            (e) => e.id === id
-                                        );
-                                        if (!exam) return null;
+                            <Combobox
+                                items={availableExams}
+                                multiple
+                                value={tempExams}
+                                onValueChange={setTempExams}
+                                disabled={goalsLoading || isSaving}
+                            >
+                                <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
+                                    <ComboboxValue>
+                                        {tempExams.map((id) => {
+                                            const exam = exams.find(
+                                                (e) => e.id === id
+                                            );
+                                            if (!exam) return null;
 
-                                        return (
-                                            <ComboboxChip
+                                            return (
+                                                <ComboboxChip
+                                                    key={exam.id}
+                                                    showRemove
+                                                    className="bg-[#2A5CFF]/10 rounded-none font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                                >
+                                                    {exam.short_name}
+                                                </ComboboxChip>
+                                            );
+                                        })}
+                                    </ComboboxValue>
+
+                                    <ComboboxChipsInput
+                                        placeholder={
+                                            tempExams.length === 0
+                                                ? 'Select target exams...'
+                                                : ''
+                                        }
+                                        className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-slate-700 dark:text-slate-300"
+                                    />
+                                </ComboboxChips>
+
+                                <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                                    <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
+                                        No matching exams found. Select a branch
+                                        first.
+                                    </ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(exam) => (
+                                            <ComboboxItem
                                                 key={exam.id}
-                                                showRemove
-                                                className="bg-[#2A5CFF]/10 rounded-none font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                                value={exam.id}
+                                                className="font-['Space_Grotesk',sans-serif] text-xs"
                                             >
                                                 {exam.short_name}
-                                            </ComboboxChip>
-                                        );
-                                    })}
-                                </ComboboxValue>
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                Selecting multiple exams automatically merges
+                                relevant syllabi into your custom practice
+                                modules.
+                            </p>
+                        </FormField>
 
-                                <ComboboxChipsInput
-                                    placeholder={
-                                        tempExams.length === 0
-                                            ? 'Select target exams...'
-                                            : ''
-                                    }
-                                    className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-slate-700 dark:text-slate-300"
-                                />
-                            </ComboboxChips>
+                        {tempBranch === 'xl' && tempExams.includes('gate') && (
+                            <FormField
+                                label="Optional Subjects"
+                                tag="// MULTI_SELECT"
+                            >
+                                <Combobox
+                                    items={optionalSubjects}
+                                    multiple
+                                    value={tempAdditionalSubjects}
+                                    onValueChange={(values) => {
+                                        if (values.length <= 2) {
+                                            setTempAdditionalSubjects(values);
+                                        }
+                                    }}
+                                    disabled={goalsLoading || isSaving}
+                                >
+                                    <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
+                                        <ComboboxValue>
+                                            {(values) =>
+                                                values.map((id) => {
+                                                    const subject =
+                                                        optionalSubjects.find(
+                                                            (s) => s.id === id
+                                                        );
 
-                            <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
-                                    No matching exams found. Select a branch
-                                    first.
-                                </ComboboxEmpty>
-                                <ComboboxList>
-                                    {(exam) => (
-                                        <ComboboxItem
-                                            key={exam.id}
-                                            value={exam.id}
-                                            className="font-['Space_Grotesk',sans-serif] text-xs"
-                                        >
-                                            {exam.short_name}
-                                        </ComboboxItem>
-                                    )}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                            Selecting multiple exams automatically merges
-                            relevant syllabi into your custom practice modules.
-                        </p>
-                    </FormField>
+                                                    if (!subject) return null;
+
+                                                    return (
+                                                        <ComboboxChip
+                                                            key={id}
+                                                            showRemove
+                                                            className="rounded-none bg-[#2A5CFF]/10 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                                        >
+                                                            {subject.name}
+                                                        </ComboboxChip>
+                                                    );
+                                                })
+                                            }
+                                        </ComboboxValue>
+
+                                        <ComboboxChipsInput
+                                            placeholder={
+                                                tempAdditionalSubjects.length >=
+                                                2
+                                                    ? ''
+                                                    : 'Select 2 subjects...'
+                                            }
+                                            className="rounded-none font-['Space_Grotesk',sans-serif] text-xs text-slate-700 dark:text-slate-300"
+                                        />
+                                    </ComboboxChips>
+
+                                    <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                                        <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
+                                            No optional subjects found.
+                                        </ComboboxEmpty>
+
+                                        <ComboboxList>
+                                            {(subject) => {
+                                                const isSelected =
+                                                    tempAdditionalSubjects.includes(
+                                                        subject.id
+                                                    );
+
+                                                const maxReached =
+                                                    tempAdditionalSubjects.length >=
+                                                    2;
+
+                                                return (
+                                                    <ComboboxItem
+                                                        key={subject.id}
+                                                        value={subject.id}
+                                                        disabled={
+                                                            !isSelected &&
+                                                            maxReached
+                                                        }
+                                                        className="font-['Space_Grotesk',sans-serif] text-xs"
+                                                    >
+                                                        {subject.name}
+                                                    </ComboboxItem>
+                                                );
+                                            }}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
+
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                    Choose exactly 2 subjects.
+                                </p>
+                            </FormField>
+                        )}
+                    </div>
 
                     {/* NOTE: This is currently in beta. */}
                     {/* About Section */}

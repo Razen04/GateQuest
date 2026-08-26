@@ -1,3 +1,5 @@
+import type { Heatmap } from '@/shared/types/Stats';
+
 export interface ProfileData {
     profile: {
         name: string | null;
@@ -22,7 +24,7 @@ export interface ProfileData {
         learning_current: number;
         learning_longest: number;
     };
-    heatmap: { date: string; count: number }[];
+    heatmap: Heatmap;
     exam_stats: Record<
         string,
         {

@@ -169,15 +169,23 @@ const MathRenderer = ({ text }: MathRendererProps) => {
     // Split text into [text|table] segments first so tables don't swallow the rest of the question
     const tableAwareSegments = splitTextAndTables(text);
 
-    // Cache the image into the Cloudinary on first load to eliminate slow loading of images (Issue #61)
+    // Cache external images through Cloudinary on first load.
+    // Already-Cloudinary images are returned directly.
     const getCachedImageUrl = (originalUrl: string) => {
         if (!originalUrl) return '';
 
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        // f_auto: chooses best format
-        // q_auto: reduces file size without losing visible quality
-        const params = 'f_auto,q_auto';
 
+        // Already hosted on our Cloudinary account.
+        const cloudinaryHost = `res.cloudinary.com/${cloudName}/`;
+
+        if (originalUrl.includes(cloudinaryHost)) {
+            return originalUrl;
+        }
+
+        // External image:
+        // Cloudinary fetches, optimizes, and caches it.
+        const params = 'f_auto,q_auto';
         const encodedUrl = encodeURIComponent(originalUrl);
 
         return `https://res.cloudinary.com/${cloudName}/image/fetch/${params}/${encodedUrl}`;

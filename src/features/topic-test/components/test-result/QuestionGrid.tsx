@@ -42,7 +42,7 @@ export function QuestionGrid({
                         >
                             {title}
                         </h3>
-                        <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5">
                             {data.attempts.length} Qs
                         </span>
                     </div>
@@ -74,7 +74,7 @@ export function QuestionGrid({
                             <motion.button
                                 key={attempt.question_id}
                                 whileHover={{ scale: 1.1 }}
-                                className={`relative flex items-center justify-center h-10 border rounded-sm transition-colors text-xs font-black ${styles}`}
+                                className={`relative flex items-center justify-center h-10 border transition-colors text-xs font-black ${styles}`}
                                 onClick={() =>
                                     navigate(
                                         `/topic-test-review/${testId}/${attempt.originalIndex}`
@@ -136,7 +136,7 @@ export function QuestionGrid({
                         <motion.button
                             key={attempt.question_id}
                             whileHover={{ scale: 1.05 }}
-                            className={`relative flex flex-col items-center justify-center h-14 border rounded-sm transition-colors ${styles}`}
+                            className={`relative flex flex-col items-center justify-center h-14 border transition-colors ${styles}`}
                             onClick={() =>
                                 navigate(
                                     `/topic-test-review/${testId}/${attempt.originalIndex}`

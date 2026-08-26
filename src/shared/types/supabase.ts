@@ -538,6 +538,7 @@ export type Database = {
                     correct_count: number | null;
                     created_at: string | null;
                     id: string;
+                    record_activity: boolean;
                     remaining_time_seconds: number;
                     score: number | null;
                     status: string | null;
@@ -555,6 +556,7 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    record_activity?: boolean;
                     remaining_time_seconds: number;
                     score?: number | null;
                     status?: string | null;
@@ -572,6 +574,7 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    record_activity?: boolean;
                     remaining_time_seconds?: number;
                     score?: number | null;
                     status?: string | null;
@@ -644,6 +647,7 @@ export type Database = {
             };
             user_goals: {
                 Row: {
+                    additional_subjects: string[] | null;
                     branch_id: string;
                     id: string;
                     is_active: boolean;
@@ -651,6 +655,7 @@ export type Database = {
                     user_id: string;
                 };
                 Insert: {
+                    additional_subjects?: string[] | null;
                     branch_id: string;
                     id?: string;
                     is_active?: boolean;
@@ -658,6 +663,7 @@ export type Database = {
                     user_id: string;
                 };
                 Update: {
+                    additional_subjects?: string[] | null;
                     branch_id?: string;
                     id?: string;
                     is_active?: boolean;
@@ -1034,16 +1040,28 @@ export type Database = {
             calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
             clear_user_data: { Args: never; Returns: Json };
             delete_account: { Args: never; Returns: undefined };
-            generate_topic_test: {
-                Args: {
-                    p_already_attempted_questions: boolean;
-                    p_branch_id: string;
-                    p_filters: Json;
-                    p_question_count: number;
-                    p_total_seconds: number;
-                };
-                Returns: Json;
-            };
+            generate_topic_test:
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_branch_id: string;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  }
+                | {
+                      Args: {
+                          p_already_attempted_questions: boolean;
+                          p_branch_id: string;
+                          p_filters: Json;
+                          p_question_count: number;
+                          p_record_activity: boolean;
+                          p_total_seconds: number;
+                      };
+                      Returns: Json;
+                  };
             generate_weekly_revision_set: {
                 Args: {
                     p_branch_id: string;
@@ -1144,6 +1162,12 @@ export type Database = {
                     learning_longest_streak: number;
                     study_current_streak: number;
                     study_longest_streak: number;
+                }[];
+            };
+            internal_get_user_goal_subjects: {
+                Args: { p_user_id: string };
+                Returns: {
+                    subject_id: string;
                 }[];
             };
             refresh_dynamic_difficulty: { Args: never; Returns: undefined };

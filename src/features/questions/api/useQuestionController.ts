@@ -165,27 +165,52 @@ export const useQuestionController = ({
     };
 
     const onShareClick = async () => {
+        const shareUrl = window.location.origin + window.location.pathname;
+
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'GATEQuest PYQ question',
-                    url: window.location.href,
+                    url: shareUrl,
                 });
             } catch (err) {
                 console.error(err);
             }
         } else {
-            await navigator.clipboard.writeText(window.location.href);
+            await navigator.clipboard.writeText(shareUrl);
             toast.message('Link copied.');
         }
     };
 
+    // function to copy raw question and options
+    const onCopyQuestion = async () => {
+        try {
+            const question = currentQuestion?.question;
+            const options = currentQuestion?.options;
+            const questionType = currentQuestion?.question_type;
+
+            const content = {
+                questionType,
+                question,
+                ...(options?.length ? { options } : {}),
+            };
+
+            await navigator.clipboard.writeText(
+                JSON.stringify(content, null, 2)
+            );
+            toast.success('Question and options copied successfully.');
+        } catch (err) {
+            toast.error('Unable to copy.');
+            console.error('Unable to copy: ', err);
+        }
+    };
+
     const onExplanationClick = () => {
-        const url =
-            mode === 'practice'
-                ? safeQuestion.source_url
-                : safeQuestion.explanation;
-        if (url) window.open(url, '_blank');
+        if (currentQuestion?.source_url) {
+            window.open(currentQuestion.source_url, '_blank');
+        } else {
+            toast.message('No explanation available. Please use AskAI.');
+        }
     };
 
     const handleBack = () => {
@@ -248,6 +273,7 @@ export const useQuestionController = ({
             onPrev: handlePrevious,
             onReport: () => setShowReportModal(true),
             onShare: onShareClick,
+            onCopy: onCopyQuestion,
             onExplanationClick,
             onBack: handleBack,
             isFirst,

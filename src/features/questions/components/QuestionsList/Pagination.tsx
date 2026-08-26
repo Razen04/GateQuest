@@ -14,7 +14,7 @@ const Pagination = ({
     totalPages,
 }: PaginationProps) => {
     return (
-        <div className="flex justify-between items-center w-full py-3 mt-3 bg-white/30 dark:bg-zinc-900/30 backdrop-blur-xl shadow-lg">
+        <div className="flex justify-between items-center w-full py-3 mt-3 bg-white/30 dark:bg-zinc-950 backdrop-blur-xl shadow-lg">
             <Button
                 variant="ghost"
                 size="icon-lg"

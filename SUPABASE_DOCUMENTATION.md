@@ -586,7 +586,7 @@ Users cannot access or modify bookmarks belonging to other users.
 
 Custom SQL functions to handle complex logic directly in the database.
 
-### Function: `insert_user_question_activity_batch(batch jsonb)`
+### Function: ![insert_user_question_activity_batch(batch jsonb)](./supabase/db-functions/insert_user_question_activity.sql)
 
 **Purpose:** Processes a batch of user question attempts, handling the synchronization of practice history, the spaced-repetition queue (Leitner system), and active weekly revision sets. It is the central engine for recording user progress while ensuring data integrity through a strict verification guard.
 
@@ -645,7 +645,7 @@ SELECT insert_user_question_activity_batch('[
 ]'::jsonb);
 ```
 
-### Function: `refresh_question_peer_stats()`
+### Function: ![refresh_question_peer_stats()](./supabase/db-functions/refresh_question_peer_stats.sql)
 
 **Purpose:**  
 Calculates and updates aggregate performance statistics for all questions in the `question_peer_stats` table. This allows users to compare their performance against peers.
@@ -683,7 +683,7 @@ Calculates and updates aggregate performance statistics for all questions in the
 
 - `void`
 
-### Function: `generate_weekly_revision_set(p_branch_id text, p_target_exams text[], p_valid_subjects uuid[])`
+### Function: ![generate_weekly_revision_set(p_branch_id text, p_target_exams text[], p_valid_subjects uuid[])](./supabase/db-functions/generate_weekly_revision_set.sql)
 
 **Purpose:** Generates a personalized weekly revision set for an authenticated user by selecting questions they previously answered incorrectly. It prioritizes questions based on the Leitner "Box" system and strictly filters for verified content to ensure high-quality revision sessions.
 
@@ -797,7 +797,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or it is already expired, the function returns a failure message instead of an exception.
 
-### Function: `start_weekly_revision_set(v_set_id uuid)`
+### Function: ![start_weekly_revision_set(v_set_id uuid)](./supabase/db-functions/start_weekly_revision_set.sql)
 
 - **Purpose:**
   - To mark the weekly revision set as "started" by setting the `started_at` and `expires_at` timestamps. This function is invoked when the user starts revising a weekly set. It ensures that the set's status changes from `pending` to `started` and calculates an expiration time of 24 hours from the start time.
@@ -847,7 +847,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or if the set is not in the pending status, the function returns a failure message.
 
-### Function: `get_weekly_set()`
+### Function: ![get_weekly_set()](./supabase/db-functions/get_weekly_set.sql)
 
 - **Purpose:**
   - To retrieve the currently available weekly revision set for the user. The function checks if the user has an active (pending or started) weekly revision set, and returns the set's details. If the set has expired, it is updated to an `expired` status before returning the set.
@@ -898,7 +898,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
 
-### Function: `submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)`
+### Function: ![submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)](./supabase/db-functions/submit_test_grading.sql)
 
 ---
 
@@ -1221,7 +1221,7 @@ await supabase.rpc("submit_test_grading", {
 });
 ```
 
-### Function: `get_exam_subject_counts(target_exams text[])`
+### Function: ![get_exam_subject_counts(target_exams text[])](./supabase/db-functions/get_exam_subject_counts.sql)
 
 **Purpose:** Calculates the total number of unique, verified questions available for each subject based on a list of targeted exams. This function is used to determine the "Total Question Pool" for progress bars and study plan calculations.
 
@@ -1262,7 +1262,7 @@ const { data, error } = await supabase.rpc("get_exam_subject_counts", {
 });
 ```
 
-### Function: `get_topic_counts(p_subject_id uuid)`
+### Function: ![get_topic_counts(p_subject_id uuid)](./supabase/db-functions/get_topic_counts.sql)
 
 **Purpose:**
 Retrieves a granular breakdown of verified question counts for every topic associated with a specific subject. This function is primarily used to power the **Topic Test** selection screen, enabling users to see both the total number of available questions and how many of those they have not yet attempted in their current user version.
@@ -1357,7 +1357,7 @@ const { data, error } = await supabase.rpc("get_topic_counts", {
 });
 ```
 
-### Function: `get_critical_question_count(p_valid_subjects uuid[])`
+### Function: ![get_critical_question_count(p_valid_subjects uuid[])](./supabase/db-functions/get_critical_question_count.sql)
 
 **Purpose:** Returns the total count of verified, overdue questions currently in the user's personal mistake queue (`user_incorrect_queue`). This function is used to display "Critical" or "Action Needed" badges on the dashboard, helping users identify exactly how many questions require immediate attention based on their spaced-repetition schedule.
 
@@ -1417,7 +1417,7 @@ SELECT get_critical_question_count(
 
 ---
 
-### Function: `delete_account()`
+### Function: ![delete_account()](./supabase/db-functions/delete_account.sql)
 
 **Purpose:** Permanently removes a user's account from the authentication system while preserving required historical and engagement-related data. The function performs a controlled account deletion workflow by removing personal and engagement-specific data that is no longer useful after account closure, anonymising remaining user records, and maintaining necessary audit/history records without retaining personally identifiable information.
 
@@ -1523,7 +1523,7 @@ The function completes silently when account deletion succeeds. If the user is n
 SELECT delete_account();
 ```
 
-### Function: `toggle_question_bookmark`
+### Function: ![toggle_question_bookmark](./supabase/db-functions/toggle_question_bookmark.sql)
 
 Toggles a question bookmark for the authenticated user. If the question is already bookmarked, the bookmark is removed. If it is not bookmarked, a new bookmark is created.
 
@@ -1630,7 +1630,7 @@ This RPC operates on:
 
 See: `question_bookmarks` table documentation for schema details.
 
-### Function: `update_question_bookmark_note`
+### Function: ![update_question_bookmark_note](./supabase/db-functions/update_question_bookmark_note.sql)
 
 Updates the personal note attached to an existing question bookmark.
 
@@ -1722,7 +1722,7 @@ This RPC operates on:
 
 See: `question_bookmarks` table documentation for schema details.
 
-### Function: `get_user_bookmarks`
+### Function: ![get_user_bookmarks](./supabase/db-functions/get_user_bookmarks.sql)
 
 Retrieves bookmarks created by the currently authenticated user.
 

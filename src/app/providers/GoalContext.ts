@@ -16,6 +16,8 @@ interface GoalContextType {
     branchExams: BranchExam[];
     subjects: Subject[];
     userGoal: UserGoal | null;
+    optionalSubjects: string[];
+    selectedOptionalSubjects: string[] | null;
     loading: boolean;
     error: string | null;
     // Logic-derived helper

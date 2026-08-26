@@ -195,8 +195,8 @@ export default function TopicTestResult() {
     }, [attempts]);
 
     return (
-        <div className="min-h-screen pb-20 bg-slate-50/30 dark:bg-zinc-950/30">
-            <div className="p-6 max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto pb-20 bg-slate-50/30 dark:bg-zinc-950/30">
+            <div className="p-6">
                 <button
                     onClick={() => navigate('/topic-test')}
                     className="flex items-center mb-4 text-sm font-bold uppercase tracking-tight hover:text-blue-500 transition-colors"
@@ -218,7 +218,7 @@ export default function TopicTestResult() {
             </div>
 
             <motion.main
-                className="max-w-6xl mx-auto px-6 space-y-12"
+                className="max-w-7xl mx-auto px-6 space-y-12"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -326,7 +326,7 @@ export default function TopicTestResult() {
                                         if (active && payload?.length) {
                                             const data = payload[0]?.payload;
                                             return (
-                                                <div className="bg-slate-900 text-white p-2 text-[10px] font-bold rounded shadow-xl border border-slate-700">
+                                                <div className="bg-slate-900 text-white p-2 text-[10px] font-bold shadow-xl border border-slate-700">
                                                     QUESTION {data.name}:{' '}
                                                     {data.time}s
                                                     <br />
@@ -369,7 +369,7 @@ export default function TopicTestResult() {
                                         className="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center font-black text-xs">
+                                            <div className="w-8 h-8 bg-rose-500 text-white flex items-center justify-center font-black text-xs">
                                                 #{attempts.indexOf(sink) + 1}
                                             </div>
                                             <p className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase">
@@ -425,12 +425,14 @@ export default function TopicTestResult() {
                     className="flex justify-center gap-4 pt-8"
                 >
                     <Button
+                        className="rounded-none"
                         variant="outline"
                         onClick={() => navigate('/topic-test')}
                     >
                         <House size={20} className="mr-2" /> Back to TestHub
                     </Button>
                     <Button
+                        className="rounded-none"
                         onClick={() =>
                             navigate(`/topic-test-review/${testId}/0`)
                         }

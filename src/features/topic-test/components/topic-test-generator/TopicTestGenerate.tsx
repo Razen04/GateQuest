@@ -32,6 +32,7 @@ const TopicTestGeneratePage = () => {
     );
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
+    const [recordActivity, setRecordActivity] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
 
     const {
@@ -74,11 +75,12 @@ const TopicTestGeneratePage = () => {
                 p_total_seconds: estimatedTime * 60,
                 p_already_attempted_questions: includeAttempted,
                 p_branch_id: userGoal?.branch_id,
+                p_record_activity: recordActivity,
             });
 
             if (error) throw error;
 
-            navigate(`/topic-test/${data.test_id}`);
+            navigate(`/topic-test/${data?.test_id}`);
         } catch (err) {
             console.error(err);
             toast.error('Failed to generate test.');
@@ -90,7 +92,7 @@ const TopicTestGeneratePage = () => {
     const onBack = () => navigate('/topic-test');
 
     return (
-        <div className="h-dvh overflow-y-auto flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto flex flex-col text-slate-900 dark:text-slate-100">
             <div className="p-6">
                 <button
                     onClick={onBack}
@@ -133,10 +135,10 @@ const TopicTestGeneratePage = () => {
                         onValueChange={(value) => setSelectedSubjectId(value)}
                         value={selectedSubjectId?.toString() || ''}
                     >
-                        <SelectTrigger className="w-full md:w-2xl rounded-md">
+                        <SelectTrigger className="w-full md:w-2xl rounded-none">
                             <SelectValue placeholder="Select a subject" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-md">
+                        <SelectContent className="rounded-none">
                             <SelectGroup>
                                 <SelectLabel>Subjects</SelectLabel>
                                 {subjects.map((s) => {
@@ -146,6 +148,7 @@ const TopicTestGeneratePage = () => {
 
                                     return (
                                         <SelectItem
+                                            className="rounded-none"
                                             key={s.id}
                                             value={s.id.toString()}
                                         >
@@ -182,6 +185,8 @@ const TopicTestGeneratePage = () => {
                     includeAttempted={includeAttempted}
                     setIncludeAttempted={setIncludeAttempted}
                     onRemoveTopic={(topicId: string) => removeTopic(topicId)}
+                    recordActivity={recordActivity}
+                    setRecordActivity={setRecordActivity}
                 />
             </motion.div>
 

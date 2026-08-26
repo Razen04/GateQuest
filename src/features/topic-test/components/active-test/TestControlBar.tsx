@@ -53,7 +53,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                 px-3 py-3 text-sm font-medium
                 bg-gray-500 text-white
                 focus:outline-none focus:ring-2 focus:ring-gray-300
-                md:px-3 md:py-2 md:justify-start md:gap-2
+                md:px-3 md:py-2 md:justify-start md:gap-2 rounded-none
             "
                     >
                         <TrashSimpleIcon size={18} />
@@ -69,7 +69,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                 flex items-center justify-center
                 px-3 py-3 text-sm font-medium border
                 focus:outline-none focus:ring-2 transition-colors
-                md:justify-start md:gap-2 md:px-3 md:py-2
+                md:justify-start md:gap-2 md:px-3 md:py-2 rounded-none
                 ${
                     isReviewMarked
                         ? 'border-purple-600 bg-purple-50 text-purple-700 focus:ring-purple-400'
@@ -94,7 +94,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                         className="
                 md:hidden
                 flex items-center justify-center
-                px-3 py-3 text-sm font-medium
+                px-3 py-3 text-sm font-medium rounded-none
             "
                     >
                         {isPaletteOpen ? (
@@ -112,7 +112,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                 flex items-center justify-center
                 px-3 py-3 text-sm font-semibold
                 focus:outline-none focus:ring-2
-                md:px-4 md:py-2 md:justify-start md:gap-2
+                md:px-4 md:py-2 md:justify-start md:gap-2 rounded-none
                 ${
                     isFirst
                         ? 'cursor-not-allowed bg-gray-200 text-gray-400'
@@ -132,7 +132,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                 flex items-center justify-center
                 px-3 py-3 text-sm font-semibold text-white
                 focus:outline-none focus:ring-2
-                md:px-4 md:py-2 md:justify-start md:gap-2
+                md:px-4 md:py-2 md:justify-start md:gap-2 rounded-none
                 ${
                     isLast
                         ? 'cursor-not-allowed bg-gray-300'

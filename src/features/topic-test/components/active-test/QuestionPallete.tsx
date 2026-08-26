@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import React from 'react';
+import { Button } from '@/shared/components/ui/button';
 
 interface QuestionPaletteProps {
     questions: { id: string }[];
@@ -32,23 +33,23 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
 }) => {
     const Stats = () => (
         <div className="grid grid-cols-2 gap-2 text-sm font-medium">
-            <div className="rounded-xl bg-green-100 text-green-800 p-4 shadow-sm">
+            <div className="bg-green-100 text-green-800 p-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide">Answered</p>
                 <p className="text-xl font-semibold">{answeredCount}</p>
             </div>
 
-            <div className="rounded-xl bg-purple-100 text-purple-800 p-4 shadow-sm">
+            <div className="bg-purple-100 text-purple-800 p-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide">Marked</p>
                 <p className="text-xl font-semibold">{markedCount}</p>
             </div>
 
-            <div className="rounded-xl bg-yellow-100 text-yellow-800 p-4 shadow-sm">
+            <div className="bg-yellow-100 text-yellow-800 p-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide">Visited</p>
                 <p className="text-xl font-semibold">{visitedNotAnswered}</p>
                 <p className="text-xs text-yellow-700">Not Answered</p>
             </div>
 
-            <div className="rounded-xl bg-gray-100 text-gray-800 p-4 shadow-sm">
+            <div className="bg-gray-100 text-gray-800 p-4 shadow-sm">
                 <p className="text-xs uppercase tracking-wide">Unvisited</p>
                 <p className="text-xl font-semibold">{unvisitedCount}</p>
             </div>
@@ -60,7 +61,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             {/* DESKTOP */}
             <aside
                 className={clsx(
-                    'hidden md:flex flex-col border-l overflow-y-auto transition-all duration-300 h-full'
+                    'hidden md:flex flex-col bg-white dark:bg-zinc-950 overflow-y-auto transition-all duration-300 h-dvh'
                 )}
             >
                 <div className="p-6 space-y-4">
@@ -84,7 +85,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                     key={q.id}
                                     onClick={() => onJumpTo(idx)}
                                     className={clsx(
-                                        'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200 rounded-md',
+                                        'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200',
 
                                         active && 'ring-2 ring-blue-500',
 
@@ -119,7 +120,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             {/* Mobile View */}
             <div
                 className={clsx(
-                    'fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-zinc-900 border-t transition-transform duration-300 md:hidden',
+                    'fixed inset-x-0 bottom-0 z-40 bg-white dark:bg-zinc-950 border-t transition-transform duration-300 md:hidden',
                     isOpen ? 'translate-y-0' : 'translate-y-full'
                 )}
                 style={{ height: '70vh' }}
@@ -144,14 +145,14 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                 const visited = isVisited(q.id);
 
                                 return (
-                                    <button
+                                    <Button
                                         key={q.id}
                                         onClick={() => {
                                             onJumpTo(idx);
                                             onToggle();
                                         }}
                                         className={clsx(
-                                            'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200 rounded',
+                                            'h-14 w-14 rounded-none text-lg font-medium flex items-center justify-center transition duration-200',
 
                                             active && 'ring-2 ring-blue-500',
 
@@ -176,7 +177,7 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                                         )}
                                     >
                                         {idx + 1}
-                                    </button>
+                                    </Button>
                                 );
                             })}
                         </div>

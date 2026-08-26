@@ -244,7 +244,7 @@ const Dashboard = () => {
             </section>
 
             {/* STREAK MAP SECTION */}
-            {!statsLoading && stats?.heatmapData?.length > 0 && (
+            {!statsLoading && stats?.heatmapData && (
                 <section className="space-y-3">
                     <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
                         Consistency & Activity Heatmap
