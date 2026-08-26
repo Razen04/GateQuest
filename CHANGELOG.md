@@ -1,4 +1,14 @@
-# v0.10.9_1 - 2026-08-08 (Latest)
+# v0.10.10 - 2026-08-26 (Latest)
+
+- Added GATE XL (Life Sciences) PYQs from 2016–2026, except 2022. Help is needed to source the 2022 PYQs. More PYQs will be added subsequently.
+- Fixed keyboard shortcut usage in MSQs. [#99](https://github.com/Razen04/GateQuest/issues/99)
+- Fixed double counting in Target Study Roadmap. [#97](https://github.com/Razen04/GateQuest/issues/97)
+- Added Branch filter in Engineering Maths and Aptitude. [#96](https://github.com/Razen04/GateQuest/issues/96)
+- Added a _Record Test Activity_ toggle to Topic Test Configuration, allowing users to prevent test attempts from affecting dashboard statistics.
+- Fixed incorrect time recording for Topic Tests.
+- Minor UI and usability changes.
+
+# v0.10.9_1 - 2026-08-08
 
 - Fixed the accuracy calculation. I think. Fixes [#94](https://github.com/Razen04/GateQuest/issues/94).
 - Improved dashboard loading speed by adding database indexes.
