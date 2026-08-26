@@ -1,95 +1,86 @@
-CREATE OR REPLACE FUNCTION public.handle_test_completion_sync()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
+create or replace function public.handle_test_completion_sync ()
+    returns trigger
+    language plpgsql
+    security definer
+    as $$
+begin
     -- Only run when status changes to 'completed'
-    IF NEW.status = 'completed' AND OLD.status <> 'completed' THEN
-
+    if new.status = 'completed' and old.status <> 'completed' and new.record_activity is true then
         -- ACTIVITY LOG
-        INSERT INTO public.user_question_activity (
-            user_id,
-            question_id,
-            subject,
-						subject_id,
-						branch_id,
-						user_version_number,
-            was_correct,
-            time_taken,
-            attempted_at,
-            attempt_number
-        )
-        SELECT
-            NEW.user_id,
+        insert into public.user_question_activity (user_id, question_id, subject, subject_id, branch_id, user_version_number, was_correct, time_taken, attempted_at, attempt_number)
+        select
+            new.user_id,
             a.question_id,
             q.subject,
-						q.subject_id,
-						NEW.branch_id,
-						(SELECT version_number from public.users where id = NEW.user_id),
-            a.is_correct,
-            a.time_spent_seconds,
-            NOW(),
+            q.subject_id,
+            new.branch_id,
             (
-                SELECT COALESCE(MAX(attempt_number), 0) + 1
-                FROM public.user_question_activity uqa
-                WHERE uqa.user_id = NEW.user_id
-                  AND uqa.question_id = a.question_id
-            )
-        FROM public.topic_tests_attempts a
-        JOIN public.questions q ON q.id = a.question_id
-        WHERE a.session_id = NEW.id;
-
+                select
+                    version_number
+                from
+                    public.users
+                where
+                    id = new.user_id), a.is_correct, a.time_spent_seconds, NOW(), (
+                select
+                    COALESCE(MAX(attempt_number), 0) + 1
+                from
+                    public.user_question_activity uqa
+                where
+                    uqa.user_id = new.user_id
+                    and uqa.question_id = a.question_id)
+        from
+            public.topic_tests_attempts a
+            join public.questions q on q.id = a.question_id
+        where
+            a.session_id = new.id
+            and a.user_answer is not null;
         -- INCORRECT ANSWERS
-        INSERT INTO public.user_incorrect_queue (
-            user_id,
-            question_id,
-            box,
-            added_at,
-            next_review_at
-        )
-        SELECT
-            NEW.user_id,
+        insert into public.user_incorrect_queue (user_id, question_id, box, added_at, next_review_at)
+        select
+            new.user_id,
             a.question_id,
             1,
             NOW(),
             NOW()
-        FROM public.topic_tests_attempts a
-        WHERE a.session_id = NEW.id
-          AND COALESCE(a.is_correct, FALSE) = FALSE
-        ON CONFLICT (user_id, question_id)
-        DO UPDATE SET
-            box = 1,
-            next_review_at = NOW() + interval '1 week';
-
+        from
+            public.topic_tests_attempts a
+        where
+            a.session_id = new.id
+            and COALESCE(a.is_correct, false) = false
+        on conflict (user_id,
+            question_id)
+            do update set
+                box = 1,
+                next_review_at = NOW() + interval '1 week';
         -- CORRECT ANSWERS → GRADUATE
         -- Graduate box 3
-        DELETE FROM public.user_incorrect_queue q
-        USING public.topic_tests_attempts a
-        WHERE q.user_id = NEW.user_id
-          AND q.question_id = a.question_id
-          AND a.session_id = NEW.id
-          AND a.is_correct IS TRUE
-          AND q.box = 3;
-
-        -- Promote box 1 → 2, box 2 → 3
-        UPDATE public.user_incorrect_queue q
-        SET
-            box = q.box + 1,
-            next_review_at = CASE
-                WHEN q.box = 1 THEN NOW() + interval '2 weeks'
-                WHEN q.box = 2 THEN NOW() + interval '4 weeks'
-                ELSE q.next_review_at
-            END
-        FROM public.topic_tests_attempts a
-        WHERE q.user_id = NEW.user_id
-          AND q.question_id = a.question_id
-          AND a.session_id = NEW.id
-          AND a.is_correct IS TRUE
-          AND q.box IN (1, 2);
-
-    END IF;
-
-    RETURN NEW;
-END;
+        delete from public.user_incorrect_queue q using public.topic_tests_attempts a
+        where q.user_id = new.user_id
+            and q.question_id = a.question_id
+            and a.session_id = new.id
+            and a.is_correct is true
+            and q.box = 3;
+    -- Promote box 1 → 2, box 2 → 3
+    update
+        public.user_incorrect_queue q
+    set
+        box = q.box + 1,
+        next_review_at = case when q.box = 1 then
+            NOW() + interval '2 weeks'
+        when q.box = 2 then
+            NOW() + interval '4 weeks'
+        else
+            q.next_review_at
+        end
+    from
+        public.topic_tests_attempts a
+    where
+        q.user_id = new.user_id
+        and q.question_id = a.question_id
+        and a.session_id = new.id
+        and a.is_correct is true
+        and q.box in (1, 2);
+end if;
+    return NEW;
+end;
 $$;
