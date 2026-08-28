@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import ModernLoader from '@/shared/components/ModernLoader.tsx';
 import type { Question } from '@/shared/types/storage.ts';
 import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
@@ -7,7 +7,9 @@ import {
     getDifficultyClassNames,
     getQuestionDisplayText,
 } from '../../utils/questionUtils.ts';
-import MathRenderer from '../Renderers/MathRenderer.tsx';
+
+const MathRenderer = lazy(() => import('../Renderers/MathRenderer.tsx'));
+
 import Pagination from './Pagination.tsx';
 
 type ListProps = {
@@ -53,7 +55,11 @@ const List = ({
                     className="cursor-pointer border border-white/20 bg-white/20 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-xl hover:bg-white/30 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition-all"
                 >
                     <h3 className="font-medium mb-3 text-sm md:text-base text-gray-800 dark:text-gray-200">
-                        <MathRenderer text={getQuestionDisplayText(question)} />
+                        <Suspense fallback={<ModernLoader />}>
+                            <MathRenderer
+                                text={getQuestionDisplayText(question)}
+                            />
+                        </Suspense>
                     </h3>
 
                     <div className="flex justify-between items-center text-xs">

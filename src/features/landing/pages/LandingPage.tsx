@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import About from '@/features/about/pages/AboutPage';
 import useSettings from '@/features/settings/hooks/useSettings';
 import { Button } from '@/shared/components/ui/button';
-import type { Settings } from '@/shared/types/Settings';
+import type { SettingToggle } from '@/shared/types/Settings';
 
 const signal = '#2A5CFF';
 
@@ -124,7 +124,7 @@ const NavigationMenu = ({
     toggle,
 }: {
     dark: boolean;
-    toggle: (setting: Settings) => void;
+    toggle: SettingToggle;
 }) => {
     return (
         <nav className="sticky top-0 z-50 bg-[#F4F5F1]/50 dark:bg-[#0B0C10]/50 backdrop-blur-3xl">
@@ -241,7 +241,7 @@ export default function LandingPage() {
 
                         <div className="mt-10 flex flex-wrap items-center gap-6">
                             <Button
-                                onClick={() => navigate('/practice')}
+                                onClick={() => navigate('/dashboard')}
                                 className="h-12 bg-[#2A5CFF] px-7 font-['Space_Grotesk',sans-serif] rounded-none font-bold text-white transition-all hover:bg-[#2A5CFF]/90 hover:shadow-lg"
                             >
                                 Open Candidate File

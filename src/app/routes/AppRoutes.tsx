@@ -1,130 +1,155 @@
 /**
  * @file AppRoutes.jsx
- * @description This file defines the main routing structure for the application using react-router-dom.
- * It handles route protection based on authentication status, ensuring that users are directed appropriately based on whether they are logged in or not. It also orchestrates the overall page layout.
+ * @description Main routing structure with optimized code-splitting.
  */
 
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Layout from '@/app/layout/Layout.jsx';
-import SettingsRoutes from '@/app/routes/SettingsRoutes';
-import About from '@/features/about/pages/AboutPage';
-import Dashboard from '@/features/dashboard/pages/DashboardPage';
-import DonationPage from '@/features/donations/pages/DonationsPage';
-import LandingPage from '@/features/landing/pages/LandingPage.tsx';
-import PracticeCard from '@/features/practice/components/PracticeCard';
-import PracticeList from '@/features/practice/components/PracticeList';
-import Practice from '@/features/practice/pages/PracticePage';
-import ProfilePage from '@/features/profile/ProfilePage';
-import SmartRevisionQuestionCard from '@/features/smart-revision/components/SmartRevisionQuestionCard';
-import SmartRevisionQuestionList from '@/features/smart-revision/components/SmartRevisionQuestionList';
-import SmartRevision from '@/features/smart-revision/pages/SmartRevisionPage';
-import TestSolutionView from '@/features/topic-test/components/TestSolutionView';
-import TopicReviewLayout from '@/features/topic-test/components/TopicReviewLayout';
-import TopicTestGeneratePage from '@/features/topic-test/components/topic-test-generator/TopicTestGenerate';
-import TopicTest from '@/features/topic-test/pages/TopicTest';
-import TopicTestLobby from '@/features/topic-test/pages/TopicTestLobby';
-import TopicTestResult from '@/features/topic-test/pages/TopicTestResult';
-import TopicTestSessionPage from '@/features/topic-test/pages/TopicTestSession';
 import ModernLoader from '@/shared/components/ModernLoader.js';
 import useAuth from '@/shared/hooks/useAuth';
 
-/**
- * @function AppRoutes
- * @description Manages the application's routing logic.
- * It consumes the AuthContext to dynamically render routes based on the user's
- * authentication state and the initial loading status.
- */
+// Shell & Nested Routers (Lazy Loaded)
+const Layout = lazy(() => import('@/app/layout/Layout.jsx'));
+const SettingsRoutes = lazy(() => import('@/app/routes/SettingsRoutes'));
+
+// Feature Pages (Lazy Loaded)
+const LandingPage = lazy(
+    () => import('@/features/landing/pages/LandingPage.tsx')
+);
+const Dashboard = lazy(
+    () => import('@/features/dashboard/pages/DashboardPage')
+);
+const Practice = lazy(() => import('@/features/practice/pages/PracticePage'));
+const PracticeList = lazy(
+    () => import('@/features/practice/components/PracticeList')
+);
+const PracticeCard = lazy(
+    () => import('@/features/practice/components/PracticeCard')
+);
+const About = lazy(() => import('@/features/about/pages/AboutPage'));
+const DonationPage = lazy(
+    () => import('@/features/donations/pages/DonationsPage')
+);
+const ProfilePage = lazy(() => import('@/features/profile/ProfilePage'));
+const SmartRevision = lazy(
+    () => import('@/features/smart-revision/pages/SmartRevisionPage')
+);
+const SmartRevisionQuestionList = lazy(
+    () =>
+        import('@/features/smart-revision/components/SmartRevisionQuestionList')
+);
+const SmartRevisionQuestionCard = lazy(
+    () =>
+        import('@/features/smart-revision/components/SmartRevisionQuestionCard')
+);
+const TopicTest = lazy(() => import('@/features/topic-test/pages/TopicTest'));
+const TopicTestGeneratePage = lazy(
+    () =>
+        import(
+            '@/features/topic-test/components/topic-test-generator/TopicTestGenerate'
+        )
+);
+const TopicTestLobby = lazy(
+    () => import('@/features/topic-test/pages/TopicTestLobby')
+);
+const TopicTestSessionPage = lazy(
+    () => import('@/features/topic-test/pages/TopicTestSession')
+);
+const TopicTestResult = lazy(
+    () => import('@/features/topic-test/pages/TopicTestResult')
+);
+const TestSolutionView = lazy(
+    () => import('@/features/topic-test/components/TestSolutionView')
+);
+const TopicReviewLayout = lazy(
+    () => import('@/features/topic-test/components/TopicReviewLayout')
+);
+
 export default function AppRoutes() {
-    // isLogin and loading states are consumed from the AuthContext.
     const { isLogin, loading } = useAuth();
 
+    if (loading) {
+        return <ModernLoader />;
+    }
+
     return (
-        <Routes>
-            {/* While authentication status is being determined, a loader is shown. */}
-            {/* This prevents a flash of the landing page for an already authenticated user. */}
-            {loading ? (
-                <Route path="*" element={<ModernLoader />} />
-            ) : (
-                <>
-                    {/* This route handles the initial entry point of the application. */}
+        <Suspense fallback={<ModernLoader />}>
+            <Routes>
+                {/* Public / Landing Entry Point */}
+                <Route
+                    path="/"
+                    element={
+                        isLogin ? (
+                            <Navigate to="/dashboard" replace />
+                        ) : (
+                            <LandingPage />
+                        )
+                    }
+                />
+
+                {/* Authenticated Layout Wrapper */}
+                <Route path="/" element={<Layout />}>
+                    <Route path="dashboard" element={<Dashboard />} />
+
+                    {/* Practice */}
+                    <Route path="practice" element={<Practice />} />
                     <Route
-                        path="/"
-                        element={
-                            // If the user is logged in, redirect them to the dashboard.
-                            // Otherwise, show the public landing page.
-                            isLogin ? (
-                                <Navigate to="/dashboard" replace />
-                            ) : (
-                                <LandingPage />
-                            )
-                        }
+                        path="practice/:subject"
+                        element={<PracticeList />}
+                    />
+                    <Route
+                        path="practice/:subject/:qid"
+                        element={<PracticeCard />}
                     />
 
-                    {/* All main application pages are nested within the Layout component. */}
-                    {/* This provides a consistent UI shell (e.g., Navbar, Sidebar) for authenticated views. */}
-                    <Route path="/" element={<Layout />}>
-                        {/* The main dashboard, the first page after login. */}
-                        <Route path="dashboard" element={<Dashboard />} />
-                        {/* The practice section has nested routes for subjects and individual questions. */}
-                        <Route path="practice" element={<Practice />} />
-                        <Route
-                            path="practice/:subject"
-                            element={<PracticeList />}
-                        />
-                        <Route
-                            path="practice/:subject/:qid"
-                            element={<PracticeCard />}
-                        />
-                        {/* Settings routes are modularized into their own component for clarity. */}
-                        <Route path="settings/*" element={<SettingsRoutes />} />
-                        {/* A static 'About' page. */}
-                        <Route
-                            path="about"
-                            element={<About landing={false} />}
-                        />
-                        <Route path="donate" element={<DonationPage />} />
-                        {/* The revision section has nested routes for revision list and individual questions. */}
-                        <Route path="revision" element={<SmartRevision />} />
-                        <Route
-                            path="revision/:rid"
-                            element={<SmartRevisionQuestionList />}
-                        />
-                        <Route
-                            path="revision/:rid/:subject/:qid"
-                            element={<SmartRevisionQuestionCard />}
-                        />
+                    {/* Settings Sub-router */}
+                    <Route path="settings/*" element={<SettingsRoutes />} />
 
-                        {/* Topic Test */}
-                        <Route path="topic-test" element={<TopicTest />} />
+                    {/* Miscellaneous */}
+                    <Route path="about" element={<About landing={false} />} />
+                    <Route path="donate" element={<DonationPage />} />
+
+                    {/* Revision */}
+                    <Route path="revision" element={<SmartRevision />} />
+                    <Route
+                        path="revision/:rid"
+                        element={<SmartRevisionQuestionList />}
+                    />
+                    <Route
+                        path="revision/:rid/:subject/:qid"
+                        element={<SmartRevisionQuestionCard />}
+                    />
+
+                    {/* Topic Test */}
+                    <Route path="topic-test" element={<TopicTest />} />
+                    <Route
+                        path="topic-test-generate"
+                        element={<TopicTestGeneratePage />}
+                    />
+                    <Route
+                        path="topic-test/:testId"
+                        element={<TopicTestLobby />}
+                    />
+                    <Route
+                        path="topic-test/:testId/attempt"
+                        element={<TopicTestSessionPage />}
+                    />
+
+                    <Route element={<TopicReviewLayout />}>
                         <Route
-                            path="topic-test-generate"
-                            element={<TopicTestGeneratePage />}
+                            path="topic-test-result/:testId"
+                            element={<TopicTestResult />}
                         />
                         <Route
-                            path="topic-test/:testId"
-                            element={<TopicTestLobby />}
+                            path="topic-test-review/:testId/:questionIndex"
+                            element={<TestSolutionView />}
                         />
-                        <Route
-                            path="topic-test/:testId/attempt"
-                            element={<TopicTestSessionPage />}
-                        />
-                        <Route element={<TopicReviewLayout />}>
-                            <Route
-                                path="topic-test-result/:testId"
-                                element={<TopicTestResult />}
-                            />
-                            <Route
-                                path="topic-test-review/:testId/:questionIndex"
-                                element={<TestSolutionView />}
-                            />
-                        </Route>
-                        <Route path="/u/:username" element={<ProfilePage />} />
-                        {/* A catch-all route to handle undefined paths within the app. */}
-                        {/* It redirects the user to the root to prevent 404 errors. */}
-                        <Route path="*" element={<Navigate to="/" />} />
                     </Route>
-                </>
-            )}
-        </Routes>
+
+                    <Route path="/u/:username" element={<ProfilePage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Route>
+            </Routes>
+        </Suspense>
     );
 }

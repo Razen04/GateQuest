@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BlockMath, InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import CodeBlockRenderer from '../Renderers/CodeBlockRenderer.js';
@@ -15,6 +15,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-python';
 // @ts-expect-error Don't really know why TS is showing error (help me)
 import 'prismjs/components/prism-javascript';
+import ModernLoader from '@/shared/components/ModernLoader.js';
 
 /**
  * Renders text that may contain LaTeX math expressions enclosed in $ symbols,
@@ -230,9 +231,15 @@ const MathRenderer = ({ text }: MathRendererProps) => {
                                             return (
                                                 <li key={liIdx}>
                                                     {/* RECURSION: Use MathRenderer inside the list item */}
-                                                    <MathRenderer
-                                                        text={innerContent}
-                                                    />
+                                                    <Suspense
+                                                        fallback={
+                                                            <ModernLoader />
+                                                        }
+                                                    >
+                                                        <MathRenderer
+                                                            text={innerContent}
+                                                        />
+                                                    </Suspense>
                                                 </li>
                                             );
                                         })}

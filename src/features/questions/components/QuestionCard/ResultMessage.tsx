@@ -1,5 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
+import { lazy, Suspense } from 'react';
+
+const MathRenderer = lazy(
+    () => import('@/features/questions/components/Renderers/MathRenderer')
+);
+
+import ModernLoader from '@/shared/components/ModernLoader.tsx';
 import type { Question } from '@/shared/types/storage.ts';
 import {
     getCorrectAnswerText,
@@ -45,7 +51,9 @@ const ResultMessage = ({
                             <div>
                                 Incorrect. The correct answer is:{' '}
                                 <span className="font-semibold">
-                                    <MathRenderer text={correctAnswer} />
+                                    <Suspense fallback={<ModernLoader />}>
+                                        <MathRenderer text={correctAnswer} />
+                                    </Suspense>
                                 </span>
                                 <br />
                                 {isNAT && `Your answer: ${numericalAnswer}`}
@@ -55,7 +63,9 @@ const ResultMessage = ({
                         <div className="flex items-center">
                             <div>
                                 Skipped. The correct answer is:{' '}
-                                <MathRenderer text={correctAnswer} />
+                                <Suspense fallback={<ModernLoader />}>
+                                    <MathRenderer text={correctAnswer} />
+                                </Suspense>
                             </div>
                         </div>
                     )}

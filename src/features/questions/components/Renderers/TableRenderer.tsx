@@ -1,5 +1,8 @@
-import React from 'react';
-import MathRenderer from './MathRenderer.js';
+import React, { lazy, Suspense } from 'react';
+
+const MathRenderer = lazy(() => import('./MathRenderer.js'));
+
+import ModernLoader from '@/shared/components/ModernLoader.js';
 
 type TableType = 'md' | 'latex';
 
@@ -150,7 +153,9 @@ const TableRenderer: React.FC<TableRendererProps> = ({ tableText }) => {
                 <div key={idx} className="overflow-x-auto w-full text-xs">
                     {tbl.caption && (
                         <div className="text-xs sm:text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">
-                            <MathRenderer text={tbl.caption} />
+                            <Suspense fallback={<ModernLoader />}>
+                                <MathRenderer text={tbl.caption} />
+                            </Suspense>
                         </div>
                     )}
                     <table className="min-w-[360px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
@@ -161,7 +166,9 @@ const TableRenderer: React.FC<TableRendererProps> = ({ tableText }) => {
                                         key={i}
                                         className="px-2 sm:px-4 py-2 text-left font-medium text-gray-600 dark:text-gray-200 border-b whitespace-nowrap"
                                     >
-                                        <MathRenderer text={header} />
+                                        <Suspense fallback={<ModernLoader />}>
+                                            <MathRenderer text={header} />
+                                        </Suspense>
                                     </th>
                                 ))}
                             </tr>
@@ -181,7 +188,11 @@ const TableRenderer: React.FC<TableRendererProps> = ({ tableText }) => {
                                             key={cellIndex}
                                             className="px-2 sm:px-4 py-2 text-gray-700 dark:text-gray-200 border-t whitespace-nowrap"
                                         >
-                                            <MathRenderer text={cell} />
+                                            <Suspense
+                                                fallback={<ModernLoader />}
+                                            >
+                                                <MathRenderer text={cell} />
+                                            </Suspense>
                                         </td>
                                     ))}
                                 </tr>

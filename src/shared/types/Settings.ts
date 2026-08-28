@@ -13,3 +13,8 @@ export type Settings = {
     shareProgress: boolean;
     dataCollection: boolean;
 };
+
+export type SettingToggle = <K extends keyof Settings>(
+    key: K,
+    value?: Settings[K]
+) => void;
