@@ -14,6 +14,11 @@ export default defineConfig({
             srcDir: 'src',
             filename: 'sw.ts',
             registerType: 'autoUpdate',
+            injectManifest: {
+                // Prevent 2.5MB+ KaTeX fonts from bloating the initial service worker precache
+                globIgnores: ['**/KaTeX_*.{woff,woff2,ttf,eot}'],
+                maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+            },
             devOptions: {
                 enabled: true,
                 type: 'module',
@@ -30,12 +35,12 @@ export default defineConfig({
                     {
                         src: '/logo.svg',
                         sizes: '192x192',
-                        type: 'image/svg',
+                        type: 'image/svg+xml',
                     },
                     {
                         src: '/logo.svg',
                         sizes: '512x512',
-                        type: 'image/svg',
+                        type: 'image/svg+xml',
                     },
                 ],
             },
@@ -44,10 +49,38 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
-                    'vendor-icons': ['@phosphor-icons/react'],
-                    'vendor-utils': ['date-fns', 'framer-motion'],
-                    'vendor-supabase': ['@supabase/supabase-js'],
+                manualChunks(id) {
+                    // React Core
+                    if (
+                        id.includes('node_modules/react/') ||
+                        id.includes('node_modules/react-dom/') ||
+                        id.includes('node_modules/react-router-dom/')
+                    ) {
+                        return 'vendor-react';
+                    }
+                    // Math rendering engine
+                    if (id.includes('node_modules/katex')) {
+                        return 'vendor-katex';
+                    }
+                    // Radix UI primitives
+                    if (id.includes('node_modules/@radix-ui')) {
+                        return 'vendor-radix';
+                    }
+                    // Charting (Nivo / Recharts)
+                    if (
+                        id.includes('node_modules/@nivo') ||
+                        id.includes('node_modules/recharts')
+                    ) {
+                        return 'vendor-charts';
+                    }
+                    // Phosphor icons
+                    if (id.includes('node_modules/@phosphor-icons')) {
+                        return 'vendor-icons';
+                    }
+                    // Animation & Framer Motion
+                    if (id.includes('node_modules/framer-motion')) {
+                        return 'vendor-motion';
+                    }
                 },
             },
         },

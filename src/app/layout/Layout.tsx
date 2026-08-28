@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
@@ -49,6 +49,16 @@ const Layout = () => {
     const user = getUserProfile();
     const location = useLocation();
 
+    const mainRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        mainRef.current?.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth',
+        });
+    }, [location.pathname]);
+
     const FOCUS_PATHS = ['/topic-test'];
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
@@ -58,16 +68,16 @@ const Layout = () => {
 
     return (
         <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
-            {/* Desktop & Mobile Header */}
             <Navbar />
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            <main
+                ref={mainRef}
+                className="flex-1 overflow-y-auto overflow-x-hidden"
+            >
                 <SyncOnUnload user={user} />
                 <Outlet />
             </main>
 
-            {/* Mobile Dock Handler */}
             <Sidebar
                 showSidebar={false}
                 setShowSidebar={() => {}}

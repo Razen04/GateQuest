@@ -1,17 +1,39 @@
 /// <reference lib="webworker" />
 /* eslint-disable no-undef */
 
-import { precacheAndRoute } from 'workbox-precaching';
+import type { WorkboxPlugin } from 'workbox-core';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { CacheFirst } from 'workbox-strategies';
 
 // 'self' operates in the scope of service worker thread
 declare let self: ServiceWorkerGlobalScope;
 
+// Clean up previous service worker precache caches
+cleanupOutdatedCaches();
+
 // On build, Vite swaps out this to our master array of static cached assets
 precacheAndRoute(self.__WB_MANIFEST);
 
+// Cache KaTeX fonts on demand via CacheFirst (valid for 1 year)
+registerRoute(
+    ({ request, url }) =>
+        request.destination === 'font' || url.pathname.includes('KaTeX_'),
+    new CacheFirst({
+        cacheName: 'katex-fonts-cache',
+        plugins: [
+            new ExpirationPlugin({
+                maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+            }) as unknown as WorkboxPlugin,
+        ],
+    })
+);
+
 self.addEventListener('push', (event) => {
     if (!event.data) {
-        console.warn('Push event is received but payload data is emty.');
+        console.warn('Push event is received but payload data is empty.');
         return;
     }
 
@@ -22,7 +44,6 @@ self.addEventListener('push', (event) => {
         const body = payload.body || 'Keep practicing PYQs';
         const deepLinkUrl = payload.url || '/dashboard';
 
-        // waitUntil tells the browser to keep the background thread alive until the promise is completely resolved
         event.waitUntil(
             self.registration.showNotification(title, {
                 body: body,

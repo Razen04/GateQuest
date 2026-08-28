@@ -1,9 +1,11 @@
 import { CheckCircle } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import ModernLoader from '@/shared/components/ModernLoader.js';
 import type { Question } from '@/shared/types/storage.js';
 import { isMultipleSelection } from '../../utils/questionUtils.js';
-import MathRenderer from '../Renderers/MathRenderer.js';
+
+const MathRenderer = lazy(() => import('../Renderers/MathRenderer.js'));
 
 type QuestionContentProps = {
     env: 'Test' | 'Practice';
@@ -51,7 +53,9 @@ const QuestionContent = ({
             <div className="mb-4 sm:mb-6 overflow-x-scroll">
                 <div className="text-sm md:text-lg">
                     {currentQuestion.question ? (
-                        <MathRenderer text={currentQuestion.question} />
+                        <Suspense fallback={<ModernLoader />}>
+                            <MathRenderer text={currentQuestion.question} />
+                        </Suspense>
                     ) : (
                         <span>Question content unavailable</span>
                     )}
@@ -136,7 +140,11 @@ const QuestionContent = ({
 
                                     <div className="flex-1">
                                         {option ? (
-                                            <MathRenderer text={option} />
+                                            <Suspense
+                                                fallback={<ModernLoader />}
+                                            >
+                                                <MathRenderer text={option} />
+                                            </Suspense>
                                         ) : (
                                             'Option unavailable'
                                         )}

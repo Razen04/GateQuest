@@ -1,7 +1,12 @@
 import { CheckCircle, Clock, ClockIcon, XCircle } from '@phosphor-icons/react';
 import { formatDistanceToNowStrict } from 'date-fns';
-import { type JSX, useState } from 'react';
-import MathRenderer from '@/features/questions/components/Renderers/MathRenderer';
+import { type JSX, lazy, Suspense, useState } from 'react';
+
+const MathRenderer = lazy(
+    () => import('@/features/questions/components/Renderers/MathRenderer')
+);
+
+import ModernLoader from '@/shared/components/ModernLoader';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -119,9 +124,13 @@ export default function ProfileActivityTabs({
 
                                     <div className="min-w-0 flex-1">
                                         <p className="line-clamp-2 text-sm font-medium leading-snug text-slate-700 group-hover:text-slate-900 dark:text-white/80 dark:group-hover:text-white">
-                                            <MathRenderer
-                                                text={item.question_text}
-                                            />
+                                            <Suspense
+                                                fallback={<ModernLoader />}
+                                            >
+                                                <MathRenderer
+                                                    text={item.question_text}
+                                                />
+                                            </Suspense>
                                         </p>
 
                                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">

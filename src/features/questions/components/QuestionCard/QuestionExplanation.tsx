@@ -1,6 +1,8 @@
-import * as React from 'react';
+import React, { lazy, Suspense } from 'react';
+import ModernLoader from '@/shared/components/ModernLoader';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
-import MathRenderer from '../Renderers/MathRenderer';
+
+const MathRenderer = lazy(() => import('../Renderers/MathRenderer'));
 
 interface QuestionExplanationProps {
     question: RevisionQuestion | Question;
@@ -24,7 +26,9 @@ const QuestionExplanation: React.FC<QuestionExplanationProps> = ({
                 explanation too.
             </p>
             <div className="text-gray-800 dark:text-gray-200">
-                <MathRenderer text={textToRender} />
+                <Suspense fallback={<ModernLoader />}>
+                    <MathRenderer text={textToRender} />
+                </Suspense>
             </div>
         </div>
     );
