@@ -42,33 +42,27 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 <summary>Screenshots</summary>
 <br>
 <p align="center">
-  <img src="public/screenshots/Landing.png" alt="Landing Page" width="45%" />
-  <img src="public/screenshots/Dashboard.png" alt="Dashboard" width="45%" />
-</p>
-<p align="center">
-  <img src="public/screenshots/Practice.png" alt="Practice Page" width="45%" />
-  <img src="public/screenshots/Questions.png" alt="Questions Page" width="45%" />
+  <img src="public/screenshots/Landing.png" alt="Landing Page" width="30%" />
+  <img src="public/screenshots/Dashboard.png" alt="Dashboard" width="30%" />
+  <img src="public/screenshots/Practice.png" alt="Practice Page" width="30%" />
 </p>
 
 <p align="center">
+  <img src="public/screenshots/Questions.png" alt="Questions Page" width="30%" />
   <img src="public/screenshots/MCQ.png" alt="MCQ Page" width="30%" />
   <img src="public/screenshots/TopicTest.png" alt="Topic Test Page" width="30%" />
-  <img src="public/screenshots/TestGenerate.png" alt="Topic Test Generate Page" width="30%" />
 </p>
 
 <p align="center">
+  <img src="public/screenshots/TestGenerate.png" alt="Topic Test Generate Page" width="30%" />
   <img src="public/screenshots/TestSession.png" alt="Active Test Page" width="30%" />
-  <img src="public/screenshots/TestPallete.png" alt="Test Palette" width="30%" />
   <img src="public/screenshots/SmartRevision.png" alt="Smart Revision Page" width="30%" />
 </p>
 
 <p align="center">
-  <img src="public/screenshots/ProfilePage.png" alt="Profile Page" width="45%" />
-  <img src="public/screenshots/Settings.png" alt="Settings Page" width="45%" />
-</p>
-<p align="center">
-  <img src="public/screenshots/DonationPage.png" alt="Donation Page" width="45%" />
-  <img src="public/screenshots/About.png" alt="About Page" width="45%" />
+  <img src="public/screenshots/ProfilePage.png" alt="Profile Page" width="30%" />
+  <img src="public/screenshots/Settings.png" alt="Settings Page" width="30%" />
+  <img src="public/screenshots/DonationPage.png" alt="Donation Page" width="30%" />
 </p>
 
 </details>
