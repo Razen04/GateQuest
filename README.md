@@ -41,26 +41,30 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 <details open>
 <summary>Screenshots</summary>
 <br>
-<div style="overflow-x: auto; auto; white-space: nowrap;">
-<table>
-  <tr>
-    <td><img src="public/screenshots/Landing.png" alt="Landing Page" width="250"></td>
-    <td><img src="public/screenshots/Dashboard.png" alt="Dashboard" width="250"></td>
-    <td><img src="public/screenshots/Practice.png" alt="Practice Page" width="250"></td>
-    <td><img src="public/screenshots/Questions.png" alt="Questions Page" width="250"></td>
-    <td><img src="public/screenshots/MCQ.png" alt="MCQ Page" width="250"></td>
-    <td><img src="public/screenshots/TopicTest.png" alt="Topic Test Page" width="250"></td>
-    <td><img src="public/screenshots/TestGenerate.png" alt="Topic Test Generate Page" width="250"></td>
-    <td><img src="public/screenshots/TestSession.png" alt="Active Test Page" width="250"></td>
-    <td><img src="public/screenshots/TestPallete.png" alt="Test Pallete" width="250"></td>
-    <td><img src="public/screenshots/Settings.png" alt="Settings Page" width="250"></td>
-    <td><img src="public/screenshots/SmartRevision.png" alt="Smart Revision Page" width="250"></td>
-    <td><img src="public/screenshots/ProfilePage.png" alt="Profile Page" width="250"></td>
-    <td><img src="public/screenshots/DonationPage.png" alt="Donation Page" width="250"></td>
-    <td><img src="public/screenshots/About.png" alt="About Page" width="250"></td>
-  </tr>
-</table>
-</div>
+<p align="center">
+  <img src="public/screenshots/Landing.png" alt="Landing Page" width="30%" />
+  <img src="public/screenshots/Dashboard.png" alt="Dashboard" width="30%" />
+  <img src="public/screenshots/Practice.png" alt="Practice Page" width="30%" />
+</p>
+
+<p align="center">
+  <img src="public/screenshots/Questions.png" alt="Questions Page" width="30%" />
+  <img src="public/screenshots/MCQ.png" alt="MCQ Page" width="30%" />
+  <img src="public/screenshots/TopicTest.png" alt="Topic Test Page" width="30%" />
+</p>
+
+<p align="center">
+  <img src="public/screenshots/TestGenerate.png" alt="Topic Test Generate Page" width="30%" />
+  <img src="public/screenshots/TestSession.png" alt="Active Test Page" width="30%" />
+  <img src="public/screenshots/SmartRevision.png" alt="Smart Revision Page" width="30%" />
+</p>
+
+<p align="center">
+  <img src="public/screenshots/ProfilePage.png" alt="Profile Page" width="30%" />
+  <img src="public/screenshots/Settings.png" alt="Settings Page" width="30%" />
+  <img src="public/screenshots/DonationPage.png" alt="Donation Page" width="30%" />
+</p>
+
 </details>
 
 ## Features
