@@ -12,14 +12,17 @@ import {
 } from '@phosphor-icons/react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
 import AskAI from '@/features/settings/components/AskAI';
-import useSettings from '@/features/settings/hooks/useSettings';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import { last_updated, version } from '../../../../package.json';
 
 const AppSettings = () => {
-    const { settings, handleSettingToggle, isUpdatingSettings } = useSettings();
+    const settings = useSettingsStore((s) => s.settings);
+    const toggleSettings = useSettingsStore((s) => s.toggleSetting);
+    const isUpdatingSettings = useSettingsStore((s) => s.isUpdatingSettings);
+
     const { status, enableNotifications, disableNotifications, isProcessing } =
         useWebPush();
     const APP_VERSION = version;
@@ -33,9 +36,9 @@ const AppSettings = () => {
             Notification.permission === 'denied' &&
             settings.notifications
         ) {
-            handleSettingToggle('notifications', false);
+            toggleSettings('notifications');
         }
-    }, [settings.notifications, handleSettingToggle]);
+    }, [settings.notifications]);
 
     const handleNotificationToggle = () => {
         if (isProcessing) return;
@@ -90,7 +93,7 @@ const AppSettings = () => {
                         title="Sound Effects"
                         description="Audio cues for study timers, quiz submission, and milestone achievements"
                         isOn={settings.sound}
-                        onToggle={() => handleSettingToggle('sound')}
+                        onToggle={() => toggleSettings('sound')}
                         disabled={isLoading}
                     />
 
@@ -99,7 +102,7 @@ const AppSettings = () => {
                         title="Auto-Start Session Timer"
                         description="Automatically launch practice timers when starting new question"
                         isOn={settings.autoTimer}
-                        onToggle={() => handleSettingToggle('autoTimer')}
+                        onToggle={() => toggleSettings('autoTimer')}
                         disabled={isLoading}
                     />
 
@@ -108,7 +111,7 @@ const AppSettings = () => {
                         title="High-Contrast Dark Theme"
                         description="Optimize UI contrast for nighttime study and reduced eye strain"
                         isOn={settings.darkMode}
-                        onToggle={() => handleSettingToggle('darkMode')}
+                        onToggle={() => toggleSettings('darkMode')}
                         disabled={isLoading}
                     />
 
@@ -126,7 +129,7 @@ const AppSettings = () => {
                         title="Enable Beta Channel"
                         description="Get early access to unreleased features. May include unstable build behavior"
                         isOn={settings.is_beta}
-                        onToggle={() => handleSettingToggle('is_beta')}
+                        onToggle={() => toggleSettings('is_beta')}
                         disabled={isLoading}
                         isDanger
                     />

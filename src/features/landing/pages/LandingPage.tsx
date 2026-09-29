@@ -13,8 +13,8 @@ import {
 import { motion } from 'framer-motion';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import About from '@/features/about/pages/AboutPage';
-import useSettings from '@/features/settings/hooks/useSettings';
 import { Button } from '@/shared/components/ui/button';
 import type { SettingToggle } from '@/shared/types/Settings';
 
@@ -182,14 +182,14 @@ const NavigationMenu = ({
 };
 
 export default function LandingPage() {
-    const { settings, handleSettingToggle } = useSettings();
-    const isDark = settings.darkMode;
+    const isDark = useSettingsStore((s) => s.settings.darkMode);
+    const toggleSetting = useSettingsStore((s) => s.toggleSetting);
 
     const navigate = useNavigate();
 
     return (
         <main className="relative h-dvh w-full overflow-x-hidden bg-[#F4F5F1] font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:bg-[#0B0C10] dark:text-slate-200">
-            <NavigationMenu dark={isDark} toggle={handleSettingToggle} />
+            <NavigationMenu dark={isDark} toggle={toggleSetting} />
             <WatermarkText />
 
             <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 sm:px-8">

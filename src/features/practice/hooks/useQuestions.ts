@@ -4,7 +4,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { useGoals } from '@/shared/hooks/useGoals';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import useGoal from '@/shared/hooks/useGoal';
 import type { Question } from '@/shared/types/storage';
 import { sortQuestionsByYear } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
@@ -83,7 +84,8 @@ const useQuestions = (subjectId: string | undefined) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const { userGoal, getPracticeSubjects } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const { getPracticeSubjects } = useGoal();
 
     // we will filter questions in-memory for display
     const filteredQuestions = useMemo(() => {

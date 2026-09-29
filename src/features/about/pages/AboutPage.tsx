@@ -8,7 +8,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useSettings from '@/features/settings/hooks/useSettings';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { Button } from '@/shared/components/ui/button.js';
 import { faqs } from '@/shared/data/faqs.js';
 
@@ -183,8 +183,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
     const navigate = useNavigate();
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-    const { settings } = useSettings();
-    const isDark = settings.darkMode;
+    const isDark = useSettingsStore((s) => s.settings.darkMode);
 
     return (
         <div

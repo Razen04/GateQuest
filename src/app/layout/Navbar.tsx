@@ -15,8 +15,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Changelog from '@/shared/components/Changelog';
 import NotificationDialog from '@/shared/components/NotificationDialog';
-import useAuth from '@/shared/hooks/useAuth';
 import useWindowSize from '@/shared/hooks/useWindowSize';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const springTransition = {
     type: 'spring' as const,
@@ -31,7 +31,7 @@ const Navbar = () => {
     const notificationRef = useRef<HTMLDivElement | null>(null);
     const animatedLogo = '/icons/animated_logo.svg';
 
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
 
     const { width } = useWindowSize();
     const navigate = useNavigate();

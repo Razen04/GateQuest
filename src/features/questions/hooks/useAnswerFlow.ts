@@ -1,9 +1,9 @@
 // This custom hook encapsulates the logic for handling the entire answer submission process, from revealing the correct answer to recording the user's attempt.
 import React from 'react';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { invalidateProfileCache } from '@/features/profile/hooks/useProfile';
 import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
-import { useGoals } from '@/shared/hooks/useGoals';
 import type { AppUser } from '@/shared/types/AppUser';
 import type { Question } from '@/shared/types/storage';
 
@@ -36,7 +36,8 @@ export default function useAnswerFlow({
     showAnswer,
 }: useAnswerFlowProps) {
     const { refresh } = useStudyPlan();
-    const { userGoal } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
+
     // This function is triggered when the user wants to see the correct answer.
     // It orchestrates stopping the timer, showing the result, and recording the attempt.
     const handleShowAnswer = async () => {

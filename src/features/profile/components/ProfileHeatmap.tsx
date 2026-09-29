@@ -1,8 +1,8 @@
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import { ChartBar } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useContext, useMemo } from 'react';
-import AppSettingContext from '@/app/providers/AppSettingContext.ts';
+import { useMemo } from 'react';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
@@ -12,8 +12,7 @@ interface ProfileHeatmapProps {
 }
 
 export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
-    const context = useContext(AppSettingContext);
-    const isDark = context?.settings?.darkMode ?? false;
+    const isDark = useSettingsStore((s) => s.settings.darkMode);
 
     // Calculate exactly 26 weeks leading up to today (CURRENT_DATE)
     const dateBounds = useMemo(() => {

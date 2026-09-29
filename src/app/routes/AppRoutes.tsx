@@ -6,7 +6,7 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ModernLoader from '@/shared/components/ModernLoader.js';
-import useAuth from '@/shared/hooks/useAuth';
+import { useAuthStore } from '../stores/useAuthStore';
 
 // Shell & Nested Routers (Lazy Loaded)
 const Layout = lazy(() => import('@/app/layout/Layout.jsx'));
@@ -66,7 +66,8 @@ const TopicReviewLayout = lazy(
 );
 
 export default function AppRoutes() {
-    const { isLogin, loading } = useAuth();
+    const loading = useAuthStore((s) => s.loading);
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
 
     if (loading) {
         return <ModernLoader />;

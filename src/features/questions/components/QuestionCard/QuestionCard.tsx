@@ -1,8 +1,8 @@
 import { ArrowLeft } from '@phosphor-icons/react';
 import React, { useEffect, useRef } from 'react';
-import useSettings from '@/features/settings/hooks/useSettings';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import Branding from '@/shared/components/Branding';
-import { useGoals } from '@/shared/hooks/useGoals';
+import useGoal from '@/shared/hooks/useGoal';
 import { usePresence } from '@/shared/hooks/usePresence';
 import type { Question } from '@/shared/types/storage';
 // Types
@@ -104,17 +104,19 @@ const QuestionCard = ({
     isFirst,
     isLast,
 }: QuestionCardProps) => {
-    const { isSubjectInGoal } = useGoals();
+    const { isSubjectInGoal } = useGoal();
     const { count } = usePresence(question.id);
 
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
 
-    const { settings } = useSettings();
-    const aiProvider = settings.aiProvider ?? 'chatgpt';
+    const aiProvider = useSettingsStore(
+        (s) => s.settings.aiProvider ?? 'chatgpt'
+    );
+    const aiCustomPrompt = useSettingsStore((s) => s.settings.aiCustomPrompt);
 
     const handleAskAI = async (doubt?: string) => {
-        await openInAI(question, aiProvider, settings.aiCustomPrompt, doubt);
+        await openInAI(question, aiProvider, aiCustomPrompt, doubt);
     };
 
     // Derived: Check if options exist to conditionally render the options list

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import useAuth from '@/shared/hooks/useAuth';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import type { Tab } from './Sidebar';
 
 type MobileDockProp = {
@@ -10,7 +10,7 @@ type MobileDockProp = {
 
 const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
     const location = useLocation();
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
 
     return (
         <nav

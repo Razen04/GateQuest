@@ -10,12 +10,12 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
 import { getCurrentUser } from '@/shared/api/auth';
 import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import { useGoals } from '@/shared/hooks/useGoals';
 import type { TestSession } from '@/shared/types/storage';
 import { fetchTestById, updateTestStatus } from '../api/topicTest';
 
@@ -73,7 +73,7 @@ const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
 const TopicTestLobby = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
-    const { userGoal } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
 
     const [testData, setTestData] = useState<TestSession | null>(null);
     const [loading, setLoading] = useState(true);
@@ -92,7 +92,7 @@ const TopicTestLobby = () => {
                 return;
             }
 
-            if (data.status === 'completed') {
+            if (data?.status === 'completed') {
                 navigate(`/topic-test-result/${testId}`);
                 return;
             }

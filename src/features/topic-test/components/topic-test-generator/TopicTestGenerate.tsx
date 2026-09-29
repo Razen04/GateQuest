@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
 import PageHeader from '@/shared/components/PageHeader';
 import {
@@ -14,7 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/shared/components/ui/select';
-import { useGoals } from '@/shared/hooks/useGoals';
+import useGoal from '@/shared/hooks/useGoal';
 import { SubjectIconMap } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { supabase } from '@/shared/utils/supabaseClient';
@@ -24,7 +25,8 @@ import TopicTestFooter from './TopicTestFooter';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();
-    const { getPracticeSubjects, userGoal } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const { getPracticeSubjects } = useGoal();
     const subjects = getPracticeSubjects();
 
     const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(

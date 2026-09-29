@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import useSettings from '@/features/settings/hooks/useSettings';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { urlBase64ToUint8Array } from '@/shared/utils/cryptoUtils';
 import {
     deleteNotificationDetails,
@@ -20,7 +20,8 @@ type PushStatus =
 export const useWebPush = () => {
     const [status, setStatus] = useState<PushStatus>('loading');
     const [isProcessing, setIsProcessing] = useState(false);
-    const { settings, handleSettingToggle } = useSettings();
+    const settings = useSettingsStore((s) => s.settings);
+    const toggleSetting = useSettingsStore((s) => s.toggleSetting);
 
     const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -52,8 +53,7 @@ export const useWebPush = () => {
             // has the device physically blocked us in browser settings?
             if (Notification.permission === 'denied') {
                 setStatus('denied');
-                if (settings.notifications)
-                    handleSettingToggle('notifications', false);
+                if (settings.notifications) toggleSetting('notifications');
                 return;
             }
 
@@ -65,12 +65,10 @@ export const useWebPush = () => {
 
                 if (existingSubscription) {
                     setStatus('subscribed');
-                    if (!settings.notifications)
-                        handleSettingToggle('notifications', true);
+                    if (!settings.notifications) toggleSetting('notifications');
                 } else {
                     setStatus('unsubscribed');
-                    if (settings.notifications)
-                        handleSettingToggle('notifications', false);
+                    if (settings.notifications) toggleSetting('notifications');
                 }
             } catch (error) {
                 console.error(
@@ -82,7 +80,7 @@ export const useWebPush = () => {
         };
 
         determineInitialStatus();
-    }, [settings.notifications, handleSettingToggle]);
+    }, [settings.notifications]);
 
     // Enable Notifications
     const enableNotifications = async () => {
@@ -127,10 +125,10 @@ export const useWebPush = () => {
             await triggerWelcomeNotification(subscriptionJSON);
 
             setStatus('subscribed');
-            handleSettingToggle('notifications', true);
+            toggleSetting('notifications', true);
         } catch (err) {
             console.error('Handshake failure saving token to Supabase:', err);
-            handleSettingToggle('notifications', false);
+            toggleSetting('notifications', false);
         } finally {
             setIsProcessing(false);
         }
@@ -155,7 +153,7 @@ export const useWebPush = () => {
             }
 
             setStatus('unsubscribed');
-            handleSettingToggle('notifications', false);
+            toggleSetting('notifications', false);
         } catch (err) {
             console.error('🔴 Disconnect error scrubbing token rows:', err);
         } finally {

@@ -7,6 +7,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import { Button } from '@/shared/components/ui/button';
 import {
     Combobox,
@@ -30,7 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/shared/components/ui/select';
-import { useGoals } from '@/shared/hooks/useGoals';
+import useGoal from '@/shared/hooks/useGoal';
 
 type SearchAndFiltersProps = {
     searchQuery: string;
@@ -86,7 +87,7 @@ const SearchAndFilters = ({
     showBranchFilter,
 }: SearchAndFiltersProps) => {
     const { subject } = useParams();
-    const { getPracticeSubjects } = useGoals();
+    const { getPracticeSubjects } = useGoal();
 
     const currentSubject = getPracticeSubjects().find(
         (s) => s.slug === subject

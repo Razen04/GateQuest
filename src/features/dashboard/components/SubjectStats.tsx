@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import type React from 'react';
-import { useGoals } from '@/shared/hooks/useGoals';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import useGoal from '@/shared/hooks/useGoal';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
@@ -21,7 +22,7 @@ type SubjectStatsPropsType = {
 };
 
 const SubjectStats = ({ subjectStats }: SubjectStatsPropsType) => {
-    const { getPracticeSubjects } = useGoals();
+    const { getPracticeSubjects } = useGoal();
     const subjects = getPracticeSubjects();
 
     return (

@@ -1,7 +1,7 @@
 import { X } from '@phosphor-icons/react';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import { toast } from 'sonner';
-import useAuth from '@/shared/hooks/useAuth.ts';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 
 type LoginProp = {
@@ -24,7 +24,7 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
         }
     };
 
-    const { handleLogin } = useAuth();
+    const handleLogin = useAuthStore((s) => s.handleLogin);
 
     return (
         <GoogleOAuthProvider clientId="635706138983-n2tb8pl1iltjs112g2faeoq26um4hj4r.apps.googleusercontent.com">

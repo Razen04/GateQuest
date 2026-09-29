@@ -10,7 +10,8 @@ import {
     Warning,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import useSettings from '@/features/settings/hooks/useSettings';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import {
     AlertDialog,
@@ -24,18 +25,18 @@ import {
     AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
 import { Button } from '@/shared/components/ui/button';
-import useAuth from '@/shared/hooks/useAuth';
 import type { Settings } from '@/shared/types/Settings';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
-    const { logout, showLogin, setShowLogin, user } = useAuth();
-    const {
-        settings,
-        handleSettingToggle,
-        isUpdatingSettings,
-        handleUserAnonymity,
-    } = useSettings();
+    const user = useAuthStore((s) => s.user);
+    const showLogin = useAuthStore((s) => s.showLogin);
+    const setShowLogin = useAuthStore((s) => s.setShowLogin);
+    const logout = useAuthStore((s) => s.logout);
+    const settings = useSettingsStore((s) => s.settings);
+    const toggleSetting = useSettingsStore((s) => s.toggleSetting);
+    const isUpdatingSettings = useSettingsStore((s) => s.isUpdatingSettings);
+    const handleUserAnonymity = useSettingsStore((s) => s.handleUserAnonymity);
     const userSettings = user?.settings as Settings | undefined;
 
     const handleClearData = async () => {
@@ -106,9 +107,7 @@ const PrivacySettings = () => {
                             title="Share Progress & Global Ranking"
                             description="Broadcast study metrics, daily streaks, and leaderboard rank to peers"
                             isOn={settings.shareProgress}
-                            onToggle={() =>
-                                handleSettingToggle('shareProgress')
-                            }
+                            onToggle={() => toggleSetting('shareProgress')}
                             disabled={isUpdatingSettings}
                         />
 

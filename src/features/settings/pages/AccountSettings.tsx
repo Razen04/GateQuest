@@ -11,6 +11,8 @@ import {
 import { motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -43,8 +45,7 @@ import {
     SelectValue,
 } from '@/shared/components/ui/select';
 import { Textarea } from '@/shared/components/ui/textarea';
-import useAuth from '@/shared/hooks/useAuth';
-import { useGoals } from '@/shared/hooks/useGoals';
+import useGoal from '@/shared/hooks/useGoal';
 import type { Settings } from '@/shared/types/Settings';
 import {
     getUserProfile,
@@ -79,7 +80,9 @@ const FormField = ({ label, tag, children, className }: FormFieldProps) => (
 );
 
 const AccountSettings = () => {
-    const { isLogin, user, setUser } = useAuth();
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
+    const user = useAuthStore((s) => s.user);
+    const setUser = useAuthStore((s) => s.setUser);
     const localUser = getUserProfile();
     const { invalidateCache } = useProfile(user?.username);
 
@@ -90,16 +93,13 @@ const AccountSettings = () => {
     const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
     const userSettings = user?.settings as Settings | undefined;
 
-    const {
-        userGoal,
-        optionalSubjects,
-        selectedOptionalSubjects,
-        branches,
-        exams,
-        branchExams,
-        setInitialGoal,
-        loading: goalsLoading,
-    } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const branches = useGoalStore((s) => s.branches);
+    const exams = useGoalStore((s) => s.exams);
+    const branchExams = useGoalStore((s) => s.branchExams);
+    const setInitialGoal = useGoalStore((s) => s.setInitialGoal);
+    const goalsLoading = useGoalStore((s) => s.loading);
+    const { optionalSubjects } = useGoal();
 
     const [tempBranch, setTempBranch] = useState<string>('');
     const [tempExams, setTempExams] = useState<string[]>([]);

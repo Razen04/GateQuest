@@ -2,7 +2,8 @@ import { compress } from 'lz-string';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useGoals } from '@/shared/hooks/useGoals';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import useGoal from '@/shared/hooks/useGoal';
 import type { RevisionQuestion } from '@/shared/types/storage';
 import { getUserProfile } from '@/shared/utils/helper';
 import {
@@ -14,11 +15,11 @@ import {
 } from '../api/smartRevision';
 
 const useSmartRevision = () => {
-    // Getting the user
     const user = getUserProfile();
-
-    const { userGoal, getPracticeSubjects } = useGoals();
     const userId = user?.id;
+
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const { getPracticeSubjects } = useGoal();
     const [loading, setLoading] = useState<boolean>(true);
     const [currentSet, setCurrentSet] = useState<WeeklySet | null>(null);
     const [questions, setQuestions] = useState<RevisionQuestion[]>([]);
@@ -26,13 +27,11 @@ const useSmartRevision = () => {
 
     const navigate = useNavigate();
 
-    // Fetch current user and weekly set
     const fetchCurrentSet = useCallback(async () => {
         if (!userId || !userGoal?.branch_id) return;
 
         setLoading(true);
         try {
-            // Call RPC to get weekly set
             const { data, error } = await fetchWeeklySet(userGoal.branch_id);
 
             if (error) throw error;
@@ -41,7 +40,6 @@ const useSmartRevision = () => {
                 setCurrentSet(data);
                 setQuestions(data.questions || []);
 
-                // storing the weekly set info
                 localStorage.setItem(
                     'weekly_set_info',
                     compress(JSON.stringify(data))
@@ -57,7 +55,6 @@ const useSmartRevision = () => {
         }
     }, [userGoal?.branch_id, userId]);
 
-    // Generate a set
     const generateSet = useCallback(async () => {
         if (!userGoal?.branch_id) return;
 
@@ -99,7 +96,6 @@ const useSmartRevision = () => {
         fetchCurrentSet,
     ]);
 
-    // Start the set
     const startSet = useCallback(async () => {
         if (!currentSet) return;
 
@@ -110,7 +106,6 @@ const useSmartRevision = () => {
             if (error) throw error;
 
             if (data?.success) {
-                // Update local state with started info
                 setCurrentSet({
                     ...currentSet,
                     started_at: data.started_at,
@@ -127,12 +122,10 @@ const useSmartRevision = () => {
         }
     }, [currentSet, navigate]);
 
-    // Find number of critical questions present in the user_incorrect_queue for the user
     const getCriticalQuestionCount = useCallback(async () => {
         if (!userId) return;
 
         try {
-            // Get present week's Sunday (end of week)
             const activeSubjects = getPracticeSubjects().map((s) => s.id);
             const activeExams =
                 (userGoal?.target_exams as string[])?.map((e) =>
