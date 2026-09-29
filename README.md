@@ -91,7 +91,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 | **Language**         | ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                                                                                                                          |
 | **Frontend**         | ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) |
 | **Backend & Auth**   | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)                                                                                                                                                                                                                                       |
-| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                                              |
+| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-blue?style=for-the-badge)                                                                                                                                                                                                                                                                         |
 | **Offline Storage**  | ![Dexie.js](https://img.shields.io/badge/Dexie.js-IndexedDB-blue?style=for-the-badge)                                                                                                                                                                                                                                                             |
 | **Animations & UI**  | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer) ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                    |
 
@@ -108,8 +108,9 @@ GateQuest/
 ├── src/
 │   ├── app/                        # App entry, layout, routing, providers
 │   │   ├── layout/                 # Navbar, sidebar, responsive layout
-│   │   ├── providers/              # Global React context providers
 │   │   └── routes/                 # Route definitions
+│   │   └── effects/                # Reactive side-effects
+│   │   └── stores/                 # Zustand stores
 │   │
 │   ├── features/                   # Feature-based architecture
 │   │   ├── dashboard/              # Stats, streaks, study plan

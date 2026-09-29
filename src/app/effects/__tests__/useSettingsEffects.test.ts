@@ -9,7 +9,6 @@ vi.mock('@/shared/utils/helper', () => ({
 
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
-import type { AppUser } from '@/shared/types/AppUser';
 import {
     getUserProfile,
     syncUserToSupabase,
