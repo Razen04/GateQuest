@@ -48,6 +48,10 @@ vi.mock('sonner', () => ({
 
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
+import {
+    getInitialSettings,
+    useSettingsStore,
+} from '@/app/stores/useSettingsStore';
 import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthEffects } from '../useAuthEffects';
@@ -366,5 +370,33 @@ describe('unmount safety', () => {
 
         expect(useAuthStore.getState().user).toBeNull();
         expect(useAuthStore.getState().loading).toBe(true); // still initial
+    });
+
+    it('hydrates the settings store with the fetched profile after login', async () => {
+        mockUsersQuery({
+            existingRow: makeDbRow({
+                settings: { is_beta: true, sound: false },
+            }),
+        });
+
+        // Force the settings store to a known "wrong" state
+        useSettingsStore.setState(
+            {
+                settings: {
+                    ...getInitialSettings(),
+                    is_beta: false,
+                    sound: true,
+                },
+            },
+            false
+        );
+
+        renderHook(() => useAuthEffects());
+        authMock.callback!('SIGNED_IN', makeSession('u1'));
+        await flush();
+
+        // THE ASSERTION THAT WOULD HAVE FAILED
+        expect(useSettingsStore.getState().settings.is_beta).toBe(true);
+        expect(useSettingsStore.getState().settings.sound).toBe(false);
     });
 });

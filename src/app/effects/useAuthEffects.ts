@@ -6,6 +6,7 @@ import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import type { AppUser } from '@/shared/types/AppUser.ts';
 import { getUserProfile } from '@/shared/utils/helper.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { useSettingsStore } from '../stores/useSettingsStore';
 
 export function useAuthEffects() {
     const { refresh } = useStudyPlan();
@@ -125,6 +126,18 @@ export function useAuthEffects() {
                         'gate_user_profile',
                         JSON.stringify(profile)
                     );
+
+                    useSettingsStore.setState(
+                        (state) => ({
+                            settings: {
+                                ...state.settings,
+                                ...profile.settings,
+                            },
+                        }),
+                        false,
+                        'settings/hydrateFromProfile'
+                    );
+
                     refreshRef.current();
                     useAuthStore
                         .getState()
