@@ -63,7 +63,8 @@
         "recharts": "^3.8.1",
         "remark-gfm": "^4.0.1",
         "sonner": "^2.0.6",
-        "tailwind-merge": "^3.4.0"
+        "tailwind-merge": "^3.4.0",
+        "zustand": "^5.0.15"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.7",
