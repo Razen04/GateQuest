@@ -1,4 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 type Bookmarks = {
@@ -24,7 +26,18 @@ export default function useBookmark() {
     const [loading, setLoading] = useState(false);
     const [bookmarksMap, setBookmarksMap] = useState<BookmarksMap>({});
 
+    const user = useAuthStore((s) => s.user);
+    const isGuest = !user || user.id === '1';
+
+    useEffect(() => {
+        if (isGuest) setBookmarksMap({});
+    }, [isGuest]);
+
     const fetchBookmarks = useCallback(async (subjectSlug: string) => {
+        if (isGuest) {
+            setBookmarksMap({});
+            return;
+        }
         try {
             setLoading(true);
             const { data: bookmarks, error } = await supabase.rpc(
@@ -60,6 +73,7 @@ export default function useBookmark() {
         questionId,
         note,
     }: BookmarkPropTypes): Promise<boolean> => {
+        if (isGuest) return false;
         validateNote(note);
 
         try {
@@ -91,6 +105,7 @@ export default function useBookmark() {
         questionId,
         note,
     }: BookmarkPropTypes) => {
+        if (isGuest) return;
         validateNote(note);
 
         try {

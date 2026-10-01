@@ -1,4 +1,3 @@
-// This custom hook encapsulates the logic for handling the entire answer submission process, from revealing the correct answer to recording the user's attempt.
 import React from 'react';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';

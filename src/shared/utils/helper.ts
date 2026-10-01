@@ -263,12 +263,6 @@ export const recordAttemptLocally = async ({
         return;
     }
 
-    // Guest users (id: 1) can practice, but their progress isn't saved.
-    if (user.id === '1') {
-        toast.message('Login to sync your profile.');
-        return;
-    }
-
     const LOCAL_KEY = `attempt_buffer_${user.id}`;
     const storedBuffer = localStorage.getItem(LOCAL_KEY);
 
@@ -312,12 +306,6 @@ export const recordAttempt = async ({
 }: recordAttemptProp) => {
     if (!user?.id) {
         toast.error('No valid user profile found.');
-        return;
-    }
-
-    // Guest users (id: 1) cannot have their attempts recorded.
-    if (user.id === '1') {
-        toast.message('Login to sync your profile.');
         return;
     }
 

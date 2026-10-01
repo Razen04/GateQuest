@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore.ts';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
-import type { AppUser } from '@/shared/types/AppUser.ts';
+import type { AppUser, GuestUser } from '@/shared/types/AppUser.ts';
 import { getUserProfile } from '@/shared/utils/helper.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { useSettingsStore } from '../stores/useSettingsStore';
@@ -27,9 +27,21 @@ export function useAuthEffects() {
 
             if (!supaUser) {
                 userIdRef.current = null;
-                useAuthStore.getState().setUser(null);
+
+                const guestProfile: GuestUser = {
+                    id: '1',
+                    name: 'Guest',
+                    deleted_at: null,
+                    settings: null,
+                };
+
+                useAuthStore.getState().setUser(guestProfile);
                 useAuthStore.getState().setNeedsUsername(false);
-                localStorage.removeItem('gate_user_profile');
+                localStorage.setItem(
+                    'gate_user_profile',
+                    JSON.stringify(guestProfile)
+                );
+
                 if (isMounted) useAuthStore.getState().setLoading(false);
                 return;
             }

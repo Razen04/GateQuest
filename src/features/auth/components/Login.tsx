@@ -1,7 +1,9 @@
 import { X } from '@phosphor-icons/react';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
+import { Button } from '@/shared/components/ui/button';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 
 type LoginProp = {
@@ -10,6 +12,7 @@ type LoginProp = {
 };
 
 const Login = ({ canClose = true, onClose }: LoginProp) => {
+    const navigate = useNavigate();
     const handleDevLogin = async () => {
         const { error } = await supabase.auth.signInWithPassword({
             email: 'test@example.com',
@@ -71,6 +74,19 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                             shape="rectangular"
                             text="continue_with"
                         />
+                    </div>
+
+                    <div className="mt-6 border-t border-border pt-6 text-center">
+                        <p className="text-sm text-muted-foreground">
+                            Want to explore first, without signing up? Try{' '}
+                            <button
+                                type="button"
+                                onClick={() => navigate('/practice')}
+                                className="font-medium text-foreground underline-offset-4 underline hover:text-blue-500"
+                            >
+                                Computer Science practice questions
+                            </button>
+                        </p>
                     </div>
 
                     {import.meta.env.DEV && (

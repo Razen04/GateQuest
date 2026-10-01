@@ -82,9 +82,17 @@ export const submitAndRecordAnswer = async ({
             );
         }
     }
+
     // If not attempted, `isCorrect` remains null.
     // 2. Record the Attempt
     (async () => {
+        if (user?.id === '1') {
+            toast.info(
+                'Login to save progress to unlock dashboard and many more.'
+            );
+            return;
+        }
+
         if (isLogin && user && user?.id !== '1') {
             try {
                 await recordAttemptLocally({

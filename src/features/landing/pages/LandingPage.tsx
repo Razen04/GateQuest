@@ -230,7 +230,7 @@ export default function LandingPage() {
                                 </span>
                             </h1>
 
-                            <p className="mt-6 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-black/70 dark:text-white/70">
+                            <p className="mt-6 max-w-xl text-lg leading-relaxed text-black/70 dark:text-white/70">
                                 Every solved question. Every unhandled topic.
                                 Every recovered mark.{' '}
                                 <HighlightScribble>GATEQuest</HighlightScribble>{' '}
@@ -316,7 +316,7 @@ export default function LandingPage() {
                                                 {item.title}
                                             </h3>
                                         </div>
-                                        <p className="mt-2 max-w-2xl font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/60">
+                                        <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-white/60">
                                             {item.finding}
                                         </p>
                                     </div>
@@ -348,7 +348,7 @@ export default function LandingPage() {
                             <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black sm:text-4xl">
                                 Recovering lost accuracy
                             </h2>
-                            <p className="mt-4 font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60">
+                            <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-white/60">
                                 Systematic error logging catches repetitive
                                 conceptual traps long before they cost marks on
                                 final exam day.

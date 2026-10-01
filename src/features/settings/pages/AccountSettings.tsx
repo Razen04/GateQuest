@@ -112,7 +112,7 @@ const AccountSettings = () => {
 
     useEffect(() => {
         const fetchSocialLinks = async () => {
-            if (!user?.id) return;
+            if (!user?.id || user.id === '1') return;
             const data = await getSocialSettingsValue(user);
             if (data) {
                 const activeLinks = Object.fromEntries(
@@ -154,6 +154,10 @@ const AccountSettings = () => {
 
     const handleSaveButton = async () => {
         if (!user) return;
+        if (user.id === '1') {
+            toast.info('Login to customize and change settings.');
+            return;
+        }
 
         if (tempExams.length === 0) {
             toast.error('Select at least 1 target exam.');

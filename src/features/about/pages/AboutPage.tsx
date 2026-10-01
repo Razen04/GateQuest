@@ -128,7 +128,6 @@ const TABS = [
     { id: 'origin', label: '01 Origin' },
     { id: 'join', label: '02 Join' },
     { id: 'queries', label: '03 Queries' },
-    { id: 'declaration', label: '04 Declaration' },
 ];
 
 const JoinRow = ({
@@ -242,7 +241,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5, duration: 0.6 }}
-                            className="mt-8 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60"
+                            className="mt-8 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-white/60"
                         >
                             Somebody has to explain why this exists. That
                             somebody is me, and this is the paperwork.
@@ -262,7 +261,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                 <h2 className="font-['Space_Grotesk',sans-serif] text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
                                     Why this exists
                                 </h2>
-                                <p className="mt-6 max-w-2xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-['Space_Grotesk',sans-serif] first-letter:text-7xl first-letter:font-black dark:text-white/70 [&::first-letter]:text-[#2A5CFF]">
+                                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-700 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-['Space_Grotesk',sans-serif] first-letter:text-7xl first-letter:font-black dark:text-white/70 [&::first-letter]:text-[#2A5CFF]">
                                     Good GATE resources already existed such as
                                     GO, Examside &mdash; and I have used both of
                                     them. But the interface always felt like an
@@ -290,7 +289,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                 <h2 className="font-['Space_Grotesk',sans-serif] text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
                                     Requisition for help
                                 </h2>
-                                <p className="mt-6 max-w-2xl font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 dark:text-white/70">
+                                <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-700 dark:text-white/70">
                                     This is a one-person operation pretending to
                                     be a product. If any of this is useful to
                                     you, here&rsquo;s where to push back or just
@@ -339,13 +338,8 @@ const About = ({ landing = false }: { landing: boolean }) => {
                             </span>
                             <div>
                                 <h2 className="font-['Space_Grotesk',sans-serif] text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
-                                    Cross-examination
+                                    Frequently Asked Questions
                                 </h2>
-                                <p className="mt-6 font-['Fraunces',serif] text-lg leading-relaxed text-slate-700 dark:text-white/70">
-                                    The questions people actually ask, on the
-                                    record.
-                                </p>
-
                                 <div className="mt-8 divide-y divide-slate-900/10 dark:divide-white/10">
                                     {faqs.map((faq, i) => {
                                         const open = openIndex === i;
@@ -360,7 +354,6 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                                     className="flex w-full items-start gap-4 py-6 text-left"
                                                 >
                                                     <span className="mt-1 shrink-0 font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-300 dark:text-white/20">
-                                                        Q
                                                         {String(i + 1).padStart(
                                                             2,
                                                             '0'
@@ -405,7 +398,6 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                                                         color: verified,
                                                                     }}
                                                                 >
-                                                                    A
                                                                     {String(
                                                                         i + 1
                                                                     ).padStart(
@@ -413,7 +405,7 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                                                         '0'
                                                                     )}
                                                                 </span>
-                                                                <p className="font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/60">
+                                                                <p className="text-base leading-relaxed text-slate-600 dark:text-white/60">
                                                                     {renderAnswer(
                                                                         faq.answer as Answer[]
                                                                     )}
@@ -427,24 +419,6 @@ const About = ({ landing = false }: { landing: boolean }) => {
                                     })}
                                 </div>
                             </div>
-                        </div>
-                    </section>
-
-                    {/* 04 DECLARATION */}
-                    <section
-                        id="declaration"
-                        className="relative mt-16 overflow-hidden rounded-[32px] px-6 py-20 text-center sm:mt-24 sm:px-12 bg-white/40 dark:bg-black"
-                    >
-                        <p className="mx-auto mt-10 max-w-xl font-['Fraunces',serif] text-xl italic leading-relaxed text-black/70 dark:text-white/70 sm:text-2xl">
-                            &ldquo;I declare that this isn't my design, I ain't
-                            that smart pal.&rdquo;
-                        </p>
-
-                        <div className="mt-8 flex flex-col items-center gap-2">
-                            <Signature />
-                            <span className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.25em] text-black/40 dark:text-white/40">
-                                &mdash; the maintainer, GateQuest
-                            </span>
                         </div>
                     </section>
                 </main>

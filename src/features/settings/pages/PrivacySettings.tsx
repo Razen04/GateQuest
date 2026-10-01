@@ -253,7 +253,7 @@ const PrivacySettings = () => {
                         )}
 
                         {/* Auth Action (Login / Logout) */}
-                        {user ? (
+                        {user && user.id !== '1' ? (
                             <Button
                                 className="h-12 rounded-none w-full justify-start gap-2.5 bg-red-600 font-['Space_Grotesk',sans-serif] font-bold text-white shadow-lg shadow-red-600/20 hover:bg-red-700"
                                 onClick={() => logout()}

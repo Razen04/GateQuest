@@ -7,7 +7,10 @@ export function useGoalEffects() {
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            if (event === 'SIGNED_IN') {
+                useGoalStore.getState().fetchData(true);
+            }
+            if (event === 'INITIAL_SESSION') {
                 useGoalStore.getState().fetchData();
             }
             if (event === 'SIGNED_OUT') {
@@ -17,6 +20,7 @@ export function useGoalEffects() {
                     'goal/signedOut'
                 );
                 useGoalStore.getState()._resetFetchGuard();
+                useGoalStore.getState().setGuestGoal();
                 useGoalStore.setState(
                     { userGoal: null, loading: false },
                     false,

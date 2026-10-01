@@ -27,6 +27,7 @@ type GoalState = {
     error: string | null;
 
     fetchData: (force?: boolean) => Promise<void>;
+    setGuestGoal: () => void;
     refresh: () => Promise<void>;
     setInitialGoal: (
         branchId: string,
@@ -51,11 +52,11 @@ export const useGoalStore = create<GoalState>()(
             error: null,
 
             fetchData: async (force = false) => {
+                if (hasFetched && !force) return;
+
                 const {
                     data: { session },
                 } = await supabase.auth.getSession();
-
-                if (!session || (hasFetched && !force)) return;
 
                 try {
                     set({ loading: true }, false, 'goal/fetchData:start');
@@ -65,7 +66,6 @@ export const useGoalStore = create<GoalState>()(
                         resBranches,
                         resExams,
                         resSubjects,
-                        resUserGoal,
                         resBS,
                         resES,
                         resBE,
@@ -73,11 +73,6 @@ export const useGoalStore = create<GoalState>()(
                         supabase.from('branches').select('*'),
                         supabase.from('exams').select('*'),
                         supabase.from('subjects').select('*'),
-                        supabase
-                            .from('user_goals')
-                            .select('*')
-                            .eq('is_active', true)
-                            .maybeSingle(),
                         supabase.from('branch_subjects').select('*'),
                         supabase.from('exams_subjects').select('*'),
                         supabase.from('branch_exams').select('*'),
@@ -95,7 +90,6 @@ export const useGoalStore = create<GoalState>()(
                             branches: resBranches.data || [],
                             exams: resExams.data || [],
                             subjects: resSubjects.data || [],
-                            userGoal: resUserGoal.data || null,
                             branchSubjects: resBS.data || [],
                             examSubjects: resES.data || [],
                             branchExams: resBE.data || [],
@@ -104,6 +98,21 @@ export const useGoalStore = create<GoalState>()(
                         false,
                         'goal/fetchData:success'
                     );
+
+                    if (session) {
+                        const { data } = await supabase
+                            .from('user_goals')
+                            .select('*')
+                            .eq('is_active', true)
+                            .maybeSingle();
+                        set(
+                            { userGoal: data || null, error: null },
+                            false,
+                            'goal/fetchData:userGoal'
+                        );
+                    } else {
+                        get().setGuestGoal();
+                    }
                 } catch (err: unknown) {
                     hasFetched = false;
                     const message =
@@ -116,6 +125,23 @@ export const useGoalStore = create<GoalState>()(
                     set({ loading: false }, false, 'goal/fetchData:end');
                 }
             },
+
+            setGuestGoal: () =>
+                set(
+                    {
+                        userGoal: {
+                            id: 'guest-goal',
+                            user_id: '1',
+                            branch_id: 'cs',
+                            target_exams: ['gate'],
+                            additional_subjects: null,
+                            is_active: true,
+                        },
+                        error: null,
+                    },
+                    false,
+                    'goal/setGuestGoal'
+                ),
 
             refresh: () => get().fetchData(true),
 

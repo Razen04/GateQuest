@@ -153,10 +153,10 @@ describe('handleSession: no session', () => {
         authMock.callback!('SIGNED_OUT', null);
         await flush();
 
-        expect(useAuthStore.getState().user).toBeNull();
+        expect(useAuthStore.getState().user).not.toBeNull(); // Reset with Guest Profile
         expect(useAuthStore.getState().needsUsername).toBe(false);
         expect(useAuthStore.getState().loading).toBe(false);
-        expect(localStorage.getItem('gate_user_profile')).toBeNull();
+        expect(localStorage.getItem('gate_user_profile')).not.toBeNull();
     });
 
     it('does not query the users table', async () => {
