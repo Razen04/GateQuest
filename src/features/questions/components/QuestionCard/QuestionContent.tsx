@@ -15,6 +15,7 @@ type QuestionContentProps = {
     selectedOptionIndices: number[] | null;
     userAnswerIndex: number | number[] | null;
     onOptionSelect?: ((index: number) => void) | undefined;
+    optionPercentages?: number[] | null;
 };
 
 // This component now only receives props. It has NO hooks.
@@ -26,6 +27,7 @@ const QuestionContent = ({
     selectedOptionIndices,
     userAnswerIndex,
     onOptionSelect,
+    optionPercentages,
 }: QuestionContentProps) => {
     useEffect(() => {
         const handler = (e: Event) => {
@@ -63,9 +65,9 @@ const QuestionContent = ({
             </div>
 
             {hasOptions && onOptionSelect && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-6">
                     {currentQuestion.options?.map((option, index) => {
-                        // For MSQ: selectedOptionIndices, for MCQ: userAnswerIndex
+                        // Determine selection state (MCQ vs MSQ)
                         let isSelected;
                         if (isMultipleSelection(currentQuestion)) {
                             isSelected =
@@ -74,63 +76,113 @@ const QuestionContent = ({
                             isSelected = userAnswerIndex === index;
                         }
 
+                        // Determine correctness
                         let isCorrect;
                         const correctAnswer = currentQuestion.correct_answer;
                         if (isMultipleSelection(currentQuestion)) {
-                            // MSQ
                             isCorrect = correctAnswer.includes(index);
                         } else {
-                            // MCQ
                             isCorrect = correctAnswer[0] === index;
                         }
 
-                        // Determine the final styles based on state
+                        // Determine the row's border style
                         let optionStyle =
                             'border-gray-200 dark:border-zinc-700 hover:border-blue-200';
                         if (showAnswer) {
-                            if (isCorrect)
-                                optionStyle =
-                                    'border-green-500 bg-green-50 dark:bg-green-600';
-                            else if (isSelected)
-                                optionStyle =
-                                    'border-red-500 bg-red-50 dark:bg-red-600';
+                            if (isCorrect) optionStyle = 'border-green-500';
+                            else if (isSelected) optionStyle = 'border-red-500';
                         } else if (isSelected) {
                             optionStyle =
                                 'border-blue-500 ring ring-blue-500 ring-offset-0';
                         }
 
+                        const percentage =
+                            showAnswer &&
+                            optionPercentages?.[index] !== undefined
+                                ? optionPercentages[index]
+                                : null;
+
                         return (
                             <motion.div
                                 key={index}
-                                whileHover={{
-                                    scale: showAnswer ? 1 : 1.01,
-                                }}
+                                whileHover={{ scale: showAnswer ? 1 : 1.01 }}
                                 whileTap={{ scale: showAnswer ? 1 : 0.99 }}
-                                className={`p-4 border transition-all ${showAnswer ? 'cursor-default' : 'cursor-pointer'} ${optionStyle}`}
+                                style={{ position: 'relative' }}
+                                className={`p-4 border transition-all min-w-0 ${
+                                    showAnswer
+                                        ? 'cursor-default'
+                                        : 'cursor-pointer'
+                                } ${optionStyle}`}
                                 onClick={() =>
                                     !showAnswer && onOptionSelect(index)
                                 }
                             >
-                                <div className="flex items-center">
+                                {/* Fill layer — clipped to the option box */}
+                                {percentage !== null && (
+                                    <div
+                                        aria-hidden="true"
+                                        className="absolute inset-0 overflow-hidden pointer-events-none"
+                                    >
+                                        <div
+                                            className={`absolute inset-y-0 left-0 transition-[width] duration-500 ${
+                                                isCorrect
+                                                    ? 'bg-green-500/15 dark:bg-green-500/20'
+                                                    : 'bg-red-500/15 dark:bg-red-500/20'
+                                            }`}
+                                            style={{ width: `${percentage}%` }}
+                                        >
+                                            <div
+                                                className={`absolute inset-y-0 right-0 w-[2px] ${
+                                                    isCorrect
+                                                        ? 'bg-green-500/80'
+                                                        : 'bg-red-500/80'
+                                                }`}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Percentage badge on the top border */}
+                                {percentage !== null && (
+                                    <span
+                                        className={`absolute -top-2 right-3 px-1.5 text-xs font-semibold tabular-nums bg-white dark:bg-zinc-900 ${
+                                            isCorrect
+                                                ? 'text-green-700 dark:text-green-400'
+                                                : 'text-red-700 dark:text-red-400'
+                                        }`}
+                                    >
+                                        {percentage}% chose this
+                                    </span>
+                                )}
+
+                                {/* Content layer */}
+                                <div className="relative flex items-center min-w-0">
                                     {env === 'Practice' && (
-                                        <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500">
+                                        <span className="hidden lg:inline font-mono mr-2 text-gray-300 dark:text-gray-500 shrink-0">
                                             [{String.fromCharCode(index + 65)}/
                                             {index + 1}]
                                         </span>
                                     )}
+
                                     {isMultipleSelection(currentQuestion) ? (
-                                        // Checkbox for multiple selection
                                         <div
-                                            className={`w-5 h-5 border rounded flex items-center justify-center mr-3 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-700'}`}
+                                            className={`w-5 h-5 border rounded flex items-center justify-center mr-3 shrink-0 ${
+                                                isSelected
+                                                    ? 'border-blue-500 bg-blue-500'
+                                                    : 'border-gray-300 dark:border-gray-700'
+                                            }`}
                                         >
                                             {isSelected && (
                                                 <CheckCircle className="text-white text-xs" />
                                             )}
                                         </div>
                                     ) : (
-                                        // Radio button for single selection
                                         <div
-                                            className={`w-5 h-5 border flex items-center justify-center mr-3 ${userAnswerIndex === index ? 'border-blue-500' : 'border-gray-300 dark:border-gray-700'}`}
+                                            className={`w-5 h-5 border flex items-center justify-center mr-3 shrink-0 ${
+                                                userAnswerIndex === index
+                                                    ? 'border-blue-500'
+                                                    : 'border-gray-300 dark:border-gray-700'
+                                            }`}
                                         >
                                             {userAnswerIndex === index && (
                                                 <div className="w-2.5 h-2.5 bg-blue-500"></div>
@@ -138,7 +190,7 @@ const QuestionContent = ({
                                         </div>
                                     )}
 
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0 overflow-x-auto">
                                         {option ? (
                                             <Suspense
                                                 fallback={<ModernLoader />}

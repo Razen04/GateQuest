@@ -298,6 +298,7 @@ export type Database = {
                 Row: {
                     avg_time_seconds: number | null;
                     correct_attempts: number;
+                    option_distribution: Json | null;
                     question_id: string;
                     total_attempts: number;
                     updated_at: string;
@@ -306,6 +307,7 @@ export type Database = {
                 Insert: {
                     avg_time_seconds?: number | null;
                     correct_attempts?: number;
+                    option_distribution?: Json | null;
                     question_id: string;
                     total_attempts?: number;
                     updated_at?: string;
@@ -314,6 +316,7 @@ export type Database = {
                 Update: {
                     avg_time_seconds?: number | null;
                     correct_attempts?: number;
+                    option_distribution?: Json | null;
                     question_id?: string;
                     total_attempts?: number;
                     updated_at?: string;
@@ -733,6 +736,7 @@ export type Database = {
                     branch_id: string;
                     id: string;
                     question_id: string | null;
+                    selected_option_indices: number[] | null;
                     subject: string | null;
                     subject_id: string | null;
                     time_taken: number | null;
@@ -746,6 +750,7 @@ export type Database = {
                     branch_id: string;
                     id?: string;
                     question_id?: string | null;
+                    selected_option_indices?: number[] | null;
                     subject?: string | null;
                     subject_id?: string | null;
                     time_taken?: number | null;
@@ -759,6 +764,7 @@ export type Database = {
                     branch_id?: string;
                     id?: string;
                     question_id?: string | null;
+                    selected_option_indices?: number[] | null;
                     subject?: string | null;
                     subject_id?: string | null;
                     time_taken?: number | null;

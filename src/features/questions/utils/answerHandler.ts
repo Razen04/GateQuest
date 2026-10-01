@@ -106,6 +106,7 @@ export const submitAndRecordAnswer = async ({
                         time_taken: timeTaken,
                         attempt_number: 1,
                         user_version_number: user.version_number,
+                        selected_option_indices: selectedOptionIndices ?? null,
                     },
                     user,
                     refresh,

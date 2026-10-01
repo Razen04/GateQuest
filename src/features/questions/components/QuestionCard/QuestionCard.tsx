@@ -1,5 +1,5 @@
 import { ArrowLeft } from '@phosphor-icons/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import Branding from '@/shared/components/Branding';
 import useGoal from '@/shared/hooks/useGoal';
@@ -141,6 +141,21 @@ const QuestionCard = ({
     const hasSelection =
         selectedOptionIndices.length > 0 || numericalAnswer !== null;
 
+    const optionPercentages = useMemo<number[] | null>(() => {
+        const dist = peerStats?.data?.option_distribution as
+            | Record<string, number>
+            | null
+            | undefined;
+        const total = peerStats?.data?.total_attempts ?? 0;
+
+        if (!dist || total === 0 || !question.options?.length) return null;
+
+        return question.options.map((_, i) => {
+            const count = dist[String(i)] ?? 0;
+            return Math.round((count / total) * 100);
+        });
+    }, [peerStats?.data, question.options]);
+
     return (
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl mt-4 p-6 pb-20">
             {/* Top Back Button */}
@@ -195,6 +210,7 @@ const QuestionCard = ({
                         selectedOptionIndices={selectedOptionIndices}
                         userAnswerIndex={userAnswerIndex}
                         onOptionSelect={onOptionSelect}
+                        optionPercentages={optionPercentages}
                     />
 
                     {/* Numerical Input Section (Conditional) */}

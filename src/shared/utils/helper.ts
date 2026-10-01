@@ -242,6 +242,7 @@ type AttemptParams = {
     time_taken: number;
     attempt_number: number;
     user_version_number: number | undefined;
+    selected_option_indices: number[] | null;
 };
 
 type recordAttemptLocallyProps = {
@@ -331,8 +332,8 @@ export const recordAttempt = async ({
 
 export const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}m ${Math.round(s)}s`;
+    const s = Math.round(secs % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
 export const normalizeTag = (tag: string): string => {
