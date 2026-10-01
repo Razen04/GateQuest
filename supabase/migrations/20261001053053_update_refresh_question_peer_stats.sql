@@ -16,6 +16,7 @@ with base as (
     where uqa.attempt_number = 1
     group by uqa.question_id
 ),
+-- Unnest the selected_option_indices arrays. One row per (question, option_index).
 option_rows as (
     select
         uqa.question_id::uuid as question_id,
@@ -68,4 +69,3 @@ set total_attempts = excluded.total_attempts,
     updated_at = now();
 
 $$;
-
