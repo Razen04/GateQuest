@@ -136,6 +136,15 @@ const Navbar = () => {
     if (width === undefined) return null;
     const isMobile = width < 1024;
 
+    // Hide Navbar during test attempt screens
+    const isAttemptPage =
+        /\/topic-test\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/attempt/i.test(
+            location.pathname
+        );
+    if (isAttemptPage) {
+        return null;
+    }
+
     return (
         <div className="sticky top-0 z-40 w-full pointer-events-none py-3 px-4 sm:px-8">
             <div className="relative mx-auto flex max-w-7xl items-center justify-between">

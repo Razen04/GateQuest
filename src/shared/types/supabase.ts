@@ -541,6 +541,7 @@ export type Database = {
                     correct_count: number | null;
                     created_at: string | null;
                     id: string;
+                    paper_id: string | null;
                     record_activity: boolean;
                     remaining_time_seconds: number;
                     score: number | null;
@@ -559,6 +560,7 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds: number;
                     score?: number | null;
@@ -577,6 +579,7 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds?: number;
                     score?: number | null;
@@ -1045,6 +1048,17 @@ export type Database = {
         Functions: {
             calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
             clear_user_data: { Args: never; Returns: Json };
+            create_test_from_paper: {
+                Args: {
+                    p_branch_id: string;
+                    p_duration_seconds: number;
+                    p_paper_id: string;
+                    p_paper_label: string;
+                    p_shift: number;
+                    p_year: number;
+                };
+                Returns: Json;
+            };
             delete_account: { Args: never; Returns: undefined };
             generate_topic_test:
                 | {
