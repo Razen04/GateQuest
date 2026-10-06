@@ -171,6 +171,7 @@ export const createTestFromPaper = async (
         p_paper_label: paper.label,
         p_year: paper.year,
         p_shift: paper.shift,
+        p_branch: paper.branch,
         p_branch_id: branchId,
         p_duration_seconds: paper.durationMinutes * 60,
         p_record_activity: recordActivity,

@@ -1,10 +1,19 @@
 import { Clock, Play } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import papersJson from '@/shared/data/cs-gate-pyq-papers.json';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import papersCs from '@/shared/data/papers/cs-gate-pyq-papers.json';
+import papersDa from '@/shared/data/papers/da-gate-pyq-papers.json';
+import papersEe from '@/shared/data/papers/ee-gate-pyq-papers.json';
+import papersMe from '@/shared/data/papers/me-gate-pyq-papers.json';
 import type { PyqPaper } from '@/shared/types/pyq';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 
-const PAPERS = papersJson as PyqPaper[];
+const ALL_PAPERS: PyqPaper[] = [
+    ...(papersCs as PyqPaper[]),
+    ...(papersDa as PyqPaper[]),
+    ...(papersEe as PyqPaper[]),
+    ...(papersMe as PyqPaper[]),
+];
 
 interface Props {
     selectedPaper: PyqPaper | null;
@@ -12,11 +21,32 @@ interface Props {
 }
 
 const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
-    // Sort descending by year, then by shift
-    const sorted = [...PAPERS].sort((a, b) => {
-        if (b.year !== a.year) return b.year - a.year;
-        return (b.shift ?? 0) - (a.shift ?? 0);
-    });
+    const userGoal = useGoalStore((s) => s.userGoal);
+
+    const userBranch = userGoal?.branch_id?.toUpperCase() ?? null;
+
+    const papers = ALL_PAPERS.filter((p) => p.branch === userBranch).sort(
+        (a, b) => {
+            if (b.year !== a.year) return b.year - a.year;
+            return (b.shift ?? 0) - (a.shift ?? 0);
+        }
+    );
+
+    if (!userBranch) {
+        return (
+            <div className="text-sm text-slate-500 py-8 text-center">
+                Set a goal to see available PYQ papers.
+            </div>
+        );
+    }
+
+    if (papers.length === 0) {
+        return (
+            <div className="text-sm text-slate-500 py-8 text-center">
+                No PYQ papers available for your branch yet.
+            </div>
+        );
+    }
 
     return (
         <motion.div
@@ -28,8 +58,8 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
                 Select a Paper
             </label>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {sorted.map((paper) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {papers.map((paper) => {
                     const isSelected = selectedPaper?.id === paper.id;
                     return (
                         <motion.button

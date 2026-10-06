@@ -46,8 +46,8 @@
         "year": 2025,
         "shift": 2,
         "questionCount": 65,
-        "marks": 99,
-        "durationMinutes": 178,
+        "marks": 100,
+        "durationMinutes": 180,
         "isComplete": true,
         "notes": null
     },
@@ -176,8 +176,8 @@
         "year": 2017,
         "shift": 1,
         "questionCount": 64,
-        "marks": 113,
-        "durationMinutes": 180,
+        "marks": 99,
+        "durationMinutes": 178,
         "isComplete": false,
         "notes": "1 question(s) excluded (out of syllabus)"
     },
@@ -189,7 +189,7 @@
         "year": 2017,
         "shift": 2,
         "questionCount": 65,
-        "marks": 118,
+        "marks": 100,
         "durationMinutes": 180,
         "isComplete": true,
         "notes": null
@@ -202,8 +202,8 @@
         "year": 2016,
         "shift": 1,
         "questionCount": 64,
-        "marks": 111,
-        "durationMinutes": 180,
+        "marks": 98,
+        "durationMinutes": 176,
         "isComplete": false,
         "notes": "1 question(s) excluded (out of syllabus)"
     },
@@ -215,8 +215,8 @@
         "year": 2016,
         "shift": 2,
         "questionCount": 64,
-        "marks": 114,
-        "durationMinutes": 180,
+        "marks": 99,
+        "durationMinutes": 178,
         "isComplete": false,
         "notes": "1 question(s) excluded (out of syllabus)"
     },
@@ -228,8 +228,8 @@
         "year": 2015,
         "shift": 1,
         "questionCount": 61,
-        "marks": 101,
-        "durationMinutes": 180,
+        "marks": 95,
+        "durationMinutes": 171,
         "isComplete": false,
         "notes": "4 question(s) excluded (out of syllabus)"
     },
@@ -241,8 +241,8 @@
         "year": 2015,
         "shift": 2,
         "questionCount": 58,
-        "marks": 93,
-        "durationMinutes": 167,
+        "marks": 90,
+        "durationMinutes": 162,
         "isComplete": false,
         "notes": "7 question(s) excluded (out of syllabus)"
     },
@@ -254,8 +254,8 @@
         "year": 2015,
         "shift": 3,
         "questionCount": 58,
-        "marks": 104,
-        "durationMinutes": 180,
+        "marks": 90,
+        "durationMinutes": 162,
         "isComplete": false,
         "notes": "7 question(s) excluded (out of syllabus)"
     },
@@ -267,8 +267,8 @@
         "year": 2014,
         "shift": 1,
         "questionCount": 60,
-        "marks": 108,
-        "durationMinutes": 180,
+        "marks": 93,
+        "durationMinutes": 167,
         "isComplete": false,
         "notes": "5 question(s) excluded (out of syllabus)"
     },
@@ -280,8 +280,8 @@
         "year": 2014,
         "shift": 2,
         "questionCount": 61,
-        "marks": 105,
-        "durationMinutes": 180,
+        "marks": 93,
+        "durationMinutes": 167,
         "isComplete": false,
         "notes": "4 question(s) excluded (out of syllabus)"
     },
@@ -293,8 +293,8 @@
         "year": 2014,
         "shift": 3,
         "questionCount": 62,
-        "marks": 100,
-        "durationMinutes": 180,
+        "marks": 95,
+        "durationMinutes": 171,
         "isComplete": false,
         "notes": "3 question(s) excluded (out of syllabus)"
     }

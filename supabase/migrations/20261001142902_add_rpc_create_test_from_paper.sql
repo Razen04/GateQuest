@@ -1,4 +1,9 @@
-create or replace function public.create_test_from_paper (p_paper_id text, p_paper_label text, p_year int, p_shift int, p_branch_id text, p_duration_seconds int, p_record_activity boolean default true)
+-- p_branch: uppercase branch code from questions.metadata.set ('CS', 'DA')
+-- p_branch_id: lowercase branch slug from branches.id ('cs', 'da')
+-- These refer to the same concept but use different representations.
+-- Unifying them requires a migration to normalize metadata.set.
+create or replace function public.create_test_from_paper (p_paper_id text, p_paper_label text, p_year int, p_shift int, p_branch text, -- NEW
+p_branch_id text, p_duration_seconds int, p_record_activity boolean default true)
     returns jsonb
     language plpgsql
     security definer
@@ -29,7 +34,6 @@ begin
     if v_existing_test_id is not null then
         return jsonb_build_object('error', 'An active test already exists for this branch', 'test_id', v_existing_test_id, 'status', 'active_exists');
     end if;
-    -- Select paper questions, GA first
     create temp table temp_paper_questions on commit drop as
     select
         q.id, coalesce(q.marks, 1) as marks, case when q.metadata ->> 'section' = 'GA' then
@@ -42,6 +46,7 @@ begin
     where
         q.verified = true
         and q.metadata ->> 'paperType' = 'official'
+        and q.metadata ->> 'set' = p_branch
         and q.year = p_year
         and ((p_shift is null
                 and q.metadata ->> 'shift' is null)
@@ -58,11 +63,9 @@ begin
     if v_actual_count = 0 then
         raise exception 'No questions found for this paper';
     end if;
-    -- Create test session — now with record_activity
-    insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity -- NEW
-)
-        values (v_user_id, array[p_paper_label], v_actual_count, p_duration_seconds, 'created', v_total_marks, p_branch_id, p_paper_id, coalesce(p_record_activity, true) -- NEW
-)
+    -- Create test session
+    insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
+        values (v_user_id, array[p_paper_label], v_actual_count, p_duration_seconds, 'created', v_total_marks, p_branch_id, p_paper_id, coalesce(p_record_activity, true))
     returning
         id
     into
