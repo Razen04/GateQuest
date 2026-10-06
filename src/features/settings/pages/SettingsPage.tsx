@@ -2,17 +2,18 @@ import { Faders, ShieldCheck, User } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import Login from '@/features/auth/components/Login';
 import AnimatedTabs from '@/shared/components/AnimatedTabs';
 import PageHeader from '@/shared/components/PageHeader';
-import useAuth from '@/shared/hooks/useAuth';
 import { itemVariants } from '@/shared/utils/motionVariants';
 
 const Settings = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const activeTab: string = location.pathname.split('/')[2] || 'account';
-    const { showLogin, setShowLogin } = useAuth();
+    const showLogin = useAuthStore((s) => s.showLogin);
+    const setShowLogin = useAuthStore((s) => s.setShowLogin);
 
     // Tab Reference
     const tabRefs = useRef<Record<string, HTMLButtonElement>>({});

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useGoals } from '@/shared/hooks/useGoals';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import useGoal from '@/shared/hooks/useGoal';
 import { fetchTopicCounts } from '../api/topicTest';
 
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour for the cache after which we will refetch the topics
@@ -34,8 +35,7 @@ export const useTopicTestGenerator = ({
     const [loading, setLoading] = useState(false);
     const [warnings, setWarnings] = useState<string[]>([]);
 
-    const { getPracticeSubjects } = useGoals();
-
+    const { getPracticeSubjects } = useGoal();
     const subjects = getPracticeSubjects();
     const subjectName = subjects.find((s) => s.id === subjectId)?.name;
 
@@ -63,7 +63,6 @@ export const useTopicTestGenerator = ({
         );
     }, []);
 
-    // fetch topics from supabase
     const fetchTopics = useCallback(async () => {
         if (!subjectId) return;
 
@@ -100,7 +99,6 @@ export const useTopicTestGenerator = ({
         fetchTopics();
     }, [fetchTopics]);
 
-    // topics selection
     const toggleTopic = (topic: Topic) => {
         setSelectedTopics((prev) => {
             const exists = prev.find(

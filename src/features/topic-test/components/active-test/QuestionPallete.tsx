@@ -33,23 +33,27 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
 }) => {
     const Stats = () => (
         <div className="grid grid-cols-2 gap-2 text-sm font-medium">
-            <div className="bg-green-100 text-green-800 p-4 shadow-sm">
+            <div className="bg-green-100 text-green-800 p-2 shadow-sm flex justify-between items-center">
                 <p className="text-xs uppercase tracking-wide">Answered</p>
                 <p className="text-xl font-semibold">{answeredCount}</p>
             </div>
 
-            <div className="bg-purple-100 text-purple-800 p-4 shadow-sm">
+            <div className="bg-purple-100 text-purple-800 p-2 shadow-sm flex justify-between items-center">
                 <p className="text-xs uppercase tracking-wide">Marked</p>
                 <p className="text-xl font-semibold">{markedCount}</p>
             </div>
 
-            <div className="bg-yellow-100 text-yellow-800 p-4 shadow-sm">
-                <p className="text-xs uppercase tracking-wide">Visited</p>
-                <p className="text-xl font-semibold">{visitedNotAnswered}</p>
+            <div className="bg-yellow-100 text-yellow-800 p-2 shadow-sm">
+                <div className="flex justify-between items-center">
+                    <p className="text-xs uppercase tracking-wide">Visited</p>
+                    <p className="text-xl font-semibold">
+                        {visitedNotAnswered}
+                    </p>
+                </div>
                 <p className="text-xs text-yellow-700">Not Answered</p>
             </div>
 
-            <div className="bg-gray-100 text-gray-800 p-4 shadow-sm">
+            <div className="bg-gray-100 text-gray-800 p-2 shadow-sm flex justify-between items-center">
                 <p className="text-xs uppercase tracking-wide">Unvisited</p>
                 <p className="text-xl font-semibold">{unvisitedCount}</p>
             </div>
@@ -61,11 +65,10 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
             {/* DESKTOP */}
             <aside
                 className={clsx(
-                    'hidden md:flex flex-col bg-white dark:bg-zinc-950 overflow-y-auto transition-all duration-300 h-dvh'
+                    'hidden md:flex flex-col bg-white dark:bg-zinc-950 transition-all duration-300 h-full'
                 )}
             >
                 <div className="p-6 space-y-4">
-                    {' '}
                     <div className="text-center space-y-1">
                         <h1 className="text-lg font-semibold">
                             Question Palette
@@ -74,7 +77,6 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                     </div>
                     <Stats />
                     <div className="grid grid-cols-4 gap-2">
-                        {' '}
                         {questions.map((q, idx) => {
                             const answered = isAnswered(q.id);
                             const review = markedForReview(q.id);

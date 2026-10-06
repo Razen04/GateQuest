@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useMemo, useState } from 'react';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import useFilters from '@/features/questions/hooks/useFilters';
 import usePagination from '@/features/questions/hooks/usePagination';
 import useUrlFilters from '@/features/questions/hooks/useUrlFilters';
 import { notMeaningfulTags } from '@/shared/data/notMeaningfulTags';
-import { useGoals } from '@/shared/hooks/useGoals';
 import type { Question, RevisionQuestion } from '@/shared/types/storage';
 import { normalizeTag } from '@/shared/utils/helper';
 import Header from './Header';
@@ -41,7 +41,7 @@ const QuestionsList: React.FC<QuestionsListProps> = ({
     );
     const [showFilters, setShowFilters] = useState(false);
 
-    const { userGoal } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
     const availableExam = (userGoal?.target_exams as string[]) || [];
 
     const isUniversalSubject = subject

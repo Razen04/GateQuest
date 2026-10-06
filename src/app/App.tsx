@@ -8,39 +8,30 @@
 
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import AppProvider from '@/app/providers/AppProvider.tsx';
-import AuthProvider from '@/app/providers/AuthProvider.tsx';
-import { GoalProvider } from '@/app/providers/GoalProvider.tsx';
-import StatsProvider from '@/app/providers/StatsProvider.tsx';
 import AppRoutes from '@/app/routes/AppRoutes.tsx';
+import { OfflineBanner } from '@/shared/components/OfflineBanner';
+import { useAuthEffects } from './effects/useAuthEffects';
+import { useGoalEffects } from './effects/useGoalEffects';
+import { useOfflineEffects } from './effects/useOfflineEffects';
+import { useSettingsEffects } from './effects/useSettingsEffects';
+import { useStatsEffects } from './effects/useStatsEffects';
 
-/**
- * @function App
- * @description The main application component that orchestrates the provider hierarchy.
- * The order of providers is intentional: core functionalities like stats and auth
- * wrap feature-specific contexts.
- */
+function AppContent() {
+    useSettingsEffects();
+    useAuthEffects();
+    useGoalEffects();
+    useStatsEffects();
+    useOfflineEffects();
+
+    return <AppRoutes />;
+}
+
 function App() {
     return (
-        // Router must be at the very top so hooks like useNavigate() work inside Providers
         <Router>
-            {/* GoalProvider manages user's exam goals. */}
-            <GoalProvider>
-                {/* StatsProvider manages user's practice statistics. */}
-                <StatsProvider>
-                    {/* AuthProvider handles user authentication state and logic. */}
-                    <AuthProvider>
-                        {/* AppProvider manages general application settings, like sound effects. */}
-                        <AppProvider>
-                            {/* AppRoutes contains all the defined application routes. */}
-                            <AppRoutes />
-
-                            {/* Vercel Speed Insights */}
-                            <SpeedInsights />
-                        </AppProvider>
-                    </AuthProvider>
-                </StatsProvider>
-            </GoalProvider>
+            <AppContent />
+            <SpeedInsights />
+            <OfflineBanner />
         </Router>
     );
 }

@@ -8,8 +8,8 @@ import {
 import { type Variants } from 'framer-motion';
 import React, { type JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import ModernLoader from '@/shared/components/ModernLoader';
-import useAuth from '@/shared/hooks/useAuth';
 import useWindowSize from '@/shared/hooks/useWindowSize';
 import MobileDock from './MobileDock';
 
@@ -32,7 +32,7 @@ const Sidebar = ({ hideMobileNavigation }: SidebarProp) => {
     const navigate = useNavigate();
     const { width } = useWindowSize();
 
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
 
     const tabs: Tab[] = [
         {

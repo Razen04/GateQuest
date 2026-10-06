@@ -11,10 +11,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import useAuth from '@/shared/hooks/useAuth';
 import InfoTab from '../components/InfoTab';
 import useSmartRevision from '../hooks/useSmartRevision';
 
@@ -48,7 +48,7 @@ const SmartRevision = () => {
         startSet,
         criticalQuestionsCount,
     } = useSmartRevision();
-    const { isLogin } = useAuth();
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
 
     // Fix: Move navigation & toast side-effects into useEffect
     useEffect(() => {

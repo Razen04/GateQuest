@@ -19,6 +19,11 @@ vi.mock('@/shared/utils/supabaseClient', () => ({
     },
 }));
 
+vi.mock('@/app/stores/useAuthStore', () => ({
+    useAuthStore: (selector: (s: { user: unknown }) => unknown) =>
+        selector({ user: { id: 'u1', name: 'Test', deleted_at: null } }),
+}));
+
 describe('useBookmark hook', () => {
     // Clear mocks before each test
     beforeEach(() => vi.clearAllMocks());

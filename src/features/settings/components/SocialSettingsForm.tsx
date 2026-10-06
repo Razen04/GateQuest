@@ -11,12 +11,12 @@ import {
 } from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import CodeforcesIcon from '@/icons/codeforces.svg';
 import LeetcodeIcon from '@/icons/leetcode.svg';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import useAuth from '@/shared/hooks/useAuth';
 import {
     getSocialSettingsValue,
     handleUpdateSocialSettings,
@@ -29,7 +29,7 @@ interface SocialSettingsFormProps {
 export default function SocialSettingsForm({
     onSuccess,
 }: SocialSettingsFormProps) {
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 

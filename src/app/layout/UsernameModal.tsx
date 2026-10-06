@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
-import useAuth from '@/shared/hooks/useAuth';
+import { useAuthStore } from '../stores/useAuthStore';
 import {
     doesUsernameExists,
     handleUsernameSubmittion,
@@ -17,7 +17,10 @@ import {
 import { RESERVED_WORDS } from './data/reservedWords';
 
 export function UsernameModal() {
-    const { user, setUser, needsUsername, setNeedsUsername } = useAuth();
+    const user = useAuthStore((s) => s.user);
+    const setUser = useAuthStore((s) => s.setUser);
+    const needsUsername = useAuthStore((s) => s.needsUsername);
+    const setNeedsUsername = useAuthStore((s) => s.setNeedsUsername);
     const [username, setUsername] = useState('');
     const [isChecking, setIsChecking] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);

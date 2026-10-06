@@ -21,14 +21,14 @@ import {
     YAxis,
 } from 'recharts';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useGoalStore } from '@/app/stores/useGoalStore';
 import useTopicTestHubData from '@/features/topic-test/hooks/useTopicTestHubData';
 import { syncTestFromSupabaseToDexie } from '@/features/topic-test/services/testSyncService';
 import { getCurrentUser } from '@/shared/api/auth';
 import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import useAuth from '@/shared/hooks/useAuth';
-import { useGoals } from '@/shared/hooks/useGoals';
 import { formatTime, getUserProfile } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { updateTestStatus } from '../api/topicTest';
@@ -50,8 +50,9 @@ const getTestName = (completedAt?: string | null) => {
 
 const TopicTest = () => {
     const navigate = useNavigate();
-    const { userGoal } = useGoals();
-    const { isLogin } = useAuth();
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
+
     if (!isLogin) {
         toast.error('You should be logged in to view this page.');
         navigate('/dashboard');
@@ -114,7 +115,6 @@ const TopicTest = () => {
     };
 
     const handleResume = () => {
-        // Navigate to the active test UUID
         if (activeTest) navigate(`/topic-test/${activeTest.id}/attempt`);
     };
 

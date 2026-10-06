@@ -10,6 +10,9 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useGoalStore } from '@/app/stores/useGoalStore';
+import { useStatsStore } from '@/app/stores/useStatsStore';
 // UI Components
 import Login from '@/features/auth/components/Login';
 import Branding from '@/shared/components/Branding';
@@ -22,8 +25,6 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 // Hooks & Utilities
-import useAuth from '@/shared/hooks/useAuth';
-import { useGoals } from '@/shared/hooks/useGoals';
 import { getUserProfile } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
@@ -32,14 +33,15 @@ import StreakMap from '../components/StreakMap';
 import StudyPlan from '../components/StudyPlan';
 import SubjectStats from '../components/SubjectStats';
 import { WebNotificationToggle } from '../components/WebNotificationToggle';
-import useStats from '../hooks/useStats';
 
 const Dashboard = () => {
-    const { isLogin, loading } = useAuth();
-    const { stats, loading: statsLoading } = useStats();
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
+    const loading = useAuthStore((s) => s.loading);
+    const stats = useStatsStore((s) => s.stats);
+    const statsLoading = useStatsStore((s) => s.loading);
     const user = getUserProfile();
     const navigate = useNavigate();
-    const { userGoal } = useGoals();
+    const userGoal = useGoalStore((s) => s.userGoal);
 
     const activeExams = useMemo(
         () => (userGoal?.target_exams as string[]) || [],

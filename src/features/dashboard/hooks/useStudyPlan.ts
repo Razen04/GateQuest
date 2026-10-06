@@ -1,8 +1,5 @@
-// This custom hook provides a convenient interface for accessing the user's study plan data.
-// It abstracts the logic of retrieving data from the global StatsContext.
-
-import { useCallback, useContext } from 'react';
-import StatsContext from '@/app/providers/StatsContext';
+import { useCallback } from 'react';
+import { useStatsStore } from '@/app/stores/useStatsStore';
 
 interface StudyPlanType {
     uniqueAttemptCount: number;
@@ -20,26 +17,17 @@ interface UseStudyPlanReturnType extends StudyPlanType {
     refresh: () => void;
 }
 
-// A hook to easily consume and interact with the study plan portion of the stats.
 const useStudyPlan = (): UseStudyPlanReturnType => {
-    // Access the global stats context, which contains all the calculated user statistics.
-    const context = useContext(StatsContext);
-    if (!context) {
-        throw new Error('useStudyPlan must be used within a StatsProvider');
-    }
-    const { stats, loading, updateStats } = context;
+    const stats = useStatsStore((s) => s.stats);
+    const loading = useStatsStore((s) => s.loading);
+    const updateStats = useStatsStore((s) => s.updateStats);
 
-    // A memoized function to manually trigger a refresh of the user's stats.
-    // This is useful for components that need to ensure they have the latest data.
     const refresh = useCallback(() => {
         return updateStats();
-    }, [updateStats]); // Depends on the updateStats function from the context.
+    }, [updateStats]);
 
-    // Safely access the studyPlan object from the stats, providing an empty object as a fallback.
     const sp = stats?.studyPlan || {};
 
-    // Return a flattened object with all the relevant study plan data.
-    // Default values (0 or false) are provided for each metric to prevent errors if the data is not yet available.
     return {
         loading,
         uniqueAttemptCount: sp.uniqueAttemptCount || 0,

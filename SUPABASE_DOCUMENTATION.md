@@ -586,52 +586,51 @@ Users cannot access or modify bookmarks belonging to other users.
 
 Custom SQL functions to handle complex logic directly in the database.
 
-### Function: ![insert_user_question_activity_batch(batch jsonb)](./supabase/db-functions/insert_user_question_activity.sql)
+### Function: [insert_user_question_activity_batch(batch jsonb)](./supabase/db-functions/insert_user_question_activity.sql)
 
 **Purpose:** Processes a batch of user question attempts, handling the synchronization of practice history, the spaced-repetition queue (Leitner system), and active weekly revision sets. It is the central engine for recording user progress while ensuring data integrity through a strict verification guard.
 
 **Arguments:**
 
-| Field Name | Data Type | Description                                                                                                                                     |
-| :--------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `batch`    | `jsonb`   | A JSON array of question attempt objects, each containing `user_id`, `question_id`, `was_correct`, `time_taken`, `subject_id`, and `branch_id`. |
+| Field Name | Data Type | Description                                                                                                                                                                                                                                      |
+| :--------- | :-------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `batch`    | `jsonb`   | A JSON array of question attempt objects, each containing `user_id`, `question_id`, `was_correct`, `time_taken`, `subject_id`, `branch_id`, `attempted_at`, and optionally `selected_option_indices` (int array — the option(s) the user chose). |
 
 ---
 
 **Logic Flow:**
 
-1.  **User Profile Sync**: Retrieves the `version_number` from the `users` table for the first user in the batch to ensure attempts are logged against the correct user data version.
-2.  **Verification Guard (Silent Skip)**: For every item in the batch, the function queries the `questions` table. If the question is not found or `verified = false`, the function execution for that specific item is skipped using `CONTINUE`. This prevents stale or unvetted content in a user's local cache from affecting their statistics.
-3.  **Revision Context Resolution**: Checks if the user has an active `weekly_revision_set` with a status of `'started'`. If so, it determines the "Revision State" for the current question:
-    - **`none`**: Standard practice mode (not part of the current revision set).
-    - **`first`**: The question belongs to the active set and has not been answered yet.
-    - **`done`**: The question was already answered in this revision set (triggers a **Hard Stop** to ignore the duplicate attempt).
-4.  **Practice History Logging**: For states `none` and `first`, it records the attempt in `user_question_activity`, automatically incrementing the `attempt_number` for that specific user-question pair.
-5.  **Spaced Repetition Management (`user_incorrect_queue`)**:
-    - **New Mistakes**: If the answer is incorrect and the question isn't in the queue, it is inserted at **Box 1**.
-    - **Box Progression**: If the attempt is a `first` revision attempt, correct answers move the question to the next box (Box 1 → 2 → 3 → Removal), while incorrect answers reset it to Box 1.
-    - **Practice Protection**: Standard practice attempts (`none`) can add questions to the queue but **cannot** advance them to higher boxes, preserving the integrity of the official revision cycle.
-6.  **Revision Aggregate Updates**: For `first` attempts, the function updates the `revision_set_questions` record and recalculates the overall `total_questions`, `correct_count`, and `accuracy` for the `weekly_revision_set`.
-7.  **Auto-Expiration**: If all questions in the active revision set have been attempted, the function triggers `update_status_of_weekly_set` to mark the set as `expired`.
+1.  **User Profile Sync**: Retrieves the `version_number` from the `users` table for the first user in the batch.
+2.  **Verification Guard (Silent Skip)**: For every item in the batch, queries `questions`. If the question is not found or `verified = false`, skips that item with `CONTINUE`.
+3.  **Selected Option Extraction**: For each item, reads the `selected_option_indices` field from the JSONB payload. Guards against missing or malformed values — if the field is absent or not a JSON array, stores `NULL`. When present, un-nests the JSON array into a Postgres `int[]`.
+4.  **Revision Context Resolution**: Checks for an active `weekly_revision_set` with status `'started'`. Determines the revision state for the current question:
+    - **`none`**: Standard practice (not part of the current revision set).
+    - **`first`**: Belongs to the active set, not yet answered.
+    - **`done`**: Already answered in this revision set (Hard Stop — skip).
+5.  **Practice History Logging**: For states `none` and `first`, records the attempt in `user_question_activity`, incrementing `attempt_number`, and stores `selected_option_indices` alongside the answer.
+6.  **Spaced Repetition Management (`user_incorrect_queue`)**:
+    - **New Mistakes**: Inserted at **Box 1**.
+    - **Box Progression**: Correct answers move the question to the next box (1 → 2 → 3 → Removal); incorrect answers reset it to Box 1. Only applies to `first` revision attempts.
+    - **Practice Protection**: Standard practice attempts (`none`) can add questions to the queue but cannot advance them.
+7.  **Revision Aggregate Updates**: For `first` attempts, updates `revision_set_questions` and recalculates `total_questions`, `correct_count`, `accuracy` on the `weekly_revision_set`.
+8.  **Auto-Expiration**: If all questions in the active set are attempted, triggers `update_status_of_weekly_set`.
 
 ---
 
 **Key Behaviors & Guarantees:**
 
-- **Resilience to Stale Data**: The `verified` check ensures that unverified questions are ignored rather than causing database errors, allowing the system to handle users who may have unvetted questions in their local browser cache.
-- **Idempotency in Revision**: Users cannot "pad" their revision accuracy by attempting the same question multiple times within a single weekly set; only the first attempt is recorded for revision stats.
-- **Leitner System Logic**: Box level and `next_review_at` intervals (1 week, 2 weeks, 4 weeks) are only modified during official revision sets to accurately measure long-term retention.
+- **Resilience to Stale Data**: The `verified` check ignores unverified questions rather than erroring.
+- **Idempotency in Revision**: Only the first attempt within a weekly set counts for revision stats.
+- **Leitner System Logic**: Box level and `next_review_at` intervals (1 week, 2 weeks, 4 weeks) are only modified during official revision sets.
+- **Peer Stats Source**: `selected_option_indices` is the input to the per-option distribution computed by `refresh_question_peer_stats`. Absent values are fine — the distribution for that question simply won't count them.
 
 **Return Value:**
 
 - `void`
 
----
-
 **Example SQL Usage:**
 
 ```sql
--- Batching a practice attempt and a revision attempt
 SELECT insert_user_question_activity_batch('[
   {
     "user_id": "uuid",
@@ -640,15 +639,15 @@ SELECT insert_user_question_activity_batch('[
     "time_taken": 45,
     "subject_id": "subject-uuid",
     "branch_id": "CS",
-    "attempted_at": "2026-04-14T21:42:00Z"
+    "attempted_at": "2026-04-14T21:42:00Z",
+    "selected_option_indices": [2]
   }
 ]'::jsonb);
 ```
 
-### Function: ![refresh_question_peer_stats()](./supabase/db-functions/refresh_question_peer_stats.sql)
+### Function: [refresh_question_peer_stats()](./supabase/db-functions/refresh_question_peer_stats.sql)
 
-**Purpose:**  
-Calculates and updates aggregate performance statistics for all questions in the `question_peer_stats` table. This allows users to compare their performance against peers.
+**Purpose:** Calculates and updates aggregate performance statistics for all questions in the `question_peer_stats` table, including per-option selection distribution. Allows users to compare their performance against peers.
 
 **Arguments:**
 
@@ -656,34 +655,185 @@ Calculates and updates aggregate performance statistics for all questions in the
 
 **Logic Flow:**
 
-1. **Select First Attempts:**
-   - Queries `user_question_activity` filtering only the **first attempt** for each user/question (`attempt_number = 1`).
+1. **Base Aggregates (CTE `base`):**
+   - Filters `user_question_activity` to **first attempts only** (`attempt_number = 1`).
+   - Per question: `total_attempts`, `correct_attempts`, `wrong_attempts`, `avg_time_seconds`.
 
-2. **Aggregate Metrics per Question:**
-   - `total_attempts` – Number of first attempts.
-   - `correct_attempts` – Number of first attempts answered correctly.
-   - `wrong_attempts` – Number of first attempts answered incorrectly.
-   - `avg_time_seconds` – Average time spent on first attempts (ignores nulls).
+2. **Option Unnest (CTEs `option_rows`, `option_counts`):**
+   - Unnests `selected_option_indices` across all first attempts using `CROSS JOIN LATERAL unnest(...)`. One row per (question, selected option).
+   - Filters out nulls and non-first attempts.
+   - Groups to a count of selections per (question, option index).
 
-3. **Insert or Update:**
-   - Uses `ON CONFLICT (question_id) DO UPDATE` to insert new rows or update existing ones.
-   - Ensures `updated_at` always reflects the latest refresh.
+3. **Distribution Assembly (CTE `dist`):**
+   - Uses `jsonb_object_agg(option_index::text, chosen_count)` to build a map like `{"0": 12, "1": 34, "2": 5}`.
+   - Keys are strings because JSONB object keys must be strings; the client reads them via `dist[String(i)]`.
+
+4. **Upsert into `question_peer_stats`:**
+   - `INSERT ... ON CONFLICT (question_id) DO UPDATE` — all fields, including `option_distribution`, are replaced on conflict.
+   - `updated_at` set to `now()`.
+
+---
 
 **Key Notes:**
 
-- Only **first attempts** are counted to prevent skew from repeated attempts.
-- Aggregate data is stored in `question_peer_stats` for analytics, dashboards, and peer comparison.
-- Designed to be safe to run frequently; old stats are overwritten.
+- Only first attempts are counted, matching the existing `total_attempts` semantics.
+- `option_distribution` is a **raw count**, not a percentage. The client divides by `total_attempts`.
+- For MSQ papers, the sum of option counts can exceed `total_attempts` — one attempt contributes to multiple options. This is intended.
+- Questions with no recorded selections get `option_distribution = NULL`, which the client renders as "no bars" rather than "0%".
 
 **Security:**
 
-- Marked `SECURITY DEFINER` – runs with the permissions of the function owner to access all user activity, even if normal users cannot.
+- `SECURITY DEFINER` — runs with the owner's privileges to read all users' activity.
 
 **Return Value:**
 
 - `void`
 
-### Function: ![generate_weekly_revision_set(p_branch_id text, p_target_exams text[], p_valid_subjects uuid[])](./supabase/db-functions/generate_weekly_revision_set.sql)
+### Function: [generate_topic_test(p_filters jsonb, p_question_count int, p_total_seconds int, p_already_attempted_questions boolean, p_branch_id text, p_record_activity boolean)](./supabase/db-functions/generate_topic_test.sql)
+
+**Purpose:** Creates a custom Topic Test session from a set of subject/topic filters. Selects questions using a bucketed priority strategy (50% new, 30% revision, 20% fill), inserts the session row and its attempt rows, and returns the new test's ID and totals. The `record_activity` flag controls whether completion of the test later contributes to dashboard statistics.
+
+**Arguments:**
+
+| Field Name                      | Data Type | Description                                                                                                                                                             |
+| :------------------------------ | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_filters`                     | `jsonb`   | Array of `{subject_id, topic}` objects identifying the topics to draw questions from.                                                                                   |
+| `p_question_count`              | `int`     | Target number of questions in the test.                                                                                                                                 |
+| `p_total_seconds`               | `int`     | Duration in seconds (client-estimated).                                                                                                                                 |
+| `p_already_attempted_questions` | `boolean` | If false, only unattempted questions are eligible for the fill bucket.                                                                                                  |
+| `p_branch_id`                   | `text`    | The user's current branch (e.g. `'cs'`, `'me'`). Used for the active-test guard and stored on the session.                                                              |
+| `p_record_activity`             | `boolean` | If true (default), attempts recorded by this test will write to `user_question_activity` on completion. Stored on the session and later read by the completion trigger. |
+
+---
+
+**Logic Flow:**
+
+1. **Authentication Check:** Reads `auth.uid()`. Raises `'Not authenticated'` if null.
+2. **Active Test Guard:** Checks `topic_tests` for any row with the same `user_id` and `branch_id` where `status != 'completed'`. If one exists, returns `{error, test_id, status: 'active_exists'}` without creating a new session.
+3. **Topic Name Extraction:** Aggregates distinct `topic` values from `p_filters` into a `text[]` for the session's `topics` column.
+4. **Question Selection (bucketed, three CTEs):**
+   - **Bucket 1 (`bucket_new`):** 50% of `p_question_count`, prioritizing unattempted questions. Order `random()`.
+   - **Bucket 2 (`bucket_rev`):** 30%, prioritizing questions in the user's incorrect queue at Box 1. Excludes anything already in Bucket 1.
+   - **Bucket 3 (`bucket_att`):** The remainder, filling from any remaining eligible question. If `p_already_attempted_questions` is false, only unattempted questions are eligible here.
+   - The three are unioned and truncated to `p_question_count`.
+5. **Safety Guard:** Uses `GET DIAGNOSTICS` to count rows. Raises `'No questions found matching these filters'` if zero.
+6. **Session Insert:** Inserts one `topic_tests` row with status `'created'`, the extracted topic names, `p_actual_count` as `total_questions`, `p_total_seconds` as `remaining_time_seconds`, and `coalesce(p_record_activity, true)` as `record_activity`. Returns the new `id`.
+7. **Attempt Rows:** Bulk-inserts one `topic_tests_attempts` row per selected question with `attempt_order = row_number()`, `status = 'unvisited'`.
+8. **Marks Rollup:** Sums `marks` across the selected questions and updates `topic_tests.total_marks`.
+
+---
+
+**Key Behaviors & Guarantees:**
+
+- **Single active test per branch.** Users can't start two tests in the same branch until the first completes. On violation, no new session is created — the client is expected to route the user to the existing test.
+- **`record_activity` defaults to true.** Uses `coalesce(p_record_activity, true)` so a null value does not accidentally disable recording. The flag is stored, not enforced here — enforcement happens in the completion trigger.
+- **Bucketing prevents repeats within a test** via the `NOT IN` exclusion between buckets.
+- **Deterministic question count.** `p_question_count` is the requested size; `v_actual_count` is what was actually found. These differ only when the topic pool is smaller than requested.
+
+**Return Value:**
+
+- `jsonb` — on success: `{test_id, actual_count, total_marks}`. On active-test conflict: `{error, test_id, status: 'active_exists'}`.
+
+**Notes:**
+
+- Postgres function overloads are resolved by argument count. Earlier signatures (4-arg and 5-arg) have been dropped to prevent silent fallthrough to versions that do not accept `p_record_activity`.
+
+### Trigger Function: [handle_test_completion_sync()](./supabase/db-functions/handle_test_completion_sync.sql)
+
+**Trigger:** `on_topic_test_completed`, `AFTER UPDATE` on `topic_tests`, `FOR EACH ROW`.
+
+**Purpose:** Fires when a Topic Test transitions to `completed`. If the test was created with `record_activity = true`, it writes each attempted question into `user_question_activity` (feeding dashboard stats and peer distributions) and updates the user's spaced-repetition queue based on correctness. If `record_activity = false`, the trigger no-ops and the test remains isolated from user progress.
+
+**Arguments:** None. Reads `new` and `old` from the trigger context.
+
+---
+
+**Fire Condition:**
+
+```sql
+if new.status = 'completed'
+   and old.status <> 'completed'
+   and new.record_activity is true then
+```
+
+### Function: [create_test_from_paper(p_paper_id text, p_paper_label text, p_year int, p_shift int, p_branch text, p_branch_id text, p_duration_seconds int, p_record_activity boolean)](./supabase/db-functions/create_test_from_paper.sql)
+
+**Purpose:** Creates a PYQ Mock test session from a paper catalog entry (e.g. "GATE CS 2024 Set 1"). Selects questions for the paper, orders them GA-first then by question number, inserts the session row plus one attempt row per question, and returns the new test's ID and totals. The `record_activity` flag controls whether completion later contributes to dashboard statistics — identical semantics to `generate_topic_test`.
+
+**Arguments:**
+
+| Field Name           | Data Type | Description                                                                                                                                                                   |
+| :------------------- | :-------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `p_paper_id`         | `text`    | Stable identifier from the client catalog, e.g. `'gate-cs-2024-s1'` or `'gate-da-2025'`. Stored on the session for history display and analytics.                             |
+| `p_paper_label`      | `text`    | Human-readable label, e.g. `'GATE CS 2024 Set 1'`. Stored as the sole entry of `topic_tests.topics` so the hub list can render it.                                            |
+| `p_year`             | `int`     | Paper year.                                                                                                                                                                   |
+| `p_shift`            | `int`     | Shift number, or `null` for single-shift years.                                                                                                                               |
+| `p_branch`           | `text`    | Uppercase branch code matching `questions.metadata.set` (`'CS'`, `'DA'`, `'EC'`, `'EE'`, `'ME'`). Distinguishes papers that share a year and shift across different branches. |
+| `p_branch_id`        | `text`    | Lowercase branch slug matching `branches.id` (`'cs'`, `'me'`). Used for the active-test guard and stored on the session.                                                      |
+| `p_duration_seconds` | `int`     | Duration in seconds, computed client-side from the paper's `durationMinutes`.                                                                                                 |
+| `p_record_activity`  | `boolean` | If true (default), attempts recorded by this test will write to `user_question_activity` on completion. Stored on the session and later read by the completion trigger.       |
+
+---
+
+**Logic Flow:**
+
+1. **Authentication Check:** Reads `auth.uid()`. Raises `'Not authenticated'` if null.
+2. **Active Test Guard:** Checks `topic_tests` for any row with the same `user_id` and `branch_id` where `status != 'completed'`. If one exists, returns `{error, test_id, status: 'active_exists'}` without creating a new session.
+3. **Paper Question Selection:**
+   - Creates a temp table `temp_paper_questions` from `questions` filtered by:
+     - `verified = true`
+     - `metadata->>'paperType' = 'official'`
+     - `metadata->>'set' = p_branch` (uppercase branch code)
+     - `year = p_year`
+     - Shift match: if `p_shift` is null, requires `metadata->>'shift'` to also be null; otherwise casts and compares to `p_shift`.
+   - Computes a `section_order` column: `0` for GA, `1` for TECH.
+4. **Count and Marks Rollup:** Sums `count(*)` and `coalesce(sum(marks), 0)` from the temp table into `v_actual_count` and `v_total_marks`.
+5. **Safety Guard:** Raises `'No questions found for this paper'` if `v_actual_count = 0`.
+6. **Session Insert:** Inserts one `topic_tests` row with:
+   - `topics = array[p_paper_label]`
+   - `status = 'created'`
+   - `total_questions = v_actual_count`
+   - `total_marks = v_total_marks`
+   - `remaining_time_seconds = p_duration_seconds`
+   - `paper_id = p_paper_id`
+   - `record_activity = coalesce(p_record_activity, true)`
+     Returns the new `id`.
+7. **Attempt Rows:** Bulk-inserts one `topic_tests_attempts` row per selected question with:
+   - `attempt_order = row_number() over (order by section_order, question_number)`
+   - `status = 'unvisited'`
+8. **Return:** `{test_id, actual_count, total_marks}`.
+
+---
+
+**Key Behaviors & Guarantees:**
+
+- **GA-first ordering.** The `section_order` derived column places all GA questions before all TECH questions, and each section sorts by its own `question_number`. This matches the presentation of a real GATE paper (Q1–Q10 are GA, Q11–Q65 are technical).
+- **Branch isolation.** The `metadata->>'set' = p_branch` filter prevents CS 2024 and DA 2024 papers from bleeding into each other. Without this, a `(year, shift)` filter alone would return both branches' questions.
+- **Single active test per branch.** Same guard as `generate_topic_test`. Users can't start a PYQ mock while they have a custom topic test in progress in the same branch, and vice versa.
+- **`record_activity` defaults to true.** Uses `coalesce(p_record_activity, true)` so a null value does not accidentally disable recording. Enforcement happens in the completion trigger.
+- **Immutable paper composition.** Once the session is created, its attempt rows are fixed. Editing the underlying question set afterward does not change an existing session — the paper is a snapshot. Regenerating the same paper in a future session picks up the latest data.
+- **No deduplication of the paper catalog.** `p_paper_id` is stored verbatim and never validated against a server-side list. The client is the source of truth for which papers exist. If a client sends an unknown paper id, the function still attempts to select questions by year/shift/branch and will succeed as long as matching questions exist.
+
+**Return Value:**
+
+- `jsonb` — on success: `{test_id, actual_count, total_marks}`. On active-test conflict: `{error, test_id, status: 'active_exists'}`.
+
+**Example SQL Usage:**
+
+```sql
+select create_test_from_paper(
+    p_paper_id := 'gate-cs-2024-s1',
+    p_paper_label := 'GATE CS 2024 Set 1',
+    p_year := 2024,
+    p_shift := 1,
+    p_branch := 'CS',
+    p_branch_id := 'cs',
+    p_duration_seconds := 10800,   -- 180 minutes
+    p_record_activity := true
+);
+```
+
+### Function: [generate_weekly_revision_set(p_branch_id text, p_target_exams text[], p_valid_subjects uuid[])](./supabase/db-functions/generate_weekly_revision_set.sql)
 
 **Purpose:** Generates a personalized weekly revision set for an authenticated user by selecting questions they previously answered incorrectly. It prioritizes questions based on the Leitner "Box" system and strictly filters for verified content to ensure high-quality revision sessions.
 
@@ -797,7 +947,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or it is already expired, the function returns a failure message instead of an exception.
 
-### Function: ![start_weekly_revision_set(v_set_id uuid)](./supabase/db-functions/start_weekly_revision_set.sql)
+### Function: [start_weekly_revision_set(v_set_id uuid)](./supabase/db-functions/start_weekly_revision_set.sql)
 
 - **Purpose:**
   - To mark the weekly revision set as "started" by setting the `started_at` and `expires_at` timestamps. This function is invoked when the user starts revising a weekly set. It ensures that the set's status changes from `pending` to `started` and calculates an expiration time of 24 hours from the start time.
@@ -847,7 +997,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or if the set is not in the pending status, the function returns a failure message.
 
-### Function: ![get_weekly_set()](./supabase/db-functions/get_weekly_set.sql)
+### Function: [get_weekly_set()](./supabase/db-functions/get_weekly_set.sql)
 
 - **Purpose:**
   - To retrieve the currently available weekly revision set for the user. The function checks if the user has an active (pending or started) weekly revision set, and returns the set's details. If the set has expired, it is updated to an `expired` status before returning the set.
@@ -898,7 +1048,7 @@ SELECT generate_weekly_revision_set(
   - If the user is not authenticated (i.e., auth.uid() returns NULL), an exception is raised with the message Not authenticated.
   - If no matching revision set is found or all available sets are expired, the function returns a failure message instead of an exception.
 
-### Function: ![submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)](./supabase/db-functions/submit_test_grading.sql)
+### Function: [submit_test_grading(p_session_id uuid, p_payload jsonb, p_remaining_time_seconds int)](./supabase/db-functions/submit_test_grading.sql)
 
 ---
 
@@ -1221,7 +1371,7 @@ await supabase.rpc("submit_test_grading", {
 });
 ```
 
-### Function: ![get_exam_subject_counts(target_exams text[])](./supabase/db-functions/get_exam_subject_counts.sql)
+### Function: [get_exam_subject_counts(target_exams text[])](./supabase/db-functions/get_exam_subject_counts.sql)
 
 **Purpose:** Calculates the total number of unique, verified questions available for each subject based on a list of targeted exams. This function is used to determine the "Total Question Pool" for progress bars and study plan calculations.
 
@@ -1262,7 +1412,7 @@ const { data, error } = await supabase.rpc("get_exam_subject_counts", {
 });
 ```
 
-### Function: ![get_topic_counts(p_subject_id uuid)](./supabase/db-functions/get_topic_counts.sql)
+### Function: [get_topic_counts(p_subject_id uuid)](./supabase/db-functions/get_topic_counts.sql)
 
 **Purpose:**
 Retrieves a granular breakdown of verified question counts for every topic associated with a specific subject. This function is primarily used to power the **Topic Test** selection screen, enabling users to see both the total number of available questions and how many of those they have not yet attempted in their current user version.
@@ -1357,7 +1507,7 @@ const { data, error } = await supabase.rpc("get_topic_counts", {
 });
 ```
 
-### Function: ![get_critical_question_count(p_valid_subjects uuid[])](./supabase/db-functions/get_critical_question_count.sql)
+### Function: [get_critical_question_count(p_valid_subjects uuid[])](./supabase/db-functions/get_critical_question_count.sql)
 
 **Purpose:** Returns the total count of verified, overdue questions currently in the user's personal mistake queue (`user_incorrect_queue`). This function is used to display "Critical" or "Action Needed" badges on the dashboard, helping users identify exactly how many questions require immediate attention based on their spaced-repetition schedule.
 
@@ -1417,7 +1567,7 @@ SELECT get_critical_question_count(
 
 ---
 
-### Function: ![delete_account()](./supabase/db-functions/delete_account.sql)
+### Function: [delete_account()](./supabase/db-functions/delete_account.sql)
 
 **Purpose:** Permanently removes a user's account from the authentication system while preserving required historical and engagement-related data. The function performs a controlled account deletion workflow by removing personal and engagement-specific data that is no longer useful after account closure, anonymising remaining user records, and maintaining necessary audit/history records without retaining personally identifiable information.
 
@@ -1523,7 +1673,7 @@ The function completes silently when account deletion succeeds. If the user is n
 SELECT delete_account();
 ```
 
-### Function: ![toggle_question_bookmark](./supabase/db-functions/toggle_question_bookmark.sql)
+### Function: [toggle_question_bookmark](./supabase/db-functions/toggle_question_bookmark.sql)
 
 Toggles a question bookmark for the authenticated user. If the question is already bookmarked, the bookmark is removed. If it is not bookmarked, a new bookmark is created.
 
@@ -1630,7 +1780,7 @@ This RPC operates on:
 
 See: `question_bookmarks` table documentation for schema details.
 
-### Function: ![update_question_bookmark_note](./supabase/db-functions/update_question_bookmark_note.sql)
+### Function: [update_question_bookmark_note](./supabase/db-functions/update_question_bookmark_note.sql)
 
 Updates the personal note attached to an existing question bookmark.
 
@@ -1722,7 +1872,7 @@ This RPC operates on:
 
 See: `question_bookmarks` table documentation for schema details.
 
-### Function: ![get_user_bookmarks](./supabase/db-functions/get_user_bookmarks.sql)
+### Function: [get_user_bookmarks](./supabase/db-functions/get_user_bookmarks.sql)
 
 Retrieves bookmarks created by the currently authenticated user.
 

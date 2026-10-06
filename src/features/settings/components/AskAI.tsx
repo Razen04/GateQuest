@@ -9,7 +9,7 @@ import {
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import useSettings from '@/features/settings/hooks/useSettings';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { Button } from '@/shared/components/ui/button';
 import { Label } from '@/shared/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/shared/components/ui/radio-group';
@@ -29,7 +29,8 @@ const PROMPT_TAGS = [
 ];
 
 const AskAI = () => {
-    const { settings, handleSettingToggle } = useSettings();
+    const settings = useSettingsStore((s) => s.settings);
+    const setSetting = useSettingsStore((s) => s.setSetting);
 
     const currentPrompt = settings.aiCustomPrompt ?? DEFAULT_TEMPLATE;
     const [localPrompt, setLocalPrompt] = useState(currentPrompt);
@@ -47,12 +48,12 @@ const AskAI = () => {
         setSaveStatus('dirty');
         const timer = setTimeout(() => {
             setSaveStatus('saving');
-            handleSettingToggle('aiCustomPrompt', localPrompt);
+            setSetting('aiCustomPrompt', localPrompt);
             setTimeout(() => setSaveStatus('synced'), 600);
         }, 3000); // 3s snappy debounce
 
         return () => clearTimeout(timer);
-    }, [localPrompt, currentPrompt, handleSettingToggle]);
+    }, [localPrompt, currentPrompt]);
 
     const insertTag = (tag: string) => {
         const updated = localPrompt ? `${localPrompt} ${tag}` : tag;
@@ -98,7 +99,7 @@ const AskAI = () => {
                 <RadioGroup
                     value={settings.aiProvider ?? 'chatgpt'}
                     onValueChange={(value) =>
-                        handleSettingToggle('aiProvider', value as AIProvider)
+                        setSetting('aiProvider', value as AIProvider)
                     }
                     className="grid grid-cols-1 sm:grid-cols-2"
                 >
@@ -209,10 +210,7 @@ const AskAI = () => {
                         size="sm"
                         onClick={() => {
                             setLocalPrompt(DEFAULT_TEMPLATE);
-                            handleSettingToggle(
-                                'aiCustomPrompt',
-                                DEFAULT_TEMPLATE
-                            );
+                            setSetting('aiCustomPrompt', DEFAULT_TEMPLATE);
                         }}
                         className="h-8 gap-1.5 rounded-none border border-slate-900/10 px-3 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-600 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-500 dark:border-white/10 dark:text-slate-300 dark:hover:border-red-500/30 dark:hover:text-red-400"
                     >

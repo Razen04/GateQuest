@@ -19,11 +19,12 @@ export interface Streaks {
     learning_longest: number;
 }
 
-export interface Heatmap {
-    data: Record<string, number>;
-    from_date: string;
-    to_date: string;
+export interface HeatmapEntry {
+    date: string;
+    count: number;
 }
+
+export type Heatmap = HeatmapEntry[];
 
 export interface StudyPlan {
     totalQuestions: number;
@@ -44,6 +45,6 @@ export interface Stats {
     subjectStatsMap: Record<string, SubjectStat[]>;
     question: Set<string>;
     streaks: Streaks;
-    heatmapData: Heatmap;
+    heatmapData: Heatmap | null;
     studyPlan: StudyPlan;
 }

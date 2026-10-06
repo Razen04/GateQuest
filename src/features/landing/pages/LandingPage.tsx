@@ -13,8 +13,8 @@ import {
 import { motion } from 'framer-motion';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import About from '@/features/about/pages/AboutPage';
-import useSettings from '@/features/settings/hooks/useSettings';
 import { Button } from '@/shared/components/ui/button';
 import type { SettingToggle } from '@/shared/types/Settings';
 
@@ -182,14 +182,14 @@ const NavigationMenu = ({
 };
 
 export default function LandingPage() {
-    const { settings, handleSettingToggle } = useSettings();
-    const isDark = settings.darkMode;
+    const isDark = useSettingsStore((s) => s.settings.darkMode);
+    const toggleSetting = useSettingsStore((s) => s.toggleSetting);
 
     const navigate = useNavigate();
 
     return (
         <main className="relative h-dvh w-full overflow-x-hidden bg-[#F4F5F1] font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:bg-[#0B0C10] dark:text-slate-200">
-            <NavigationMenu dark={isDark} toggle={handleSettingToggle} />
+            <NavigationMenu dark={isDark} toggle={toggleSetting} />
             <WatermarkText />
 
             <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 sm:px-8">
@@ -230,7 +230,7 @@ export default function LandingPage() {
                                 </span>
                             </h1>
 
-                            <p className="mt-6 max-w-xl font-['Fraunces',serif] text-lg leading-relaxed text-black/70 dark:text-white/70">
+                            <p className="mt-6 max-w-xl text-lg leading-relaxed text-black/70 dark:text-white/70">
                                 Every solved question. Every unhandled topic.
                                 Every recovered mark.{' '}
                                 <HighlightScribble>GATEQuest</HighlightScribble>{' '}
@@ -316,7 +316,7 @@ export default function LandingPage() {
                                                 {item.title}
                                             </h3>
                                         </div>
-                                        <p className="mt-2 max-w-2xl font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/60">
+                                        <p className="mt-2 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-white/60">
                                             {item.finding}
                                         </p>
                                     </div>
@@ -348,7 +348,7 @@ export default function LandingPage() {
                             <h2 className="mt-3 font-['Space_Grotesk',sans-serif] text-3xl font-black sm:text-4xl">
                                 Recovering lost accuracy
                             </h2>
-                            <p className="mt-4 font-['Fraunces',serif] text-lg leading-relaxed text-slate-600 dark:text-white/60">
+                            <p className="mt-4 text-lg leading-relaxed text-slate-600 dark:text-white/60">
                                 Systematic error logging catches repetitive
                                 conceptual traps long before they cost marks on
                                 final exam day.

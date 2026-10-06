@@ -1,8 +1,8 @@
 import { ArrowLeft } from '@phosphor-icons/react';
-import React, { useEffect, useRef } from 'react';
-import useSettings from '@/features/settings/hooks/useSettings';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import Branding from '@/shared/components/Branding';
-import { useGoals } from '@/shared/hooks/useGoals';
+import useGoal from '@/shared/hooks/useGoal';
 import { usePresence } from '@/shared/hooks/usePresence';
 import type { Question } from '@/shared/types/storage';
 // Types
@@ -104,17 +104,19 @@ const QuestionCard = ({
     isFirst,
     isLast,
 }: QuestionCardProps) => {
-    const { isSubjectInGoal } = useGoals();
+    const { isSubjectInGoal } = useGoal();
     const { count } = usePresence(question.id);
 
     const numInputRef = useRef<HTMLInputElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
 
-    const { settings } = useSettings();
-    const aiProvider = settings.aiProvider ?? 'chatgpt';
+    const aiProvider = useSettingsStore(
+        (s) => s.settings.aiProvider ?? 'chatgpt'
+    );
+    const aiCustomPrompt = useSettingsStore((s) => s.settings.aiCustomPrompt);
 
     const handleAskAI = async (doubt?: string) => {
-        await openInAI(question, aiProvider, settings.aiCustomPrompt, doubt);
+        await openInAI(question, aiProvider, aiCustomPrompt, doubt);
     };
 
     // Derived: Check if options exist to conditionally render the options list
@@ -138,6 +140,21 @@ const QuestionCard = ({
     // Derived: true when the user has selected an option or typed a numerical answer
     const hasSelection =
         selectedOptionIndices.length > 0 || numericalAnswer !== null;
+
+    const optionPercentages = useMemo<number[] | null>(() => {
+        const dist = peerStats?.data?.option_distribution as
+            | Record<string, number>
+            | null
+            | undefined;
+        const total = peerStats?.data?.total_attempts ?? 0;
+
+        if (!dist || total === 0 || !question.options?.length) return null;
+
+        return question.options.map((_, i) => {
+            const count = dist[String(i)] ?? 0;
+            return Math.round((count / total) * 100);
+        });
+    }, [peerStats?.data, question.options]);
 
     return (
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl mt-4 p-6 pb-20">
@@ -193,6 +210,7 @@ const QuestionCard = ({
                         selectedOptionIndices={selectedOptionIndices}
                         userAnswerIndex={userAnswerIndex}
                         onOptionSelect={onOptionSelect}
+                        optionPercentages={optionPercentages}
                     />
 
                     {/* Numerical Input Section (Conditional) */}

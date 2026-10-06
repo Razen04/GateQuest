@@ -111,12 +111,13 @@ const QuestionHeader = ({
                 });
                 toast.success('Bookmark note updated');
             } else {
-                await toggleBookmark({
+                const val = await toggleBookmark({
                     subjectSlug,
                     questionId: question.id,
                     ...(noteText.trim() ? { note: noteText.trim() } : {}),
                 });
-                toast.success('Question bookmarked');
+                if (val) toast.success('Question bookmarked successfully.');
+                else toast.error('Unable to bookmark.');
             }
 
             window.dispatchEvent(new Event('BOOKMARKS_UPDATED'));

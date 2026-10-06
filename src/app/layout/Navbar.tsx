@@ -15,8 +15,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Changelog from '@/shared/components/Changelog';
 import NotificationDialog from '@/shared/components/NotificationDialog';
-import useAuth from '@/shared/hooks/useAuth';
 import useWindowSize from '@/shared/hooks/useWindowSize';
+import { useAuthStore } from '../stores/useAuthStore';
 
 const springTransition = {
     type: 'spring' as const,
@@ -31,7 +31,7 @@ const Navbar = () => {
     const notificationRef = useRef<HTMLDivElement | null>(null);
     const animatedLogo = '/icons/animated_logo.svg';
 
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
 
     const { width } = useWindowSize();
     const navigate = useNavigate();
@@ -135,6 +135,15 @@ const Navbar = () => {
 
     if (width === undefined) return null;
     const isMobile = width < 1024;
+
+    // Hide Navbar during test attempt screens
+    const isAttemptPage =
+        /\/topic-test\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/attempt/i.test(
+            location.pathname
+        );
+    if (isAttemptPage) {
+        return null;
+    }
 
     return (
         <div className="sticky top-0 z-40 w-full pointer-events-none py-3 px-4 sm:px-8">

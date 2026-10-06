@@ -58,7 +58,7 @@ export const faqs: Faq[] = [
                 text: 'GOPDF PYQs repository',
                 href: 'https://github.com/GATEOverflow/GO-PDFs',
             },
-            { type: 'text', content: '.' },
+            { type: 'text', content: 'and official GATE Paper Archive.' },
         ],
     },
     {
@@ -67,7 +67,7 @@ export const faqs: Faq[] = [
             {
                 type: 'text',
                 content:
-                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS, DA, EC, EE, ME branch as of now). I may add descriptive questions in the future.',
+                    'Except for descriptive and out-of-syllabus questions, all are present in the app (only for CS, DA, EC, EE, ME, XL branch as of now). I may add descriptive questions in the future.',
             },
         ],
     },

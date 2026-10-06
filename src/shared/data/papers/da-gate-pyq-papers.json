@@ -1,0 +1,41 @@
+[
+    {
+        "id": "gate-da-2026",
+        "label": "GATE DA 2026",
+        "exam": "GATE",
+        "branch": "DA",
+        "year": 2026,
+        "shift": null,
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
+    },
+    {
+        "id": "gate-da-2025",
+        "label": "GATE DA 2025",
+        "exam": "GATE",
+        "branch": "DA",
+        "year": 2025,
+        "shift": null,
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
+    },
+    {
+        "id": "gate-da-2024",
+        "label": "GATE DA 2024",
+        "exam": "GATE",
+        "branch": "DA",
+        "year": 2024,
+        "shift": null,
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
+    }
+]

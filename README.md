@@ -21,7 +21,6 @@
 </p>
 
 <p align="center">
-  <a href="https://gate-quest.vercel.app"><img src="https://img.shields.io/badge/Hosted_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel Deployment" /></a>
   <a href="https://github.com/Razen04/GateQuest/stargazers"><img src="https://img.shields.io/github/stars/Razen04/GateQuest?style=for-the-badge" alt="GitHub Stars" /></a>
   <a href="https://github.com/Razen04/GateQuest/network/members"><img src="https://img.shields.io/github/forks/Razen04/GateQuest?style=for-the-badge" alt="GitHub Forks" /></a>
   <a href="https://github.com/Razen04/GateQuest/blob/master/LICENSE"><img src="https://img.shields.io/github/license/Razen04/GateQuest?style=for-the-badge" alt="MIT License" /></a>
@@ -92,8 +91,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 | **Language**         | ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                                                                                                                          |
 | **Frontend**         | ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white) |
 | **Backend & Auth**   | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)                                                                                                                                                                                                                                       |
-| **Deployment**       | ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)                                                                                                                                                                                                                                      |
-| **State Management** | ![React Context API](https://img.shields.io/badge/React_Context_API-blue?style=for-the-badge&logo=react)                                                                                                                                                                                                                                          |
+| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-blue?style=for-the-badge)                                                                                                                                                                                                                                                                         |
 | **Offline Storage**  | ![Dexie.js](https://img.shields.io/badge/Dexie.js-IndexedDB-blue?style=for-the-badge)                                                                                                                                                                                                                                                             |
 | **Animations & UI**  | ![Framer Motion](https://img.shields.io/badge/framer%20motion-black?style=for-the-badge&logo=framer) ![Phosphor Icons](https://img.shields.io/badge/phosphor-icons-orange?style=for-the-badge)                                                                                                                                                    |
 
@@ -110,8 +108,9 @@ GateQuest/
 ├── src/
 │   ├── app/                        # App entry, layout, routing, providers
 │   │   ├── layout/                 # Navbar, sidebar, responsive layout
-│   │   ├── providers/              # Global React context providers
 │   │   └── routes/                 # Route definitions
+│   │   └── effects/                # Reactive side-effects
+│   │   └── stores/                 # Zustand stores
 │   │
 │   ├── features/                   # Feature-based architecture
 │   │   ├── dashboard/              # Stats, streaks, study plan

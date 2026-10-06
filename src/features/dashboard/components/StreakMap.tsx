@@ -1,7 +1,7 @@
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import { motion } from 'framer-motion';
-import { useContext, useMemo } from 'react';
-import AppSettingContext from '@/app/providers/AppSettingContext.ts';
+import { useMemo } from 'react';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import type { Stats } from '@/shared/types/Stats.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
@@ -10,10 +10,7 @@ type StreakMapType = {
 };
 
 const StreakMap = ({ stats }: StreakMapType) => {
-    const { settings } = useContext(AppSettingContext) ?? {
-        settings: { darkMode: false },
-    };
-    const isDark = settings.darkMode;
+    const isDark = useSettingsStore((s) => s.settings.darkMode);
 
     const heatmapObj = useMemo(() => {
         return stats.heatmapData;

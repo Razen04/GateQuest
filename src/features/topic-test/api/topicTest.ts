@@ -1,5 +1,6 @@
 // src/features/topic-test/api/topicTest.ts
 
+import type { PyqPaper } from '@/shared/types/pyq';
 import type { Attempt, Question } from '@/shared/types/storage';
 import { supabase } from '@/shared/utils/supabaseClient';
 
@@ -158,4 +159,22 @@ export const fetchFullTestData = async (userId: string, branchId: string) => {
         attempts: pureAttempts,
         questions,
     };
+};
+
+export const createTestFromPaper = async (
+    paper: PyqPaper,
+    branchId: string,
+    recordActivity: boolean = true
+) => {
+    const { data, error } = await supabase.rpc('create_test_from_paper', {
+        p_paper_id: paper.id,
+        p_paper_label: paper.label,
+        p_year: paper.year,
+        p_shift: paper.shift,
+        p_branch: paper.branch,
+        p_branch_id: branchId,
+        p_duration_seconds: paper.durationMinutes * 60,
+        p_record_activity: recordActivity,
+    });
+    return { data, error };
 };

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import QuestionCard from '@/features/questions/components/QuestionCard/QuestionCard';
 import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
 import {
@@ -8,7 +9,6 @@ import {
     isNumericalQuestion,
 } from '@/features/questions/utils/questionUtils';
 import ReportModal from '@/shared/components/ReportModal';
-import useAuth from '@/shared/hooks/useAuth';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 const TestSolutionView = () => {
@@ -19,7 +19,7 @@ const TestSolutionView = () => {
 
     const { attempts } = useOutletContext();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const user = useAuthStore((s) => s.user);
 
     const [showReportModal, setShowReportModal] = useState(false);
 

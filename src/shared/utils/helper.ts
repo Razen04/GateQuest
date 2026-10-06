@@ -242,6 +242,7 @@ type AttemptParams = {
     time_taken: number;
     attempt_number: number;
     user_version_number: number | undefined;
+    selected_option_indices: number[] | null;
 };
 
 type recordAttemptLocallyProps = {
@@ -260,12 +261,6 @@ export const recordAttemptLocally = async ({
     // A check to ensure attempts are only recorded for logged-in users.
     if (!user?.id) {
         toast.error('No valid user profile found.');
-        return;
-    }
-
-    // Guest users (id: 1) can practice, but their progress isn't saved.
-    if (user.id === '1') {
-        toast.message('Login to sync your profile.');
         return;
     }
 
@@ -315,12 +310,6 @@ export const recordAttempt = async ({
         return;
     }
 
-    // Guest users (id: 1) cannot have their attempts recorded.
-    if (user.id === '1') {
-        toast.message('Login to sync your profile.');
-        return;
-    }
-
     // Insert the entire buffer as new rows in the activity table.
     if (buffer.length !== 0) {
         const { error } = await supabase.rpc(
@@ -343,8 +332,8 @@ export const recordAttempt = async ({
 
 export const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}m ${Math.round(s)}s`;
+    const s = Math.round(secs % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
 export const normalizeTag = (tag: string): string => {

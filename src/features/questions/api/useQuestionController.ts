@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import useAnswerFlow from '@/features/questions/hooks/useAnswerFlow';
 import { usePeerBenchmark } from '@/features/questions/hooks/usePeerBenchmark';
 import useQuestionNav from '@/features/questions/hooks/useQuestionNav';
-import useSettings from '@/features/settings/hooks/useSettings';
-import useAuth from '@/shared/hooks/useAuth';
 import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import type { Question } from '@/shared/types/storage';
 import { useQuestionState } from '../hooks/useQuestionState';
@@ -31,8 +31,9 @@ export const useQuestionController = ({
     const [searchParams] = useSearchParams();
     const qs = searchParams.toString();
 
-    const { user, isLogin } = useAuth();
-    const { settings } = useSettings();
+    const user = useAuthStore((s) => s.user);
+    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
+    const settings = useSettingsStore((s) => s.settings);
 
     const [currentIndex, setCurrentIndex] = useState<string | number>(qid || 0);
 
