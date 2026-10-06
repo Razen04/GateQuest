@@ -1,4 +1,15 @@
-# v0.10.10 - 2026-08-26 (Latest)
+# v0.10.11 - 2026-10-06 (Latest)
+
+- Added **PYQ Mock Tests**: Practice full GATE papers (2014–2026, except EC and XL, they will be added soon) in exam conditions with a timer, palette, and end-of-test review. Partial papers show what was excluded and why. [#48](https://github.com/Razen04/GateQuest/issues/48)
+- Added **guest mode**: Attempt CS questions without signing up. Progress won't sync until you log in. [#106](https://github.com/Razen04/GateQuest/issues/106)
+- Added an **offline banner** that appears when the connection drops and dismisses on reconnect. Eventually I will offline-mode. [#4](https://github.com/Razen04/GateQuest/issues/4)
+- Added **option-wise peer distribution**: After revealing an answer, each option shows what percentage of users picked it. Works for MCQ and MSQ. [#68](https://github.com/Razen04/GateQuest/issues/68)
+- Improved rendering performance across the app.
+- Fixed settings not hydrating after login when beta mode was toggled before logout.
+- Fixed `useBookmark` crashing when auth state changed mid-session.
+- Fixed settings changes being dropped if another setting was toggled within the debounce window.
+
+# v0.10.10 - 2026-08-26
 
 - Added GATE XL (Life Sciences) PYQs from 2016–2026, except 2022. Help is needed to source the 2022 PYQs. More PYQs will be added subsequently.
 - Fixed keyboard shortcut usage in MSQs. [#99](https://github.com/Razen04/GateQuest/issues/99)
