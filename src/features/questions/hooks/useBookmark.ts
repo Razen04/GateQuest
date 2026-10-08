@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthStore } from '@/app/stores/useAuthStore';
-import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 type Bookmarks = {
@@ -115,7 +114,7 @@ export default function useBookmark() {
                 'update_question_bookmark_note',
                 {
                     p_question_id: questionId,
-                    p_note: note,
+                    ...(note ? { p_note: note } : {}),
                 }
             );
 
