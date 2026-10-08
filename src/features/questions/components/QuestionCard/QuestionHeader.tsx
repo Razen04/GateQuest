@@ -90,7 +90,7 @@ const QuestionHeader = ({
         if (subjectSlug) {
             fetchBookmarks(subjectSlug);
         }
-    }, [subjectSlug, question.id, fetchBookmarks]);
+    }, [subjectSlug, fetchBookmarks]);
 
     // Keep textarea state in sync with existing bookmark note when modal opens
     useEffect(() => {

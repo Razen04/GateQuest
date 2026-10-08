@@ -16,11 +16,11 @@ vi.mock('@/shared/utils/supabaseClient', () => ({
 }));
 
 describe('useGoalEffects', () => {
-    it('resets the fetch guard on SIGNED_OUT', () => {
-        useGoalStore.setState({ userGoal: { id: 'g' } as any, loading: true });
+    it('resets to a guest goal on SIGNED_OUT', () => {
         renderHook(() => useGoalEffects());
         authCallback('SIGNED_OUT');
-        expect(useGoalStore.getState().userGoal).toBeNull();
+        expect(useGoalStore.getState().userGoal?.id).toBe('guest-goal');
+        expect(useGoalStore.getState().userGoal?.branch_id).toBe('cs');
         expect(useGoalStore.getState().loading).toBe(false);
     });
 });

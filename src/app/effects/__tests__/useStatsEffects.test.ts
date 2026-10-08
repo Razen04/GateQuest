@@ -7,7 +7,6 @@ const {
     fetchCurrentSetMock,
     mockUserGoalRef,
     mockCurrentSetRef,
-    getUserProfileMock,
 } = vi.hoisted(() => ({
     updateStatsMock: vi.fn().mockResolvedValue(undefined),
     setLoadingMock: vi.fn(),
@@ -16,7 +15,6 @@ const {
     mockCurrentSetRef: {
         current: { set_id: 'set-1' } as { set_id: string } | null,
     },
-    getUserProfileMock: vi.fn(),
 }));
 
 vi.mock('@/app/stores/useStatsStore', () => ({
@@ -40,17 +38,10 @@ vi.mock('@/features/smart-revision/hooks/useSmartRevision', () => ({
     }),
 }));
 
-vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: getUserProfileMock,
-}));
-
 import { useStatsEffects } from '../useStatsEffects';
-
-const signedInProfile = { id: 'u1', version_number: 1 };
 
 beforeEach(() => {
     vi.clearAllMocks();
-    getUserProfileMock.mockReturnValue(null);
     mockUserGoalRef.current = null;
     mockCurrentSetRef.current = { set_id: 'set-1' };
 });
@@ -61,49 +52,69 @@ afterEach(() => {
 });
 
 describe('initial fetch', () => {
-    it('sets loading false and does not fetch when there is no profile', () => {
-        getUserProfileMock.mockReturnValue(null);
-
+    it('calls updateStats even for guests — the store handles the guard', () => {
         renderHook(() => useStatsEffects());
-
-        expect(setLoadingMock).toHaveBeenCalledWith(false);
-        expect(updateStatsMock).not.toHaveBeenCalled();
+        expect(updateStatsMock).toHaveBeenCalledTimes(1);
+        // setLoading is not called from the hook; the store handles loading internally
+        expect(setLoadingMock).not.toHaveBeenCalled();
     });
 
-    it('sets loading false and does not fetch for the guest user (id "1")', () => {
-        getUserProfileMock.mockReturnValue({ id: '1', version_number: 1 });
-
+    it('calls updateStats even when there is no local profile', () => {
         renderHook(() => useStatsEffects());
-
-        expect(setLoadingMock).toHaveBeenCalledWith(false);
-        expect(updateStatsMock).not.toHaveBeenCalled();
+        expect(updateStatsMock).toHaveBeenCalledTimes(1);
     });
 
     it('fetches stats for a signed-in user', () => {
-        getUserProfileMock.mockReturnValue(signedInProfile);
-
         renderHook(() => useStatsEffects());
 
         expect(updateStatsMock).toHaveBeenCalledTimes(1);
         expect(setLoadingMock).not.toHaveBeenCalled();
     });
 
-    it('re-fetches when the user goal changes', () => {
-        getUserProfileMock.mockReturnValue(signedInProfile);
+    it('re-fetches when the user goal contents change', () => {
+        mockUserGoalRef.current = {
+            id: 'goal-1',
+            branch_id: 'cs',
+            target_exams: ['gate'],
+            additional_subjects: null,
+        };
 
         const { rerender } = renderHook(() => useStatsEffects());
         expect(updateStatsMock).toHaveBeenCalledTimes(1);
 
-        // Change the goal the mocked selector will return, then re-render.
-        mockUserGoalRef.current = { branch_id: 'cs' };
+        // Same id, same branch — but a different exam set.
+        // This is what happens when the user edits their goal without changing branch.
+        mockUserGoalRef.current = {
+            id: 'goal-1',
+            branch_id: 'cs',
+            target_exams: ['gate', 'ese'],
+            additional_subjects: null,
+        };
         rerender();
 
         expect(updateStatsMock).toHaveBeenCalledTimes(2);
     });
 
-    it('re-fetches when the current set changes', () => {
-        getUserProfileMock.mockReturnValue(signedInProfile);
+    it('does not re-fetch when the goal is refetched with identical content', () => {
+        const goal = {
+            id: 'goal-1',
+            branch_id: 'cs',
+            target_exams: ['gate'],
+            additional_subjects: null,
+        };
+        mockUserGoalRef.current = goal;
 
+        const { rerender } = renderHook(() => useStatsEffects());
+        expect(updateStatsMock).toHaveBeenCalledTimes(1);
+
+        // New object reference, same content — e.g. Supabase refetched the same row.
+        mockUserGoalRef.current = { ...goal };
+        rerender();
+
+        expect(updateStatsMock).toHaveBeenCalledTimes(1); // NOT 2
+    });
+
+    it('re-fetches when the current set changes', () => {
         const { rerender } = renderHook(() => useStatsEffects());
         expect(updateStatsMock).toHaveBeenCalledTimes(1);
 
@@ -114,8 +125,6 @@ describe('initial fetch', () => {
     });
 
     it('does not re-fetch on re-render when neither dep changed', () => {
-        getUserProfileMock.mockReturnValue(signedInProfile);
-
         const { rerender } = renderHook(() => useStatsEffects());
         expect(updateStatsMock).toHaveBeenCalledTimes(1);
 
@@ -127,8 +136,8 @@ describe('initial fetch', () => {
 
 describe('event listeners', () => {
     it('calls fetchCurrentSet when REVISION_UPDATED is dispatched', () => {
-        getUserProfileMock.mockReturnValue(null); // keep effect 1 quiet
         renderHook(() => useStatsEffects());
+        fetchCurrentSetMock.mockClear();
 
         act(() => {
             window.dispatchEvent(new Event('REVISION_UPDATED'));
@@ -138,12 +147,11 @@ describe('event listeners', () => {
     });
 
     it('calls updateStats when STATS_UPDATED is dispatched', () => {
-        getUserProfileMock.mockReturnValue(null);
         renderHook(() => useStatsEffects());
 
-        // Effect 1 did not call it (no profile). So any call here comes
-        // from the listener.
-        expect(updateStatsMock).not.toHaveBeenCalled();
+        // Effect 1 fires updateStats on mount. Zero it so any subsequent call
+        // is attributable to the listener, not the mount.
+        updateStatsMock.mockClear();
 
         act(() => {
             window.dispatchEvent(new Event('STATS_UPDATED'));
@@ -153,8 +161,11 @@ describe('event listeners', () => {
     });
 
     it('detaches listeners on unmount', () => {
-        getUserProfileMock.mockReturnValue(null);
         const { unmount } = renderHook(() => useStatsEffects());
+
+        // Ignore the mount-time fetch.
+        fetchCurrentSetMock.mockClear();
+        updateStatsMock.mockClear();
 
         unmount();
 

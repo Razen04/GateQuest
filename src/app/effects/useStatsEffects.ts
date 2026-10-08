@@ -2,20 +2,26 @@ import { useEffect } from 'react';
 import { useGoalStore } from '@/app/stores/useGoalStore.ts';
 import { useStatsStore } from '@/app/stores/useStatsStore.ts';
 import useSmartRevision from '@/features/smart-revision/hooks/useSmartRevision.ts';
-import { getUserProfile } from '@/shared/utils/helper.ts';
 
 export function useStatsEffects() {
     const { currentSet, fetchCurrentSet } = useSmartRevision();
-    const userGoal = useGoalStore((s) => s.userGoal);
+
+    const userGoalKey = useGoalStore((s) => {
+        const g = s.userGoal;
+        if (!g) return null;
+        const exams = Array.isArray(g.target_exams)
+            ? g.target_exams.join(',')
+            : '';
+        const optionals = Array.isArray(g.additional_subjects)
+            ? g.additional_subjects.join(',')
+            : '';
+        return `${g.id}:${g.branch_id}:${exams}:${optionals}`;
+    });
 
     useEffect(() => {
-        const u = getUserProfile();
-        if (!u || u.id === '1') {
-            useStatsStore.getState().setLoading(false);
-            return;
-        }
+        // existing body
         useStatsStore.getState().updateStats();
-    }, [currentSet?.set_id, userGoal]);
+    }, [currentSet?.set_id, userGoalKey]);
 
     useEffect(() => {
         const handleRevisionUpdate = () => fetchCurrentSet();

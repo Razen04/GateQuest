@@ -1,28 +1,32 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 export function useGoalEffects() {
+    const userIdRef = useRef<string | null>(null);
+
     useEffect(() => {
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_IN') {
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            const newUserId = session?.user?.id ?? null;
+            const userChanged = userIdRef.current !== newUserId;
+
+            if (
+                (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') &&
+                userChanged
+            ) {
+                userIdRef.current = newUserId;
                 useGoalStore.getState().fetchData(true);
+                return;
             }
-            if (event === 'INITIAL_SESSION') {
-                useGoalStore.getState().fetchData();
-            }
+
             if (event === 'SIGNED_OUT') {
-                useGoalStore.setState(
-                    { userGoal: null, loading: false },
-                    false,
-                    'goal/signedOut'
-                );
+                userIdRef.current = null;
                 useGoalStore.getState()._resetFetchGuard();
                 useGoalStore.getState().setGuestGoal();
                 useGoalStore.setState(
-                    { userGoal: null, loading: false },
+                    { loading: false },
                     false,
                     'goal/signedOut'
                 );
