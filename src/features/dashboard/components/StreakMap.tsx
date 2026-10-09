@@ -44,17 +44,46 @@ const StreakMap = ({ stats }: StreakMapType) => {
     const bucketedData = useMemo(() => {
         const rawData = heatmapObj?.data ?? {};
 
-        if (Array.isArray(rawData)) {
-            return rawData.map((item) => ({
-                day: item.date ?? item.day,
-                value: Number(item.count ?? item.value ?? 0),
-            }));
-        }
+        const entries = Array.isArray(rawData)
+            ? rawData.map((item) => ({
+                  day: item.date ?? item.day,
+                  raw: Number(item.count ?? item.value ?? 0),
+              }))
+            : Object.entries(rawData).map(([date, count]) => ({
+                  day: date,
+                  raw: Number(count),
+              }));
 
-        return Object.entries(rawData).map(([date, count]) => ({
-            day: date,
-            value: Number(count),
-        }));
+        const max = Math.max(...entries.map((e) => e.raw), 1);
+
+        return entries.map(({ day, raw }) => {
+            const normalized = raw / max;
+            let value = 0;
+            if (normalized > 0.8) value = 5;
+            else if (normalized > 0.6) value = 4;
+            else if (normalized > 0.4) value = 3;
+            else if (normalized > 0.2) value = 2;
+            else if (normalized > 0) value = 1;
+            return { day, value };
+        });
+    }, [heatmapObj]);
+
+    const rawLookup = useMemo(() => {
+        const rawData = heatmapObj?.data ?? {};
+        if (Array.isArray(rawData)) {
+            return Object.fromEntries(
+                rawData.map((item) => [
+                    item.date ?? item.day,
+                    Number(item.count ?? item.value ?? 0),
+                ])
+            );
+        }
+        return Object.fromEntries(
+            Object.entries(rawData).map(([date, count]) => [
+                date,
+                Number(count),
+            ])
+        );
     }, [heatmapObj]);
 
     const maxCount = useMemo(() => {
@@ -148,7 +177,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
 
                 {/* Chart */}
                 <div className="relative w-full overflow-x-auto overflow-y-visible no-scrollbar pt-6">
-                    <div className="h-[190px] min-w-[720px] sm:min-w-full">
+                    <div className="h-[190px] min-w-[1200px] sm:min-w-full">
                         <ResponsiveTimeRange
                             data={bucketedData}
                             from={fromIso}
@@ -160,27 +189,23 @@ const StreakMap = ({ stats }: StreakMapType) => {
                             }
                             colors={colors}
                             minValue={0}
-                            maxValue={maxCount}
+                            maxValue={5}
                             margin={{
                                 top: 25,
-                                right: 10,
-                                bottom: 10,
-                                left: 10,
+                                right: 15,
+                                bottom: 15,
+                                left: 15,
                             }}
                             daySpacing={5}
                             dayRadius={0}
                             dayBorderWidth={2}
-                            dayBorderColor={
-                                isDark
-                                    ? 'rgba(255,255,255,0.05)'
-                                    : 'rgba(15,23,42,0.05)'
-                            }
-                            tooltip={({ day, value }) => (
+                            dayBorderColor="transparent"
+                            tooltip={({ day }) => (
                                 <div className="border border-white/20 bg-white/90 dark:bg-zinc-900/95 backdrop-blur-xl shadow-xl px-3 py-2 text-xs text-slate-800 dark:text-white z-10">
                                     <strong>{day}</strong>
                                     <div className="mt-1 text-slate-500 dark:text-white/60">
                                         Questions solved:{' '}
-                                        <strong>{value ?? 0}</strong>
+                                        <strong>{rawLookup[day] ?? 0}</strong>
                                     </div>
                                 </div>
                             )}

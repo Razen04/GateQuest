@@ -100,12 +100,28 @@ const TopicTestGeneratePage = () => {
 
     const handleStartPyq = async () => {
         if (!selectedPaper || !userGoal?.branch_id) return;
+
+        if (selectedPaper.branch === 'XL') {
+            const optionals = userGoal.additional_subjects ?? [];
+            if (optionals.length !== 2) {
+                toast.warning(
+                    'Set two optional subjects in your goal before starting an XL mock.'
+                );
+                return;
+            }
+        }
+
         try {
             setIsGenerating(true);
+            const optionalSubjectIds =
+                selectedPaper.branch === 'XL'
+                    ? (userGoal.additional_subjects as string[])
+                    : [];
             const { data, error } = await createTestFromPaper(
                 selectedPaper,
                 userGoal.branch_id,
-                recordActivity
+                recordActivity,
+                optionalSubjectIds
             );
             if (error) throw error;
             if (data?.status === 'active_exists') {
@@ -298,7 +314,11 @@ const TopicTestGeneratePage = () => {
                     estimatedTime={selectedPaper?.durationMinutes ?? 0}
                     finalQuestionCount={selectedPaper?.questionCount ?? 0}
                     handleStartTest={handleStartPyq}
-                    canGenerate={!!selectedPaper}
+                    canGenerate={
+                        !!selectedPaper &&
+                        (selectedPaper.branch !== 'XL' ||
+                            (userGoal?.additional_subjects?.length ?? 0) === 2)
+                    }
                     isGenerating={isGenerating}
                     buttonLabel="Start Mock"
                     subtitle={selectedPaper?.label}

@@ -1048,40 +1048,46 @@ export type Database = {
         Functions: {
             calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
             clear_user_data: { Args: never; Returns: Json };
-            create_test_from_paper: {
-                Args: {
-                    p_branch_id: string;
-                    p_duration_seconds: number;
-                    p_paper_id: string;
-                    p_paper_label: string;
-                    p_shift: number;
-                    p_year: number;
-                };
-                Returns: Json;
-            };
-            delete_account: { Args: never; Returns: undefined };
-            generate_topic_test:
+            create_test_from_paper:
                 | {
                       Args: {
-                          p_already_attempted_questions: boolean;
+                          p_branch: string;
                           p_branch_id: string;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_total_seconds: number;
+                          p_duration_seconds: number;
+                          p_paper_id: string;
+                          p_paper_label: string;
+                          p_record_activity?: boolean;
+                          p_shift: number;
+                          p_year: number;
                       };
                       Returns: Json;
                   }
                 | {
                       Args: {
-                          p_already_attempted_questions: boolean;
+                          p_branch: string;
                           p_branch_id: string;
-                          p_filters: Json;
-                          p_question_count: number;
-                          p_record_activity: boolean;
-                          p_total_seconds: number;
+                          p_duration_seconds: number;
+                          p_optional_subject_ids?: string[];
+                          p_paper_id: string;
+                          p_paper_label: string;
+                          p_record_activity?: boolean;
+                          p_shift: number;
+                          p_year: number;
                       };
                       Returns: Json;
                   };
+            delete_account: { Args: never; Returns: undefined };
+            generate_topic_test: {
+                Args: {
+                    p_already_attempted_questions: boolean;
+                    p_branch_id: string;
+                    p_filters: Json;
+                    p_question_count: number;
+                    p_record_activity: boolean;
+                    p_total_seconds: number;
+                };
+                Returns: Json;
+            };
             generate_weekly_revision_set: {
                 Args: {
                     p_branch_id: string;
@@ -1209,7 +1215,7 @@ export type Database = {
                 Returns: boolean;
             };
             update_question_bookmark_note: {
-                Args: { p_note: string; p_question_id: string };
+                Args: { p_note?: string; p_question_id: string };
                 Returns: undefined;
             };
             update_status_of_weekly_set: {

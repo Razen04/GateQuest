@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useGoalStore } from '@/app/stores/useGoalStore';
 import useGoal from '@/shared/hooks/useGoal';
 import { fetchTopicCounts } from '../api/topicTest';
 

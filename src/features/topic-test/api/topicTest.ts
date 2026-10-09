@@ -164,7 +164,8 @@ export const fetchFullTestData = async (userId: string, branchId: string) => {
 export const createTestFromPaper = async (
     paper: PyqPaper,
     branchId: string,
-    recordActivity: boolean = true
+    recordActivity: boolean = true,
+    optionalSubjectIds: string[] = []
 ) => {
     const { data, error } = await supabase.rpc('create_test_from_paper', {
         p_paper_id: paper.id,
@@ -175,6 +176,9 @@ export const createTestFromPaper = async (
         p_branch_id: branchId,
         p_duration_seconds: paper.durationMinutes * 60,
         p_record_activity: recordActivity,
+        ...(optionalSubjectIds.length === 2
+            ? { p_optional_subject_ids: optionalSubjectIds }
+            : {}),
     });
     return { data, error };
 };

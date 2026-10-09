@@ -7,7 +7,6 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGoalStore } from '@/app/stores/useGoalStore';
 import { Button } from '@/shared/components/ui/button';
 import {
     Combobox,
