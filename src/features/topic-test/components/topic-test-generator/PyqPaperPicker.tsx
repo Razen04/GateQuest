@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import papersCs from '@/shared/data/papers/cs-gate-pyq-papers.json';
 import papersDa from '@/shared/data/papers/da-gate-pyq-papers.json';
+import papersEc from '@/shared/data/papers/ec-gate-pyq-papers.json';
 import papersEe from '@/shared/data/papers/ee-gate-pyq-papers.json';
 import papersMe from '@/shared/data/papers/me-gate-pyq-papers.json';
+import papersXl from '@/shared/data/papers/xl-gate-pyq-papers.json';
 import type { PyqPaper } from '@/shared/types/pyq';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 
@@ -13,6 +15,8 @@ const ALL_PAPERS: PyqPaper[] = [
     ...(papersDa as PyqPaper[]),
     ...(papersEe as PyqPaper[]),
     ...(papersMe as PyqPaper[]),
+    ...(papersEc as PyqPaper[]),
+    ...(papersXl as PyqPaper[]),
 ];
 
 interface Props {

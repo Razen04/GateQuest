@@ -10,4 +10,5 @@ export interface PyqPaper {
     durationMinutes: number;
     isComplete: boolean;
     notes: string | null;
+    optionalChoices?: string[]; // XL only
 }
