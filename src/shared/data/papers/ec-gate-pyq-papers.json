@@ -97,11 +97,11 @@
         "branch": "EC",
         "year": 2019,
         "shift": null,
-        "questionCount": 51,
-        "marks": 77,
-        "durationMinutes": 139,
-        "isComplete": false,
-        "notes": "14 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2018",
@@ -110,11 +110,11 @@
         "branch": "EC",
         "year": 2018,
         "shift": null,
-        "questionCount": 55,
-        "marks": 86,
-        "durationMinutes": 155,
-        "isComplete": false,
-        "notes": "10 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2017-s1",
@@ -123,11 +123,11 @@
         "branch": "EC",
         "year": 2017,
         "shift": 1,
-        "questionCount": 60,
-        "marks": 91,
-        "durationMinutes": 164,
-        "isComplete": false,
-        "notes": "5 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2017-s2",
@@ -136,11 +136,11 @@
         "branch": "EC",
         "year": 2017,
         "shift": 2,
-        "questionCount": 55,
-        "marks": 85,
-        "durationMinutes": 153,
-        "isComplete": false,
-        "notes": "10 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2016-s1",
@@ -149,11 +149,11 @@
         "branch": "EC",
         "year": 2016,
         "shift": 1,
-        "questionCount": 56,
-        "marks": 83,
-        "durationMinutes": 149,
+        "questionCount": 63,
+        "marks": 96,
+        "durationMinutes": 173,
         "isComplete": false,
-        "notes": "9 question(s) will be added soon."
+        "notes": "2 question(s) out of syllabus."
     },
     {
         "id": "gate-ec-2016-s2",
@@ -162,11 +162,11 @@
         "branch": "EC",
         "year": 2016,
         "shift": 2,
-        "questionCount": 53,
-        "marks": 80,
-        "durationMinutes": 144,
-        "isComplete": false,
-        "notes": "12 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2016-s3",
@@ -175,11 +175,11 @@
         "branch": "EC",
         "year": 2016,
         "shift": 3,
-        "questionCount": 57,
-        "marks": 87,
-        "durationMinutes": 157,
-        "isComplete": false,
-        "notes": "8 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2015-s1",
@@ -188,11 +188,11 @@
         "branch": "EC",
         "year": 2015,
         "shift": 1,
-        "questionCount": 57,
-        "marks": 88,
-        "durationMinutes": 158,
-        "isComplete": false,
-        "notes": "8 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2015-s2",
@@ -201,11 +201,11 @@
         "branch": "EC",
         "year": 2015,
         "shift": 2,
-        "questionCount": 57,
-        "marks": 87,
-        "durationMinutes": 157,
-        "isComplete": false,
-        "notes": "8 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2015-s3",
@@ -214,11 +214,11 @@
         "branch": "EC",
         "year": 2015,
         "shift": 3,
-        "questionCount": 60,
-        "marks": 91,
-        "durationMinutes": 164,
+        "questionCount": 64,
+        "marks": 99,
+        "durationMinutes": 178,
         "isComplete": false,
-        "notes": "5 question(s) will be added soon."
+        "notes": "1 question(s) out of syllabus."
     },
     {
         "id": "gate-ec-2014-s1",
@@ -227,11 +227,11 @@
         "branch": "EC",
         "year": 2014,
         "shift": 1,
-        "questionCount": 59,
-        "marks": 90,
-        "durationMinutes": 162,
-        "isComplete": false,
-        "notes": "6 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2014-s2",
@@ -240,11 +240,11 @@
         "branch": "EC",
         "year": 2014,
         "shift": 2,
-        "questionCount": 55,
-        "marks": 83,
-        "durationMinutes": 149,
-        "isComplete": false,
-        "notes": "10 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2014-s3",
@@ -253,11 +253,11 @@
         "branch": "EC",
         "year": 2014,
         "shift": 3,
-        "questionCount": 51,
-        "marks": 79,
-        "durationMinutes": 142,
-        "isComplete": false,
-        "notes": "14 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     },
     {
         "id": "gate-ec-2014-s4",
@@ -266,10 +266,10 @@
         "branch": "EC",
         "year": 2014,
         "shift": 4,
-        "questionCount": 58,
-        "marks": 91,
-        "durationMinutes": 164,
-        "isComplete": false,
-        "notes": "7 question(s) will be added soon."
+        "questionCount": 65,
+        "marks": 100,
+        "durationMinutes": 180,
+        "isComplete": true,
+        "notes": null
     }
 ]
