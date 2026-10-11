@@ -14,97 +14,40 @@
     "theme_color": "#000000",
     "icons": [
         {
-            "src": "/web-app-manifest-192x192.png",
+            "src": "/icons/web-app-manifest-192x192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "maskable"
         },
         {
-            "src": "/web-app-manifest-512x512.png",
+            "src": "/icons/web-app-manifest-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
         }
     ],
-    "screenshots": [
-        {
-            "src": "/screenshots/Landing.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Minimalist Exam Prep"
-        },
-        {
-            "src": "/screenshots/Dashboard.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Personalized Dashboard"
-        },
-        {
-            "src": "/screenshots/Practice.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Practice Questions"
-        },
-        {
-            "src": "/screenshots/Questions.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Solve GATE PYQs Questions"
-        },
-        {
-            "src": "/screenshots/MCQ.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Practice Mode"
-        },
-        {
-            "src": "/screenshots/TopicTest.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Topic Test"
-        },
-        {
-            "src": "/screenshots/TestGenerate.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Generate Custom Topic Test"
-        },
-        {
-            "src": "/screenshots/Test Session.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Live Topic Test Session"
-        },
-        {
-            "src": "/screenshots/TestPallete.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Question Pallete for convenience"
-        },
-        {
-            "src": "/screenshots/Settings.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Settings for your need"
-        },
-        {
-            "src": "/screenshots/About.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "About GATEQuest"
-        },
-        {
-            "src": "/screenshots/Desktop.png",
-            "sizes": "1080x1920",
-            "type": "image/png",
-            "label": "Optimized for Desktop"
-        }
-    ],
+		"screenshots": [
+    { "src": "/screenshots/Landing.png",      "sizes": "769x1554",  "type": "image/png", "label": "Minimalist Exam Prep" },
+    { "src": "/screenshots/Dashboard.png",    "sizes": "769x1554",  "type": "image/png", "label": "Personalized Dashboard" },
+    { "src": "/screenshots/Practice.png",     "sizes": "769x1554",  "type": "image/png", "label": "Practice Questions" },
+    { "src": "/screenshots/Questions.png",    "sizes": "742x1501",  "type": "image/png", "label": "Solve GATE PYQ Questions" },
+    { "src": "/screenshots/MCQ.png",          "sizes": "769x1554",  "type": "image/png", "label": "Practice Mode" },
+    { "src": "/screenshots/TopicTest.png",    "sizes": "742x1501",  "type": "image/png", "label": "Topic Test" },
+    { "src": "/screenshots/TestGenerate.png", "sizes": "423x856",   "type": "image/png", "label": "Generate Custom Topic Test" },
+    { "src": "/screenshots/TestSession.png",  "sizes": "423x856",   "type": "image/png", "label": "Live Topic Test Session" },
+    { "src": "/screenshots/TestPallete.png",  "sizes": "423x856",   "type": "image/png", "label": "Question Palette for convenience" },
+    { "src": "/screenshots/Settings.png",     "sizes": "742x1501",  "type": "image/png", "label": "Settings for your needs" },
+    { "src": "/screenshots/About.png",        "sizes": "769x1554",  "type": "image/png", "label": "About GATEQuest" },
+    { "src": "/screenshots/Desktop.png",      "sizes": "2704x1553", "type": "image/png", "form_factor": "wide", "label": "Optimized for Desktop" }
+		],
     "categories": ["education", "productivity"],
     "edge_side_panel": {
         "preferred_width": 400,
         "enabled": true
     },
+		"launch_handler": {
+    "client_mode": "navigate-existing"
+		},
     "protocol_handlers": [
         {
             "protocol": "web+gatequest",
@@ -112,5 +55,28 @@
         }
     ],
     "prefer_related_applications": false,
-    "related_applications": []
+		"shortcuts": [
+    {
+        "name": "Continue Practice",
+        "short_name": "Practice",
+        "description": "Resume your last practice session",
+        "url": "/practice",
+        "icons": [{ "src": "/icons/web-app-manifest-192x192.png", "sizes": "192x192" }]
+    },
+    {
+        "name": "Topic Test",
+        "short_name": "Tests",
+        "description": "Start a new topic test",
+        "url": "/topic-test",
+        "icons": [{ "src": "/icons/web-app-manifest-192x192.png", "sizes": "192x192" }]
+    },
+    {
+        "name": "Dashboard",
+        "short_name": "Dashboard",
+        "description": "View your progress",
+        "url": "/dashboard",
+        "icons": [{ "src": "/icons/web-app-manifest-192x192.png", "sizes": "192x192" }]
+    }
+		]
+
 }
