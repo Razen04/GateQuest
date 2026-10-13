@@ -46,6 +46,7 @@ import {
 } from '@phosphor-icons/react';
 import React from 'react';
 import { toast } from 'sonner';
+import { useStatsStore } from '@/app/stores/useStatsStore';
 import type { AppUser } from '@/shared/types/AppUser.js';
 import type { Question } from '@/shared/types/storage.js';
 import { supabase } from '@/shared/utils/supabaseClient.js';
@@ -248,7 +249,6 @@ type AttemptParams = {
 type recordAttemptLocallyProps = {
     params: AttemptParams;
     user: AppUser;
-    refresh: () => void;
 };
 
 type AttemptBufferItem = AttemptParams & { attempted_at: string };
@@ -256,7 +256,6 @@ type AttemptBufferItem = AttemptParams & { attempted_at: string };
 export const recordAttemptLocally = async ({
     params,
     user,
-    refresh,
 }: recordAttemptLocallyProps) => {
     // A check to ensure attempts are only recorded for logged-in users.
     if (!user?.id) {
@@ -282,7 +281,7 @@ export const recordAttemptLocally = async ({
     // When the buffer reaches a size of 3, sync it to the database.
     // Chainging this to 1 for now, let's observe how to API calls are made for a week
     if (buffer.length >= 1) {
-        const error = await recordAttempt({ buffer, user, refresh });
+        const error = await recordAttempt({ buffer, user });
         if (error) {
             toast.error(`Failed·to·record·attempt:·${error.message}`);
             return;
@@ -297,14 +296,9 @@ export const recordAttemptLocally = async ({
 type recordAttemptProp = {
     buffer: AttemptBufferItem[];
     user: AppUser;
-    refresh: () => void;
 };
 
-export const recordAttempt = async ({
-    buffer,
-    user,
-    refresh,
-}: recordAttemptProp) => {
+export const recordAttempt = async ({ buffer, user }: recordAttemptProp) => {
     if (!user?.id) {
         toast.error('No valid user profile found.');
         return;
@@ -324,8 +318,7 @@ export const recordAttempt = async ({
             return error;
         }
     }
-    // After syncing, immediately update the user's stats to reflect the new data.
-    refresh();
+    useStatsStore.getState().markStatsStale();
 
     toast.success('Attempt synced successfully!');
 };

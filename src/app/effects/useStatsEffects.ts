@@ -25,17 +25,14 @@ export function useStatsEffects() {
 
     useEffect(() => {
         const handleRevisionUpdate = () => fetchCurrentSet();
-        const handleStatsUpdate = () => useStatsStore.getState().updateStats();
 
         window.addEventListener('REVISION_UPDATED', handleRevisionUpdate);
-        window.addEventListener('STATS_UPDATED', handleStatsUpdate);
 
         return () => {
             window.removeEventListener(
                 'REVISION_UPDATED',
                 handleRevisionUpdate
             );
-            window.removeEventListener('STATS_UPDATED', handleStatsUpdate);
         };
     }, [fetchCurrentSet]);
 }

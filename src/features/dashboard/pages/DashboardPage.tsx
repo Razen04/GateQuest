@@ -70,6 +70,10 @@ const Dashboard = () => {
         }
     }, [currentSubjectStats]);
 
+    useEffect(() => {
+        useStatsStore.getState().updateStats();
+    }, []);
+
     if (loading) {
         return (
             <div className="w-full h-dvh flex justify-center items-center bg-slate-50 dark:bg-zinc-950">

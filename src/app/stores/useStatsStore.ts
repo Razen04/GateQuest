@@ -6,6 +6,8 @@ import { getUserProfile } from '@/shared/utils/helper.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { useGoalStore } from './useGoalStore.ts';
 
+const STATS_TTL = 60_000;
+
 const defaultStats: Stats = {
     progress: 0,
     accuracy: 0,
@@ -35,21 +37,37 @@ const defaultStats: Stats = {
 type StatsState = {
     stats: Stats;
     loading: boolean;
+    lastFetchedAt: number | null;
+    isStale: boolean;
 
     updateStats: () => Promise<void>;
+    markStatsStale: () => void;
     setLoading: (value: boolean) => void;
 };
 
 export const useStatsStore = create<StatsState>()(
     devtools(
-        (set) => ({
+        (set, get) => ({
             stats: defaultStats,
             loading: true,
+            lastFetchedAt: null,
+            isStale: false,
 
             setLoading: (value) =>
                 set({ loading: value }, false, 'stats/setLoading'),
 
+            markStatsStale: () =>
+                set({ isStale: true }, false, 'stats/markStatsStale'),
+
             updateStats: async () => {
+                const { lastFetchedAt, isStale } = get();
+                const fresh =
+                    lastFetchedAt !== null &&
+                    Date.now() - lastFetchedAt < STATS_TTL &&
+                    !isStale;
+
+                if (fresh) return;
+
                 const user = getUserProfile();
 
                 if (
@@ -185,6 +203,8 @@ export const useStatsStore = create<StatsState>()(
                                         dbStats.is_target_met_today || false,
                                 },
                             },
+                            lastFetchedAt: Date.now(),
+                            isStale: false,
                         },
                         false,
                         'stats/updateStats:success'
