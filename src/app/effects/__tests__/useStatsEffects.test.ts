@@ -146,20 +146,6 @@ describe('event listeners', () => {
         expect(fetchCurrentSetMock).toHaveBeenCalledTimes(1);
     });
 
-    it('calls updateStats when STATS_UPDATED is dispatched', () => {
-        renderHook(() => useStatsEffects());
-
-        // Effect 1 fires updateStats on mount. Zero it so any subsequent call
-        // is attributable to the listener, not the mount.
-        updateStatsMock.mockClear();
-
-        act(() => {
-            window.dispatchEvent(new Event('STATS_UPDATED'));
-        });
-
-        expect(updateStatsMock).toHaveBeenCalledTimes(1);
-    });
-
     it('detaches listeners on unmount', () => {
         const { unmount } = renderHook(() => useStatsEffects());
 

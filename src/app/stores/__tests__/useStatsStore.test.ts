@@ -43,7 +43,15 @@ beforeEach(() => {
     vi.clearAllMocks();
     (getUserProfile as Mock).mockReturnValue(null);
 
-    useStatsStore.setState({ stats: initialStats, loading: true }, false);
+    useStatsStore.setState(
+        {
+            stats: initialStats,
+            loading: true,
+            lastFetchedAt: null,
+            isStale: false,
+        },
+        false
+    );
 
     useGoalStore.setState({ userGoal: null }, false);
 });
