@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { getUserProfile } from '@/shared/utils/helper';
+import { useAuthStore } from '@/app/stores/useAuthStore.ts';
 import DonationBox from '../components/DonationBox';
 import DonorList from '../components/DonorList';
 import UpiQRCode from '../components/UpiQRCode';
@@ -70,12 +70,9 @@ const Donations: React.FC = () => {
     >('form');
     const [showQR, setShowQR] = useState<boolean>(false);
 
-    const userProfile = getUserProfile();
-    const userId = userProfile
-        ? userProfile.id !== '1'
-            ? userProfile.id
-            : null
-        : null;
+    const userId = useAuthStore((s) =>
+        s.user && s.user.id !== '1' ? s.user.id : null
+    );
 
     const { donations, loading, addDonation, loadDonations } = useDonations();
 

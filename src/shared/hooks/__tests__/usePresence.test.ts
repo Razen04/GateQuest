@@ -1,19 +1,28 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
-import { getUserProfile } from '@/shared/utils/helper';
-import { supabase } from '@/shared/utils/supabaseClient';
-import { usePresence } from '../usePresence';
 
-// Mocking the external dependencies
+const mockUserRef = vi.hoisted(() => ({
+    current: null as { id: string } | null,
+}));
+
 vi.mock('@/shared/utils/supabaseClient', () => ({
     supabase: {
         channel: vi.fn(),
     },
 }));
 
-vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: vi.fn(),
+vi.mock('@/app/stores/useAuthStore', () => ({
+    useAuthStore: Object.assign(
+        (selector: (s: { user: unknown }) => unknown) =>
+            selector({ user: mockUserRef.current }),
+        {
+            getState: () => ({ user: mockUserRef.current }),
+        }
+    ),
 }));
+
+import { supabase } from '@/shared/utils/supabaseClient';
+import { usePresence } from '../usePresence';
 
 describe('usePresence hook', () => {
     let mockChannel: {
@@ -28,7 +37,6 @@ describe('usePresence hook', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        // mockChannel to copy supabase behavior
         mockChannel = {
             on: vi.fn().mockReturnThis(),
             subscribe: vi.fn((cb: (status: string) => void) => {
@@ -45,7 +53,8 @@ describe('usePresence hook', () => {
             return mockChannel;
         });
         (supabase.channel as Mock).mockReturnValue(mockChannel);
-        (getUserProfile as Mock).mockReturnValue({ id: 'user-1' });
+
+        mockUserRef.current = { id: 'user-1' };
     });
 
     it('should initialize the count as undefined', () => {
@@ -111,12 +120,12 @@ describe('usePresence hook', () => {
         const { result } = renderHook(() => usePresence('test'));
 
         mockChannel.presenceState.mockReturnValue({
-            'user-1': [{}, {}], // 2 tabs opened by same user with same question
-            'user-2': [{}], // only 1 tab
+            'user-1': [{}, {}],
+            'user-2': [{}],
         });
 
         act(() => {
-            return syncCallback();
+            syncCallback();
         });
 
         expect(result.current.count).toBe(2);

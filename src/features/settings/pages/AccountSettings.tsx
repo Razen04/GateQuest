@@ -47,11 +47,7 @@ import {
 import { Textarea } from '@/shared/components/ui/textarea';
 import useGoal from '@/shared/hooks/useGoal';
 import type { Settings } from '@/shared/types/Settings';
-import {
-    getUserProfile,
-    syncUserToSupabase,
-    updateUserProfile,
-} from '@/shared/utils/helper';
+import { syncUserToSupabase } from '@/shared/utils/helper';
 import { getSocialSettingsValue } from '../api/social-settings';
 import SocialLinksDisplay from '../components/SocialLinksDisplay';
 import SocialSettingsForm from '../components/SocialSettingsForm';
@@ -83,13 +79,12 @@ const AccountSettings = () => {
     const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
     const user = useAuthStore((s) => s.user);
     const setUser = useAuthStore((s) => s.setUser);
-    const localUser = getUserProfile();
     const { invalidateCache } = useProfile(user?.username);
 
-    const [name, setName] = useState(localUser?.name || '');
-    const [college, setCollege] = useState(localUser?.college || '');
-    const [about, setAbout] = useState(localUser?.about || '');
-    const [targetYear, setTargetYear] = useState(localUser?.targetYear ?? 2027);
+    const [name, setName] = useState(user?.name || '');
+    const [college, setCollege] = useState(user?.college || '');
+    const [about, setAbout] = useState(user?.about || '');
+    const [targetYear, setTargetYear] = useState(user?.targetYear ?? 2027);
     const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
     const userSettings = user?.settings as Settings | undefined;
 
@@ -183,7 +178,6 @@ const AccountSettings = () => {
                 targetYear,
             };
 
-            updateUserProfile(updated);
             setUser(updated);
 
             if (tempBranch) {

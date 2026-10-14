@@ -29,7 +29,7 @@ import { getCurrentUser } from '@/shared/api/auth';
 import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import { formatTime, getUserProfile } from '@/shared/utils/helper';
+import { formatTime } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { updateTestStatus } from '../api/topicTest';
 
@@ -58,8 +58,7 @@ const TopicTest = () => {
         navigate('/dashboard');
     }
 
-    const user = getUserProfile();
-    const userId = user?.id;
+    const userId = useAuthStore((s) => s.user?.id);
     const {
         loading,
         activeTest,

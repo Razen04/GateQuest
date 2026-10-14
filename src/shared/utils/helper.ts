@@ -46,21 +46,12 @@ import {
 } from '@phosphor-icons/react';
 import React from 'react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
 import type { AppUser } from '@/shared/types/AppUser.js';
 import type { Question } from '@/shared/types/storage.js';
 import { supabase } from '@/shared/utils/supabaseClient.js';
-
-// Safely retrieves and parses the user profile from localStorage.
-// Returns null if the profile doesn't exist or if there's a parsing error.
-export const getUserProfile = (): AppUser | null => {
-    try {
-        const stored = localStorage.getItem('gate_user_profile');
-        return stored ? JSON.parse(stored) : null;
-    } catch {
-        return null;
-    }
-};
 
 // Icon mapper for the subjects
 export const SubjectIconMap: Record<string, React.ElementType> = {
@@ -158,15 +149,6 @@ export const getBackgroundColor = (color: string | null): ColorClass => {
     return colors[color as ColorKey];
 };
 
-// Updates the user profile in localStorage by merging new data with the existing profile.
-export const updateUserProfile = (updates: AppUser): AppUser => {
-    const stored = localStorage.getItem('gate_user_profile');
-    const current = stored ? JSON.parse(stored) : [];
-    const updated = { ...current, ...updates };
-    localStorage.setItem('gate_user_profile', JSON.stringify(updated));
-    return updated;
-};
-
 // A helper function to sort questions by year in descending order (newest first).
 export const sortQuestionsByYear = (questionsToSort: Question[]) => {
     return [...questionsToSort].sort((a, b) => {
@@ -179,30 +161,27 @@ export const sortQuestionsByYear = (questionsToSort: Question[]) => {
 // Pushes the entire local user profile to the Supabase 'users' table.
 // This is used to persist changes made locally (like settings) to the database.
 export const syncUserToSupabase = async (isLogin: boolean) => {
-    // A check to ensure there is a valid user to sync.
-    if (!isLogin) return; // don’t even try until login is true
-    const user = getUserProfile();
+    if (!isLogin) return;
+    const user = useAuthStore.getState().user;
+    const settings = useSettingsStore.getState().settings;
 
     if (!user?.id) {
         console.warn('User missing id');
         return;
     }
 
-    // 1. Create a clean payload with strictly database columns.
-    // We use `?? null` to satisfy TypeScript's strict optional property types.
     const dbPayload = {
         name: user.name ?? null,
         avatar: user.avatar ?? null,
         college: user.college ?? null,
-        targetYear: user.targetYear || null, // Fallback chain
-        settings: user.settings ?? {}, // Assuming settings is a JSONB object, default to {}
+        targetYear: user.targetYear || null,
+        settings: settings,
         show_name: user.show_name ?? true,
         username: user.username ?? null,
         is_public: user.is_public ?? false,
         about: user?.about ?? null,
     };
 
-    // 2. Send only the clean payload to the database
     const { error } = await supabase
         .from('users')
         .update(dbPayload)
@@ -214,8 +193,6 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
         return;
     }
 
-    // We only sync the identity fields (name/avatar) to keep the JWT small.
-    // This stops the "Stale Session Overwrite" bug on page reload.
     const { error: authError } = await supabase.auth.updateUser({
         data: {
             full_name: user.name,
@@ -224,7 +201,6 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     });
 
     if (authError) {
-        // Warning only, because the DB sync succeeded which is the critical part
         console.warn('Session metadata sync failed:', authError.message);
     }
 

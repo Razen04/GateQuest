@@ -25,7 +25,6 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu';
 // Hooks & Utilities
-import { getUserProfile } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
 import StatCard from '../components/StatCard';
@@ -39,7 +38,7 @@ const Dashboard = () => {
     const loading = useAuthStore((s) => s.loading);
     const stats = useStatsStore((s) => s.stats);
     const statsLoading = useStatsStore((s) => s.loading);
-    const user = getUserProfile();
+    const user = useAuthStore((s) => s.user);
     const navigate = useNavigate();
     const userGoal = useGoalStore((s) => s.userGoal);
 

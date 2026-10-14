@@ -2,18 +2,12 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: vi.fn(),
     syncUserToSupabase: vi.fn().mockResolvedValue(undefined),
-    updateUserProfile: vi.fn(),
 }));
 
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
-import {
-    getUserProfile,
-    syncUserToSupabase,
-    updateUserProfile,
-} from '@/shared/utils/helper';
+import { syncUserToSupabase } from '@/shared/utils/helper';
 import { useSettingsEffects } from '../useSettingsEffects';
 
 const initialSettings = useSettingsStore.getState().settings;
@@ -21,7 +15,6 @@ const initialSettings = useSettingsStore.getState().settings;
 beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
-    (getUserProfile as ReturnType<typeof vi.fn>).mockReturnValue(null);
 
     useAuthStore.setState({ user: null }, false);
     useSettingsStore.setState(
@@ -30,6 +23,7 @@ beforeEach(() => {
     );
 
     document.documentElement.classList.remove('dark');
+    localStorage.removeItem('theme');
 });
 
 afterEach(() => {
@@ -37,61 +31,10 @@ afterEach(() => {
     vi.useRealTimers();
 });
 
-describe('settings persistence', () => {
-    it('calls updateUserProfile with the new settings when they change', () => {
-        (getUserProfile as ReturnType<typeof vi.fn>).mockReturnValue({
-            id: 'u1',
-            settings: { ...initialSettings },
-        });
-
-        renderHook(() => useSettingsEffects());
-
-        act(() => {
-            useSettingsStore.getState().setSetting('sound', false);
-        });
-
-        expect(updateUserProfile).toHaveBeenCalledTimes(1);
-        expect(updateUserProfile).toHaveBeenCalledWith(
-            expect.objectContaining({
-                id: 'u1',
-                settings: expect.objectContaining({ sound: false }),
-            })
-        );
-    });
-
-    it('does nothing when there is no local profile', () => {
-        (getUserProfile as ReturnType<typeof vi.fn>).mockReturnValue(null);
-
-        renderHook(() => useSettingsEffects());
-
-        act(() => {
-            useSettingsStore.getState().setSetting('sound', false);
-        });
-
-        expect(updateUserProfile).not.toHaveBeenCalled();
-    });
-
-    it('ignores store updates that do not change settings', () => {
-        (getUserProfile as ReturnType<typeof vi.fn>).mockReturnValue({
-            id: 'u1',
-        });
-
-        renderHook(() => useSettingsEffects());
-
-        act(() => {
-            useSettingsStore.getState().setIsUpdatingSettings(true);
-        });
-
-        expect(updateUserProfile).not.toHaveBeenCalled();
-    });
-});
-
 describe('debounced supabase sync', () => {
     const signedIn = { id: 'u1' };
 
     it('does not sync when logged out', () => {
-        (getUserProfile as ReturnType<typeof vi.fn>).mockReturnValue(null);
-
         renderHook(() => useSettingsEffects());
 
         act(() => {
@@ -250,5 +193,22 @@ describe('dark mode class', () => {
             useSettingsStore.getState().setSetting('darkMode', false);
         });
         expect(document.documentElement.classList.contains('dark')).toBe(false);
+    });
+
+    it('persists the theme to localStorage so the next cold load has no flash', () => {
+        useSettingsStore.setState(
+            { settings: { ...initialSettings, darkMode: true } },
+            false
+        );
+
+        renderHook(() => useSettingsEffects());
+
+        expect(localStorage.getItem('theme')).toBe('dark');
+
+        act(() => {
+            useSettingsStore.getState().setSetting('darkMode', false);
+        });
+
+        expect(localStorage.getItem('theme')).toBe('light');
     });
 });

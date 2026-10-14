@@ -38,21 +38,12 @@ vi.mock('@/features/dashboard/hooks/useStudyPlan.js', () => ({
     default: () => ({ refresh: refreshMock }),
 }));
 
-vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: vi.fn(),
-}));
-
 vi.mock('sonner', () => ({
     toast: { error: vi.fn(), success: vi.fn() },
 }));
 
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
-import {
-    getInitialSettings,
-    useSettingsStore,
-} from '@/app/stores/useSettingsStore';
-import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthEffects } from '../useAuthEffects';
 
@@ -116,7 +107,6 @@ const flush = () => new Promise<void>((res) => setTimeout(res, 0));
 beforeEach(() => {
     vi.clearAllMocks();
     authMock.callback = null;
-    (getUserProfile as Mock).mockReturnValue(null);
     useAuthStore.setState(
         { user: null, loading: true, showLogin: false, needsUsername: false },
         false
@@ -142,21 +132,16 @@ describe('subscription lifecycle', () => {
 });
 
 describe('handleSession: no session', () => {
-    it('clears user, needsUsername and loading, and removes the local profile', async () => {
-        localStorage.setItem('gate_user_profile', JSON.stringify({ id: 'u1' }));
-        useAuthStore.setState(
-            { user: { id: 'u1' } as never, needsUsername: true, loading: true },
-            false
-        );
-
+    it('sets a guest user and clears needsUsername', async () => {
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_OUT', null);
         await flush();
 
-        expect(useAuthStore.getState().user).not.toBeNull(); // Reset with Guest Profile
+        const user = useAuthStore.getState().user;
+        expect(user).not.toBeNull();
+        expect(user?.id).toBe('1');
         expect(useAuthStore.getState().needsUsername).toBe(false);
         expect(useAuthStore.getState().loading).toBe(false);
-        expect(localStorage.getItem('gate_user_profile')).not.toBeNull();
     });
 
     it('does not query the users table', async () => {
@@ -171,9 +156,6 @@ describe('handleSession: no session', () => {
 describe('handleSession: existing user', () => {
     it('fetches the profile and stores it', async () => {
         mockUsersQuery({ existingRow: makeDbRow({ id: 'u1' }) });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_IN', makeSession('u1'));
@@ -189,9 +171,6 @@ describe('handleSession: existing user', () => {
 
     it('skips the DB query when the same user is already loaded', async () => {
         mockUsersQuery({ existingRow: makeDbRow({ id: 'u1' }) });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         renderHook(() => useAuthEffects());
 
@@ -202,32 +181,11 @@ describe('handleSession: existing user', () => {
         authMock.callback!('TOKEN_REFRESHED', makeSession('u1'));
         await flush();
 
-        expect(supabase.from).toHaveBeenCalledTimes(1); // still 1
-    });
-
-    it('writes the built profile to localStorage', async () => {
-        mockUsersQuery({ existingRow: makeDbRow({ id: 'u1' }) });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
-
-        renderHook(() => useAuthEffects());
-        authMock.callback!('SIGNED_IN', makeSession('u1'));
-        await flush();
-
-        const stored = localStorage.getItem('gate_user_profile');
-        expect(stored).not.toBeNull();
-        expect(JSON.parse(stored!)).toMatchObject({
-            id: 'u1',
-            username: 'razen',
-        });
+        expect(supabase.from).toHaveBeenCalledTimes(1);
     });
 
     it('calls refresh after loading the profile', async () => {
         mockUsersQuery({ existingRow: makeDbRow({ id: 'u1' }) });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_IN', makeSession('u1'));
@@ -245,9 +203,6 @@ describe('handleSession: new user', () => {
             name: 'Boob',
         });
         mockUsersQuery({ existingRow: null, insertedRow: inserted });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_IN', makeSession('u2'));
@@ -291,9 +246,6 @@ describe('handleSession: needsUsername', () => {
                     settings: { is_beta: true },
                 }),
             });
-            (getUserProfile as Mock).mockReturnValue({
-                settings: { is_beta: true },
-            });
 
             renderHook(() => useAuthEffects());
             authMock.callback!('SIGNED_IN', makeSession(supaId));
@@ -305,10 +257,9 @@ describe('handleSession: needsUsername', () => {
 });
 
 describe('handleSession: beta mode change', () => {
-    it('re-queries the DB when the local beta state flips', async () => {
-        mockUsersQuery({ existingRow: makeDbRow({ id: 'u1' }) });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
+    it('re-queries the DB when the user settings in the auth store flip', async () => {
+        mockUsersQuery({
+            existingRow: makeDbRow({ id: 'u1', settings: { is_beta: false } }),
         });
 
         renderHook(() => useAuthEffects());
@@ -317,9 +268,15 @@ describe('handleSession: beta mode change', () => {
         await flush();
         expect(supabase.from).toHaveBeenCalledTimes(1);
 
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: true },
-        });
+        const current = useAuthStore.getState().user;
+        if (current) {
+            useAuthStore.setState({
+                user: {
+                    ...current,
+                    settings: { ...current.settings, is_beta: true },
+                } as never,
+            });
+        }
 
         authMock.callback!('TOKEN_REFRESHED', makeSession('u1'));
         await flush();
@@ -331,9 +288,6 @@ describe('handleSession: beta mode change', () => {
 describe('handleSession: errors', () => {
     it('toasts and clears loading when the DB query errors', async () => {
         mockUsersQuery({ selectError: { message: 'kaboom' } });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_IN', makeSession('u1'));
@@ -356,9 +310,6 @@ describe('unmount safety', () => {
             }
         );
         mockUsersQuery({ pendingMaybeSingle: pending });
-        (getUserProfile as Mock).mockReturnValue({
-            settings: { is_beta: false },
-        });
 
         const { unmount } = renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_IN', makeSession('u1'));
@@ -369,34 +320,6 @@ describe('unmount safety', () => {
         await flush();
 
         expect(useAuthStore.getState().user).toBeNull();
-        expect(useAuthStore.getState().loading).toBe(true); // still initial
-    });
-
-    it('hydrates the settings store with the fetched profile after login', async () => {
-        mockUsersQuery({
-            existingRow: makeDbRow({
-                settings: { is_beta: true, sound: false },
-            }),
-        });
-
-        // Force the settings store to a known "wrong" state
-        useSettingsStore.setState(
-            {
-                settings: {
-                    ...getInitialSettings(),
-                    is_beta: false,
-                    sound: true,
-                },
-            },
-            false
-        );
-
-        renderHook(() => useAuthEffects());
-        authMock.callback!('SIGNED_IN', makeSession('u1'));
-        await flush();
-
-        // THE ASSERTION THAT WOULD HAVE FAILED
-        expect(useSettingsStore.getState().settings.is_beta).toBe(true);
-        expect(useSettingsStore.getState().settings.sound).toBe(false);
+        expect(useAuthStore.getState().loading).toBe(true);
     });
 });

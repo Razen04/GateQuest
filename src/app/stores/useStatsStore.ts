@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
 import type { DashboardResponse } from '@/shared/types/StatsType.js';
-import { getUserProfile } from '@/shared/utils/helper.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { useAuthStore } from './useAuthStore.ts';
 import { useGoalStore } from './useGoalStore.ts';
 
 const STATS_TTL = 60_000;
@@ -68,7 +68,7 @@ export const useStatsStore = create<StatsState>()(
 
                 if (fresh) return;
 
-                const user = getUserProfile();
+                const user = useAuthStore.getState().user;
 
                 if (
                     !user ||

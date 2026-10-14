@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore.ts';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import type { AppUser, GuestUser } from '@/shared/types/AppUser.ts';
-import { getUserProfile } from '@/shared/utils/helper.js';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
@@ -37,16 +36,12 @@ export function useAuthEffects() {
 
                 useAuthStore.getState().setUser(guestProfile);
                 useAuthStore.getState().setNeedsUsername(false);
-                localStorage.setItem(
-                    'gate_user_profile',
-                    JSON.stringify(guestProfile)
-                );
 
                 if (isMounted) useAuthStore.getState().setLoading(false);
                 return;
             }
 
-            const localProfile = getUserProfile();
+            const localProfile = useAuthStore.getState().user;
             const currentBetaState = localProfile?.settings?.is_beta ?? false;
             const betaModeChanged =
                 lastBetaStateRef.current !== null &&
@@ -133,11 +128,6 @@ export function useAuthEffects() {
                             useAuthStore.getState().setNeedsUsername(false);
                         }
                     }
-
-                    localStorage.setItem(
-                        'gate_user_profile',
-                        JSON.stringify(profile)
-                    );
 
                     useSettingsStore.setState(
                         (state) => ({

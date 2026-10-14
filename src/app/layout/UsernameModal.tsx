@@ -84,18 +84,6 @@ export function UsernameModal() {
 
         const updatedUser = { ...user, username };
 
-        const stored = localStorage.getItem('gate_user_profile');
-        if (stored) {
-            const profile = JSON.parse(stored);
-            profile.username = username;
-            localStorage.setItem('gate_user_profile', JSON.stringify(profile));
-        } else {
-            localStorage.setItem(
-                'gate_user_profile',
-                JSON.stringify(updatedUser)
-            );
-        }
-
         setUser(updatedUser);
 
         toast.success(`Welcome to GATEQuest, @${username}!`);

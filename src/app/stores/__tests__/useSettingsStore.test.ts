@@ -1,14 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentUser } from '@/shared/api/auth';
 import type { Settings } from '@/shared/types/Settings';
-import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthStore } from '../useAuthStore';
-import { getInitialSettings, useSettingsStore } from '../useSettingsStore';
-
-vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: vi.fn(() => null),
-}));
+import { useSettingsStore } from '../useSettingsStore';
 
 vi.mock('@/shared/utils/supabaseClient', () => ({
     supabase: {
@@ -157,33 +152,16 @@ describe('handleUserAnonymity', () => {
 });
 
 describe('initial settings', () => {
-    it('merges partial profiles with default settings', () => {
-        vi.mocked(getUserProfile).mockReturnValue({
-            settings: { sound: false },
-        } as any);
-
-        const settings = getInitialSettings();
-
-        expect(settings.sound).toBe(false);
-        expect(settings.darkMode).toBe(true);
-    });
-
-    it('uses profile settings when they exist', async () => {
-        vi.resetModules();
-        vi.doMock('@/shared/utils/helper', () => ({
-            getUserProfile: () => ({
-                settings: {
-                    sound: false,
-                    darkMode: false,
-                    aiProvider: 'claude',
-                },
-            }),
-        }));
-
-        const { useSettingsStore: fresh } = await import('../useSettingsStore');
-        const s = fresh.getState().settings;
+    it('hydrates settings from the auth store', () => {
+        useAuthStore.setState({
+            user: {
+                id: 'u1',
+                settings: { sound: false, aiProvider: 'claude' },
+            } as never,
+        });
+        useSettingsStore.getState().hydrate();
+        const s = useSettingsStore.getState().settings;
         expect(s.sound).toBe(false);
-        expect(s.darkMode).toBe(false);
         expect(s.aiProvider).toBe('claude');
     });
 });

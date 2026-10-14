@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import AnimatedTabs from '@/shared/components/AnimatedTabs';
 import PageHeader from '@/shared/components/PageHeader';
@@ -25,11 +26,7 @@ import {
 import { Progress } from '@/shared/components/ui/progress';
 import useGoal from '@/shared/hooks/useGoal';
 import type { SubjectStat } from '@/shared/types/Stats';
-import {
-    getBackgroundColor,
-    getUserProfile,
-    SubjectIconMap,
-} from '@/shared/utils/helper';
+import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper';
 import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
 
 const Practice = () => {
@@ -38,8 +35,7 @@ const Practice = () => {
     const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
 
     // User profile
-    const user = getUserProfile();
-
+    const user = useAuthStore((s) => s.user);
     // Get the subjects of the branch and exams selected by the user
     const userGoal = useGoalStore((s) => s.userGoal);
     const loading = useGoalStore((s) => s.loading);

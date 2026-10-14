@@ -3,7 +3,6 @@ import { devtools } from 'zustand/middleware';
 import { getCurrentUser } from '@/shared/api/auth';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template';
 import type { Settings } from '@/shared/types/Settings';
-import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthStore } from './useAuthStore';
 
@@ -19,6 +18,17 @@ const defaultSettings: Settings = {
     is_beta: false,
 };
 
+const readStoredTheme = (): boolean | null => {
+    try {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'dark') return true;
+        if (stored === 'light') return false;
+        return null;
+    } catch {
+        return null;
+    }
+};
+
 type BooleanKeys = {
     [K in keyof Settings]: Settings[K] extends boolean ? K : never;
 }[keyof Settings];
@@ -27,6 +37,7 @@ type SettingsStore = {
     settings: Settings;
     isUpdatingSettings: boolean;
 
+    hydrate: () => void;
     setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
     toggleSetting: (key: BooleanKeys, val?: boolean) => void;
     setSettings: (settings: Settings) => void;
@@ -34,17 +45,31 @@ type SettingsStore = {
     handleUserAnonymity: (isPublic: boolean) => Promise<void>;
 };
 
-export const getInitialSettings = (): Settings => ({
-    ...defaultSettings,
-    ...getUserProfile()?.settings,
-});
-
 export const useSettingsStore = create<SettingsStore>()(
     devtools(
         (set) => ({
             // Lazy initializer
-            settings: getInitialSettings(),
+            settings: {
+                ...defaultSettings,
+                darkMode: readStoredTheme() ?? defaultSettings.darkMode,
+            },
             isUpdatingSettings: false,
+
+            hydrate: () => {
+                const user = useAuthStore.getState().user;
+                if (!user?.settings) return;
+
+                set(
+                    (state) => ({
+                        settings: {
+                            ...state.settings,
+                            ...user.settings,
+                        },
+                    }),
+                    false,
+                    'settings/hydrate'
+                );
+            },
 
             setSetting: (key, value) =>
                 set(

@@ -1,14 +1,10 @@
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
-vi.mock('@/shared/utils/helper', () => ({
-    getUserProfile: vi.fn(),
-}));
-
 vi.mock('@/shared/utils/supabaseClient', () => ({
     supabase: { rpc: vi.fn() },
 }));
 
-import { getUserProfile } from '@/shared/utils/helper';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useGoalStore } from '../useGoalStore';
 import { useStatsStore } from '../useStatsStore';
@@ -29,19 +25,14 @@ const makeDashboard = (over: Record<string, unknown> = {}) => ({
     ...over,
 });
 
-const signedInProfile = { id: 'u1', version_number: 1 };
-
-// --- reset -----------------------------------------------------------------
-// Capture the store's initial data once, restore it before every test.
-// The `false` second argument to setState is critical: it means "merge",
-// not "replace". If you pass `true`, you wipe the action functions and
-// every subsequent test crashes with "updateStats is not a function".
+const signedInUser = { id: 'u1', version_number: 1 };
 
 const initialStats = useStatsStore.getState().stats;
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (getUserProfile as Mock).mockReturnValue(null);
+
+    useAuthStore.setState({ user: null }, false);
 
     useStatsStore.setState(
         {
@@ -59,11 +50,11 @@ beforeEach(() => {
 describe('updateStats', () => {
     describe('early exits', () => {
         it.each([
-            ['no profile at all', null],
+            ['no user at all', null],
             ['guest user (id === "1")', { id: '1', version_number: 1 }],
             ['missing version_number', { id: 'u1' }],
-        ])('skips the RPC when %s', async (_, profile) => {
-            (getUserProfile as Mock).mockReturnValue(profile);
+        ])('skips the RPC when %s', async (_, user) => {
+            useAuthStore.setState({ user: user as never });
 
             await useStatsStore.getState().updateStats();
 
@@ -74,7 +65,7 @@ describe('updateStats', () => {
 
     describe('error paths', () => {
         it('leaves stats untouched when the RPC returns an error', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: null,
                 error: { message: 'boom' },
@@ -84,12 +75,11 @@ describe('updateStats', () => {
             await useStatsStore.getState().updateStats();
 
             expect(supabase.rpc).toHaveBeenCalledWith('get_my_dashboard');
-            // The store must not have replaced the object.
             expect(useStatsStore.getState().stats).toBe(before);
         });
 
         it('leaves stats untouched when the RPC returns null data', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: null,
                 error: null,
@@ -103,7 +93,7 @@ describe('updateStats', () => {
         });
 
         it('swallows a rejected RPC call and leaves stats untouched', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockRejectedValue(new Error('network'));
 
             const before = useStatsStore.getState().stats;
@@ -118,7 +108,7 @@ describe('updateStats', () => {
 
     describe('success paths', () => {
         it('applies defaults when the RPC returns an empty dashboard', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: makeDashboard(),
                 error: null,
@@ -136,7 +126,7 @@ describe('updateStats', () => {
         });
 
         it('computes progress, streaks, and study plan from the RPC response', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: makeDashboard({
                     exam_stats: {
@@ -168,7 +158,7 @@ describe('updateStats', () => {
             await useStatsStore.getState().updateStats();
 
             const { stats } = useStatsStore.getState();
-            expect(stats.progress).toBe(40); // 40 / 100
+            expect(stats.progress).toBe(40);
             expect(stats.accuracy).toBe(75);
             expect(stats.subjectStats).toEqual([{ id: 's1' }, { id: 's2' }]);
             expect(stats.subjectStatsMap).toEqual({
@@ -197,11 +187,10 @@ describe('updateStats', () => {
         });
 
         it('rounds progress to the nearest integer', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: makeDashboard({
                     exam_stats: {
-                        // 1/3 * 100 = 33.33…
                         GATE: makeExamStats({
                             overall_attempted: 1,
                             total_available: 3,
@@ -217,7 +206,7 @@ describe('updateStats', () => {
         });
 
         it('uses the user goal target exams to pick the primary exam', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             useGoalStore.setState({
                 userGoal: { target_exams: ['ese'], branch_id: 'cs' } as never,
             });
@@ -248,7 +237,7 @@ describe('updateStats', () => {
         });
 
         it('falls back to GATE when there is no user goal', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             (supabase.rpc as Mock).mockResolvedValue({
                 data: makeDashboard({
                     exam_stats: {
@@ -264,7 +253,7 @@ describe('updateStats', () => {
         });
 
         it('falls back to GATE when target_exams is not an array', async () => {
-            (getUserProfile as Mock).mockReturnValue(signedInProfile);
+            useAuthStore.setState({ user: signedInUser as never });
             useGoalStore.setState({
                 userGoal: {
                     target_exams: 'not-an-array',
