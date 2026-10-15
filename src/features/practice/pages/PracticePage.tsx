@@ -26,8 +26,40 @@ import {
 } from '@/shared/components/ui/card';
 import { Progress } from '@/shared/components/ui/progress';
 import useGoal from '@/shared/hooks/useGoal';
+import type { SubjectStat } from '@/shared/types/Stats';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper';
 import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
+
+const ExamStatTile = ({ exam, stat }: { exam: string; stat: SubjectStat }) => {
+    const progress = stat.progress ?? 0;
+    const accuracy = stat.accuracy ?? 0;
+    const attempted = stat.attempted ?? 0;
+    const total = stat.total_available ?? 0;
+
+    return (
+        <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex items-baseline justify-between gap-1 font-mono text-[10px] tabular-nums">
+                <span className="font-bold text-[11px] text-slate-900 dark:text-white">
+                    {progress}%
+                </span>
+                <span className="text-slate-400 dark:text-zinc-500 truncate">
+                    {attempted}/{total}
+                </span>
+            </div>
+
+            <Progress value={progress} className="h-1 w-full rounded-none" />
+
+            <div className="flex items-baseline justify-between gap-1 font-mono text-[9px]">
+                <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                    {exam}
+                </span>
+                <span className="text-slate-400 dark:text-zinc-500 tabular-nums">
+                    {accuracy}% accuracy
+                </span>
+            </div>
+        </div>
+    );
+};
 
 const Practice = () => {
     const navigate = useNavigate();
@@ -42,7 +74,9 @@ const Practice = () => {
     const [showGoalAlert, setShowGoalAlert] = useState(user === null);
 
     const subjects = getPracticeSubjects();
-    const subjectStats = useStatsStore((s) => s.stats.subjectStats);
+    const subjectStatsMap = useStatsStore((s) => s.stats.subjectStatsMap);
+
+    const activeExams = (userGoal?.target_exams as string[] | undefined) ?? [];
 
     useEffect(() => {
         if (!loading && subjects.length === 0) {
@@ -99,6 +133,19 @@ const Practice = () => {
     const handleSubjectSelect = (slug: string) => {
         navigate(`${slug}`);
     };
+
+    const rowsForSubject = (slug: string) =>
+        activeExams
+            .map((exam) => ({
+                exam,
+                stat: (subjectStatsMap?.[exam.toUpperCase()] ?? []).find(
+                    (s) => s.subject_slug === slug
+                ),
+            }))
+            .filter(
+                (row): row is { exam: string; stat: SubjectStat } =>
+                    row.stat !== undefined
+            );
 
     return (
         <div className="relative min-h-dvh flex flex-col select-none">
@@ -166,10 +213,8 @@ const Practice = () => {
                 >
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
                         {filteredSubjects.map((subject) => {
-                            const stat = subjectStats.find(
-                                (s) => s.subject_slug === subject.slug
-                            );
-                            const progress = stat ? stat.progress : 0;
+                            const rows = rowsForSubject(subject.slug);
+
                             const SubjectIcon = SubjectIconMap[
                                 subject.icon_name || 'default'
                             ] as React.ElementType;
@@ -190,6 +235,7 @@ const Practice = () => {
                                                     <SubjectIcon className="h-6 w-6" />
                                                 )}
                                             </div>
+
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start gap-2">
                                                     <CardTitle className="font-semibold text-base leading-snug truncate">
@@ -211,21 +257,38 @@ const Practice = () => {
                                                     </Badge>
                                                 </div>
 
-                                                <div className="mt-4 space-y-1">
-                                                    <Progress
-                                                        value={progress}
-                                                        className="h-1.5 rounded-none"
-                                                    />
-                                                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
-                                                        Progress:{' '}
-                                                        {progress.toFixed(0)}%
-                                                    </p>
+                                                {/* Per-exam stat rows */}
+                                                <div
+                                                    className="mt-4 grid grid-flow-col gap-3 overflow-x-auto no-scrollbar"
+                                                    style={{
+                                                        gridAutoColumns:
+                                                            'minmax(120px, 1fr)',
+                                                    }}
+                                                >
+                                                    {rows.length > 0 ? (
+                                                        rows.map(
+                                                            ({
+                                                                exam,
+                                                                stat,
+                                                            }) => (
+                                                                <ExamStatTile
+                                                                    key={exam}
+                                                                    exam={exam}
+                                                                    stat={stat}
+                                                                />
+                                                            )
+                                                        )
+                                                    ) : (
+                                                        <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
+                                                            Not started
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </CardHeader>
 
                                         <CardFooter
-                                            className="mt-auto p-5 pt-0"
+                                            className="mt-2 p-5 pt-0"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleSubjectSelect(

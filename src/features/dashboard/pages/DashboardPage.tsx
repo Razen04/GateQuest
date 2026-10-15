@@ -1,36 +1,26 @@
 import {
     ArrowClockwiseIcon,
     ArrowRightIcon,
-    CaretDownIcon,
     ChartLine,
     Compass,
     LightningIcon,
     Medal,
 } from '@phosphor-icons/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/stores/useAuthStore';
-import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
 // UI Components
 import Login from '@/features/auth/components/Login';
 import Branding from '@/shared/components/Branding';
 import ModernLoader from '@/shared/components/ModernLoader';
-import { Button } from '@/shared/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
 // Hooks & Utilities
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
 import StatCard from '../components/StatCard';
 import StreakMap from '../components/StreakMap';
 import StudyPlan from '../components/StudyPlan';
-import SubjectStats from '../components/SubjectStats';
 import { WebNotificationToggle } from '../components/WebNotificationToggle';
 
 const Dashboard = () => {
@@ -40,25 +30,6 @@ const Dashboard = () => {
     const statsLoading = useStatsStore((s) => s.loading);
     const user = useAuthStore((s) => s.user);
     const navigate = useNavigate();
-    const userGoal = useGoalStore((s) => s.userGoal);
-
-    const activeExams = useMemo(
-        () => (userGoal?.target_exams as string[]) || [],
-        [userGoal?.target_exams]
-    );
-
-    const [selectedExam, setSelectedExam] = useState(activeExams[0] || '');
-
-    useEffect(() => {
-        if (activeExams[0] && !selectedExam) {
-            setSelectedExam(activeExams[0]);
-        }
-    }, [activeExams, selectedExam]);
-
-    const currentSubjectStats = useMemo(
-        () => stats?.subjectStatsMap?.[selectedExam.toUpperCase()] || [],
-        [stats?.subjectStatsMap, selectedExam]
-    );
 
     useEffect(() => {
         useStatsStore.getState().updateStats();
@@ -248,77 +219,6 @@ const Dashboard = () => {
                     <StreakMap stats={stats} />
                 </section>
             )}
-
-            {/* SUBJECT ANALYTICS WITH EXAM SWITCHER */}
-            <section className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200/80 dark:border-zinc-800">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-mono">
-                            Subject Performance Overview
-                        </h2>
-                    </div>
-
-                    {/* Active Exam Switcher Dropdown */}
-                    {activeExams.length > 1 && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 gap-2 rounded-none border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-bold font-mono text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800"
-                                >
-                                    <span className="text-blue-600 dark:text-blue-400">
-                                        EXAM:
-                                    </span>
-                                    <span>{selectedExam.toUpperCase()}</span>
-                                    <CaretDownIcon size={12} weight="bold" />
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent
-                                align="end"
-                                className="w-44 rounded-none border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl"
-                            >
-                                {activeExams.map((exam) => (
-                                    <DropdownMenuItem
-                                        key={exam}
-                                        onClick={() => setSelectedExam(exam)}
-                                        className={`text-xs font-mono font-semibold rounded-none cursor-pointer ${
-                                            selectedExam === exam
-                                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                                                : 'text-slate-600 dark:text-zinc-400'
-                                        }`}
-                                    >
-                                        {exam.toUpperCase()}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    )}
-                </div>
-
-                {/* Subject Stats Grid */}
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={selectedExam}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        {currentSubjectStats.length > 0 ? (
-                            <SubjectStats subjectStats={currentSubjectStats} />
-                        ) : (
-                            <div className="p-12 text-center border border-dashed border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/30">
-                                <p className="text-sm text-slate-500 dark:text-zinc-400 font-medium">
-                                    No activity data logged yet for{' '}
-                                    {selectedExam.toUpperCase()}.
-                                </p>
-                            </div>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
-            </section>
 
             {/* Branding Footer */}
             <Branding className="w-full opacity-60 hover:opacity-100 transition-opacity" />
