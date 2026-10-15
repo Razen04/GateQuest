@@ -1,7 +1,4 @@
 import {
-    Check,
-    CircleNotch,
-    FloppyDisk,
     GraduationCap,
     IdentificationCard,
     Info,
@@ -9,23 +6,13 @@ import {
     UserGear,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
+import { useStatsStore } from '@/app/stores/useStatsStore';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { Button } from '@/shared/components/ui/button';
-import {
-    Combobox,
-    ComboboxChip,
-    ComboboxChips,
-    ComboboxChipsInput,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxItem,
-    ComboboxList,
-    ComboboxValue,
-} from '@/shared/components/ui/combobox';
 import {
     Dialog,
     DialogContent,
@@ -33,47 +20,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/shared/components/ui/select';
-import { Textarea } from '@/shared/components/ui/textarea';
-import useGoal from '@/shared/hooks/useGoal';
 import type { Settings } from '@/shared/types/Settings';
 import { syncUserToSupabase } from '@/shared/utils/helper';
 import { getSocialSettingsValue } from '../api/social-settings';
+import { GoalSettings } from '../components/GoalSettings';
+import { ProfileForm } from '../components/ProfileForm';
+import { SaveButton } from '../components/SaveButton';
 import SocialLinksDisplay from '../components/SocialLinksDisplay';
 import SocialSettingsForm from '../components/SocialSettingsForm';
-
-type FormFieldProps = {
-    label: string;
-    tag?: string;
-    children: React.ReactNode;
-    className?: string;
-};
-
-const FormField = ({ label, tag, children, className }: FormFieldProps) => (
-    <div className={`group relative space-y-2 ${className || ''}`}>
-        <div className="flex items-center justify-between">
-            <Label className="font-['Space_Grotesk',sans-serif] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                {label}
-            </Label>
-            {tag && (
-                <span className="font-['JetBrains_Mono',monospace] text-[10px] font-medium text-slate-400">
-                    {tag}
-                </span>
-            )}
-        </div>
-        {children}
-    </div>
-);
 
 const AccountSettings = () => {
     const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
@@ -81,30 +35,42 @@ const AccountSettings = () => {
     const setUser = useAuthStore((s) => s.setUser);
     const { invalidateCache } = useProfile(user?.username);
 
+    const userGoal = useGoalStore((s) => s.userGoal);
+    const setInitialGoal = useGoalStore((s) => s.setInitialGoal);
+    const goalsLoading = useGoalStore((s) => s.loading);
+
+    // Profile state
     const [name, setName] = useState(user?.name || '');
     const [college, setCollege] = useState(user?.college || '');
     const [about, setAbout] = useState(user?.about || '');
     const [targetYear, setTargetYear] = useState(user?.targetYear ?? 2027);
-    const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
-    const userSettings = user?.settings as Settings | undefined;
 
-    const userGoal = useGoalStore((s) => s.userGoal);
-    const branches = useGoalStore((s) => s.branches);
-    const exams = useGoalStore((s) => s.exams);
-    const branchExams = useGoalStore((s) => s.branchExams);
-    const setInitialGoal = useGoalStore((s) => s.setInitialGoal);
-    const goalsLoading = useGoalStore((s) => s.loading);
-    const { optionalSubjects } = useGoal();
-
-    const [tempBranch, setTempBranch] = useState<string>('');
+    // Goal state
+    const [tempBranch, setTempBranch] = useState('');
     const [tempExams, setTempExams] = useState<string[]>([]);
     const [tempAdditionalSubjects, setTempAdditionalSubjects] = useState<
         string[]
     >([]);
+
+    // Save / UI state
     const [isSaving, setIsSaving] = useState(false);
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [openSocialSettings, setOpenSocialSettings] = useState(false);
+    const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
 
+    const userSettings = user?.settings as Settings | undefined;
+
+    // Sync goal state from the store
+    useEffect(() => {
+        if (!userGoal) return;
+        setTempBranch(userGoal.branch_id);
+        setTempExams((userGoal.target_exams as string[]) || []);
+        setTempAdditionalSubjects(
+            (userGoal.additional_subjects as string[] | null) ?? []
+        );
+    }, [userGoal]);
+
+    // Fetch social links
     useEffect(() => {
         const fetchSocialLinks = async () => {
             if (!user?.id || user.id === '1') return;
@@ -121,31 +87,10 @@ const AccountSettings = () => {
         fetchSocialLinks();
     }, [user, openSocialSettings]);
 
-    const availableExams = useMemo(() => {
-        if (!tempBranch) return [];
-        const validExamIds = branchExams
-            .filter((be) => be.branch_id === tempBranch)
-            .map((be) => be.exam_id);
-
-        return exams.filter((e) => validExamIds.includes(e.id));
-    }, [tempBranch, branchExams, exams]);
-
     const handleBranchChange = (newBranch: string) => {
         setTempBranch(newBranch);
         setTempExams([]);
     };
-
-    useEffect(() => {
-        if (userGoal) {
-            setTempBranch(userGoal.branch_id);
-            setTempExams((userGoal?.target_exams as string[]) || []);
-
-            const savedSubjects =
-                (userGoal.additional_subjects as string[] | null) ?? [];
-
-            setTempAdditionalSubjects(savedSubjects);
-        }
-    }, [userGoal]);
 
     const handleSaveButton = async () => {
         if (!user) return;
@@ -159,7 +104,6 @@ const AccountSettings = () => {
             return;
         }
 
-        // GATE XL requires exactly 2 optional subjects.
         const isGateXL = tempBranch === 'xl' && tempExams.includes('gate');
 
         if (isGateXL && tempAdditionalSubjects.length !== 2) {
@@ -179,6 +123,7 @@ const AccountSettings = () => {
             };
 
             setUser(updated);
+            useStatsStore.getState().markStatsStale();
 
             if (tempBranch) {
                 await setInitialGoal(
@@ -215,7 +160,6 @@ const AccountSettings = () => {
 
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-5">
-                        {/* Avatar */}
                         <div className="relative shrink-0">
                             <div className="flex h-16 w-16 items-center justify-center overflow-hidden border border-slate-900/10 bg-white shadow-md transition-transform duration-300 hover:scale-105 dark:border-white/20 dark:bg-white/10">
                                 {user?.avatar ? (
@@ -230,7 +174,6 @@ const AccountSettings = () => {
                             </div>
                         </div>
 
-                        {/* Info details */}
                         <div className="space-y-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
                                 <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -269,7 +212,6 @@ const AccountSettings = () => {
                         </div>
                     </div>
 
-                    {/* Action button */}
                     {userSettings?.is_beta && (
                         <Button
                             onClick={() => setOpenSocialSettings(true)}
@@ -284,8 +226,6 @@ const AccountSettings = () => {
                     )}
                 </div>
 
-                {/* NOTE: This is currently in beta. */}
-                {/* About Display */}
                 {user?.about && user?.settings?.is_beta && (
                     <div className="mt-4 pt-3 border-t border-slate-900/5 dark:border-white/10">
                         <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -298,7 +238,6 @@ const AccountSettings = () => {
                     </div>
                 )}
 
-                {/* Social links row */}
                 {userSettings?.is_beta && (
                     <>
                         <div className="my-4 h-px bg-slate-900/5 dark:bg-white/10" />
@@ -309,7 +248,7 @@ const AccountSettings = () => {
                 )}
             </motion.div>
 
-            {/* Social Settings Modal Dialog */}
+            {/* Social Settings Modal */}
             <Dialog
                 open={openSocialSettings}
                 onOpenChange={setOpenSocialSettings}
@@ -329,322 +268,67 @@ const AccountSettings = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Form Fields Matrix */}
+            {/* Form Sections */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="space-y-6"
+                className="space-y-8"
             >
-                <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
-                    <IdentificationCard size={18} className="text-[#2A5CFF]" />
-                    <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                        Personal Dossier Settings
-                    </h4>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormField label="Full Name" tag="// IDENTITY">
-                        <Input
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            disabled={isSaving}
-                            className="h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold rounded-none transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                <section className="space-y-6">
+                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                        <IdentificationCard
+                            size={18}
+                            className="text-[#2A5CFF]"
                         />
-                    </FormField>
-
-                    <FormField label="Email Address" tag="// VERIFIED">
-                        <Input
-                            type="email"
-                            value={user?.email ?? ''}
-                            placeholder="your.email@example.com"
-                            disabled
-                            className="h-11 cursor-not-allowed border-slate-900/10 bg-slate-100/50 font-['JetBrains_Mono',monospace] rounded-none text-xs text-slate-500 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-400"
-                        />
-                    </FormField>
-
-                    <FormField
-                        label="College / University"
-                        tag="// ACADEMIC_INST"
-                    >
-                        <Input
-                            type="text"
-                            value={college}
-                            onChange={(e) => setCollege(e.target.value)}
-                            placeholder="Your Institution"
-                            disabled={isSaving}
-                            className="h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm font-semibold transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
-                        />
-                    </FormField>
-
-                    <FormField label="Target Exam Year" tag="// TIMELINE">
-                        <Select
-                            onValueChange={(e) => setTargetYear(Number(e))}
-                            value={String(targetYear)}
-                            disabled={isSaving}
-                        >
-                            <SelectTrigger className="rounded-none h-11 border-slate-900/10 bg-white/50 font-['JetBrains_Mono',monospace] text-sm font-bold dark:border-white/10 dark:bg-white/[0.03] dark:text-white">
-                                <SelectValue placeholder="Select target year" />
-                            </SelectTrigger>
-                            <SelectContent className="border-slate-900/10 bg-white/90 rounded-none backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                {[2027, 2028, 2029, 2030].map((year) => (
-                                    <SelectItem
-                                        key={year}
-                                        value={String(year)}
-                                        className="font-['JetBrains_Mono',monospace] rounded-none"
-                                    >
-                                        {year} Batch
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </FormField>
-
-                    <FormField label="Academic Branch" tag="// GOAL_BRANCH">
-                        <Select
-                            value={tempBranch}
-                            onValueChange={handleBranchChange}
-                            disabled={goalsLoading || isSaving}
-                        >
-                            <SelectTrigger className="rounded-none h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold dark:border-white/10 dark:bg-white/[0.03] dark:text-white">
-                                <SelectValue
-                                    placeholder={
-                                        goalsLoading
-                                            ? 'Loading branches...'
-                                            : 'Select engineering branch'
-                                    }
-                                />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-none border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                <SelectGroup>
-                                    <SelectLabel className="rounded-none font-['JetBrains_Mono',monospace] text-[10px] uppercase text-slate-400">
-                                        Engineering Branches
-                                    </SelectLabel>
-                                    {branches.map((b) => (
-                                        <SelectItem key={b.id} value={b.id}>
-                                            {b.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </FormField>
-
-                    <div className="flex flex-col gap-2">
-                        <FormField
-                            label="Target Examinations"
-                            tag="// MULTI_SELECT"
-                        >
-                            <Combobox
-                                items={availableExams}
-                                multiple
-                                value={tempExams}
-                                onValueChange={setTempExams}
-                                disabled={goalsLoading || isSaving}
-                            >
-                                <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
-                                    <ComboboxValue>
-                                        {tempExams.map((id) => {
-                                            const exam = exams.find(
-                                                (e) => e.id === id
-                                            );
-                                            if (!exam) return null;
-
-                                            return (
-                                                <ComboboxChip
-                                                    key={exam.id}
-                                                    showRemove
-                                                    className="bg-[#2A5CFF]/10 rounded-none font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
-                                                >
-                                                    {exam.short_name}
-                                                </ComboboxChip>
-                                            );
-                                        })}
-                                    </ComboboxValue>
-
-                                    <ComboboxChipsInput
-                                        placeholder={
-                                            tempExams.length === 0
-                                                ? 'Select target exams...'
-                                                : ''
-                                        }
-                                        className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-slate-700 dark:text-slate-300"
-                                    />
-                                </ComboboxChips>
-
-                                <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                    <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
-                                        No matching exams found. Select a branch
-                                        first.
-                                    </ComboboxEmpty>
-                                    <ComboboxList>
-                                        {(exam) => (
-                                            <ComboboxItem
-                                                key={exam.id}
-                                                value={exam.id}
-                                                className="font-['Space_Grotesk',sans-serif] text-xs"
-                                            >
-                                                {exam.short_name}
-                                            </ComboboxItem>
-                                        )}
-                                    </ComboboxList>
-                                </ComboboxContent>
-                            </Combobox>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                Selecting multiple exams automatically merges
-                                relevant syllabi into your custom practice
-                                modules.
-                            </p>
-                        </FormField>
-
-                        {tempBranch === 'xl' && tempExams.includes('gate') && (
-                            <FormField
-                                label="Optional Subjects"
-                                tag="// MULTI_SELECT"
-                            >
-                                <Combobox
-                                    items={optionalSubjects}
-                                    multiple
-                                    value={tempAdditionalSubjects}
-                                    onValueChange={(values) => {
-                                        if (values.length <= 2) {
-                                            setTempAdditionalSubjects(values);
-                                        }
-                                    }}
-                                    disabled={goalsLoading || isSaving}
-                                >
-                                    <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
-                                        <ComboboxValue>
-                                            {(values) =>
-                                                values.map((id) => {
-                                                    const subject =
-                                                        optionalSubjects.find(
-                                                            (s) => s.id === id
-                                                        );
-
-                                                    if (!subject) return null;
-
-                                                    return (
-                                                        <ComboboxChip
-                                                            key={id}
-                                                            showRemove
-                                                            className="rounded-none bg-[#2A5CFF]/10 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
-                                                        >
-                                                            {subject.name}
-                                                        </ComboboxChip>
-                                                    );
-                                                })
-                                            }
-                                        </ComboboxValue>
-
-                                        <ComboboxChipsInput
-                                            placeholder={
-                                                tempAdditionalSubjects.length >=
-                                                2
-                                                    ? ''
-                                                    : 'Select 2 subjects...'
-                                            }
-                                            className="rounded-none font-['Space_Grotesk',sans-serif] text-xs text-slate-700 dark:text-slate-300"
-                                        />
-                                    </ComboboxChips>
-
-                                    <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                        <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
-                                            No optional subjects found.
-                                        </ComboboxEmpty>
-
-                                        <ComboboxList>
-                                            {(subject) => {
-                                                const isSelected =
-                                                    tempAdditionalSubjects.includes(
-                                                        subject.id
-                                                    );
-
-                                                const maxReached =
-                                                    tempAdditionalSubjects.length >=
-                                                    2;
-
-                                                return (
-                                                    <ComboboxItem
-                                                        key={subject.id}
-                                                        value={subject.id}
-                                                        disabled={
-                                                            !isSelected &&
-                                                            maxReached
-                                                        }
-                                                        className="font-['Space_Grotesk',sans-serif] text-xs"
-                                                    >
-                                                        {subject.name}
-                                                    </ComboboxItem>
-                                                );
-                                            }}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                    Choose exactly 2 subjects.
-                                </p>
-                            </FormField>
-                        )}
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                            Personal Dossier Settings
+                        </h4>
                     </div>
 
-                    {/* NOTE: This is currently in beta. */}
-                    {/* About Section */}
-                    {user?.settings?.is_beta && (
-                        <FormField
-                            label="About / Bio"
-                            tag="// BIOGRAPHY"
-                            className="md:col-span-2"
-                        >
-                            <Textarea
-                                value={about}
-                                onChange={(e) => setAbout(e.target.value)}
-                                maxLength={100}
-                                placeholder="Write a brief intro about your background, interests, or study goals..."
-                                disabled={isSaving}
-                                rows={3}
-                                className="resize-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
-                            />
-                            <div className="flex justify-end text-xs text-slate-400">
-                                {about.length}/100
-                            </div>
-                        </FormField>
-                    )}
-                </div>
+                    <ProfileForm
+                        name={name}
+                        onNameChange={setName}
+                        email={user?.email ?? ''}
+                        college={college}
+                        onCollegeChange={setCollege}
+                        targetYear={targetYear}
+                        onTargetYearChange={setTargetYear}
+                        about={about}
+                        onAboutChange={setAbout}
+                        disabled={isSaving}
+                        isBeta={!!userSettings?.is_beta}
+                    />
+                </section>
 
-                {/* Save CTA */}
-                <div className="pt-4">
-                    <Button
-                        onClick={handleSaveButton}
-                        disabled={isSaving || goalsLoading}
-                        className={`rounded-none group relative flex h-12 w-full items-center justify-center gap-2 font-['Space_Grotesk',sans-serif] text-sm font-bold text-white transition-all md:w-auto md:min-w-[200px] ${
-                            savedSuccess
-                                ? 'bg-emerald-600 hover:bg-emerald-700'
-                                : 'bg-[#2A5CFF] hover:bg-[#2A5CFF]/90 hover:shadow-lg hover:shadow-[#2A5CFF]/20 active:scale-[0.99]'
-                        }`}
-                    >
-                        {isSaving ? (
-                            <>
-                                <CircleNotch
-                                    className="animate-spin"
-                                    size={18}
-                                />
-                                <span>Syncing Changes...</span>
-                            </>
-                        ) : savedSuccess ? (
-                            <>
-                                <Check size={18} weight="bold" />
-                                <span>Changes Saved</span>
-                            </>
-                        ) : (
-                            <>
-                                <FloppyDisk size={18} />
-                                <span>Save Profile Changes</span>
-                            </>
-                        )}
-                    </Button>
-                </div>
+                <section className="space-y-6">
+                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                        <IdentificationCard
+                            size={18}
+                            className="text-[#2A5CFF]"
+                        />
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                            Goal Configuration
+                        </h4>
+                    </div>
+
+                    <GoalSettings
+                        branch={tempBranch}
+                        onBranchChange={handleBranchChange}
+                        selectedExams={tempExams}
+                        onExamsChange={setTempExams}
+                        additionalSubjects={tempAdditionalSubjects}
+                        onAdditionalSubjectsChange={setTempAdditionalSubjects}
+                        disabled={isSaving}
+                    />
+                </section>
+
+                <SaveButton
+                    isSaving={isSaving}
+                    savedSuccess={savedSuccess}
+                    disabled={isSaving || goalsLoading}
+                    onClick={handleSaveButton}
+                />
             </motion.div>
         </div>
     );
