@@ -61,15 +61,6 @@ const Dashboard = () => {
     );
 
     useEffect(() => {
-        if (currentSubjectStats.length) {
-            localStorage.setItem(
-                'subjectStats',
-                JSON.stringify(currentSubjectStats)
-            );
-        }
-    }, [currentSubjectStats]);
-
-    useEffect(() => {
         useStatsStore.getState().updateStats();
     }, []);
 

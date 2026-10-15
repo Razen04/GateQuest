@@ -19,7 +19,6 @@ export function usePeerBenchmark(questionId: string | number, enable: boolean) {
         const strQuestionId = String(questionId);
 
         if (!UUID_REGEX.test(strQuestionId)) return;
-        console.log('Enable value: ', enable);
         if (!enable) return;
 
         let isMounted = true;

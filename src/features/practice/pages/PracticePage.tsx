@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
+import { useStatsStore } from '@/app/stores/useStatsStore';
 import AnimatedTabs from '@/shared/components/AnimatedTabs';
 import PageHeader from '@/shared/components/PageHeader';
 import {
@@ -25,14 +26,12 @@ import {
 } from '@/shared/components/ui/card';
 import { Progress } from '@/shared/components/ui/progress';
 import useGoal from '@/shared/hooks/useGoal';
-import type { SubjectStat } from '@/shared/types/Stats';
 import { getBackgroundColor, SubjectIconMap } from '@/shared/utils/helper';
 import { fadeInUp, stagger } from '@/shared/utils/motionVariants';
 
 const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
-    const [subjectStats, setSubjectStats] = useState<SubjectStat[]>([]);
 
     // User profile
     const user = useAuthStore((s) => s.user);
@@ -43,6 +42,7 @@ const Practice = () => {
     const [showGoalAlert, setShowGoalAlert] = useState(user === null);
 
     const subjects = getPracticeSubjects();
+    const subjectStats = useStatsStore((s) => s.stats.subjectStats);
 
     useEffect(() => {
         if (!loading && subjects.length === 0) {
@@ -88,14 +88,6 @@ const Practice = () => {
             id: 'aptitude',
         },
     ];
-
-    // Load subject stats
-    useEffect(() => {
-        const storedStats = localStorage.getItem('subjectStats');
-        if (storedStats) {
-            setSubjectStats(JSON.parse(storedStats));
-        }
-    }, []);
 
     // Filter subjects based on active tab
     const filteredSubjects = subjects.filter((subject) => {

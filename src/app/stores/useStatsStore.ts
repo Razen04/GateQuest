@@ -133,18 +133,6 @@ export const useStatsStore = create<StatsState>()(
 
                     const defaultSubjectStats = primaryExamStats.subjects || [];
 
-                    try {
-                        localStorage.setItem(
-                            'subjectStats',
-                            JSON.stringify(defaultSubjectStats)
-                        );
-                    } catch (e) {
-                        console.warn(
-                            'Failed to save subjectStats to localStorage',
-                            e
-                        );
-                    }
-
                     const totalQuestions =
                         primaryExamStats.total_available || 0;
                     const uniqueAttemptCount =

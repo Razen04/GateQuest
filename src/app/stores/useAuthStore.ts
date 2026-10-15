@@ -8,7 +8,6 @@ import { appStorage } from '@/storage/storageService';
 const STALE_KEYS = [
     'last_checked_notification',
     'peer_benchmark_details',
-    'subjectStats',
     'repo_stars',
     'weekly_set_info',
 ] as const;
