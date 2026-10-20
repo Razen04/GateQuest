@@ -11,5 +11,11 @@ export default defineConfig({
     test: {
         environment: 'jsdom',
         setupFiles: ['./src/test/setup.ts'],
+        exclude: [
+            '**/node_modules/**',
+            '**/dist/**',
+            '**/.{idea,git,cache,output,temp}/**',
+            'supabase/functions/**', // handled by Deno
+        ],
     },
 });

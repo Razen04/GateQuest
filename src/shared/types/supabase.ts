@@ -204,28 +204,73 @@ export type Database = {
                     },
                 ];
             };
+            notification_reads: {
+                Row: {
+                    notification_id: string;
+                    read_at: string;
+                    user_id: string;
+                };
+                Insert: {
+                    notification_id: string;
+                    read_at?: string;
+                    user_id: string;
+                };
+                Update: {
+                    notification_id?: string;
+                    read_at?: string;
+                    user_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'notification_reads_notification_id_fkey';
+                        columns: ['notification_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'notifications';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'notification_reads_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'users';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
             notifications: {
                 Row: {
                     active: boolean | null;
+                    audience_ids: string[] | null;
                     created_at: string;
+                    dispatched_at: string | null;
                     id: string;
+                    link: string | null;
                     message: string | null;
+                    target: Json;
                     title: string | null;
                     type: string | null;
                 };
                 Insert: {
                     active?: boolean | null;
+                    audience_ids?: string[] | null;
                     created_at?: string;
+                    dispatched_at?: string | null;
                     id?: string;
+                    link?: string | null;
                     message?: string | null;
+                    target?: Json;
                     title?: string | null;
                     type?: string | null;
                 };
                 Update: {
                     active?: boolean | null;
+                    audience_ids?: string[] | null;
                     created_at?: string;
+                    dispatched_at?: string | null;
                     id?: string;
+                    link?: string | null;
                     message?: string | null;
+                    target?: Json;
                     title?: string | null;
                     type?: string | null;
                 };
@@ -811,6 +856,7 @@ export type Database = {
                     is_public: boolean | null;
                     joined_at: string;
                     name: string | null;
+                    notification_tags: string[];
                     settings: Json | null;
                     show_name: boolean | null;
                     targetYear: number | null;
@@ -829,6 +875,7 @@ export type Database = {
                     is_public?: boolean | null;
                     joined_at?: string;
                     name?: string | null;
+                    notification_tags?: string[];
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
@@ -847,6 +894,7 @@ export type Database = {
                     is_public?: boolean | null;
                     joined_at?: string;
                     name?: string | null;
+                    notification_tags?: string[];
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
@@ -1198,6 +1246,11 @@ export type Database = {
             };
             refresh_dynamic_difficulty: { Args: never; Returns: undefined };
             refresh_question_peer_stats: { Args: never; Returns: undefined };
+            resolve_notification_target: {
+                Args: { p_target: Json };
+                Returns: string[];
+            };
+            resolve_segment: { Args: { p_target: Json }; Returns: string[] };
             start_weekly_revision_set: {
                 Args: { v_set_id: string };
                 Returns: Json;
