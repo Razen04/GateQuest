@@ -1,5 +1,4 @@
-import { SupabaseClient } from 'npm:@supabase/supabase-js';
-import webpush from 'npm:web-push';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js';
 import { WEEKLY_PAYLOADS } from '../payloads/weeklyTestPayloads.ts';
 
 interface TopicTestReminderArgs {
@@ -21,86 +20,29 @@ export const handleTopicTestReminder = async ({
     supabaseAdmin,
     corsHeaders,
 }: TopicTestReminderArgs) => {
-    // Query the view to directly get this week users to notify
-    const { data: subscriptionsToNotify, error: queryErr } = await supabaseAdmin
-        .from('active_weekend_subscriptions')
-        .select('*');
-
-    if (queryErr) throw queryErr;
-
-    if (!subscriptionsToNotify || subscriptionsToNotify.length === 0) {
-        return new Response(
-            JSON.stringify({
-                message: 'No active subscribers found for this weekend.',
-            }),
-            {
-                status: 200,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            }
-        );
-    }
-
     const weekIndex = getWeekNumber(new Date()) - 1;
     const selectedCopy = WEEKLY_PAYLOADS[weekIndex % WEEKLY_PAYLOADS.length];
 
-    const payload = JSON.stringify({
-        title: selectedCopy.title,
-        body: selectedCopy.body,
-        url: '/topic-test',
-    });
-
-    const CHUNK_SIZE = 50;
-    const MAX_CONCURRENT_CHUNKS = 10;
-    let successfulPings = 0;
-    const deadEndpoints: string[] = [];
-
-    const chunks = [];
-    for (let i = 0; i < subscriptionsToNotify.length; i += CHUNK_SIZE) {
-        chunks.push(subscriptionsToNotify.slice(i, i + CHUNK_SIZE));
-    }
-
-    const processChunk = async (chunk: typeof subscriptionsToNotify) => {
-        const promises = chunk.map(async (sub) => {
-            try {
-                await webpush.sendNotification(
-                    {
-                        endpoint: sub.endpoint,
-                        keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
-                    },
-                    payload
-                );
-                successfulPings++;
-            } catch (err) {
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    deadEndpoints.push(sub.endpoint); // Queue for bulk deletion
-                }
-            }
+    // The 'active_weekend' segment resolves to users who attempted in the
+    // last 14 days. Resolution happens at trigger time via resolve_segment().
+    // If nobody matches, the trigger sets audience_ids = [] and the dispatcher
+    // skips delivery — no push is sent, but the row exists for auditability.
+    const { error: insertErr } = await supabaseAdmin
+        .from('notifications')
+        .insert({
+            title: selectedCopy.title,
+            message: selectedCopy.body,
+            link: '/topic-test',
+            type: 'reminder',
+            target: { type: 'segment', segment: 'active_weekend' },
         });
-        await Promise.allSettled(promises);
-    };
 
-    // Execute chunks in parallel pools of 10
-    for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CHUNKS) {
-        const pool = chunks
-            .slice(i, i + MAX_CONCURRENT_CHUNKS)
-            .map(processChunk);
-        await Promise.all(pool);
-    }
-
-    // Bulk delete all dead tokens in exactly ONE database call
-    if (deadEndpoints.length > 0) {
-        console.warn(`Bulk deleting ${deadEndpoints.length} dead tokens...`);
-        await supabaseAdmin
-            .from('push_subscriptions')
-            .delete()
-            .in('endpoint', deadEndpoints);
-    }
+    if (insertErr) throw insertErr;
 
     return new Response(
         JSON.stringify({
             success: true,
-            processed: subscriptionsToNotify.length,
-            delivered: successfulPings,
+            message: 'Weekend topic test notification created.',
         }),
         {
             status: 200,

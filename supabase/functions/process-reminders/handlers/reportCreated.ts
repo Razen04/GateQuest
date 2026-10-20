@@ -1,5 +1,4 @@
-import { SupabaseClient } from 'npm:@supabase/supabase-js';
-import webpush from 'npm:web-push';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js';
 
 interface ReportCreatedArgs {
     req: Request;
@@ -7,34 +6,19 @@ interface ReportCreatedArgs {
     corsHeaders: Record<string, string>;
 }
 
+const ADMIN_REPORTS_URL =
+    'https://supabase.com/dashboard/project/zewzixicpoxirmouyeje/editor/86578?schema=public';
+
 export const handleReportCreated = async ({
     req,
     supabaseAdmin,
     corsHeaders,
 }: ReportCreatedArgs) => {
-    const ADMIN_USER_ID = Deno.env.get('ADMIN_USER_ID');
+    const adminUserId = Deno.env.get('ADMIN_USER_ID');
 
-    if (!ADMIN_USER_ID) {
+    if (!adminUserId) {
         throw new Error(
             'ADMIN_USER_ID is missing from the environment variables.'
-        );
-    }
-
-    const { data: adminSubs, error: adminErr } = await supabaseAdmin
-        .from('push_subscriptions')
-        .select('endpoint, auth_key, p256dh_key')
-        .eq('user_id', ADMIN_USER_ID);
-
-    if (adminErr) throw adminErr;
-    if (!adminSubs || adminSubs.length === 0) {
-        return new Response(
-            JSON.stringify({
-                message: 'Admin token missing from push subscriptions table.',
-            }),
-            {
-                status: 200,
-                headers: corsHeaders,
-            }
         );
     }
 
@@ -42,42 +26,25 @@ export const handleReportCreated = async ({
     const sampleDetails =
         record?.report_text || 'No additional notes provided.';
 
-    const adminPayload = JSON.stringify({
-        title: 'New Report Filed!',
-        body: `Issue: "${sampleDetails.substring(0, 50)}...". Check table editor.`,
-        url: 'https://supabase.com/dashboard/project/zewzixicpoxirmouyeje/editor/86578?schema=public',
-    });
+    const { error: insertErr } = await supabaseAdmin
+        .from('notifications')
+        .insert({
+            title: 'New Report Filed!',
+            message: `Issue: "${sampleDetails.substring(0, 50)}...". Check table editor.`,
+            link: ADMIN_REPORTS_URL,
+            target: { type: 'user', user_id: adminUserId },
+        });
 
-    for (const sub of adminSubs) {
-        try {
-            await webpush.sendNotification(
-                {
-                    endpoint: sub.endpoint,
-                    keys: {
-                        auth: sub.auth_key,
-                        p256dh: sub.p256dh_key,
-                    },
-                },
-                adminPayload
-            );
-        } catch (err) {
-            if (err.statusCode === 410 || err.statusCode === 404) {
-                await supabaseAdmin
-                    .from('push_subscriptions')
-                    .delete()
-                    .eq('endpoint', sub.endpoint);
-            }
-        }
-    }
+    if (insertErr) throw insertErr;
 
     return new Response(
         JSON.stringify({
             success: true,
-            message: 'Admin alert delivered.',
+            message: 'Admin alert notification created.',
         }),
         {
             status: 200,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
     );
 };
