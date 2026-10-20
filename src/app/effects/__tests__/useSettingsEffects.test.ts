@@ -5,6 +5,14 @@ vi.mock('@/shared/utils/helper', () => ({
     syncUserToSupabase: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('@/shared/utils/supabaseClient', () => ({
+    supabase: {
+        auth: { onAuthStateChange: vi.fn(), signOut: vi.fn() },
+        from: vi.fn(),
+        rpc: vi.fn(),
+    },
+}));
+
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { syncUserToSupabase } from '@/shared/utils/helper';

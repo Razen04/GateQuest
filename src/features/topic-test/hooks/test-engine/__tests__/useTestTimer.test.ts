@@ -2,6 +2,14 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import useTestTimer from '@/features/topic-test/hooks/test-engine/useTestTimer';
 
+vi.mock('@/shared/utils/supabaseClient', () => ({
+    supabase: {
+        auth: { onAuthStateChange: vi.fn(), signOut: vi.fn() },
+        from: vi.fn(),
+        rpc: vi.fn(),
+    },
+}));
+
 describe('useTestTimer hook', () => {
     beforeEach(() => {
         vi.useFakeTimers();
