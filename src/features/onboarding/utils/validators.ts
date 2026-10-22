@@ -11,15 +11,73 @@ const URL_MAX = 200;
 
 const TARGET_YEAR_SPAN = 5;
 
+export const RESERVED_WORDS = [
+    'admin',
+    'administrator',
+    'root',
+    'system',
+    'support',
+    'help',
+    'staff',
+    'team',
+    'official',
+    'mod',
+    'moderator',
+
+    'gatequest',
+    'gate',
+
+    'login',
+    'logout',
+    'signin',
+    'signup',
+    'register',
+    'account',
+    'settings',
+    'profile',
+    'dashboard',
+
+    'api',
+    'rpc',
+    'graphql',
+    'public',
+    'private',
+
+    'me',
+    'self',
+    'user',
+    'users',
+    'guest',
+    'anonymous',
+
+    'founder',
+    'owner',
+    'ceo',
+    'developer',
+    'dev',
+
+    'leaderboard',
+    'rankings',
+    'exams',
+    'subjects',
+    'questions',
+    'practice',
+    'mocktest',
+    'tests',
+];
+
 export const validateUsername = (value: string): ValidationError => {
     const trimmed = value.trim();
+
     if (!trimmed) return 'Username is required.';
     if (trimmed.length < USERNAME_MIN)
         return `Must be at least ${USERNAME_MIN} characters.`;
     if (trimmed.length > USERNAME_MAX)
         return `Must be at most ${USERNAME_MAX} characters.`;
     if (!USERNAME_PATTERN.test(trimmed))
-        return 'Only letters, numbers, and underscores.';
+        return 'Only lowercase letters, numbers, and underscores.';
+    if (RESERVED_WORDS.includes(trimmed)) return 'This username is reserved.';
+
     return null;
 };
 
