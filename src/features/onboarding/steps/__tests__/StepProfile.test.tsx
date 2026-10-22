@@ -85,7 +85,7 @@ describe('StepProfile', () => {
         it('disables Next when full name is empty', () => {
             renderStep({
                 defaultValue: {
-                    username: 'user',
+                    username: 'user1',
                     fullName: '',
                     email: 'x@x.com',
                     college: '',
@@ -117,7 +117,7 @@ describe('StepProfile', () => {
         it('enables Next when required fields are filled', () => {
             renderStep({
                 defaultValue: {
-                    username: 'user',
+                    username: 'user2',
                     fullName: 'X',
                     email: 'x@x.com',
                     college: '',
@@ -134,7 +134,7 @@ describe('StepProfile', () => {
             const user = userEvent.setup();
             renderStep({
                 defaultValue: {
-                    username: 'user',
+                    username: 'user3',
                     fullName: 'X',
                     email: 'x@x.com',
                     college: '',
@@ -145,7 +145,7 @@ describe('StepProfile', () => {
             await user.click(screen.getByRole('button', { name: /next/i }));
             expect(mockOnNext).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    username: 'user',
+                    username: 'user3',
                     fullName: 'X',
                     about: 'bio',
                 })
@@ -199,7 +199,7 @@ describe('StepProfile', () => {
         it('allows skipping socials (Next enabled with all empty)', () => {
             renderStep({
                 defaultValue: {
-                    username: 'user',
+                    username: 'user4',
                     fullName: 'X',
                     email: 'x@x.com',
                     college: '',
