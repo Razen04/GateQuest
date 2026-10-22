@@ -857,6 +857,7 @@ export type Database = {
                     joined_at: string;
                     name: string | null;
                     notification_tags: string[];
+                    onboarding_completed: boolean;
                     settings: Json | null;
                     show_name: boolean | null;
                     targetYear: number | null;
@@ -876,6 +877,7 @@ export type Database = {
                     joined_at?: string;
                     name?: string | null;
                     notification_tags?: string[];
+                    onboarding_completed?: boolean;
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
@@ -895,6 +897,7 @@ export type Database = {
                     joined_at?: string;
                     name?: string | null;
                     notification_tags?: string[];
+                    onboarding_completed?: boolean;
                     settings?: Json | null;
                     show_name?: boolean | null;
                     targetYear?: number | null;
