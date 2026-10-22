@@ -105,6 +105,8 @@ bucket_rev as (
         pool
     where
         is_revision
+        and (p_already_attempted_questions
+            or not is_attempted)
         and id not in (
             select
                 id
