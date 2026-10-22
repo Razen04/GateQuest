@@ -41,7 +41,6 @@ const initialState = {
     user: null,
     loading: true,
     showLogin: false,
-    needsUsername: false,
 };
 
 beforeEach(() => {

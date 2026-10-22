@@ -210,47 +210,43 @@ const PrivacySettings = () => {
                             </AlertDialog>
                         )}
 
-                        {/* Delete Account Trigger (Beta) */}
-                        {userSettings?.is_beta && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="h-12 w-full justify-start gap-2.5 border-red-500/20 bg-red-500/5 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-red-600 hover:bg-red-500/10 dark:border-red-500/30 dark:text-red-400"
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="h-12 w-full justify-start gap-2.5 border-red-500/20 bg-red-500/5 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-red-600 hover:bg-red-500/10 dark:border-red-500/30 dark:text-red-400"
+                                >
+                                    <Trash size={18} />
+                                    Delete Account
+                                </Button>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent className="border-red-500/30 bg-white/95 backdrop-blur-xl dark:bg-slate-950/95 rounded-none">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle className="font-['Space_Grotesk',sans-serif] rounded-none text-xl font-black text-red-600 dark:text-red-400">
+                                        Permanently Delete Account?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
+                                        This operation is non-reversible. All
+                                        account ownership, personalized
+                                        preferences, and linked records will be
+                                        purged immediately from primary storage.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+
+                                <AlertDialogFooter className="pt-2">
+                                    <AlertDialogCancel className="font-['Space_Grotesk',sans-serif] font-bold rounded-none">
+                                        Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={handleAccDelete}
+                                        className="bg-red-600 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-white hover:bg-red-700"
                                     >
-                                        <Trash size={18} />
                                         Delete Account
-                                    </Button>
-                                </AlertDialogTrigger>
-
-                                <AlertDialogContent className="border-red-500/30 bg-white/95 backdrop-blur-xl dark:bg-slate-950/95 rounded-none">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle className="font-['Space_Grotesk',sans-serif] rounded-none text-xl font-black text-red-600 dark:text-red-400">
-                                            Permanently Delete Account?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
-                                            This operation is non-reversible.
-                                            All account ownership, personalized
-                                            preferences, and linked records will
-                                            be purged immediately from primary
-                                            storage.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-
-                                    <AlertDialogFooter className="pt-2">
-                                        <AlertDialogCancel className="font-['Space_Grotesk',sans-serif] font-bold rounded-none">
-                                            Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={handleAccDelete}
-                                            className="bg-red-600 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-white hover:bg-red-700"
-                                        >
-                                            Delete Account
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        )}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
 
                         {/* Auth Action (Login / Logout) */}
                         {user && user.id !== '1' ? (

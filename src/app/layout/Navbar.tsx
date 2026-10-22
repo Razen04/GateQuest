@@ -109,7 +109,6 @@ const Navbar = () => {
             icon: <BookOpen size={18} weight="duotone" />,
             activeIcon: <BookOpen size={18} weight="fill" />,
         },
-        // NOTE: This is currently in beta.
         {
             id: 'profile',
             name: 'Profile',
@@ -193,44 +192,36 @@ const Navbar = () => {
                         {/* Light highlight edge */}
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20" />
 
-                        {tabs
-                            .filter(
-                                (tab) =>
-                                    tab.id !== 'profile' ||
-                                    user?.settings?.is_beta
-                            )
-                            .map((tab) => {
-                                const isActive = location.pathname.startsWith(
-                                    tab.path
-                                );
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => navigate(tab.path)}
-                                        className={`relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-wide transition-colors duration-200 outline-none select-none ${
-                                            isActive
-                                                ? 'text-slate-900 dark:text-white'
-                                                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                                        }`}
-                                    >
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="floating-nav-pill"
-                                                transition={springTransition}
-                                                className="absolute inset-0 border border-blue-500/20 to-transparent shadow-[0_2px_12px_rgba(59,130,246,0.15)] backdrop-blur-md dark:border-blue-400/30 dark:from-blue-500/20 dark:via-indigo-500/20"
-                                            />
-                                        )}
-                                        <span className="relative z-10 text-base">
-                                            {isActive
-                                                ? tab.activeIcon
-                                                : tab.icon}
-                                        </span>
-                                        <span className="relative z-10 font-['Space_Grotesk',sans-serif]">
-                                            {tab.name}
-                                        </span>
-                                    </button>
-                                );
-                            })}
+                        {tabs.map((tab) => {
+                            const isActive = location.pathname.startsWith(
+                                tab.path
+                            );
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => navigate(tab.path)}
+                                    className={`relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-wide transition-colors duration-200 outline-none select-none ${
+                                        isActive
+                                            ? 'text-slate-900 dark:text-white'
+                                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                    }`}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="floating-nav-pill"
+                                            transition={springTransition}
+                                            className="absolute inset-0 border border-blue-500/20 to-transparent shadow-[0_2px_12px_rgba(59,130,246,0.15)] backdrop-blur-md dark:border-blue-400/30 dark:from-blue-500/20 dark:via-indigo-500/20"
+                                        />
+                                    )}
+                                    <span className="relative z-10 text-base">
+                                        {isActive ? tab.activeIcon : tab.icon}
+                                    </span>
+                                    <span className="relative z-10 font-['Space_Grotesk',sans-serif]">
+                                        {tab.name}
+                                    </span>
+                                </button>
+                            );
+                        })}
                     </motion.nav>
                 )}
 

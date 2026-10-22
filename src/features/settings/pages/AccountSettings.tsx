@@ -184,21 +184,17 @@ const AccountSettings = () => {
                                 </span>
                             </div>
 
-                            {userSettings?.is_beta && (
-                                <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-slate-500 dark:text-slate-400">
-                                    <span className="text-[#2A5CFF]">
-                                        @{user?.username || 'candidate'}
-                                    </span>
-                                    {user?.targetYear && (
-                                        <>
-                                            <span>&bull;</span>
-                                            <span>
-                                                Target {user.targetYear}
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            )}
+                            <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-slate-500 dark:text-slate-400">
+                                <span className="text-[#2A5CFF]">
+                                    @{user?.username || 'candidate'}
+                                </span>
+                                {user?.targetYear && (
+                                    <>
+                                        <span>&bull;</span>
+                                        <span>Target {user.targetYear}</span>
+                                    </>
+                                )}
+                            </div>
 
                             {user?.college && (
                                 <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-slate-500 dark:text-slate-400">
@@ -212,21 +208,19 @@ const AccountSettings = () => {
                         </div>
                     </div>
 
-                    {userSettings?.is_beta && (
-                        <Button
-                            onClick={() => setOpenSocialSettings(true)}
-                            className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-slate-900/10 bg-white/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-800 shadow-sm transition hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-                        >
-                            <UserGear
-                                size={16}
-                                className="transition-transform group-hover:rotate-45"
-                            />
-                            <span>Manage Socials</span>
-                        </Button>
-                    )}
+                    <Button
+                        onClick={() => setOpenSocialSettings(true)}
+                        className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-slate-900/10 bg-white/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-800 shadow-sm transition hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                    >
+                        <UserGear
+                            size={16}
+                            className="transition-transform group-hover:rotate-45"
+                        />
+                        <span>Manage Socials</span>
+                    </Button>
                 </div>
 
-                {user?.about && user?.settings?.is_beta && (
+                {user?.about && (
                     <div className="mt-4 pt-3 border-t border-slate-900/5 dark:border-white/10">
                         <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                             <Info
@@ -238,14 +232,9 @@ const AccountSettings = () => {
                     </div>
                 )}
 
-                {userSettings?.is_beta && (
-                    <>
-                        <div className="my-4 h-px bg-slate-900/5 dark:bg-white/10" />
-                        <div className="pt-1">
-                            <SocialLinksDisplay links={socialLinks} />
-                        </div>
-                    </>
-                )}
+                <div className="pt-1">
+                    <SocialLinksDisplay links={socialLinks} />
+                </div>
             </motion.div>
 
             {/* Social Settings Modal */}
@@ -297,7 +286,6 @@ const AccountSettings = () => {
                         about={about}
                         onAboutChange={setAbout}
                         disabled={isSaving}
-                        isBeta={!!userSettings?.is_beta}
                     />
                 </section>
 

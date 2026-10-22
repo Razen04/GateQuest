@@ -108,7 +108,7 @@ beforeEach(() => {
     vi.clearAllMocks();
     authMock.callback = null;
     useAuthStore.setState(
-        { user: null, loading: true, showLogin: false, needsUsername: false },
+        { user: null, loading: true, showLogin: false },
         false
     );
     localStorage.clear();
@@ -132,7 +132,7 @@ describe('subscription lifecycle', () => {
 });
 
 describe('handleSession: no session', () => {
-    it('sets a guest user and clears needsUsername', async () => {
+    it('sets a guest user', async () => {
         renderHook(() => useAuthEffects());
         authMock.callback!('SIGNED_OUT', null);
         await flush();
@@ -140,7 +140,6 @@ describe('handleSession: no session', () => {
         const user = useAuthStore.getState().user;
         expect(user).not.toBeNull();
         expect(user?.id).toBe('1');
-        expect(useAuthStore.getState().needsUsername).toBe(false);
         expect(useAuthStore.getState().loading).toBe(false);
     });
 
@@ -214,46 +213,6 @@ describe('handleSession: new user', () => {
             name: 'Boob',
         });
     });
-});
-
-describe('handleSession: needsUsername', () => {
-    it.each([
-        {
-            label: 'non-superuser with no username',
-            supaId: 'u1',
-            dbUsername: null,
-            expected: true,
-        },
-        {
-            label: 'superuser (id "1")',
-            supaId: '1',
-            dbUsername: null,
-            expected: false,
-        },
-        {
-            label: 'non-superuser with a username',
-            supaId: 'u1',
-            dbUsername: 'titan',
-            expected: false,
-        },
-    ])(
-        'sets needsUsername to $expected for $label',
-        async ({ supaId, dbUsername, expected }) => {
-            mockUsersQuery({
-                existingRow: makeDbRow({
-                    id: supaId,
-                    username: dbUsername,
-                    settings: { is_beta: true },
-                }),
-            });
-
-            renderHook(() => useAuthEffects());
-            authMock.callback!('SIGNED_IN', makeSession(supaId));
-            await flush();
-
-            expect(useAuthStore.getState().needsUsername).toBe(expected);
-        }
-    );
 });
 
 describe('handleSession: beta mode change', () => {

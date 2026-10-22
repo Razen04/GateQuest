@@ -20,7 +20,6 @@ type ProfileFormProps = {
     about: string;
     onAboutChange: (value: string) => void;
     disabled: boolean;
-    isBeta: boolean;
 };
 
 export function ProfileForm({
@@ -34,7 +33,6 @@ export function ProfileForm({
     about,
     onAboutChange,
     disabled,
-    isBeta,
 }: ProfileFormProps) {
     return (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -91,26 +89,24 @@ export function ProfileForm({
                 </Select>
             </FormField>
 
-            {isBeta && (
-                <FormField
-                    label="About / Bio"
-                    tag="// BIOGRAPHY"
-                    className="md:col-span-2"
-                >
-                    <Textarea
-                        value={about}
-                        onChange={(e) => onAboutChange(e.target.value)}
-                        maxLength={100}
-                        placeholder="Write a brief intro about your background, interests, or study goals..."
-                        disabled={disabled}
-                        rows={3}
-                        className="resize-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
-                    />
-                    <div className="flex justify-end text-xs text-slate-400">
-                        {about.length}/100
-                    </div>
-                </FormField>
-            )}
+            <FormField
+                label="About / Bio"
+                tag="// BIOGRAPHY"
+                className="md:col-span-2"
+            >
+                <Textarea
+                    value={about}
+                    onChange={(e) => onAboutChange(e.target.value)}
+                    maxLength={100}
+                    placeholder="Write a brief intro about your background, interests, or study goals..."
+                    disabled={disabled}
+                    rows={3}
+                    className="resize-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                />
+                <div className="flex justify-end text-xs text-slate-400">
+                    {about.length}/100
+                </div>
+            </FormField>
         </div>
     );
 }

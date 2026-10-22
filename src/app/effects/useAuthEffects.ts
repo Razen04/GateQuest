@@ -35,7 +35,6 @@ export function useAuthEffects() {
                 };
 
                 useAuthStore.getState().setUser(guestProfile);
-                useAuthStore.getState().setNeedsUsername(false);
 
                 if (isMounted) useAuthStore.getState().setLoading(false);
                 return;
@@ -120,14 +119,6 @@ export function useAuthEffects() {
                             ...rawSettings,
                         },
                     };
-
-                    if (profile.settings.is_beta) {
-                        if (supaUser.id !== '1' && !profile.username) {
-                            useAuthStore.getState().setNeedsUsername(true);
-                        } else {
-                            useAuthStore.getState().setNeedsUsername(false);
-                        }
-                    }
 
                     useSettingsStore.setState(
                         (state) => ({

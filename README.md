@@ -77,7 +77,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 - **Topic Tests**: Test your knowledge in a timed environment targeted at specific topics.
 - **AskAI**: Instant AI assistance for step-by-step question breakdown and doubt clearing for _FREE_.
 - **Built-in Timer**: Simulate real exam conditions with an automatic timer for each question.
-- **User Profile `[Beta]`**: Share your public profile with friends and aspirants.(currently in beta).
+- **User Profile**: Share your public profile with friends and aspirants.
 - **Light & Dark Modes**: Switch between light and dark themes for a comfortable viewing experience.
 - **Audio Feedback**: Get instant audio feedback cues for correct and incorrect answers.
 - **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.

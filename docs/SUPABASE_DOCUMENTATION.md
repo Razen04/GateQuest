@@ -9,7 +9,7 @@ Welcome to the GATEQuest database documentation. This document provides a detail
 The database is designed around a few core concepts. Understanding their relationships is key to understanding the application.
 
 - **`users`**: Stores the public-facing profiles for everyone who signs up. This is linked to Supabase's private `auth.users` table.
-- **`users_social` _Beta_**: Stores social media handles for beta users, 1-to-1 with `users`. Optional rows; a user may not have one.
+- **`users_social`**: Stores social media handles for beta users, 1-to-1 with `users`. Optional rows; a user may not have one.
 - **`user_goals`**: Stores the user goals, i.e., the branch and the exams user is preparing for.
 - **`branches`**: Stores the master list of academic disciplines like CS, ME, and EE.
 - **`exams`**: Contains the official names and short names of all supported competitive exams.
@@ -253,25 +253,26 @@ This section provides a detailed breakdown of each table in the `public` schema.
 
 Stores public profile information for authenticated users. This table is linked 1-to-1 with the private `auth.users` table.
 
-| Column Name          | Data Type     | Constraints & Defaults                          | Description                                                                              |
-| :------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------------------- |
-| `id`                 | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.             |
-| `joined_at`          | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                         |
-| `email`              | `text`        | `NULL` allowed                                  | The user's email address.                                                                |
-| `name`               | `text`        | `NULL` allowed                                  | The user's full display name.                                                            |
-| `avatar`             | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                                     |
-| `show_name`          | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                          |
-| `total_xp`           | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                                    |
-| `settings`           | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                                        |
-| `college`            | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                           |
-| `"targetYear"`       | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                                |
-| `bookmark_questions` | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                                   |
-| `version_number`     | `integer`     | `NOT NULL`, `DEFAULT 1`                         | Used for versioning or schema updates related to user settings Clear Data feature.       |
-| `deleted_at`         | `timestamptz` | `DEFAULT NULL`                                  | Used when the user deletes their account to store the date and time of deletion.         |
-| `username`           | `text`        | `UNIQUE`, `NULL` allowed                        | Public handle for the user, used in profile URLs.                                        |
-| `about`              | `text`        | `NULL` allowed                                  | Short bio text displayed on the public profile.                                          |
-| `is_public`          | `boolean`     | `DEFAULT true`                                  | Whether the profile is visible in public search.                                         |
-| `notification_tags`  | `text[]`      | `NOT NULL`, `DEFAULT '{}'`                      | Precomputed tags for notification targeting (`branch:cs`, `exam:gate`, `role:donor`, …). |
+| Column Name            | Data Type     | Constraints & Defaults                          | Description                                                                              |
+| :--------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| `id`                   | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.             |
+| `joined_at`            | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                         |
+| `email`                | `text`        | `NULL` allowed                                  | The user's email address.                                                                |
+| `name`                 | `text`        | `NULL` allowed                                  | The user's full display name.                                                            |
+| `avatar`               | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                                     |
+| `show_name`            | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                          |
+| `total_xp`             | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                                    |
+| `settings`             | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                                        |
+| `college`              | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                           |
+| `"targetYear"`         | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                                |
+| `bookmark_questions`   | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                                   |
+| `version_number`       | `integer`     | `NOT NULL`, `DEFAULT 1`                         | Used for versioning or schema updates related to user settings Clear Data feature.       |
+| `deleted_at`           | `timestamptz` | `DEFAULT NULL`                                  | Used when the user deletes their account to store the date and time of deletion.         |
+| `username`             | `text`        | `UNIQUE`, `NULL` allowed                        | Public handle for the user, used in profile URLs.                                        |
+| `about`                | `text`        | `NULL` allowed                                  | Short bio text displayed on the public profile.                                          |
+| `is_public`            | `boolean`     | `DEFAULT true`                                  | Whether the profile is visible in public search.                                         |
+| `notification_tags`    | `text[]`      | `NOT NULL`, `DEFAULT '{}'`                      | Precomputed tags for notification targeting (`branch:cs`, `exam:gate`, `role:donor`, …). |
+| `onboarding_completed` | `boolean`     | `DEFAULT false`                                 | Runs the onboarding step if the value is false otherwise skip                            |
 
 **Row Level Security (RLS) Policies:**
 

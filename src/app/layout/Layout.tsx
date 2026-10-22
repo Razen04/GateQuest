@@ -7,7 +7,6 @@ import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthStore } from '../stores/useAuthStore.ts';
 import Navbar from './Navbar.tsx';
 import Sidebar from './Sidebar/Sidebar.tsx';
-import { UsernameModal } from './UsernameModal.tsx';
 
 type SyncOnUnloadProps = {
     user: AppUser | null;
@@ -83,8 +82,6 @@ const Layout = () => {
                 setShowSidebar={() => {}}
                 hideMobileNavigation={hideMobileNavigation}
             />
-
-            <UsernameModal />
         </div>
     );
 };
