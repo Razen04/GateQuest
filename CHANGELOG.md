@@ -1,4 +1,4 @@
-# v0.11.0 - 2026-10-22 (Latest)
+# v0.11.0 - 2026-10-23 (Latest)
 
 - Revamped notifications with targeting and cross-device read state. [#10](https://github.com/Razen04/GateQuest/issues/10)
 - Added a first-time onboarding flow for username, goal, year, and profile. [#114](https://github.com/Razen04/GateQuest/issues/114)
