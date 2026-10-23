@@ -81,7 +81,7 @@ const TestSolutionView = () => {
         benchmarkDetails,
         loading: statsLoading,
         message: statsMessage,
-    } = usePeerBenchmark(safeQuestion.id);
+    } = usePeerBenchmark(safeQuestion.id, true); // enable is true because in TestSolution we need to see the peer_stats since all the questions are already answered
 
     // Navigation Handlers
     const handleNext = () => {

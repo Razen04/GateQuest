@@ -1,5 +1,4 @@
 import { createClient } from 'npm:@supabase/supabase-js';
-import webpush from 'npm:web-push';
 import { handleDonationReminder } from './handlers/donationReminder.ts';
 import { handleReportCreated } from './handlers/reportCreated.ts';
 import { handleReportResolved } from './handlers/reportResolved.ts';
@@ -52,12 +51,6 @@ Deno.serve(async (req) => {
         const supabaseAdmin = createClient(
             Deno.env.get('SUPABASE_URL'),
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-        );
-
-        webpush.setVapidDetails(
-            'mailto:support@gatequest.in',
-            Deno.env.get('VAPID_PUBLIC_KEY'),
-            Deno.env.get('VAPID_PRIVATE_KEY')
         );
 
         switch (task) {

@@ -1,5 +1,4 @@
-import { SupabaseClient } from 'npm:@supabase/supabase-js';
-import webpush from 'npm:web-push';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js';
 import { DONATION_REMINDER_PAYLOADS } from '../payloads/weeklyDonationPayloads.ts';
 
 interface DonationReminderArgs {
@@ -22,18 +21,6 @@ export const handleDonationReminder = async ({
     supabaseAdmin,
     corsHeaders,
 }: DonationReminderArgs) => {
-    const { data: allSubscriptions, error: queryErr } = await supabaseAdmin
-        .from('push_subscriptions')
-        .select('*');
-
-    if (queryErr) throw queryErr;
-    if (!allSubscriptions || allSubscriptions.length === 0) {
-        return new Response(JSON.stringify({ message: 'No subscriptions.' }), {
-            status: 200,
-            headers: corsHeaders,
-        });
-    }
-
     const biWeeklyIndex = Math.abs(getBiWeeklyIndex(new Date()));
 
     if (biWeeklyIndex % 2 !== 0) {
@@ -50,64 +37,25 @@ export const handleDonationReminder = async ({
             biWeeklyIndex % DONATION_REMINDER_PAYLOADS.length
         ];
 
-    const payload = JSON.stringify({
-        title: selectedCopy.title,
-        body: selectedCopy.body,
-        url: '/donate',
-    });
-
-    const CHUNK_SIZE = 50;
-    const MAX_CONCURRENT_CHUNKS = 10;
-    let successfulPings = 0;
-    const deadEndpoints: string[] = [];
-
-    const chunks = [];
-    for (let i = 0; i < allSubscriptions.length; i += CHUNK_SIZE) {
-        chunks.push(allSubscriptions.slice(i, i + CHUNK_SIZE));
-    }
-
-    const processChunk = async (chunk: typeof allSubscriptions) => {
-        const promises = chunk.map(async (sub) => {
-            try {
-                await webpush.sendNotification(
-                    {
-                        endpoint: sub.endpoint,
-                        keys: { auth: sub.auth_key, p256dh: sub.p256dh_key },
-                    },
-                    payload
-                );
-                successfulPings++;
-            } catch (err) {
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    deadEndpoints.push(sub.endpoint); // Queue for bulk deletion
-                }
-            }
+    // The dispatcher trigger resolves target=null to "everyone", fans out to
+    // push subscriptions, and marks dispatched_at. This handler only writes
+    // the notification row.
+    const { error: insertErr } = await supabaseAdmin
+        .from('notifications')
+        .insert({
+            title: selectedCopy.title,
+            message: selectedCopy.body,
+            link: '/donate',
+            type: 'reminder',
+            target: { type: 'broadcast' },
         });
-        await Promise.allSettled(promises);
-    };
 
-    // Execute chunks in parallel pools of 10
-    for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_CHUNKS) {
-        const pool = chunks
-            .slice(i, i + MAX_CONCURRENT_CHUNKS)
-            .map(processChunk);
-        await Promise.all(pool);
-    }
-
-    // Bulk delete all dead tokens in exactly ONE database call
-    if (deadEndpoints.length > 0) {
-        console.warn(`Bulk deleting ${deadEndpoints.length} dead tokens...`);
-        await supabaseAdmin
-            .from('push_subscriptions')
-            .delete()
-            .in('endpoint', deadEndpoints);
-    }
+    if (insertErr) throw insertErr;
 
     return new Response(
         JSON.stringify({
             success: true,
-            processed: allSubscriptions.length,
-            delivered: successfulPings,
+            message: 'Donation reminder notification created.',
         }),
         {
             status: 200,

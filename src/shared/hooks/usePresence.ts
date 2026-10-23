@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
-import { getUserProfile } from '../utils/helper';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { supabase } from '../utils/supabaseClient';
 
 export const usePresence = (questionId: string) => {
     const [count, setCount] = useState<number | undefined>(undefined);
+    const userId = useAuthStore((s) => s.user?.id);
 
     useEffect(() => {
-        const user = getUserProfile();
-        if (!user?.id || !questionId) return;
+        if (!userId || !questionId) return;
 
         const channel = supabase.channel(`presence:${questionId}`, {
             config: {
                 presence: {
-                    key: user.id,
+                    key: userId,
                 },
             },
         });
@@ -41,7 +41,7 @@ export const usePresence = (questionId: string) => {
             }
 
             await channel.track({
-                user_id: user.id,
+                user_id: userId,
                 online_at: new Date().toISOString(),
             });
         });

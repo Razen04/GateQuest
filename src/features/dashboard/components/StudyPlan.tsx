@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.ts';
 import ModernLoader from '@/shared/components/ModernLoader';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
@@ -21,8 +22,10 @@ const StudyPlan = () => {
         todayProgressPercent,
     }: StudyPlanData = useStudyPlan();
 
+    const userTargetYear = useAuthStore((s) => s.user?.targetYear);
+
     const { days, hours, minutes, seconds } = useExamCountdown(
-        '2027-02-08T09:00:00'
+        `${userTargetYear}-02-08T09:00:00`
     );
 
     if (loading) {
@@ -43,14 +46,15 @@ const StudyPlan = () => {
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent dark:from-white/5" />
 
             <div className="relative">
-                <p className="mt-0.5 flex items-center gap-2 font-['JetBrains_Mono'] text-sm text-muted-foreground">
-                    <span>{days} days</span>
+                <p className="mt-0.5 flex items-center gap-2 text-sm font-bold font-['Jetbrains-Mono'] text-muted-foreground">
+                    <span>{days}d</span>
                     <span>:</span>
-                    <span>{String(hours).padStart(2, '0')} hours</span>
+                    <span>{String(hours).padStart(2, '0')}hrs</span>
                     <span>:</span>
-                    <span>{String(minutes).padStart(2, '0')} minutes</span>
+                    <span>{String(minutes).padStart(2, '0')}min</span>
                     <span>:</span>
-                    <span>{String(seconds).padStart(2, '0')} seconds</span>
+                    <span>{String(seconds).padStart(2, '0')}s</span>
+                    <span>left for GATE {userTargetYear}</span>
                 </p>
 
                 <div>

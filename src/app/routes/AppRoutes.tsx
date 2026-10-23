@@ -5,8 +5,10 @@
 
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { OnboardingFlow } from '@/features/onboarding/OnboardingFlow';
 import ModernLoader from '@/shared/components/ModernLoader.js';
 import { useAuthStore } from '../stores/useAuthStore';
+import { RequireCompletedSetup, RequireOnboarding } from './Guards';
 
 // Shell & Nested Routers (Lazy Loaded)
 const Layout = lazy(() => import('@/app/layout/Layout.jsx'));
@@ -88,8 +90,24 @@ export default function AppRoutes() {
                     }
                 />
 
+                <Route
+                    path="/onboarding"
+                    element={
+                        <RequireOnboarding>
+                            <OnboardingFlow />
+                        </RequireOnboarding>
+                    }
+                />
+
                 {/* Authenticated Layout Wrapper */}
-                <Route path="/" element={<Layout />}>
+                <Route
+                    path="/"
+                    element={
+                        <RequireCompletedSetup>
+                            <Layout />
+                        </RequireCompletedSetup>
+                    }
+                >
                     <Route path="dashboard" element={<Dashboard />} />
 
                     {/* Practice */}

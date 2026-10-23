@@ -1,6 +1,5 @@
 import React from 'react';
 import { useGoalStore } from '@/app/stores/useGoalStore';
-import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { invalidateProfileCache } from '@/features/profile/hooks/useProfile';
 import { submitAndRecordAnswer } from '@/features/questions/utils/answerHandler';
 import type { AppUser } from '@/shared/types/AppUser';
@@ -34,7 +33,6 @@ export default function useAnswerFlow({
     stop,
     showAnswer,
 }: useAnswerFlowProps) {
-    const { refresh } = useStudyPlan();
     const userGoal = useGoalStore((s) => s.userGoal);
 
     // This function is triggered when the user wants to see the correct answer.
@@ -57,7 +55,6 @@ export default function useAnswerFlow({
             timeTaken,
             user,
             isLogin,
-            refresh,
             branchId: userGoal?.branch_id,
         });
 

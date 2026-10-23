@@ -36,5 +36,7 @@ export const handleUpdateSocialSettings = async (
         codeforces_url: formData.get('codeforces_url')?.toString() || null,
     });
 
+    console.log('Error: ', error);
+
     return error;
 };

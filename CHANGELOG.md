@@ -1,11 +1,20 @@
-# v0.10.12 - 2026-10-09 (Latest)
+# v0.11.0 - 2026-10-23 (Latest)
+
+- Revamped notifications with targeting and cross-device read state. [#10](https://github.com/Razen04/GateQuest/issues/10)
+- Added a first-time onboarding flow for username, goal, year, and profile. [#114](https://github.com/Razen04/GateQuest/issues/114)
+- Practice tab now shows per-exam stats. Removed subject stats from the Dashboard.
+- Profile bio, social links, and account deletion are available to everyone.
+- Username is set once during onboarding and displayed read-only.
+- Faster dashboard loads with fewer network calls.
+
+# v0.10.12 - 2026-10-09
 
 - Added **GATE XL (Life Sciences) PYQ Mocks** (2016–2026, 10 papers), **GATE EC (Electronics) PYQ Mocks** (2014–2026, 21 papers). [#48](https://github.com/Razen04/GateQuest/issues/48)
 - Fixed unusually high Supabase API usage after the previous release.
 - Minor UI fixes to the dashboard activity heatmap on mobile.
 - Clear cache and re-login if having issues due to Cloudflare issue. If issue persist then contact via Discord or Github.
 
-# v0.10.11 - 2026-10-06 (Latest)
+# v0.10.11 - 2026-10-06
 
 - Added **PYQ Mock Tests**: Practice full GATE papers (2014–2026, except EC and XL, they will be added soon) in exam conditions with a timer, palette, and end-of-test review. Partial papers show what was excluded and why. [#48](https://github.com/Razen04/GateQuest/issues/48)
 - Added **guest mode**: Attempt CS questions without signing up. Progress won't sync until you log in. [#106](https://github.com/Razen04/GateQuest/issues/106)

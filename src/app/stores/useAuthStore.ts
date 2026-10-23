@@ -8,7 +8,6 @@ import { appStorage } from '@/storage/storageService';
 const STALE_KEYS = [
     'last_checked_notification',
     'peer_benchmark_details',
-    'subjectStats',
     'repo_stars',
     'weekly_set_info',
 ] as const;
@@ -37,12 +36,10 @@ type AuthState = {
     user: AppUser | null;
     loading: boolean;
     showLogin: boolean;
-    needsUsername: boolean;
 
     setUser: (updater: Updater<AppUser | null>) => void;
     setLoading: (value: boolean) => void;
     setShowLogin: (value: boolean) => void;
-    setNeedsUsername: (value: boolean) => void;
 
     handleLogin: (credentials: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -54,7 +51,6 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             loading: true,
             showLogin: false,
-            needsUsername: false,
 
             setUser: (updater) =>
                 set(
@@ -77,9 +73,6 @@ export const useAuthStore = create<AuthState>()(
 
             setShowLogin: (value) =>
                 set({ showLogin: value }, false, 'auth/setShowLogin'),
-
-            setNeedsUsername: (value) =>
-                set({ needsUsername: value }, false, 'auth/setNeedsUsername'),
 
             handleLogin: async (credential) => {
                 const { error } = await supabase.auth.signInWithIdToken({

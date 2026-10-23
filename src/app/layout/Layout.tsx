@@ -3,11 +3,10 @@ import { Outlet, useLocation } from 'react-router-dom';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan';
 import { useSessionLogger } from '@/shared/hooks/useSessionLogger.ts';
 import type { AppUser } from '@/shared/types/AppUser';
-import { getUserProfile } from '@/shared/utils/helper';
 import { supabase } from '@/shared/utils/supabaseClient';
+import { useAuthStore } from '../stores/useAuthStore.ts';
 import Navbar from './Navbar.tsx';
 import Sidebar from './Sidebar/Sidebar.tsx';
-import { UsernameModal } from './UsernameModal.tsx';
 
 type SyncOnUnloadProps = {
     user: AppUser | null;
@@ -46,7 +45,7 @@ function SyncOnUnload({ user }: SyncOnUnloadProps) {
 }
 
 const Layout = () => {
-    const user = getUserProfile();
+    const user = useAuthStore((s) => s.user);
     const location = useLocation();
 
     const mainRef = useRef<HTMLElement>(null);
@@ -83,8 +82,6 @@ const Layout = () => {
                 setShowSidebar={() => {}}
                 hideMobileNavigation={hideMobileNavigation}
             />
-
-            <UsernameModal />
         </div>
     );
 };

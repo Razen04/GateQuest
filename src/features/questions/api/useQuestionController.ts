@@ -103,7 +103,7 @@ export const useQuestionController = ({
         benchmarkDetails,
         loading: statsLoading,
         message: statsMessage,
-    } = usePeerBenchmark(safeQuestion.id);
+    } = usePeerBenchmark(safeQuestion.id, showAnswer);
 
     const correctSoundRef = useRef<HTMLAudioElement | null>(null);
     const wrongSoundRef = useRef<HTMLAudioElement | null>(null);

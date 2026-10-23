@@ -1,27 +1,15 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
-import {
-    getUserProfile,
-    syncUserToSupabase,
-    updateUserProfile,
-} from '@/shared/utils/helper';
+import { syncUserToSupabase } from '@/shared/utils/helper';
 
 export const useSettingsEffects = () => {
-    const isLogin = useAuthStore((s) => s.user !== null && s.user.id !== '1');
+    const user = useAuthStore((s) => s.user);
+    const isLogin = user !== null && user.id !== '1';
 
-    // Update profile whenever settings change
     useEffect(() => {
-        const unsubscribe = useSettingsStore.subscribe((state, prev) => {
-            if (prev.settings === state.settings) return;
-
-            const profile = getUserProfile();
-            if (profile) {
-                updateUserProfile({ ...profile, settings: state.settings });
-            }
-        });
-        return unsubscribe;
-    }, []);
+        useSettingsStore.getState().hydrate();
+    }, [user?.id]);
 
     // Supabase sync of settings
     useEffect(() => {
@@ -50,6 +38,7 @@ export const useSettingsEffects = () => {
 
     const darkMode = useSettingsStore((s) => s.settings.darkMode);
     useEffect(() => {
+        localStorage.setItem('theme', darkMode ? 'dark' : 'light');
         document.documentElement.classList.toggle('dark', darkMode);
     }, [darkMode]);
 };

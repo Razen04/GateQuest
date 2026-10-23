@@ -6,8 +6,9 @@ import {
 } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import type { Database } from '../types/supabase.js';
 import { supabase } from '../utils/supabaseClient.js';
 
@@ -22,82 +23,76 @@ const NotificationDialog = ({
     isOpen,
     setUnreadNotifications,
 }: NotificationDialogProp) => {
+    const user = useAuthStore((s) => s.user);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [readNotifications, setReadNotifications] = useState<string[]>(() => {
-        try {
-            const stored = localStorage.getItem('read_notifications');
-            const parsed = stored ? JSON.parse(stored) : [];
+    const [marking, setMarking] = useState(false);
 
-            return Array.isArray(parsed) ? (parsed as string[]) : [];
-        } catch {
-            return [];
+    // Fetch notifications. RLS filters to:
+    //   - active notifications
+    //   - whose target matches this user (broadcast/user/tag/segment)
+    //   - that this user has not already marked as read
+    const fetchNotifications = useCallback(async () => {
+        if (!user?.id || user.id === '1') {
+            setNotifications([]);
+            return;
         }
-    });
 
-    // Mark all notifications as read
-    const markAllAsRead = (notifications: Notification[]): void => {
-        const allIds: string[] = notifications.map((n) => n.id);
-        const updatedRead: string[] = Array.from(
-            new Set([...readNotifications, ...allIds])
-        );
+        const { data, error } = await supabase
+            .from('notifications')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-        setReadNotifications(updatedRead);
-        localStorage.setItem('read_notifications', JSON.stringify(updatedRead));
+        if (error) {
+            console.error('Error fetching notifications: ', error);
+            toast.message("Couldn't fetch notifications");
+            return;
+        }
 
-        setNotifications([]);
-        setUnreadNotifications(false);
-    };
+        setNotifications(data ?? []);
+    }, [user?.id]);
 
-    // Fetch notifications on mount
     useEffect(() => {
-        const fetchNotifications = async () => {
-            const lastCheckedStr = localStorage.getItem(
-                'last_checked_notification'
-            );
-
-            const lastChecked = lastCheckedStr
-                ? new Date(JSON.parse(lastCheckedStr))
-                : null;
-
-            const now = new Date();
-            const diffInHours = lastChecked
-                ? (now.getTime() - lastChecked.getTime()) / (1000 * 60 * 60)
-                : Infinity;
-
-            if (diffInHours <= 3) return;
-
-            const readIds = JSON.parse(
-                localStorage.getItem('read_notifications') || '[]'
-            ) as string[];
-
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('active', true)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching notifications: ', error);
-                toast.message("Couldn't fetch notifications");
-            } else {
-                setNotifications(
-                    (data || []).filter((n) => !readIds.includes(n.id))
-                );
-                const time = new Date();
-                localStorage.setItem(
-                    'last_checked_notification',
-                    JSON.stringify(time)
-                );
-            }
-        };
-
         fetchNotifications();
-    }, []);
+    }, [fetchNotifications]);
 
-    // Update unread status when notifications or readNotifications change
+    // Bubble the unread flag up to the parent (drives the bell badge)
     useEffect(() => {
         setUnreadNotifications(notifications.length > 0);
     }, [notifications, setUnreadNotifications]);
+
+    const markAllAsRead = async (): Promise<void> => {
+        if (!user?.id || notifications.length === 0 || marking) return;
+
+        const idsToMark = notifications.map((n) => n.id);
+
+        // Optimistic clear
+        setNotifications([]);
+        setUnreadNotifications(false);
+        setMarking(true);
+
+        try {
+            const rows = idsToMark.map((id) => ({
+                notification_id: id,
+                user_id: user.id,
+            }));
+
+            const { error } = await supabase
+                .from('notification_reads')
+                .upsert(rows, {
+                    onConflict: 'notification_id,user_id',
+                    ignoreDuplicates: true,
+                });
+
+            if (error) throw error;
+        } catch (err) {
+            console.error('Failed to mark notifications as read:', err);
+            toast.error('Failed to update notifications');
+            // Restore from server since the optimistic clear was wrong
+            await fetchNotifications();
+        } finally {
+            setMarking(false);
+        }
+    };
 
     const getNotificationIcon = (notification: Notification) => {
         if (notification.type === 'update') {
@@ -127,8 +122,10 @@ const NotificationDialog = ({
                         <h3 className="font-semibold text-sm">Notifications</h3>
 
                         <button
-                            onClick={() => markAllAsRead(notifications)}
-                            className="p-1.5 text-blue-500 hover:bg-white/20 dark:hover:bg-white/10 transition-colors"
+                            onClick={markAllAsRead}
+                            disabled={marking || notifications.length === 0}
+                            className="p-1.5 text-blue-500 hover:bg-white/20 dark:hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            title="Mark all as read"
                         >
                             <CheckSquareOffset size={20} />
                         </button>
@@ -136,51 +133,38 @@ const NotificationDialog = ({
 
                     {/* List */}
                     <div className="relative max-h-80 overflow-y-auto p-2 space-y-1">
-                        {notifications?.length > 0 ? (
-                            notifications.map((notification) => {
-                                const isRead = readNotifications.includes(
-                                    notification.id
-                                );
-
-                                return (
-                                    <div
-                                        key={notification.id}
-                                        className="group flex items-start gap-3 p-3 border border-transparent hover:border-white/20 hover:bg-white/20 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
-                                    >
-                                        {/* Icon */}
-                                        <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 bg-white/20 dark:bg-white/[0.08] border border-white/20">
-                                            {getNotificationIcon(notification)}
-                                        </div>
-
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start gap-2">
-                                                <p className="text-sm font-medium truncate">
-                                                    {notification.title}
-                                                </p>
-
-                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                                    {formatDistanceToNow(
-                                                        new Date(
-                                                            notification.created_at
-                                                        )
-                                                    )}
-                                                </span>
-                                            </div>
-
-                                            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                                                {notification.message}
-                                            </p>
-                                        </div>
-
-                                        {!isRead && (
-                                            <span
-                                                className="mt-1.5 h-2 w-2 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"
-                                                title="Unread notification"
-                                            />
-                                        )}
+                        {notifications.length > 0 ? (
+                            notifications.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className="group flex items-start gap-3 p-3 border border-transparent hover:border-white/20 hover:bg-white/20 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
+                                >
+                                    {/* Icon */}
+                                    <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 bg-white/20 dark:bg-white/[0.08] border border-white/20">
+                                        {getNotificationIcon(notification)}
                                     </div>
-                                );
-                            })
+
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <p className="text-sm font-medium truncate">
+                                                {notification.title}
+                                            </p>
+
+                                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                                {formatDistanceToNow(
+                                                    new Date(
+                                                        notification.created_at
+                                                    )
+                                                )}
+                                            </span>
+                                        </div>
+
+                                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                                            {notification.message}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
                         ) : (
                             <div className="py-10 text-center text-sm text-muted-foreground">
                                 What a lonely day.

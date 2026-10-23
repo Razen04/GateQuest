@@ -77,7 +77,7 @@ GATEQuest is a feature-rich, user-friendly application built to provide a compre
 - **Topic Tests**: Test your knowledge in a timed environment targeted at specific topics.
 - **AskAI**: Instant AI assistance for step-by-step question breakdown and doubt clearing for _FREE_.
 - **Built-in Timer**: Simulate real exam conditions with an automatic timer for each question.
-- **User Profile `[Beta]`**: Share your public profile with friends and aspirants.(currently in beta).
+- **User Profile**: Share your public profile with friends and aspirants.
 - **Light & Dark Modes**: Switch between light and dark themes for a comfortable viewing experience.
 - **Audio Feedback**: Get instant audio feedback cues for correct and incorrect answers.
 - **Secure Authentication**: Sign in safely with your Google account, powered by Supabase.
@@ -188,8 +188,8 @@ To get a local copy up and running, follow these simple steps.
       npm run supabase:start
       ```
     - The CLI will output your local Supabase URL, anon key, and service role key.
-    - Read more about the Supabase Setup in [SUPABASE_GUIDE](SUPABASE_GUIDE.md)
-    - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](SUPABASE_DOCUMENTATION.md)
+    - Read more about the Supabase Setup in [SUPABASE_GUIDE](docs/SUPABASE_GUIDE.md)
+    - Read more about the Supabase Documentation of the project in [SUPABASE_DOCS](docs/SUPABASE_DOCUMENTATION.md)
 4.  **Set up environment variables:**
     - Create a `.env` file in the root directory.
     - Add your Supabase project URL and anon key:

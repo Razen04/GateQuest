@@ -1,5 +1,4 @@
-import { SupabaseClient } from 'npm:@supabase/supabase-js';
-import webpush from 'npm:web-push';
+import type { SupabaseClient } from 'npm:@supabase/supabase-js';
 
 interface ReportResolvedArgs {
     req: Request;
@@ -37,12 +36,7 @@ export const handleReportResolved = async ({
 
     const { data: questionData, error: questionErr } = await supabaseAdmin
         .from('questions')
-        .select(
-            `
-														id,
-														subjects (slug)
-														`
-        )
+        .select('id, subjects (slug)')
         .eq('id', questionId)
         .single();
 
@@ -51,65 +45,36 @@ export const handleReportResolved = async ({
             `Failed to find mapping for question ID ${questionId}:`,
             questionErr
         );
-        throw questionErr;
-    }
-
-    const subjectSlug = (questionData.subjects as any)?.slug || 'general';
-
-    const { data: studentSubs, error: studentErr } = await supabaseAdmin
-        .from('push_subscriptions')
-        .select('endpoint, auth_key, p256dh_key')
-        .eq('user_id', studentId);
-
-    if (studentErr) throw studentErr;
-    if (!studentSubs || studentSubs.length === 0) {
-        return new Response(
-            JSON.stringify({
-                message: 'Student has no registered web push endpoints.',
-            }),
-            {
-                status: 200,
-                headers: corsHeaders,
-            }
+        throw (
+            questionErr ??
+            new Error(`Question ${questionId} not found for report resolution`)
         );
     }
 
-    const studentPayload = JSON.stringify({
-        title: 'Question Fixed!',
-        body: 'An issue you reported has been verified and updated. Thank you for making the platform great for everyone.',
-        url: `/practice/${subjectSlug}/${questionId}`,
-    });
+    const subjectSlug =
+        (questionData.subjects as { slug?: string })?.slug ?? 'general';
 
-    for (const sub of studentSubs) {
-        try {
-            await webpush.sendNotification(
-                {
-                    endpoint: sub.endpoint,
-                    keys: {
-                        auth: sub.auth_key,
-                        p256dh: sub.p256dh_key,
-                    },
-                },
-                studentPayload
-            );
-        } catch (err) {
-            if (err.statusCode === 410 || err.statusCode === 404) {
-                await supabaseAdmin
-                    .from('push_subscriptions')
-                    .delete()
-                    .eq('endpoint', sub.endpoint);
-            }
-        }
-    }
+    const { error: insertErr } = await supabaseAdmin
+        .from('notifications')
+        .insert({
+            title: 'Question Fixed!',
+            message:
+                'An issue you reported has been verified and updated. Thank you for making the platform great for everyone.',
+            link: `/practice/${subjectSlug}/${questionId}`,
+            type: 'update',
+            target: { type: 'user', user_id: studentId },
+        });
+
+    if (insertErr) throw insertErr;
 
     return new Response(
         JSON.stringify({
             success: true,
-            message: 'Student resolution notification dispatched.',
+            message: 'Student resolution notification created.',
         }),
         {
             status: 200,
-            headers: corsHeaders,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
     );
 };

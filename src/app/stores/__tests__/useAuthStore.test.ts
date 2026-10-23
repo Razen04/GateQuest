@@ -41,7 +41,6 @@ const initialState = {
     user: null,
     loading: true,
     showLogin: false,
-    needsUsername: false,
 };
 
 beforeEach(() => {
@@ -137,7 +136,6 @@ describe('logout', () => {
             error: null,
         });
         localStorage.setItem('last_checked_notification', 'x');
-        localStorage.setItem('subjectStats', 'y');
         localStorage.setItem('keep_me', 'z');
 
         await useAuthStore.getState().logout();
@@ -146,7 +144,6 @@ describe('logout', () => {
 
         // Stale localStorage keys removed; unrelated keys kept
         expect(localStorage.getItem('last_checked_notification')).toBeNull();
-        expect(localStorage.getItem('subjectStats')).toBeNull();
         expect(localStorage.getItem('keep_me')).toBe('z');
 
         // Cache Storage cleared

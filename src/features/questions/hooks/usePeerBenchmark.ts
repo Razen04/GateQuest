@@ -8,7 +8,7 @@ const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 const UUID_REGEX =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function usePeerBenchmark(questionId: string | number) {
+export function usePeerBenchmark(questionId: string | number, enable: boolean) {
     const [benchmarkDetails, setBenchmarkDetails] = useState<Benchmark | null>(
         null
     );
@@ -19,6 +19,7 @@ export function usePeerBenchmark(questionId: string | number) {
         const strQuestionId = String(questionId);
 
         if (!UUID_REGEX.test(strQuestionId)) return;
+        if (!enable) return;
 
         let isMounted = true;
 
@@ -81,7 +82,7 @@ export function usePeerBenchmark(questionId: string | number) {
         return () => {
             isMounted = false;
         };
-    }, [questionId]);
+    }, [questionId, enable]);
 
     return { benchmarkDetails, loading, message };
 }

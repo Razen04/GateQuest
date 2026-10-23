@@ -2,10 +2,10 @@ import { compress } from 'lz-string';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import useGoal from '@/shared/hooks/useGoal';
 import type { RevisionQuestion } from '@/shared/types/storage';
-import { getUserProfile } from '@/shared/utils/helper';
 import {
     fetchCriticalQuestionCount,
     fetchWeeklySet,
@@ -15,7 +15,7 @@ import {
 } from '../api/smartRevision';
 
 const useSmartRevision = () => {
-    const user = getUserProfile();
+    const user = useAuthStore((s) => s.user);
     const userId = user?.id;
 
     const userGoal = useGoalStore((s) => s.userGoal);

@@ -2,9 +2,11 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { Stats, SubjectStat } from '@/shared/types/Stats.ts';
 import type { DashboardResponse } from '@/shared/types/StatsType.js';
-import { getUserProfile } from '@/shared/utils/helper.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
+import { useAuthStore } from './useAuthStore.ts';
 import { useGoalStore } from './useGoalStore.ts';
+
+const STATS_TTL = 60_000;
 
 const defaultStats: Stats = {
     progress: 0,
@@ -35,22 +37,38 @@ const defaultStats: Stats = {
 type StatsState = {
     stats: Stats;
     loading: boolean;
+    lastFetchedAt: number | null;
+    isStale: boolean;
 
     updateStats: () => Promise<void>;
+    markStatsStale: () => void;
     setLoading: (value: boolean) => void;
 };
 
 export const useStatsStore = create<StatsState>()(
     devtools(
-        (set) => ({
+        (set, get) => ({
             stats: defaultStats,
             loading: true,
+            lastFetchedAt: null,
+            isStale: false,
 
             setLoading: (value) =>
                 set({ loading: value }, false, 'stats/setLoading'),
 
+            markStatsStale: () =>
+                set({ isStale: true }, false, 'stats/markStatsStale'),
+
             updateStats: async () => {
-                const user = getUserProfile();
+                const { lastFetchedAt, isStale } = get();
+                const fresh =
+                    lastFetchedAt !== null &&
+                    Date.now() - lastFetchedAt < STATS_TTL &&
+                    !isStale;
+
+                if (fresh) return;
+
+                const user = useAuthStore.getState().user;
 
                 if (
                     !user ||
@@ -115,18 +133,6 @@ export const useStatsStore = create<StatsState>()(
 
                     const defaultSubjectStats = primaryExamStats.subjects || [];
 
-                    try {
-                        localStorage.setItem(
-                            'subjectStats',
-                            JSON.stringify(defaultSubjectStats)
-                        );
-                    } catch (e) {
-                        console.warn(
-                            'Failed to save subjectStats to localStorage',
-                            e
-                        );
-                    }
-
                     const totalQuestions =
                         primaryExamStats.total_available || 0;
                     const uniqueAttemptCount =
@@ -185,6 +191,8 @@ export const useStatsStore = create<StatsState>()(
                                         dbStats.is_target_met_today || false,
                                 },
                             },
+                            lastFetchedAt: Date.now(),
+                            isStale: false,
                         },
                         false,
                         'stats/updateStats:success'
