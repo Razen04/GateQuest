@@ -17,11 +17,14 @@ const useTopicTestHubData = (
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        setActiveTest(null);
+        setHistory([]);
+        setLoading(true);
+
         const loadData = async () => {
             if (!userId || !branchId) return;
 
             try {
-                // 1. Handle Active Test
                 let localSession = await getOngoingTestSession(branchId);
 
                 if (!localSession.length) {
@@ -30,31 +33,27 @@ const useTopicTestHubData = (
                 }
                 setActiveTest(localSession[0] || null);
 
-                // 2. Fetch history from local Dexie first
-                let localHistory = await getCompletedTestSessions(branchId);
+                const { data: supaSessions, error: supaError } =
+                    await fetchTestHistory(userId, branchId);
 
-                // 3. If Dexie history is empty, fetch from Supabase and cache it
-                if (localHistory && localHistory.length === 0) {
-                    const { data: supaTestSessions, error: supaError } =
-                        await fetchTestHistory(userId, branchId);
-
-                    if (supaError) {
-                        console.error('Error fetching test history', supaError);
-                    } else if (
-                        supaTestSessions &&
-                        supaTestSessions.length > 0
-                    ) {
-                        await cacheTestSessions(supaTestSessions);
-                        localHistory = supaTestSessions;
-                    }
+                if (supaError) {
+                    console.error('Error fetching test history', supaError);
+                    const localFallback =
+                        (await getCompletedTestSessions(branchId)) ?? [];
+                    setHistory(localFallback.slice(0, 10));
+                } else if (supaSessions?.length) {
+                    await cacheTestSessions(supaSessions);
+                    const merged =
+                        (await getCompletedTestSessions(branchId)) ?? [];
+                    setHistory(merged.slice(0, 10));
+                } else {
+                    const localOnly =
+                        (await getCompletedTestSessions(branchId)) ?? [];
+                    setHistory(localOnly.slice(0, 10));
                 }
-
-                setHistory(localHistory.slice(0, 10));
             } catch (error) {
-                // Now, if Dexie throws, we will see it in the console!
                 console.error('Failed to load topic test hub data:', error);
             } finally {
-                // GUARANTEES the loading state is removed even if an error is thrown
                 setLoading(false);
             }
         };
