@@ -86,6 +86,8 @@ const getCompletedTestSessions = async (branchId?: string) => {
         .equals('completed')
         .toArray();
 
+    if (!branchId) return sessions;
+
     let filtered = sessions;
     if (branchId) {
         filtered = sessions.filter((s) => s.branch_id === branchId);
@@ -115,6 +117,10 @@ const updateSessionTimeAndStatus = async (
 ) => {
     const session = await db.sessions.get(sessionId);
     if (!session) return null;
+
+    if (session.status === 'completed' && status !== 'completed') {
+        return null;
+    }
 
     const updateSession = {
         remaining_time_seconds: time,

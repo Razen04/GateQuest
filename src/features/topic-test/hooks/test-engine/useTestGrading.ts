@@ -6,6 +6,12 @@ import {
 import type { Attempt } from '@/shared/types/storage';
 import { submitTestGrading } from '../../api/topicTest';
 
+type TestGradingResult = {
+    total_score: number;
+    correct_count: number;
+    incorrect_count: number;
+};
+
 const useTestGrading = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,22 +55,35 @@ const useTestGrading = () => {
 
             const result = await rpcCall();
 
-            const attempted = result.correct_count + result.incorrect_count;
+            if (
+                !result ||
+                typeof result !== 'object' ||
+                Array.isArray(result)
+            ) {
+                throw new Error('Invalid test grading response');
+            }
+
+            const gradingResult = result as TestGradingResult;
+
+            const attempted =
+                gradingResult.correct_count + gradingResult.incorrect_count;
 
             await updateAttempts(
                 testId,
                 [],
                 attempted,
-                result.total_score,
-                result.correct_count
+                gradingResult.total_score,
+                gradingResult.correct_count
             );
+
+            // NOTE: Check if this is actually needed anymore after the Zustand Migration
             // Add broadcast to update the stats in Dashboard.
             window.dispatchEvent(new Event('STATS_UPDATED'));
 
             return {
-                totalScore: result.total_score,
-                correctCount: result.correct_count,
-                incorrectCount: result.incorrect_count,
+                totalScore: gradingResult.total_score,
+                correctCount: gradingResult.correct_count,
+                incorrectCount: gradingResult.incorrect_count,
             };
         } catch (err) {
             console.error('Submission error: ', err);

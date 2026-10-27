@@ -20,7 +20,6 @@ describe('useTestTimer hook', () => {
         vi.useRealTimers();
     });
 
-    // Test case 1
     describe('Time formatting', () => {
         it('formats time correctly (300s -> 05:00)', () => {
             const { result } = renderHook(() => {
@@ -33,7 +32,6 @@ describe('useTestTimer hook', () => {
         });
     });
 
-    // Test case 2
     describe('boundaries', () => {
         it('stops at 0 and does not go negative', () => {
             const { result } = renderHook(() => {
@@ -51,7 +49,6 @@ describe('useTestTimer hook', () => {
         });
     });
 
-    // Test case 3
     describe('expiry callback', () => {
         it('fires onExpire callback once only when timer reaches 0', () => {
             const onExpire = vi.fn();
@@ -67,7 +64,6 @@ describe('useTestTimer hook', () => {
         });
     });
 
-    // Test case 4
     describe('drift test', () => {
         it('corrects drift when system time jumps forward', () => {
             const { result } = renderHook(() =>
@@ -89,5 +85,44 @@ describe('useTestTimer hook', () => {
 
             expect(result.current.secondsRemaining).toBe(54);
         });
+    });
+
+    it('does not fire onExpire before expiry', () => {
+        const onExpire = vi.fn();
+        renderHook(() => useTestTimer({ initialSeconds: 10, onExpire }));
+        act(() => {
+            vi.advanceTimersByTime(5000);
+        });
+        expect(onExpire).not.toHaveBeenCalled();
+    });
+
+    it('clears the interval on unmount', () => {
+        const clear = vi.spyOn(window, 'clearInterval');
+        const { unmount } = renderHook(() =>
+            useTestTimer({ initialSeconds: 10 })
+        );
+        unmount();
+        expect(clear).toHaveBeenCalled();
+    });
+
+    it('expires immediately when initialSeconds is 0', () => {
+        const { result } = renderHook(() =>
+            useTestTimer({ initialSeconds: 0 })
+        );
+        expect(result.current.secondsRemaining).toBe(0);
+        expect(result.current.isExpired).toBe(true);
+    });
+
+    it('ignores updates to initialSeconds after mount', () => {
+        const { result, rerender } = renderHook(
+            ({ s }) => useTestTimer({ initialSeconds: s }),
+            { initialProps: { s: 60 } }
+        );
+        act(() => {
+            vi.advanceTimersByTime(10000);
+        });
+        expect(result.current.secondsRemaining).toBe(50);
+        rerender({ s: 999 });
+        expect(result.current.secondsRemaining).toBe(50);
     });
 });

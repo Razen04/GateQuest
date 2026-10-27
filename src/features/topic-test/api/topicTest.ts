@@ -1,8 +1,32 @@
-// src/features/topic-test/api/topicTest.ts
-
 import type { PyqPaper } from '@/shared/types/pyq';
 import type { Attempt, Question } from '@/shared/types/storage';
 import { supabase } from '@/shared/utils/supabaseClient';
+
+type RawJoinedAttempt = {
+    session_id: string;
+    question_id: string;
+    attempt_order: number | null;
+    user_answer: number | number[] | null;
+    marked_for_review: boolean | null;
+    status: string | null;
+    is_correct: boolean | null;
+    score: number | null;
+    time_spent_seconds: number | null;
+    questions: Question | Question[] | null;
+};
+
+const toAttempt = (row: RawJoinedAttempt): Attempt => ({
+    session_id: row.session_id,
+    question_id: row.question_id,
+    attempt_order: row.attempt_order ?? 0,
+    user_answer: row.user_answer,
+    marked_for_review: row.marked_for_review ?? false,
+    status: row.status ?? 'unvisited',
+    is_correct: row.is_correct ?? false,
+    score: row.score ?? 0,
+    time_spent_seconds: row.time_spent_seconds ?? 0,
+    is_synced: 1,
+});
 
 // ---------- Test Session CRUD ----------
 export const fetchTestById = async (testId: string) => {
@@ -112,53 +136,39 @@ export const fetchQuestionsByIds = async (ids: string[]) => {
     return { data, error };
 };
 
-type RawAttemptData = Attempt & {
-    questions: Question | Question[];
-};
-
-// Replace inside: src/features/topic-test/api/topicTest.ts
 export const fetchFullTestData = async (userId: string, branchId: string) => {
-    const { data: testSession, error } = await supabase
+    const { data: raw, error } = await supabase
         .from('topic_tests')
-        .select(
-            `
+        .select(`
             *,
             topic_tests_attempts (
                 *,
                 questions (*)
             )
-        `
-        )
+        `)
         .eq('user_id', userId)
         .eq('branch_id', branchId)
         .in('status', ['ongoing', 'paused', 'created'])
         .maybeSingle();
 
-    if (error || !testSession)
+    if (error || !raw)
         return { testSession: null, attempts: null, questions: null };
 
-    const rawAttempts = testSession.topic_tests_attempts || [];
+    // Strip the join field so it never reaches Dexie (destructure, don't delete).
+    const { topic_tests_attempts, ...testSession } = raw;
+    const joined = (topic_tests_attempts ?? []) as RawJoinedAttempt[];
 
-    // Safely extract questions, handling whether Supabase returned an object or a [array]
-    const questions = rawAttempts
-        .flatMap((a: RawAttemptData) =>
-            Array.isArray(a.questions) ? a.questions : [a.questions]
-        )
-        .filter(Boolean);
-
-    // Strip the nested 'questions' object out of attempts so Dexie doesn't crash
-    const pureAttempts = rawAttempts.map(
-        ({ questions, ...rest }: RawAttemptData) => rest
+    const questions = joined.flatMap((row) =>
+        row.questions
+            ? Array.isArray(row.questions)
+                ? row.questions
+                : [row.questions]
+            : []
     );
 
-    // Clean up the main testSession
-    delete testSession.topic_tests_attempts;
+    const attempts: Attempt[] = joined.map(toAttempt);
 
-    return {
-        testSession,
-        attempts: pureAttempts,
-        questions,
-    };
+    return { testSession, attempts, questions };
 };
 
 export const createTestFromPaper = async (
@@ -167,6 +177,7 @@ export const createTestFromPaper = async (
     recordActivity: boolean = true,
     optionalSubjectIds: string[] = []
 ) => {
+    if (!paper.shift) return;
     const { data, error } = await supabase.rpc('create_test_from_paper', {
         p_paper_id: paper.id,
         p_paper_label: paper.label,

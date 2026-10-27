@@ -12,7 +12,7 @@
         "format": "biome format --write .",
         "format:check": "biome format .",
         "preview": "vite preview",
-        "cloc": "cloc --exclude-dir=$(tr '\n' ',' < .clocignore) .",
+        "cloc": "cloc --exclude-dir=$(grep -v '/' .clocignore | tr '\\n' ',') --fullpath --not-match-d=\"$(grep '/' .clocignore | paste -sd '|' -)\" .",
         "test": "vitest",
         "test:run": "vitest run",
         "test:watch": "vitest",

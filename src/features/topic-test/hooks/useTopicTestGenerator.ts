@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import useGoal from '@/shared/hooks/useGoal';
 import { fetchTopicCounts } from '../api/topicTest';
 
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour for the cache after which we will refetch the topics
+const CACHE_TTL = 1000 * 60 * 5; // 5 mins for the cache after which we will refetch the topics
 
 export interface Topic {
     name: string;
@@ -62,41 +62,51 @@ export const useTopicTestGenerator = ({
         );
     }, []);
 
-    const fetchTopics = useCallback(async () => {
-        if (!subjectId) return;
-
-        const cached = readCache(subjectId);
-        if (cached) {
-            setAvailableTopics(cached);
-            return;
-        }
-
-        setLoading(true);
-
-        const { data, error } = await fetchTopicCounts(subjectId);
-
-        if (error) {
-            console.error(error);
-            setAvailableTopics([]);
-        } else {
-            const topics: Topic[] = data.map((t: TopicFromSupabase) => ({
-                name: t.topic,
-                subjectName,
-                subjectId,
-                questionCount: t.question_count,
-                unattemptedCount: t.unattempted_count,
-            }));
-
-            setAvailableTopics(topics);
-            writeCache(subjectId, topics);
-        }
-
-        setLoading(false);
-    }, [subjectId, subjectName, readCache, writeCache]);
-
     useEffect(() => {
-        fetchTopics();
-    }, [fetchTopics]);
+        let cancelled = false;
+
+        (async () => {
+            if (!subjectId) return;
+
+            const cached = readCache(subjectId);
+            if (cached) {
+                setAvailableTopics(cached);
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const { data, error } = await fetchTopicCounts(subjectId);
+                if (cancelled) return;
+
+                if (error || !data || !subjectName) {
+                    if (error) console.error(error);
+                    setAvailableTopics([]);
+                    return;
+                }
+                const topics: Topic[] = data.map((t: TopicFromSupabase) => ({
+                    name: t.topic,
+                    subjectName,
+                    subjectId,
+                    questionCount: t.question_count,
+                    unattemptedCount: t.unattempted_count,
+                }));
+                setAvailableTopics(topics);
+                writeCache(subjectId, topics);
+            } catch (err) {
+                if (!cancelled) {
+                    console.error(err);
+                    setAvailableTopics([]);
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [subjectId, subjectName, readCache, writeCache]);
 
     const toggleTopic = (topic: Topic) => {
         setSelectedTopics((prev) => {
@@ -162,6 +172,5 @@ export const useTopicTestGenerator = ({
         toggleTopic,
         removeTopic,
         clearSelection,
-        refreshCache: fetchTopics,
     };
 };

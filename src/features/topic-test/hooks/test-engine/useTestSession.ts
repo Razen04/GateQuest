@@ -47,7 +47,6 @@ const useTestSession = (
     const grading = useTestGrading();
 
     const timerRef = useRef<number>(timer.secondsRemaining);
-    const statusRef = useRef(status);
 
     // helper to commit time spent on current question
     const commitCurrentTime = useCallback(() => {
@@ -126,12 +125,7 @@ const useTestSession = (
 
     // Heartbeat: Sync timer + unsynced attempts every 30 seconds
     useEffect(() => {
-        if (
-            statusRef.current !== 'ready' &&
-            statusRef.current !== 'submitting' &&
-            statusRef.current === 'completed'
-        )
-            return;
+        if (status === 'completed') return;
 
         let cancelled = false;
 
@@ -145,10 +139,7 @@ const useTestSession = (
                 // Fetch unsynced attempts from Dexie
                 const dirtyAttempts = await getPendingAttempts();
                 if (dirtyAttempts.length > 0) {
-                    // In handleSubmit AND in the Heartbeat useEffect:
-
                     const payload = dirtyAttempts.map((a) => {
-                        // Find the REAL index from the master list
                         const realIndex = data.questions.findIndex(
                             (q) => q.id === a.question_id
                         );
@@ -173,7 +164,6 @@ const useTestSession = (
                     const { error } = await upsertAttempts(payload);
 
                     if (!error) {
-                        // mark attempts as synced locally
                         await markAttemptsSynced(dirtyAttempts);
                     } else {
                         console.error('Heartbeat upsert error:', error);
@@ -184,10 +174,8 @@ const useTestSession = (
             }
         };
 
-        // run immediately once
         heartbeat();
 
-        // then every 60 seconds
         const interval = setInterval(() => {
             if (!cancelled) heartbeat();
         }, 60000);

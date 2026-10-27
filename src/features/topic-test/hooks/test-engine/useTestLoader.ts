@@ -16,7 +16,10 @@ const useTestLoader = (testId: string) => {
         let mounted = true;
         (async () => {
             const testSession = await getTestSession(testId);
-            if (!testSession) return;
+            if (!testSession) {
+                if (mounted) setLoading(false);
+                return;
+            }
             const session = testSession.session;
 
             const attempts = testSession.attempts;

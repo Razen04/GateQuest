@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { saveAttempt } from '@/features/topic-test/services/testSession';
 import type { Attempt } from '@/shared/types/storage';
 
+// NOTE: Update viewed to visited in future in both DB and Tests
 interface useTestAnswerPropType {
     testId: string;
     initialAttempts: Attempt[];
@@ -18,14 +19,13 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
         return map;
     });
 
-    // reviewList Map
-    const [reviewList, setReviewList] = useState<Set<string>>(() => {
+    const reviewList = useMemo(() => {
         const set = new Set<string>();
-        initialAttempts.forEach((attempt) => {
-            if (attempt.marked_for_review) set.add(attempt.question_id);
-        });
+        for (const [questionId, attempt] of answers) {
+            if (attempt.marked_for_review) set.add(questionId);
+        }
         return set;
-    });
+    }, [answers]);
 
     const [isSaving, setIsSaving] = useState(false);
 
@@ -82,7 +82,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                           attempt_order: attemptOrder,
                           user_answer: null,
                           marked_for_review: false,
-                          status: 'visited',
+                          status: 'viewed',
                           is_correct: false, // graded later
                           score: 0,
                           time_spent_seconds: secondsToAdd,
@@ -136,29 +136,15 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
 
     const toggleReview = useCallback(
         (questionId: string, attemptOrder: number) => {
-            const isCurrentlyMarked = reviewList.has(questionId);
-            const newStatus = !isCurrentlyMarked;
-
-            setReviewList((prev) => {
-                const next = new Set(prev);
-                if (!newStatus) {
-                    next.delete(questionId);
-                } else {
-                    next.add(questionId);
-                }
-
-                return next;
-            });
-
-            // attempt updated
             setAnswers((prev) => {
                 const next = new Map(prev);
                 const existing = prev.get(questionId);
+                const newMarkedStatus = !(existing?.marked_for_review ?? false);
 
                 const updatedAttempt: Attempt = existing
                     ? {
                           ...existing,
-                          marked_for_review: newStatus,
+                          marked_for_review: newMarkedStatus,
                           is_synced: 0,
                       }
                     : {
@@ -166,8 +152,8 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                           question_id: questionId,
                           attempt_order: attemptOrder,
                           user_answer: null,
-                          marked_for_review: newStatus,
-                          status: 'visited',
+                          marked_for_review: newMarkedStatus,
+                          status: 'viewed',
                           is_correct: false, // graded later
                           score: 0,
                           time_spent_seconds: 0,
@@ -182,7 +168,7 @@ const useTestAnswer = ({ testId, initialAttempts }: useTestAnswerPropType) => {
                 return next;
             });
         },
-        [testId, reviewList]
+        [testId]
     );
 
     // no. of questions answered
