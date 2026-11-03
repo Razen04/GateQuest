@@ -376,7 +376,11 @@ This is the primary source of truth for "which subjects should this user see" �
 
 - **The upsert pattern.** `setInitialGoal` uses `ON CONFLICT (user_id, branch_id) DO UPDATE`, so changing exams for a branch that already has a goal updates in place. Changing _branch_ creates a new row and marks the old one `is_active = false`.
 - **`additional_subjects` is only consulted when `branch_id = 'xl'` and `'gate'` is in `target_exams`.** For every other combination, the value is either `NULL` or ignored. The validation lives on the client and in `AccountSettings`; there's no database-level constraint enforcing "exactly two subjects when XL".
-- **Notification tags.** When the notification migration ships, `users.notification_tags` is populated by a trigger on `user_goals` — `branch:<branch_id>` and `exam:<exam_id>` for each entry in `target_exams`. Until that trigger exists, tag-targeted notifications return an empty audience. See [Notification System](#notification-system) for details.
+- **Notification tags.** `users.notification_tags` holds three tag families:
+
+1. `branch:<branch_id>` and `exam:<exam_id>` — populated by the `on_user_goal_change` trigger on `user_goals`. Whenever a user's goal is inserted, updated, or deleted, the trigger recomputes these tags from scratch.
+2. `role:donor` — appended explicitly by the donation-verification flow when a donation is verified. Never removed. Preserved by the goal trigger, which only rewrites `branch:*` and `exam:*` families.
+3. `role:beta` — not currently used. The beta program was folded into stable in v0.11.0; the tag remains in the schema for future use but nothing writes it.
 
 ---
 
@@ -2394,15 +2398,16 @@ A consolidated view of every trigger in the database. Triggers are grouped by th
 
 ### Trigger Inventory
 
-| Table              | Trigger                         | Timing | Events                 | Function                          | Purpose                                                                                                       |
-| :----------------- | :------------------------------ | :----- | :--------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `questions`        | `handle_questions_updated_at`   | BEFORE | UPDATE                 | `moddatetime('updated_at')`       | Auto-update the `updated_at` column on any row change.                                                        |
-| `questions`        | `trg_update_question_count`     | AFTER  | INSERT, UPDATE, DELETE | `update_subject_question_count()` | Recompute `subjects.question_count` when verified questions are added, edited, or removed.                    |
-| `question_reports` | `trigger_on_report_insert`      | AFTER  | INSERT                 | `handle_report_event_webhook()`   | Forward new report to the `process-reminders` Edge Function → notification to admin.                          |
-| `question_reports` | `trigger_on_report_update`      | AFTER  | UPDATE                 | `handle_report_event_webhook()`   | Forward status transitions to the `process-reminders` Edge Function → notification to reporter when resolved. |
-| `topic_tests`      | `on_topic_test_completed`       | AFTER  | UPDATE                 | `handle_test_completion_sync()`   | Sync test attempts into `user_question_activity` and update the queue on session completion.                  |
-| `notifications`    | `on_notification_before_insert` | BEFORE | INSERT                 | `before_notification_insert()`    | Default `active`, resolve `audience_ids` from `target`.                                                       |
-| `notifications`    | `on_notification_after_insert`  | AFTER  | INSERT                 | `dispatch_notification_http()`    | Fire async HTTP to the `dispatch-notification` Edge Function for push fanout.                                 |
+| Table                 | Trigger                         | Timing                     | Events                   | Function                          | Purpose                                                                                                       |
+| :-------------------- | :------------------------------ | :------------------------- | :----------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `questions`           | `handle_questions_updated_at`   | BEFORE                     | UPDATE                   | `moddatetime('updated_at')`       | Auto-update the `updated_at` column on any row change.                                                        |
+| `questions`           | `trg_update_question_count`     | AFTER                      | INSERT, UPDATE, DELETE   | `update_subject_question_count()` | Recompute `subjects.question_count` when verified questions are added, edited, or removed.                    |
+| `question_reports`    | `trigger_on_report_insert`      | AFTER                      | INSERT                   | `handle_report_event_webhook()`   | Forward new report to the `process-reminders` Edge Function → notification to admin.                          |
+| `question_reports`    | `trigger_on_report_update`      | AFTER                      | UPDATE                   | `handle_report_event_webhook()`   | Forward status transitions to the `process-reminders` Edge Function → notification to reporter when resolved. |
+| `topic_tests`         | `on_topic_test_completed`       | AFTER                      | UPDATE                   | `handle_test_completion_sync()`   | Sync test attempts into `user_question_activity` and update the queue on session completion.                  |
+| `notifications`       | `on_notification_before_insert` | BEFORE                     | INSERT                   | `before_notification_insert()`    | Default `active`, resolve `audience_ids` from `target`.                                                       |
+| `notifications`       | `on_notification_after_insert`  | AFTER                      | INSERT                   | `dispatch_notification_http()`    | Fire async HTTP to the `dispatch-notification` Edge Function for push fanout.                                 |
+| `on_user_goal_change` | `user_goals`                    | AFTER INSERT/UPDATE/DELETE | `refresh_user_goal_tags` |
 
 ---
 
@@ -2573,6 +2578,28 @@ Three conditions must all hold:
 **Test mode:** pgTAP tests set `app.skip_dispatch = true` via `set local`. Without this, every test that inserts a notification would try to reach `localhost:54321/functions/v1/dispatch-notification` — which works when the local stack is up, but fails when running tests in isolation. The setting must be read with `current_setting('app.skip_dispatch', true)` (second argument `true` means "return NULL instead of error if unset"), otherwise production inserts would crash.
 
 **Failure handling:** If `net.http_post` fails (network error, timeout), there's no retry. The notification exists with `dispatched_at = NULL`. A backfill sweep query (documented in [the notifications table](#table-publicnotifications)) catches these on the next manual inspection, but no automatic retry currently exists.
+
+---
+
+### Trigger: `on_user_goal_change`
+
+**Table:** `user_goals`
+**Timing:** AFTER INSERT, UPDATE, DELETE
+**Function:** `refresh_user_goal_tags()`
+
+**Purpose:** Keeps `users.notification_tags` in sync with the user's active goal. When a user changes branch, adds a target exam, or deactivates their goal, the derived `branch:*` and `exam:*` tags are recomputed.
+
+**Behavior:**
+
+1. Read the user's active goal (`is_active = true`).
+2. Derive `branch:<branch_id>` from `goal.branch_id`.
+3. Derive `exam:<exam_id>` for each entry in `goal.target_exams` (lowercased).
+4. Preserve existing `role:*` tags — the trigger does not own them.
+5. Write the combined array back to `users.notification_tags`.
+
+**Why preserve `role:*` tags.** The trigger fires on goal changes, not donor changes. If it wiped the entire array, verifying a donation and then changing the goal would lose the `role:donor` tag. The `where t like 'role:%'` filter in the function keeps role tags intact across recomputation.
+
+**Guest users:** users with `id = '1'` have no goal and no donor status, so the trigger produces `{}`. No special-casing needed.
 
 ---
 
