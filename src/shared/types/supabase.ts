@@ -1099,34 +1099,20 @@ export type Database = {
         Functions: {
             calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
             clear_user_data: { Args: never; Returns: Json };
-            create_test_from_paper:
-                | {
-                      Args: {
-                          p_branch: string;
-                          p_branch_id: string;
-                          p_duration_seconds: number;
-                          p_paper_id: string;
-                          p_paper_label: string;
-                          p_record_activity?: boolean;
-                          p_shift: number;
-                          p_year: number;
-                      };
-                      Returns: Json;
-                  }
-                | {
-                      Args: {
-                          p_branch: string;
-                          p_branch_id: string;
-                          p_duration_seconds: number;
-                          p_optional_subject_ids?: string[];
-                          p_paper_id: string;
-                          p_paper_label: string;
-                          p_record_activity?: boolean;
-                          p_shift: number;
-                          p_year: number;
-                      };
-                      Returns: Json;
-                  };
+            create_test_from_paper: {
+                Args: {
+                    p_branch: string;
+                    p_branch_id: string;
+                    p_duration_seconds: number;
+                    p_optional_subject_ids?: string[];
+                    p_paper_id: string;
+                    p_paper_label: string;
+                    p_record_activity?: boolean;
+                    p_shift: number;
+                    p_year: number;
+                };
+                Returns: Json;
+            };
             delete_account: { Args: never; Returns: undefined };
             generate_topic_test: {
                 Args: {
@@ -1254,6 +1240,14 @@ export type Database = {
                 Returns: string[];
             };
             resolve_segment: { Args: { p_target: Json }; Returns: string[] };
+            search_users: {
+                Args: { search_term: string };
+                Returns: {
+                    avatar: string;
+                    id: string;
+                    username: string;
+                }[];
+            };
             start_weekly_revision_set: {
                 Args: { v_set_id: string };
                 Returns: Json;

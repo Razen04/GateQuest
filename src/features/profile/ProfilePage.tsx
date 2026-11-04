@@ -1,16 +1,18 @@
 import { motion } from 'framer-motion';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ModernLoader from '@/shared/components/ModernLoader';
 import { containerVariants } from '@/shared/utils/motionVariants';
 import ProfileActivityTabs from './components/ProfileActivityTabs';
 import ProfileError from './components/ProfileError';
 import ProfileHeatmap from './components/ProfileHeatmap';
 import ProfileHero from './components/ProfileHero';
+import ProfileSearch from './components/ProfileSearch';
 import ProfileSidePanel from './components/ProfileSidePanel';
 import ProfileStatsGrid from './components/ProfileStatsGrid';
 import { useProfile } from './hooks/useProfile';
 
 export default function ProfilePage() {
+    const navigate = useNavigate();
     const { username } = useParams<{ username: string }>();
     const { data, loading, error } = useProfile(username);
 
@@ -39,13 +41,16 @@ export default function ProfilePage() {
 
                 <div className="relative z-10 mx-auto max-w-6xl px-4 pt-6 sm:px-6">
                     <div className="flex flex-col gap-6">
-                        {/* Hero: the thesis statement — who this is */}
                         <ProfileHero profile={data.profile} />
 
-                        {/* Below: "your numbers" (left rail) vs "your activity" (main) —
-                        a deliberate split instead of a stacked checklist */}
                         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[300px_1fr]">
                             <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
+                                <ProfileSearch
+                                    onSelectUser={(username) => {
+                                        navigate(`/u/${username}`);
+                                    }}
+                                />
+
                                 <ProfileStatsGrid
                                     globalStats={data.global_stats}
                                     streaks={data.streaks}
