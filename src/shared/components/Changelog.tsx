@@ -38,13 +38,13 @@ function Changelog() {
                 <motion.button
                     aria-label="Changelog"
                     whileTap={{ scale: 0.95 }}
-                    className="flex h-8 items-center gap-1.5 px-2.5 text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-all"
+                    className="flex h-8 items-center gap-1.5 px-2.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
                 >
                     <ArticleIcon size={20} />
                 </motion.button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-3xl rounded-none border border-white/30 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl">
+            <DialogContent className="max-w-3xl rounded-none border border-border bg-popover/60 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl">
                 <DialogHeader className="py-5">
                     <DialogTitle className="flex items-center justify-center">
                         <motion.span
@@ -59,21 +59,21 @@ function Changelog() {
                                 filter: 'blur(0px)',
                             }}
                             transition={{ duration: 0.4, ease: 'easeOut' }}
-                            className="text-4xl font-black bg-gradient-to-r from-blue-400 via-blue-500 to-blue-700 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x pl-[0.3em]"
+                            className="text-4xl font-black bg-gradient-to-r from-chart-1 via-primary to-chart-1 bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x pl-[0.3em]"
                         >
                             CHANGELOG
                         </motion.span>
                     </DialogTitle>
                 </DialogHeader>
 
-                <ScrollArea className="h-[60vh] pr-4 bg-white/20 dark:bg-white/[0.03] backdrop-blur-xl backdrop-saturate-150 p-4">
+                <ScrollArea className="h-[60vh] pr-4 bg-foreground/[0.03] backdrop-blur-xl backdrop-saturate-150 p-4">
                     <article className="prose prose-neutral dark:prose-invert max-w-none">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
                                 h1: ({ children }) => (
-                                    <h1 className="inline-flex items-center gap-2 text-xl text-blue-500 font-semibold border-b border-white/20 pb-2">
-                                        <MegaphoneIcon className="w-4 h-4 text-red-500 rotate-y-180" />
+                                    <h1 className="inline-flex items-center gap-2 text-xl text-primary font-semibold border-b border-border pb-2">
+                                        <MegaphoneIcon className="w-4 h-4 text-destructive rotate-y-180" />
                                         {children}
                                     </h1>
                                 ),
@@ -87,7 +87,7 @@ function Changelog() {
                                             href={href}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-primary italic bg-blue-500/10 hover:bg-blue-500/20 backdrop-blur-md transition-colors"
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 text-primary italic bg-primary/10 hover:bg-primary/20 backdrop-blur-md transition-colors"
                                         >
                                             {children}
                                             {isGithubLink ? (

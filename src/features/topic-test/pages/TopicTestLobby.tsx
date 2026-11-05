@@ -64,18 +64,16 @@ const INSTRUCTION_RULES: InstructionRule[] = [
 const InstructionItem = ({ rule }: { rule: InstructionRule }) => {
     const isWarning = rule.type === 'warning';
     const Icon = isWarning ? WarningCircle : CheckCircle;
-    const iconColor = isWarning
-        ? 'text-amber-500 dark:text-amber-400'
-        : 'text-emerald-500 dark:text-emerald-400';
+    const iconColor = isWarning ? 'text-chart-4' : 'text-chart-2';
 
     return (
-        <div className="flex items-start gap-3 p-3 bg-white/40 dark:bg-zinc-900/40 border border-slate-200/50 dark:border-zinc-800/60">
+        <div className="flex items-start gap-3 p-3 bg-card/40 border border-border">
             <Icon
                 size={18}
                 weight="fill"
                 className={`${iconColor} shrink-0 mt-0.5`}
             />
-            <p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
                 {rule.text}
             </p>
         </div>
@@ -147,12 +145,12 @@ const TopicTestLobby = () => {
     const isResume = testData.status === 'ongoing';
 
     return (
-        <div className="max-w-7xl mx-auto flex flex-col text-slate-900 dark:text-slate-100 pb-36 min-h-screen">
+        <div className="max-w-7xl mx-auto flex flex-col text-foreground pb-36 min-h-screen">
             {/* Top Navigation & Header */}
             <div className="p-6 pb-2">
                 <button
                     onClick={() => navigate('/topic-test')}
-                    className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400 mb-4 transition-colors"
+                    className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-chart-1 mb-4 transition-colors"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Topic Tests
@@ -173,35 +171,35 @@ const TopicTestLobby = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="border border-slate-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-2xl shadow-xl p-6"
+                    className="border border-border bg-card/60 backdrop-blur-2xl shadow-xl p-6"
                 >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-zinc-800/80">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-border">
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-chart-1/10 text-chart-1 border border-chart-1/20">
                                     {testData.title || 'Custom Test'}
                                 </span>
                                 {isResume && (
-                                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 bg-chart-4/10 text-chart-4 border border-chart-4/20">
                                         In Progress
                                     </span>
                                 )}
                             </div>
-                            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                            <h2 className="text-xl font-bold tracking-tight text-foreground">
                                 {testData.title || 'Practice Assessment'}
                             </h2>
                         </div>
 
                         {/* Metric Badges */}
                         <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 border border-blue-200/60 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/30 px-3.5 py-1.5 text-sm font-semibold text-blue-700 dark:text-blue-300">
+                            <div className="flex items-center gap-2 border border-chart-1/30 bg-chart-1/10 px-3.5 py-1.5 text-sm font-semibold text-chart-1">
                                 <Question size={18} weight="bold" />
                                 <span>
                                     {testData.total_questions} Questions
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-2 border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/30 px-3.5 py-1.5 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                            <div className="flex items-center gap-2 border border-chart-4/30 bg-chart-4/10 px-3.5 py-1.5 text-sm font-semibold text-chart-4">
                                 <Timer size={18} weight="bold" />
                                 <span>{timeInMinutes} Mins</span>
                             </div>
@@ -210,14 +208,14 @@ const TopicTestLobby = () => {
 
                     {/* Included Topics */}
                     <div className="pt-4">
-                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block mb-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">
                             Included Topics ({testData.topics.length})
                         </label>
                         <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
                             {testData.topics.map((topic, i) => (
                                 <span
                                     key={i}
-                                    className="text-xs px-2.5 py-1 bg-slate-100 dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-800"
+                                    className="text-xs px-2.5 py-1 bg-muted text-muted-foreground border border-border"
                                 >
                                     {topic}
                                 </span>
@@ -233,7 +231,7 @@ const TopicTestLobby = () => {
                     transition={{ delay: 0.08 }}
                     className="space-y-3"
                 >
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         <Info size={16} />
                         <span>Instructions & Guidelines</span>
                     </div>
@@ -247,9 +245,9 @@ const TopicTestLobby = () => {
             </main>
 
             {/* Bottom Fixed Action Toolbar */}
-            <div className="fixed bottom-0 inset-x-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-slate-200 dark:border-zinc-800 p-4">
+            <div className="fixed bottom-0 inset-x-0 z-30 bg-background/90 backdrop-blur-xl border-t border-border p-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                    <div className="hidden sm:flex items-center gap-3 text-xs text-slate-500 dark:text-zinc-400">
+                    <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
                         <span>
                             Ensure quiet surroundings before starting. Good
                             Luck.
@@ -260,7 +258,7 @@ const TopicTestLobby = () => {
                         onClick={handleStartTest}
                         disabled={starting}
                         size="lg"
-                        className="w-full sm:w-auto min-w-[220px] bg-blue-600 hover:bg-blue-700 text-white rounded-none shadow-lg h-11 text-sm font-semibold tracking-wide"
+                        className="w-full sm:w-auto min-w-[220px] bg-chart-1 hover:bg-chart-1/90 text-white rounded-none shadow-lg h-11 text-sm font-semibold tracking-wide"
                     >
                         {starting ? (
                             <span>Preparing Test Environment...</span>

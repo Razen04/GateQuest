@@ -13,13 +13,13 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
             {donations.map((donation) => (
                 <li
                     key={donation.donation_id}
-                    className="relative overflow-hidden flex items-start gap-3 p-3 border border-white/20 bg-white/10 backdrop-blur-xl dark:bg-white/[0.06] dark:border-white/10 transition-all duration-300 hover:bg-white/20 dark:hover:bg-white/[0.1] hover:-translate-y-0.5 hover:shadow-lg"
+                    className="relative overflow-hidden flex items-start gap-3 p-3 border border-white/20 bg-card/60 backdrop-blur-xl transition-all duration-300 hover:bg-card/90 hover:-translate-y-0.5 hover:shadow-lg"
                 >
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
 
-                    <div className="relative flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full overflow-hidden border border-white/20 bg-white/10 dark:bg-white/[0.08]">
+                    <div className="relative flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full overflow-hidden border border-white/20 bg-card/80">
                         {donation.anonymous || !donation.user_avatar ? (
-                            <UserCircle size={32} className="text-blue-500" />
+                            <UserCircle size={32} className="text-chart-1" />
                         ) : (
                             <img
                                 src={donation.user_avatar}
@@ -33,7 +33,7 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                         <div className="flex justify-between items-start gap-2">
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-sm truncate">
+                                    <span className="font-semibold text-sm truncate text-foreground">
                                         {donation.anonymous ||
                                         !donation.user_name
                                             ? 'Anonymous'
@@ -55,7 +55,7 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                                 </div>
                             </div>
 
-                            <span className="flex-shrink-0 px-2.5 py-1 text-xs font-semibold border border-emerald-400/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <span className="flex-shrink-0 px-2.5 py-1 text-xs font-semibold border border-chart-2/30 bg-chart-2/10 text-chart-2">
                                 ₹{donation.actual_amount}
                             </span>
                         </div>

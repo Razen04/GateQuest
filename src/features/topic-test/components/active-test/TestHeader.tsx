@@ -46,7 +46,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
     const { isFullscreen, toggleFullscreen } = useFullscreen();
 
     return (
-        <header className="sticky top-0 z-10 bg-white dark:bg-zinc-950 border-b border-slate-200 dark:border-zinc-800">
+        <header className="sticky top-0 z-10 bg-card border-b border-border">
             <div className="flex items-center justify-between gap-3 px-4 py-2">
                 {/* Left Section: Back Action & Test Title */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -87,13 +87,13 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                     </AlertDialog>
 
                     <div className="min-w-0 flex items-center gap-2">
-                        <h1 className="hidden md:block truncate text-xs font-semibold sm:text-sm">
+                        <h1 className="hidden md:block truncate text-xs font-semibold sm:text-sm text-foreground">
                             Custom Test
                         </h1>
-                        <span className="text-slate-400 dark:text-zinc-600 text-xs hidden md:block">
+                        <span className="text-muted-foreground text-xs hidden md:block">
                             •
                         </span>
-                        <p className="text-xs text-slate-500 dark:text-zinc-400 whitespace-nowrap">
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
                             {questionStatus}
                         </p>
                     </div>
@@ -104,8 +104,8 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                     <div
                         className={`px-3 py-1 text-sm sm:text-base flex items-center gap-1.5 font-mono font-bold tabular-nums rounded-none transition ${
                             critical
-                                ? 'animate-pulse bg-red-950 text-red-400'
-                                : 'bg-slate-100 dark:bg-zinc-900 dark:text-zinc-100 text-slate-800'
+                                ? 'animate-pulse bg-destructive text-white'
+                                : 'bg-muted text-foreground'
                         }`}
                         aria-live="polite"
                     >
@@ -115,7 +115,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                 </div>
 
                 {/* Right Section: Finish Action */}
-                <div className="flex items-center  gap-2 justify-end flex-1">
+                <div className="flex items-center gap-2 justify-end flex-1">
                     {/* Fullscreen Button (Desktop Only) */}
                     <Button
                         variant="outline"
@@ -145,7 +145,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                         <AlertDialogTrigger asChild>
                             <Button
                                 size="sm"
-                                className="bg-red-600 hover:bg-red-700 text-white rounded-none h-8 px-3"
+                                className="bg-destructive hover:bg-destructive/90 text-white rounded-none h-8 px-3"
                             >
                                 Finish
                             </Button>
@@ -164,7 +164,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                                     Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction
-                                    className="rounded-none bg-red-600 hover:bg-red-700"
+                                    className="rounded-none bg-destructive hover:bg-destructive/90 text-white"
                                     onClick={onEndTest}
                                 >
                                     Finish Test

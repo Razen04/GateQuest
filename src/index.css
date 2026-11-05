@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -52,10 +56,32 @@ body {
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-heatmap-0: var(--heatmap-0);
+    --color-heatmap-1: var(--heatmap-1);
+    --color-heatmap-2: var(--heatmap-2);
+    --color-heatmap-3: var(--heatmap-3);
+    --color-heatmap-4: var(--heatmap-4);
+    --color-heatmap-5: var(--heatmap-5);
+    --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: "Fraunces", ui-serif, Georgia, serif;
 }
 
+/* ─────────────────────────────────────────────
+   ACCENT SYSTEM
+   `--accent-h` is the ONLY knob that drives the brand accent.
+   Override it via [data-accent="X"] blocks at the bottom.
+   Tokens below automatically recalculate when the hue changes.
+   ───────────────────────────────────────────── */
 :root {
     --radius: 0.625rem;
+
+    /* Brand accent hue — 255 = blue (default) */
+    --accent-h: 255;
 
     --background: oklch(0.975 0 0);
     --foreground: oklch(0.18 0 0);
@@ -66,7 +92,8 @@ body {
     --popover: oklch(0.99 0 0);
     --popover-foreground: oklch(0.18 0 0);
 
-    --primary: oklch(0.35 0.12 255);
+    /* PRIMARY — dark version of accent, used for emphasis + gradient starts */
+    --primary: oklch(0.35 0.12 var(--accent-h));
     --primary-foreground: oklch(0.98 0 0);
 
     --secondary: oklch(0.965 0 0);
@@ -75,17 +102,28 @@ body {
     --muted: oklch(0.96 0 0);
     --muted-foreground: oklch(0.55 0 0);
 
+    /* NOTE: --accent is shadcn's subtle hover surface, NOT brand accent. */
+    /* Do not hue-derive — hovers stay neutral. */
     --accent: oklch(0.96 0 0);
+    --heatmap-h: var(--accent-h); /* heatmap follows accent by default */
     --accent-foreground: oklch(0.25 0 0);
 
     --destructive: oklch(0.58 0.22 27);
 
+    --success: oklch(0.62 0.17 155);
+    --success-foreground: oklch(0.98 0 0);
+
     /* Soft glass borders */
     --border: oklch(0.91 0 0);
     --input: oklch(0.91 0 0);
-    --ring: oklch(0.7 0.05 255);
 
-    --chart-1: oklch(0.62 0.22 255);
+    /* RING — focus outlines use accent */
+    --ring: oklch(0.7 0.05 var(--accent-h));
+
+    /* CHART-1 — the dominant brand accent (SaveButton, CTAs, links) */
+    --chart-1: oklch(0.62 0.22 var(--accent-h));
+
+    /* CHART-2..5 stay FIXED — categorical data colors, not brand */
     --chart-2: oklch(0.65 0.16 160);
     --chart-3: oklch(0.55 0.12 220);
     --chart-4: oklch(0.75 0.18 85);
@@ -94,15 +132,23 @@ body {
     /* Match sidebar */
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.18 0 0);
-
-    --sidebar-primary: oklch(0.35 0.12 255);
+    --sidebar-primary: oklch(0.35 0.12 var(--accent-h));
     --sidebar-primary-foreground: oklch(0.98 0 0);
-
     --sidebar-accent: oklch(0.965 0 0);
     --sidebar-accent-foreground: oklch(0.25 0 0);
-
     --sidebar-border: oklch(0.91 0 0);
-    --sidebar-ring: oklch(0.7 0.05 255);
+    --sidebar-ring: oklch(0.7 0.05 var(--accent-h));
+
+    /* HEATMAP — fixed sequential blue scale (data color, not brand) */
+    --heatmap-0: oklch(0.94 0.012 var(--heatmap-h));
+    --heatmap-1: oklch(0.88 0.04 var(--heatmap-h));
+    --heatmap-2: oklch(0.81 0.07 var(--heatmap-h));
+    --heatmap-3: oklch(0.71 0.11 var(--heatmap-h));
+    --heatmap-4: oklch(0.62 0.22 var(--heatmap-h));
+    --heatmap-5: oklch(0.5 0.16 var(--heatmap-h));
+
+    --glass-shadow: rgba(15, 23, 42, 0.25);
+    --glass-edge: rgba(255, 255, 255, 0.7);
 }
 
 .dark {
@@ -115,7 +161,9 @@ body {
     --popover: oklch(0.29 0.015 260);
     --popover-foreground: oklch(0.97 0 0);
 
-    --primary: oklch(0.92 0 0);
+    /* PRIMARY — light, subtly hue-tinted. Keeps the "light primary" dark-mode */
+    /* aesthetic while letting the accent whisper through in gradients/tints.  */
+    --primary: oklch(0.9 0.04 var(--accent-h));
     --primary-foreground: oklch(0.22 0 0);
 
     --secondary: oklch(0.31 0.015 260);
@@ -129,17 +177,185 @@ body {
 
     --border: oklch(1 0 0 / 12%);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.6 0.02 260);
+    --ring: oklch(0.65 0.05 var(--accent-h));
+
+    --success: oklch(0.7 0.15 155);
+    --success-foreground: oklch(0.18 0 0);
 
     --sidebar: oklch(0.25 0.015 260);
     --sidebar-foreground: oklch(0.97 0 0);
-    --sidebar-primary: oklch(0.65 0.15 260);
+    --sidebar-primary: oklch(0.65 0.15 var(--accent-h));
     --sidebar-primary-foreground: oklch(0.98 0 0);
     --sidebar-accent: oklch(0.32 0.015 260);
     --sidebar-accent-foreground: oklch(0.97 0 0);
     --sidebar-border: oklch(1 0 0 / 12%);
-    --sidebar-ring: oklch(0.5 0.02 260);
+    --sidebar-ring: oklch(0.5 0.05 var(--accent-h));
+
+    --heatmap-0: oklch(0.28 0.02 var(--heatmap-h));
+    --heatmap-1: oklch(0.36 0.06 var(--heatmap-h));
+    --heatmap-2: oklch(0.45 0.1 var(--heatmap-h));
+    --heatmap-3: oklch(0.55 0.14 var(--heatmap-h));
+    --heatmap-4: oklch(0.62 0.22 var(--heatmap-h));
+    --heatmap-5: oklch(0.78 0.12 var(--heatmap-h));
+
+    --glass-shadow: rgba(0, 0, 0, 0.7);
+    --glass-edge: rgba(255, 255, 255, 0.08);
 }
+
+/* ─────────────────────────────────────────────
+   AMOLED MODE — pure black surfaces for OLED displays
+   Layered on top of .dark. Only overrides what must change.
+   Accent tokens (--chart-1, --primary, --ring) inherit from
+   .dark + :root, so they're automatically hue-driven.
+   ───────────────────────────────────────────── */
+.dark.amoled {
+    --background: oklch(0 0 0); /* pure black — pixels OFF */
+    --foreground: oklch(0.97 0 0);
+
+    --card: oklch(0.04 0 0); /* subtle lift so cards read as elevated */
+    --card-foreground: oklch(0.97 0 0);
+
+    --popover: oklch(0.06 0 0); /* highest layer floats visibly */
+    --popover-foreground: oklch(0.97 0 0);
+
+    --secondary: oklch(0.09 0 0);
+    --secondary-foreground: oklch(0.97 0 0);
+
+    --muted: oklch(0.08 0 0);
+    --muted-foreground: oklch(0.68 0 0);
+
+    --accent: oklch(0.12 0 0);
+    --accent-foreground: oklch(0.97 0 0);
+
+    /* Borders must be BRIGHTER on pure black — 12% is invisible */
+    --border: oklch(1 0 0 / 20%);
+    --input: oklch(1 0 0 / 22%);
+    /* --ring inherits from .dark (hue-driven, works on pure black) */
+
+    /* Sidebar inherits from .dark (hue-driven) */
+
+    /* Deeper shadow + slightly brighter edge for depth on pure black */
+    --glass-shadow: rgba(0 0 0 / 0.85);
+    --glass-edge: rgba(255 255 255 / 0.12);
+}
+
+/* ─────────────────────────────────────────────
+   SEPIA MODE — warm near-black "midnight cocoa".
+   93% darker than the previous warm-paper version.
+   Requires `.dark` class alongside `.sepia` (see useSettingsEffects).
+   colorScheme must be 'dark' (see hook).
+   ───────────────────────────────────────────── */
+.sepia {
+    /* Near-black warm background + warm cream ink */
+    --background: oklch(0.06 0.012 55);
+    --foreground: oklch(0.92 0.015 75);
+
+    /* Cards slightly lighter than bg — elevation preserved */
+    --card: oklch(0.1 0.014 58);
+    --card-foreground: oklch(0.92 0.015 75);
+
+    --popover: oklch(0.12 0.014 58);
+    --popover-foreground: oklch(0.92 0.015 75);
+
+    /* Hover surfaces — visible warm lift on near-black */
+    --secondary: oklch(0.14 0.016 58);
+    --secondary-foreground: oklch(0.9 0.015 75);
+
+    --muted: oklch(0.13 0.014 58);
+    --muted-foreground: oklch(0.68 0.03 65);
+
+    --accent: oklch(0.16 0.018 58);
+    --accent-foreground: oklch(0.9 0.015 75);
+
+    /* Warm brown borders — must be ~3× brighter than in light sepia
+     (dark-on-dark needs way more contrast than light-on-light) */
+    --border: oklch(0.24 0.02 58);
+    --input: oklch(0.26 0.02 58);
+
+    /* Sidebar — same warm-dark hierarchy */
+    --sidebar: oklch(0.08 0.013 56);
+    --sidebar-foreground: oklch(0.92 0.015 75);
+    --sidebar-accent: oklch(0.13 0.014 58);
+    --sidebar-accent-foreground: oklch(0.9 0.015 75);
+    --sidebar-border: oklch(0.24 0.02 58);
+
+    /* ─────────────────────────────────────────────
+     ACCENTS — brightened + muted for near-black bg.
+     On dark surfaces, muted ink must be LIGHTER than
+     on light paper (inverse of the previous strategy).
+     ───────────────────────────────────────────── */
+
+    --chart-1: oklch(0.68 0.14 var(--accent-h));
+    --primary: oklch(0.75 0.1 var(--accent-h));
+    --primary-foreground: oklch(0.1 0.012 55);
+    --ring: oklch(0.68 0.08 var(--accent-h));
+    --sidebar-primary: oklch(0.75 0.1 var(--accent-h));
+    --sidebar-primary-foreground: oklch(0.1 0.012 55);
+    --sidebar-ring: oklch(0.68 0.08 var(--accent-h));
+
+    /* Semantic — brick + moss, tuned for dark bg */
+    --destructive: oklch(0.62 0.17 25);
+    --success: oklch(0.62 0.11 145);
+    --success-foreground: oklch(0.1 0.012 55);
+
+    /* Chart series — muted variants that read well on near-black */
+    --chart-2: oklch(0.62 0.11 145);
+    --chart-3: oklch(0.58 0.09 220);
+    --chart-4: oklch(0.68 0.13 75);
+    --chart-5: oklch(0.62 0.13 45);
+
+    /* Heatmap — warm "ink glowing on dark" scale */
+    --heatmap-0: oklch(0.1 0.012 55);
+    --heatmap-1: oklch(0.18 0.025 58);
+    --heatmap-2: oklch(0.28 0.04 58);
+    --heatmap-3: oklch(0.4 0.055 55);
+    --heatmap-4: oklch(0.55 0.075 52);
+    --heatmap-5: oklch(0.75 0.09 50);
+
+    /* Deep warm shadows on near-black */
+    --glass-shadow: rgba(0, 0, 0, 0.85);
+    --glass-edge: rgba(255, 235, 200, 0.1);
+}
+/* ─────────────────────────────────────────────
+   ACCENT VARIANTS
+   Each block overrides ONLY --accent-h.
+   Every derived token in :root/.dark recalculates automatically.
+   
+   · chart-1        — vivid accent (CTAs, links, rings, glow)
+   · primary        — dark (light mode) / light-tinted (dark mode)
+   · ring           — focus outlines
+   · sidebar-*      — sidebar accent
+   
+   Fixed regardless of accent:
+   · chart-2..5     — categorical chart series (data semantics)
+   · destructive    — error red
+   · success        — success green
+   · heatmap-*      — sequential activity scale (blue = data)
+   · accent         — shadcn hover surface (neutral)
+   ───────────────────────────────────────────── */
+
+[data-accent="ocean"] {
+    --accent-h: 190; /* teal */
+}
+
+[data-accent="forest"] {
+    --accent-h: 140; /* green */
+}
+
+[data-accent="amber"] {
+    --accent-h: 70; /* gold */
+}
+
+[data-accent="rose"] {
+    --accent-h: 340; /* pink */
+}
+
+[data-accent="violet"] {
+    --accent-h: 275; /* purple */
+}
+
+/* Note: `default` (blue) is achieved by NOT setting data-accent — the
+   :root value (255) applies. No [data-accent="default"] block needed. */
 
 @layer base {
     * {

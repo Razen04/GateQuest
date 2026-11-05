@@ -96,11 +96,11 @@ const NotificationDialog = ({
 
     const getNotificationIcon = (notification: Notification) => {
         if (notification.type === 'update') {
-            return <SealCheck className="text-green-500" />;
+            return <SealCheck className="text-chart-2" />;
         } else if (notification.type === 'reminder') {
-            return <Calendar className="text-blue-500" />;
+            return <Calendar className="text-chart-1" />;
         } else {
-            return <BookOpen className="text-purple-500" />;
+            return <BookOpen className="text-chart-6" />;
         }
     };
 
@@ -108,7 +108,7 @@ const NotificationDialog = ({
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    className="absolute right-0 top-5 mt-3 w-80 overflow-hidden border border-white/20 bg-white/20 backdrop-blur-2xl backdrop-saturate-150 dark:bg-black/20 dark:border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.18)] z-50"
+                    className="absolute right-0 top-5 mt-3 w-80 overflow-hidden border border-white/20 bg-popover/60 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_12px_40px_rgba(0,0,0,0.18)] z-50"
                     initial={{ opacity: 0, y: -10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -119,12 +119,14 @@ const NotificationDialog = ({
 
                     {/* Header */}
                     <div className="relative flex items-center justify-between px-4 py-3 border-b border-white/20 dark:border-white/10">
-                        <h3 className="font-semibold text-sm">Notifications</h3>
+                        <h3 className="font-semibold text-sm text-foreground">
+                            Notifications
+                        </h3>
 
                         <button
                             onClick={markAllAsRead}
                             disabled={marking || notifications.length === 0}
-                            className="p-1.5 text-blue-500 hover:bg-white/20 dark:hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="p-1.5 text-chart-1 hover:bg-card/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             title="Mark all as read"
                         >
                             <CheckSquareOffset size={20} />
@@ -137,16 +139,16 @@ const NotificationDialog = ({
                             notifications.map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className="group flex items-start gap-3 p-3 border border-transparent hover:border-white/20 hover:bg-white/20 dark:hover:bg-white/[0.08] transition-all cursor-pointer"
+                                    className="group flex items-start gap-3 p-3 border border-transparent hover:border-white/20 hover:bg-card/40 transition-all cursor-pointer"
                                 >
                                     {/* Icon */}
-                                    <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 bg-white/20 dark:bg-white/[0.08] border border-white/20">
+                                    <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 bg-card/40 border border-white/20">
                                         {getNotificationIcon(notification)}
                                     </div>
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start gap-2">
-                                            <p className="text-sm font-medium truncate">
+                                            <p className="text-sm font-medium truncate text-foreground">
                                                 {notification.title}
                                             </p>
 

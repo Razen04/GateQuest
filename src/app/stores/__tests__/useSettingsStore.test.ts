@@ -27,15 +27,21 @@ beforeEach(() => {
 });
 
 describe('setSetting', () => {
-    it('upadates a single key and leave others untouches', () => {
+    it('updates a single key and leaves others untouched', () => {
         const before = useSettingsStore.getState().settings;
 
         useSettingsStore.getState().setSetting('sound', false);
 
         const after = useSettingsStore.getState().settings;
         expect(after.sound).toBe(false);
-        expect(after.darkMode).toBe(before.darkMode);
+        expect(after.mode).toBe(before.mode);
         expect(after.aiProvider).toBe(before.aiProvider);
+    });
+
+    it('updates mode when called with a ThemeMode value', () => {
+        useSettingsStore.getState().setSetting('mode', 'amoled');
+
+        expect(useSettingsStore.getState().settings.mode).toBe('amoled');
     });
 
     it('produces a new object reference', () => {

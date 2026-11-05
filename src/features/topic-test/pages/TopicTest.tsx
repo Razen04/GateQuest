@@ -132,36 +132,27 @@ const TopicTest = () => {
             case 'passed':
                 return {
                     icon: <CheckCircle size={20} weight="fill" />,
-                    bg: 'bg-green-100',
-                    text: 'text-green-600',
-                    darkBg: 'dark:bg-green-900/30',
-                    darkText: 'dark:text-green-400',
+                    cls: 'bg-chart-2/10 text-chart-2',
                 };
             case 'failed':
                 return {
                     icon: <XCircle size={20} weight="fill" />,
-                    bg: 'bg-red-100',
-                    text: 'text-red-600',
-                    darkBg: 'dark:bg-red-900/30',
-                    darkText: 'dark:text-red-400',
+                    cls: 'bg-destructive/10 text-destructive',
                 };
             default:
                 return {
                     icon: <Clock size={20} />,
-                    bg: 'bg-gray-100',
-                    text: 'text-gray-600',
-                    darkBg: 'dark:bg-gray-900/30',
-                    darkText: 'dark:text-gray-400',
+                    cls: 'bg-muted text-muted-foreground',
                 };
         }
     };
 
     return (
-        <div className="max-h-dvh pb-40 flex flex-col text-slate-900 dark:text-slate-100 max-w-7xl mx-auto">
+        <div className="max-h-dvh pb-40 flex flex-col text-foreground max-w-7xl mx-auto">
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 px-3 py-2 hover:bg-white/20 transition-colors cursor-pointer focus:outline-none"
+                    className="flex items-center mb-4 px-3 py-2 hover:bg-accent/40 transition-colors cursor-pointer focus:outline-none"
                 >
                     <ArrowLeftIcon className="mr-2" />
                     <span>Back</span>
@@ -183,15 +174,15 @@ const TopicTest = () => {
                     {activeTest ? (
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                                     In Progress
                                 </h3>
                             </div>
 
-                            <div className="bg-gradient-to-br from-blue-500/80 to-blue-700/80 backdrop-blur-2xl border border-white/20 p-5 text-white shadow-xl relative overflow-hidden">
+                            <div className="bg-gradient-to-br from-chart-1 to-chart-1/70 backdrop-blur-2xl border border-white/20 p-5 text-white shadow-xl relative overflow-hidden">
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-4">
-                                        <h3 className="text-blue-100 text-sm truncate max-w-52 md:max-w-3xl">
+                                        <h3 className="text-white/80 text-sm truncate max-w-52 md:max-w-3xl">
                                             {activeTest.topics?.length
                                                 ? activeTest.topics.join(', ')
                                                 : 'No Topics'}
@@ -206,7 +197,7 @@ const TopicTest = () => {
                                     </div>
 
                                     <div className="flex items-end justify-between">
-                                        <div className="text-sm text-blue-100">
+                                        <div className="text-sm text-white/80">
                                             <span className="font-bold text-white text-lg mr-1">
                                                 {activeTest.status ===
                                                     'ongoing' ||
@@ -219,14 +210,14 @@ const TopicTest = () => {
                                         {activeTest.status === 'ongoing' ? (
                                             <Button
                                                 onClick={handleResume}
-                                                className="bg-white/90 text-blue-600 rounded-none backdrop-blur-xl"
+                                                className="bg-white/90 text-chart-1 rounded-none backdrop-blur-xl hover:bg-white hover:text-chart-1"
                                             >
                                                 Resume <Play weight="fill" />
                                             </Button>
                                         ) : (
                                             <Button
                                                 onClick={handleStartTest}
-                                                className="bg-white/90 text-black rounded-none backdrop-blur-xl"
+                                                className="bg-white/90 text-black rounded-none backdrop-blur-xl hover:bg-white hover:text-black"
                                             >
                                                 Start <Play weight="fill" />
                                             </Button>
@@ -238,20 +229,20 @@ const TopicTest = () => {
                     ) : (
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                                     No Active Test
                                 </h3>
                             </div>
 
-                            <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 p-5 shadow-xl text-center">
+                            <div className="bg-card/50 backdrop-blur-2xl border border-border p-5 shadow-xl text-center">
                                 <div className="flex flex-col items-center gap-4">
-                                    <p className="text-gray-700 dark:text-gray-200 text-sm">
+                                    <p className="text-muted-foreground text-sm">
                                         You currently have no ongoing or paused
                                         test sessions.
                                     </p>
                                     <Button
                                         onClick={handleGenerateNew}
-                                        className="bg-blue-600 text-white rounded-none"
+                                        className="bg-chart-1 text-white rounded-none"
                                     >
                                         Start a New Test{' '}
                                         <Plus weight="bold" className="ml-2" />
@@ -264,27 +255,27 @@ const TopicTest = () => {
 
                 <motion.div variants={itemVariants} className="my-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                             Progress Trends
                         </h3>
 
-                        <div className="flex bg-white/20 dark:bg-white/[0.05] border border-white/20 backdrop-blur-xl p-1">
+                        <div className="flex bg-muted/40 border border-border backdrop-blur-xl p-1">
                             <button
                                 onClick={() => setViewMode('accuracy')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
                             >
                                 Accuracy
                             </button>
                             <button
                                 onClick={() => setViewMode('score')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500' : 'text-slate-500'}`}
+                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
                             >
                                 Performance %
                             </button>
                         </div>
                     </div>
 
-                    <div className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-2xl border border-white/20 dark:border-white/10 p-4 h-64 shadow-xl">
+                    <div className="bg-card/50 backdrop-blur-2xl border border-border p-4 h-64 shadow-xl">
                         {chartData.length > 1 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={chartData}>
@@ -298,12 +289,12 @@ const TopicTest = () => {
                                         >
                                             <stop
                                                 offset="5%"
-                                                stopColor="#3b82f6"
+                                                stopColor="var(--chart-1)"
                                                 stopOpacity={0.3}
                                             />
                                             <stop
                                                 offset="95%"
-                                                stopColor="#3b82f6"
+                                                stopColor="var(--chart-1)"
                                                 stopOpacity={0}
                                             />
                                         </linearGradient>
@@ -311,7 +302,7 @@ const TopicTest = () => {
                                     <CartesianGrid
                                         strokeDasharray="3 3"
                                         vertical={false}
-                                        stroke="#e2e8f0"
+                                        stroke="var(--border)"
                                         opacity={0.5}
                                     />
                                     <XAxis
@@ -319,25 +310,31 @@ const TopicTest = () => {
                                         fontSize={10}
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fill: '#94a3b8' }}
+                                        tick={{
+                                            fill: 'var(--muted-foreground)',
+                                        }}
                                     />
                                     <YAxis
                                         domain={[0, 100]}
                                         fontSize={10}
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fill: '#94a3b8' }}
+                                        tick={{
+                                            fill: 'var(--muted-foreground)',
+                                        }}
                                         tickFormatter={(val) => `${val}%`}
                                     />
                                     <Tooltip
                                         contentStyle={{
-                                            backgroundColor: '#1e293b',
+                                            backgroundColor: 'var(--popover)',
                                             border: 'none',
                                             borderRadius: '12px',
                                             fontSize: '12px',
-                                            color: '#f8fafc',
+                                            color: 'var(--popover-foreground)',
                                         }}
-                                        itemStyle={{ color: '#60a5fa' }}
+                                        itemStyle={{
+                                            color: 'var(--chart-1)',
+                                        }}
                                     />
                                     <Area
                                         type="monotone"
@@ -346,7 +343,7 @@ const TopicTest = () => {
                                                 ? 'accuracy'
                                                 : 'scorePercent'
                                         }
-                                        stroke="#3b82f6"
+                                        stroke="var(--chart-1)"
                                         strokeWidth={3}
                                         fillOpacity={1}
                                         fill="url(#colorMetric)"
@@ -355,7 +352,7 @@ const TopicTest = () => {
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-zinc-400">
+                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
                                 <ChartLineUpIcon
                                     size={32}
                                     weight="duotone"
@@ -372,7 +369,7 @@ const TopicTest = () => {
 
                 <motion.div variants={itemVariants} className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-sm font-semibold mb-2 uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <h3 className="text-sm font-semibold mb-2 uppercase tracking-wide text-muted-foreground">
                             Previous Attempts
                         </h3>
                     </div>
@@ -380,8 +377,9 @@ const TopicTest = () => {
                     <div>
                         {testHistory?.length ? (
                             testHistory.map((test) => {
-                                const { icon, bg, text, darkBg, darkText } =
-                                    getStatusDisplay(test.status);
+                                const { icon, cls } = getStatusDisplay(
+                                    test.status
+                                );
                                 const testName = getTestName(test.completed_at);
                                 const timeTookForTest = Math.round(
                                     Math.ceil(test.total_questions * 2.77) *
@@ -397,19 +395,17 @@ const TopicTest = () => {
                                                 `/topic-test-result/${test.id}`
                                             )
                                         }
-                                        className="bg-white/40 dark:bg-white/[0.05] backdrop-blur-xl border border-white/20 dark:border-white/10 p-4 my-2 flex items-center justify-between hover:border-blue-500/50 transition-colors cursor-pointer"
+                                        className="bg-card/50 backdrop-blur-xl border border-border p-4 my-2 flex items-center justify-between hover:border-chart-1/50 transition-colors cursor-pointer"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div
-                                                className={`p-2 ${bg} ${text} ${darkBg} ${darkText}`}
-                                            >
+                                            <div className={`p-2 ${cls}`}>
                                                 {icon}
                                             </div>
                                             <div>
-                                                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                                <h3 className="text-sm font-semibold text-foreground">
                                                     {testName}
                                                 </h3>
-                                                <h4 className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                                                <h4 className="text-xs text-muted-foreground flex items-center gap-2">
                                                     Time taken:{' '}
                                                     {test.total_questions &&
                                                     test.remaining_time_seconds
@@ -423,18 +419,18 @@ const TopicTest = () => {
 
                                         <div className="text-right">
                                             <div
-                                                className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-green-600 dark:text-green-400' : test.accuracy < 40 ? 'text-red-500 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400') : 'text-gray-500 dark:text-gray-400'}`}
+                                                className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-chart-2' : test.accuracy < 40 ? 'text-destructive' : 'text-chart-4') : 'text-muted-foreground'}`}
                                             >
                                                 {test.accuracy?.toFixed(2) ?? 0}
                                                 %
                                             </div>
-                                            <p className="text-xs text-slate-400">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
+                                            <p className="text-xs text-muted-foreground">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
                                         </div>
                                     </div>
                                 );
                             })
                         ) : (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                            <p className="text-sm text-muted-foreground">
                                 No previous attempts
                             </p>
                         )}

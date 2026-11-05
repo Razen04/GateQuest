@@ -15,9 +15,6 @@ import DonorList from '../components/DonorList';
 import UpiQRCode from '../components/UpiQRCode';
 import { useDonations } from '../hooks/useDonations.ts';
 
-// Shared Palette Accents
-const signal = '#2A5CFF';
-
 // Kinetic Animated Underline SVG
 const HighlightLine = ({ children }: { children: React.ReactNode }) => (
     <span className="relative inline-block">
@@ -32,7 +29,7 @@ const HighlightLine = ({ children }: { children: React.ReactNode }) => (
             <motion.path
                 d="M 6 12 Q 140 2 274 10"
                 fill="none"
-                stroke={signal}
+                stroke="var(--chart-1)"
                 strokeWidth={4}
                 strokeLinecap="round"
                 initial={{ pathLength: 0 }}
@@ -50,9 +47,9 @@ const ProfileBadge = ({ src }: { src: string }) => (
         <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-            className="absolute -inset-3 rounded-full border border-dashed border-[#2A5CFF]/40"
+            className="absolute -inset-3 rounded-full border border-dashed border-chart-1/40"
         />
-        <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-slate-900/10 shadow-2xl dark:border-white/20 sm:h-28 sm:w-28">
+        <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-border shadow-2xl sm:h-28 sm:w-28">
             <img src={src} alt="Razen" className="h-full w-full object-cover" />
         </div>
     </div>
@@ -110,13 +107,13 @@ const Donations: React.FC = () => {
     const topDonor = donations.filter((d) => d.actual_amount === maxAmount);
 
     return (
-        <main className="relative min-h-screen w-full overflow-x-hidden pb-20 bg-[#F4F5F1] font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:bg-[#0B0C10] dark:text-slate-200">
+        <main className="relative min-h-screen w-full overflow-x-hidden pb-20 bg-background font-sans text-foreground transition-colors duration-500">
             {/* Watermark Section Header */}
             <div
                 aria-hidden
                 className="pointer-events-none absolute inset-x-0 top-10 -z-0 overflow-hidden opacity-[0.03] dark:opacity-[0.05]"
             >
-                <div className="whitespace-nowrap font-['Space_Grotesk',sans-serif] text-[12vw] font-black uppercase leading-none text-slate-900 dark:text-white">
+                <div className="whitespace-nowrap font-grotesk text-[12vw] font-black uppercase leading-none text-foreground">
                     PATRONAGE // REVENUE MANIFEST
                 </div>
             </div>
@@ -127,31 +124,31 @@ const Donations: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="relative mb-12 overflow-hidden border border-slate-900/10 bg-white/70 p-6 backdrop-blur-md dark:border-white/10 dark:bg-white/[0.03] sm:p-10"
+                    className="relative mb-12 overflow-hidden border border-border bg-card/70 p-6 backdrop-blur-md sm:p-10"
                 >
                     <div className="flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
                         <ProfileBadge src={razenImg} />
 
                         <div className="flex-1">
                             <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-                                <span className="font-['JetBrains_Mono',monospace] text-[10px] uppercase tracking-[0.25em] text-[#2A5CFF]">
+                                <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-chart-1">
                                     DOSSIER // RAZEN
                                 </span>
-                                <span className="bg-[#1FAA6D]/10 px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[9px] font-bold text-[#1FAA6D]">
+                                <span className="bg-chart-2/10 px-2.5 py-0.5 font-mono text-[9px] font-bold text-chart-2">
                                     INDEPENDENT CREATOR
                                 </span>
                             </div>
 
-                            <h1 className="mt-2 font-['Space_Grotesk',sans-serif] text-3xl font-black tracking-tight sm:text-4xl">
+                            <h1 className="mt-2 font-grotesk text-3xl font-black tracking-tight sm:text-4xl">
                                 Fueling open engineering &{' '}
-                                <span className="font-['Fraunces',serif] font-normal italic text-[#2A5CFF]">
+                                <span className="font-serif font-normal italic text-chart-1">
                                     <HighlightLine>
                                         project build-outs.
                                     </HighlightLine>
                                 </span>
                             </h1>
 
-                            <p className="mt-3 max-w-2xl font-['Fraunces',serif] text-base leading-relaxed text-slate-600 dark:text-white/70">
+                            <p className="mt-3 max-w-2xl font-serif text-base leading-relaxed text-muted-foreground">
                                 Direct contributions keep the platform alive and
                                 development continuous. Every contribution is
                                 publicly recorded on the ledger.
@@ -167,12 +164,12 @@ const Donations: React.FC = () => {
                         initial={{ opacity: 0, x: -15 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="relative flex flex-col justify-between border border-slate-900/10 bg-white p-6 shadow-xl dark:border-white/10 dark:bg-[#12151B] sm:p-8"
+                        className="relative flex flex-col justify-between border border-border bg-card p-6 shadow-xl sm:p-8"
                     >
                         {/* Terminal Header */}
-                        <div className="mb-6 flex items-center justify-between border-b border-slate-900/10 pb-4 dark:border-white/10">
+                        <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
                             <div>
-                                <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                     STEP{' '}
                                     {step === 'form'
                                         ? '01/02'
@@ -180,13 +177,13 @@ const Donations: React.FC = () => {
                                           ? '02/02'
                                           : 'COMPLETE'}
                                 </span>
-                                <h2 className="font-['Space_Grotesk',sans-serif] text-xl font-bold">
+                                <h2 className="font-grotesk text-xl font-bold">
                                     {step === 'form' && 'Select Contribution'}
                                     {step === 'utr' && 'Verify UPI Payment'}
                                     {step === 'thankYou' && 'Receipt Confirmed'}
                                 </h2>
                             </div>
-                            <Receipt className="h-6 w-6 text-[#2A5CFF]" />
+                            <Receipt className="h-6 w-6 text-chart-1" />
                         </div>
 
                         {/* Interactive Steps */}
@@ -219,12 +216,12 @@ const Donations: React.FC = () => {
                                     exit={{ opacity: 0 }}
                                     className="space-y-6 text-center"
                                 >
-                                    <div className="border border-slate-900/10 bg-[#F4F5F1] p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                                    <div className="border border-border bg-background p-4">
                                         <UpiQRCode amount={amount} />
                                     </div>
 
                                     <div className="text-left space-y-2">
-                                        <label className="font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider text-slate-400">
+                                        <label className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                             12-Digit Reference / UTR Number
                                         </label>
                                         <input
@@ -234,16 +231,16 @@ const Donations: React.FC = () => {
                                             onChange={(e) =>
                                                 setUtr(e.target.value)
                                             }
-                                            className="w-full border border-slate-900/20 bg-slate-50 p-3.5 font-['JetBrains_Mono',monospace] text-sm font-semibold outline-none transition focus:border-[#2A5CFF] focus:ring-2 focus:ring-[#2A5CFF]/20 dark:border-white/20 dark:bg-white/5 dark:text-white"
+                                            className="w-full border border-border bg-background p-3.5 font-mono text-sm font-semibold text-foreground placeholder:text-muted-foreground outline-none transition focus:border-chart-1 focus:ring-2 focus:ring-chart-1/20"
                                         />
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <p className="text-xs text-muted-foreground">
                                             Locate the UTR number in your UPI
                                             app receipt after payment.
                                         </p>
                                     </div>
 
                                     {/* Proof Screenshot Guide thumbnail */}
-                                    <div className="overflow-hidden border border-slate-900/10 dark:border-white/10">
+                                    <div className="overflow-hidden border border-border">
                                         <img
                                             src="/screenshots/tidscreenshot.jpeg"
                                             alt="UTR Guide"
@@ -253,7 +250,7 @@ const Donations: React.FC = () => {
 
                                     <button
                                         onClick={handleUTRSubmit}
-                                        className="flex w-full items-center justify-center gap-2 bg-[#1FAA6D] py-3.5 font-['Space_Grotesk',sans-serif] font-bold text-white transition hover:bg-[#1FAA6D]/90 shadow-lg shadow-[#1FAA6D]/20"
+                                        className="flex w-full items-center justify-center gap-2 bg-chart-2 py-3.5 font-grotesk font-bold text-white shadow-lg shadow-chart-2/20 transition hover:bg-chart-2/90"
                                     >
                                         Submit Transaction for Verification
                                         <ArrowRight className="h-4 w-4" />
@@ -268,15 +265,15 @@ const Donations: React.FC = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="py-8 text-center space-y-4"
                                 >
-                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-[#1FAA6D]/10 text-[#1FAA6D]">
+                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-chart-2/10 text-chart-2">
                                         <CheckCircle2 className="h-10 w-10" />
                                     </div>
 
-                                    <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black">
+                                    <h3 className="font-grotesk text-2xl font-black">
                                         Patronage Recorded
                                     </h3>
 
-                                    <p className="text-base text-slate-600 dark:text-white/70">
+                                    <p className="text-base text-muted-foreground">
                                         Your reference submission is being
                                         processed. It will reflect on the live
                                         donor ledger shortly.
@@ -284,7 +281,7 @@ const Donations: React.FC = () => {
 
                                     <button
                                         onClick={() => setStep('form')}
-                                        className="mt-4 border border-slate-900/20 px-6 py-2.5 font-['Space_Grotesk',sans-serif] text-sm font-bold transition hover:bg-slate-100 dark:border-white/20 dark:hover:bg-white/10"
+                                        className="mt-4 border border-border px-6 py-2.5 font-grotesk text-sm font-bold transition hover:bg-accent hover:text-accent-foreground"
                                     >
                                         Submit Another Entry
                                     </button>
@@ -293,9 +290,9 @@ const Donations: React.FC = () => {
                         </AnimatePresence>
 
                         {/* Footer Guarantee */}
-                        <div className="mt-8 flex items-center justify-between border-t border-slate-900/10 pt-4 font-['JetBrains_Mono',monospace] text-[10px] text-slate-400 dark:border-white/10">
+                        <div className="mt-8 flex items-center justify-between border-t border-border pt-4 font-mono text-[10px] text-muted-foreground">
                             <span>ENCRYPTED DIRECT UPI</span>
-                            <span className="flex items-center gap-1 text-[#1FAA6D]">
+                            <span className="flex items-center gap-1 text-chart-2">
                                 <ShieldCheck className="h-3.5 w-3.5" /> VERIFIED
                                 RECEIVER
                             </span>
@@ -311,14 +308,14 @@ const Donations: React.FC = () => {
                     >
                         <div>
                             <div className="flex items-center justify-between">
-                                <p className="font-['JetBrains_Mono',monospace] text-[11px] uppercase tracking-[0.25em] text-[#2A5CFF]">
+                                <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-chart-1">
                                     EXHIBIT C // LIVE LEDGER
                                 </p>
-                                <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-400">
+                                <span className="font-mono text-xs font-bold text-muted-foreground">
                                     {donations.length} RECORDED
                                 </span>
                             </div>
-                            <h2 className="mt-1 font-['Space_Grotesk',sans-serif] text-2xl font-black">
+                            <h2 className="mt-1 font-grotesk text-2xl font-black">
                                 Hall of Patrons
                             </h2>
                         </div>
@@ -327,9 +324,9 @@ const Donations: React.FC = () => {
                             <div className="space-y-6">
                                 {/* Top Patron Feature Card */}
                                 {topDonor.length > 0 && (
-                                    <div className="relative overflow-hidden border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent p-5 backdrop-blur-md">
+                                    <div className="relative overflow-hidden border border-chart-4/30 bg-gradient-to-br from-chart-4/10 via-transparent to-transparent p-5 backdrop-blur-md">
                                         <div className="flex items-center justify-between">
-                                            <span className="flex items-center gap-1.5 font-['JetBrains_Mono',monospace] text-[10px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                            <span className="flex items-center gap-1.5 font-mono text-[10px] font-extrabold uppercase tracking-widest text-chart-4">
                                                 <Crown className="h-3.5 w-3.5" />{' '}
                                                 TOP BENEFACTOR
                                             </span>
@@ -341,8 +338,8 @@ const Donations: React.FC = () => {
                                 )}
 
                                 {/* Main Donor List */}
-                                <div className="border border-slate-900/10 bg-white/50 p-4 backdrop-blur-md dark:border-white/10 dark:bg-white/[0.02]">
-                                    <h3 className="mb-3 font-['JetBrains_Mono',monospace] text-xs font-bold uppercase tracking-wider text-slate-400">
+                                <div className="border border-border bg-card/50 p-4 backdrop-blur-md">
+                                    <h3 className="mb-3 font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                         All Contributor Logs
                                     </h3>
                                     <div className="max-h-[420px] overflow-y-auto pr-1">
@@ -351,9 +348,9 @@ const Donations: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center border border-dashed border-slate-900/20 p-12 text-center dark:border-white/20">
-                                <Heart className="h-8 w-8 text-slate-300 dark:text-slate-600" />
-                                <p className="mt-3 font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
+                            <div className="flex flex-col items-center justify-center border border-dashed border-border p-12 text-center">
+                                <Heart className="h-8 w-8 text-muted-foreground" />
+                                <p className="mt-3 font-serif text-sm text-muted-foreground">
                                     No public records on the manifest yet. Be
                                     the founding patron.
                                 </p>

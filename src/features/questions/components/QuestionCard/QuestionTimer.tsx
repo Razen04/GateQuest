@@ -19,54 +19,63 @@ const QuestionTimer = ({
     const shouldShowTime = isActive || minutes !== '00' || seconds !== '00';
 
     return (
-        <div>
-            <button
-                className="flex text-base items-center justify-center space-x-2 bg-blue-400 px-3 py-0.5 text-white cursor-pointer transition-all duration-300 hover:bg-blue-500 active:scale-95 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                onClick={isAnswered ? undefined : onToggle}
-                disabled={isAnswered}
-            >
-                <AnimatePresence mode="wait" initial={false}>
-                    {isActive ? (
-                        <motion.div
-                            key="pause"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <Pause
-                                className={`${isActive && !isAnswered ? 'animate-pulse' : ''}`}
-                            />
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="stopwatch"
-                            className="py-0.5"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <Timer />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-                <AnimatePresence>
-                    {shouldShowTime && (
-                        <motion.label
-                            key="timer-label"
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: 'auto' }}
-                            exit={{ opacity: 0, width: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className={`font-mono transition-opacity duration-300 ${!isActive ? 'opacity-70' : 'opacity-100'}`}
-                        >
-                            {minutes}:{seconds}
-                        </motion.label>
-                    )}
-                </AnimatePresence>
-            </button>
-        </div>
+        <button
+            type="button"
+            onClick={isAnswered ? undefined : onToggle}
+            disabled={isAnswered}
+            className={`relative flex items-center justify-center gap-2 border px-3 py-1.5 text-base backdrop-blur-md transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                isActive
+                    ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 dark:text-emerald-400'
+                    : 'border-primary/20 bg-primary/10 text-primary hover:bg-primary/20'
+            }`}
+        >
+            {/* Animated Icon */}
+            <AnimatePresence mode="wait" initial={false}>
+                {isActive ? (
+                    <motion.span
+                        key="pause"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Pause
+                            size={18}
+                            weight="fill"
+                            className={!isAnswered ? 'animate-pulse' : ''}
+                        />
+                    </motion.span>
+                ) : (
+                    <motion.span
+                        key="stopwatch"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Timer size={18} />
+                    </motion.span>
+                )}
+            </AnimatePresence>
+
+            {/* Timer Display */}
+            <AnimatePresence initial={false}>
+                {shouldShowTime && (
+                    <motion.span
+                        key="timer-label"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`overflow-hidden font-mono text-sm font-semibold tabular-nums ${
+                            isActive ? 'opacity-100' : 'opacity-70'
+                        }`}
+                    >
+                        {minutes}:{seconds}
+                    </motion.span>
+                )}
+            </AnimatePresence>
+        </button>
     );
 };
 

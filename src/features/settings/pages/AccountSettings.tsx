@@ -20,7 +20,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/shared/components/ui/dialog';
-import type { Settings } from '@/shared/types/Settings';
 import { syncUserToSupabase } from '@/shared/utils/helper';
 import { getSocialSettingsValue } from '../api/social-settings';
 import { GoalSettings } from '../components/GoalSettings';
@@ -57,8 +56,6 @@ const AccountSettings = () => {
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [openSocialSettings, setOpenSocialSettings] = useState(false);
     const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
-
-    const userSettings = user?.settings as Settings | undefined;
 
     // Sync goal state from the store
     useEffect(() => {
@@ -154,14 +151,14 @@ const AccountSettings = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white/60 p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-white/[0.04] dark:to-white/[0.01]"
+                className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 p-6 shadow-xl backdrop-blur-2xl"
             >
-                <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 bg-[#2A5CFF]/10 blur-3xl" />
+                <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 bg-chart-1/10 blur-3xl" />
 
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-5">
                         <div className="relative shrink-0">
-                            <div className="flex h-16 w-16 items-center justify-center overflow-hidden border border-slate-900/10 bg-white shadow-md transition-transform duration-300 hover:scale-105 dark:border-white/20 dark:bg-white/10">
+                            <div className="flex h-16 w-16 items-center justify-center overflow-hidden border border-border bg-card shadow-md transition-transform duration-300 hover:scale-105">
                                 {user?.avatar ? (
                                     <img
                                         src={user.avatar}
@@ -169,23 +166,23 @@ const AccountSettings = () => {
                                         className="h-full w-full object-cover"
                                     />
                                 ) : (
-                                    <User className="h-7 w-7 text-slate-500 dark:text-slate-300" />
+                                    <User className="h-7 w-7 text-muted-foreground" />
                                 )}
                             </div>
                         </div>
 
                         <div className="space-y-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
-                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-foreground">
                                     {user?.name || 'Anonymous Aspirant'}
                                 </h3>
-                                <span className="border border-slate-900/10 bg-slate-100 px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-slate-600 dark:border-white/15 dark:bg-white/10 dark:text-slate-300">
+                                <span className="border border-border bg-muted px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-muted-foreground">
                                     v{user?.version_number ?? '1.0'}
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-slate-500 dark:text-slate-400">
-                                <span className="text-[#2A5CFF]">
+                            <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-muted-foreground">
+                                <span className="text-chart-1">
                                     @{user?.username || 'candidate'}
                                 </span>
                                 {user?.targetYear && (
@@ -197,10 +194,10 @@ const AccountSettings = () => {
                             </div>
 
                             {user?.college && (
-                                <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-slate-500 dark:text-slate-400">
+                                <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-muted-foreground">
                                     <GraduationCap
                                         size={14}
-                                        className="text-[#2A5CFF]"
+                                        className="text-chart-1"
                                     />
                                     {user.college}
                                 </p>
@@ -210,7 +207,7 @@ const AccountSettings = () => {
 
                     <Button
                         onClick={() => setOpenSocialSettings(true)}
-                        className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-slate-900/10 bg-white/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-800 shadow-sm transition hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                        className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-border bg-background/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-foreground shadow-sm transition hover:bg-accent hover:text-accent-foreground hover:shadow-md"
                     >
                         <UserGear
                             size={16}
@@ -221,11 +218,11 @@ const AccountSettings = () => {
                 </div>
 
                 {user?.about && (
-                    <div className="mt-4 pt-3 border-t border-slate-900/5 dark:border-white/10">
-                        <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <div className="mt-4 pt-3 border-t border-border">
+                        <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-muted-foreground leading-relaxed">
                             <Info
                                 size={16}
-                                className="mt-0.5 shrink-0 text-[#2A5CFF]"
+                                className="mt-0.5 shrink-0 text-chart-1"
                             />
                             <span>{user.about}</span>
                         </p>
@@ -242,12 +239,12 @@ const AccountSettings = () => {
                 open={openSocialSettings}
                 onOpenChange={setOpenSocialSettings}
             >
-                <DialogContent className="border-slate-900/10 bg-white/90 p-6 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/90 sm:max-w-md rounded-none">
+                <DialogContent className="border-border bg-popover/90 p-6 backdrop-blur-2xl sm:max-w-md rounded-none">
                     <DialogHeader>
                         <DialogTitle className="font-['Space_Grotesk',sans-serif] text-lg font-bold rounded-none">
                             Social Media Presence
                         </DialogTitle>
-                        <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 rounded-none">
+                        <DialogDescription className="text-xs text-muted-foreground rounded-none">
                             Connect your profiles so peers can find your work.
                         </DialogDescription>
                     </DialogHeader>
@@ -265,12 +262,12 @@ const AccountSettings = () => {
                 className="space-y-8"
             >
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                    <div className="flex items-center gap-2 border-b border-border pb-3">
                         <IdentificationCard
                             size={18}
-                            className="text-[#2A5CFF]"
+                            className="text-chart-1"
                         />
-                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-foreground">
                             Personal Dossier Settings
                         </h4>
                     </div>
@@ -290,12 +287,12 @@ const AccountSettings = () => {
                 </section>
 
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                    <div className="flex items-center gap-2 border-b border-border pb-3">
                         <IdentificationCard
                             size={18}
-                            className="text-[#2A5CFF]"
+                            className="text-chart-1"
                         />
-                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-foreground">
                             Goal Configuration
                         </h4>
                     </div>

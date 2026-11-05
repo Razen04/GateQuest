@@ -21,8 +21,8 @@ export function SaveButton({
                 disabled={disabled}
                 className={`rounded-none group relative flex h-12 w-full items-center justify-center gap-2 font-['Space_Grotesk',sans-serif] text-sm font-bold text-white transition-all md:w-auto md:min-w-[200px] ${
                     savedSuccess
-                        ? 'bg-emerald-600 hover:bg-emerald-700'
-                        : 'bg-[#2A5CFF] hover:bg-[#2A5CFF]/90 hover:shadow-lg hover:shadow-[#2A5CFF]/20 active:scale-[0.99]'
+                        ? 'bg-chart-2 hover:bg-chart-2/90'
+                        : 'bg-chart-1 hover:bg-chart-1/90 hover:shadow-lg hover:shadow-chart-1/20 active:scale-[0.99]'
                 }`}
             >
                 {isSaving ? (

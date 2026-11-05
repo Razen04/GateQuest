@@ -38,7 +38,7 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
 
     if (!userBranch) {
         return (
-            <div className="text-sm text-slate-500 py-8 text-center">
+            <div className="text-sm text-muted-foreground py-8 text-center">
                 Set a goal to see available PYQ papers.
             </div>
         );
@@ -46,7 +46,7 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
 
     if (papers.length === 0) {
         return (
-            <div className="text-sm text-slate-500 py-8 text-center">
+            <div className="text-sm text-muted-foreground py-8 text-center">
                 No PYQ papers available for your branch yet.
             </div>
         );
@@ -58,7 +58,7 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
             initial="hidden"
             animate="visible"
         >
-            <label className="text-sm mb-4 font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
+            <label className="text-sm mb-4 font-semibold uppercase tracking-wide text-foreground">
                 Select a Paper
             </label>
 
@@ -72,23 +72,23 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
                             onClick={() => onSelect(paper)}
                             className={`text-left p-4 border transition-colors ${
                                 isSelected
-                                    ? 'border-blue-500 bg-blue-500/10'
-                                    : 'border-white/20 dark:border-white/10 bg-white/40 dark:bg-white/[0.05] hover:border-blue-500/50'
+                                    ? 'border-chart-1 bg-chart-1/10'
+                                    : 'border-border bg-card/40 hover:border-chart-1/50'
                             } backdrop-blur-xl`}
                         >
                             <div className="flex items-start justify-between">
                                 <div className="min-w-0">
-                                    <h4 className="font-semibold text-sm truncate">
+                                    <h4 className="font-semibold text-sm truncate text-foreground">
                                         {paper.label}
                                     </h4>
-                                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                                         <Clock size={12} weight="bold" />
                                         {paper.durationMinutes} min ·{' '}
                                         {paper.questionCount} Q · {paper.marks}{' '}
                                         marks
                                     </p>
                                     {paper.notes && (
-                                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                        <p className="text-xs text-chart-4 mt-1">
                                             {paper.notes}
                                         </p>
                                     )}
@@ -97,7 +97,7 @@ const PyqPaperPicker = ({ selectedPaper, onSelect }: Props) => {
                                     <Play
                                         size={16}
                                         weight="fill"
-                                        className="text-blue-500 shrink-0 ml-2"
+                                        className="text-chart-1 shrink-0 ml-2"
                                     />
                                 )}
                             </div>

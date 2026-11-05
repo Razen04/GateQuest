@@ -153,7 +153,7 @@ const Navbar = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                     onClick={() => navigate('/dashboard')}
-                    className="pointer-events-auto flex cursor-pointer items-center gap-2 p-1.5 pr-4 backdrop-blur-2xl dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] hover:border-blue-500/30 transition-all duration-300 group"
+                    className="pointer-events-auto flex cursor-pointer items-center gap-2 p-1.5 pr-4 backdrop-blur-2xl hover:border-blue-500/30 transition-all duration-300 group"
                 >
                     <motion.div
                         whileHover={{ scale: 1.08, rotate: 5 }}
@@ -187,7 +187,7 @@ const Navbar = () => {
                             delay: 0.1,
                             ease: 'easeOut',
                         }}
-                        className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-1 p-1.5  dark:bg-zinc-900/60"
+                        className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-1 p-1.5"
                     >
                         {/* Light highlight edge */}
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20" />

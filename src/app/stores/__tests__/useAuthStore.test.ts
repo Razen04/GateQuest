@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const reloadMock = vi.fn();
+const replaceMock = vi.fn();
 Object.defineProperty(window, 'location', {
     configurable: true,
-    value: { ...window.location, reload: reloadMock },
+    writable: true,
+    value: { ...window.location, replace: replaceMock },
 });
 
 globalThis.caches = {
@@ -156,7 +157,7 @@ describe('logout', () => {
         expect(appStorage.nuke).toHaveBeenCalledTimes(1);
 
         // Page reloaded
-        expect(reloadMock).toHaveBeenCalledTimes(1);
+        expect(replaceMock).toHaveBeenCalledTimes(1);
     });
 
     it('runs cleanup steps in the correct order', async () => {
@@ -173,13 +174,12 @@ describe('logout', () => {
                 order.push('nuke');
             }
         );
-        reloadMock.mockImplementation(() => {
-            order.push('reload');
+        replaceMock.mockImplementation((url: string) => {
+            order.push(`replace:${url}`);
         });
-
         await useAuthStore.getState().logout();
 
-        expect(order).toEqual(['signOut', 'nuke', 'reload']);
+        expect(order).toEqual(['signOut', 'nuke', 'replace:/']);
     });
 
     it('swallows the error, shows a toast, and halts cleanup if signOut rejects', async () => {
@@ -190,7 +190,7 @@ describe('logout', () => {
         await useAuthStore.getState().logout();
 
         expect(appStorage.nuke).not.toHaveBeenCalled();
-        expect(reloadMock).not.toHaveBeenCalled();
+        expect(replaceMock).not.toHaveBeenCalled();
 
         expect(toast.error).toHaveBeenCalledWith(
             'Unable to log out, please try again later.'

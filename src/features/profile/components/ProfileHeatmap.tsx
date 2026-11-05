@@ -2,7 +2,6 @@ import { ResponsiveTimeRange } from '@nivo/calendar';
 import { ChartBar } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
-import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
@@ -11,9 +10,16 @@ interface ProfileHeatmapProps {
     heatmapData: ProfileData['heatmap'];
 }
 
-export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
-    const isDark = useSettingsStore((s) => s.settings.darkMode);
+const HEATMAP_COLORS = [
+    'var(--heatmap-0)',
+    'var(--heatmap-1)',
+    'var(--heatmap-2)',
+    'var(--heatmap-3)',
+    'var(--heatmap-4)',
+    'var(--heatmap-5)',
+] as const;
 
+export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
     // Calculate exactly 26 weeks leading up to today (CURRENT_DATE)
     const dateBounds = useMemo(() => {
         const to = new Date();
@@ -60,26 +66,22 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
     if (!heatmapData || Object.keys(heatmapData.data ?? {}).length === 0) {
         return (
             <div
-                className={`${glassPanel} p-5 text-center text-xs text-slate-400`}
+                className={`${glassPanel} p-5 text-center text-xs text-muted-foreground`}
             >
                 No activity data available.
             </div>
         );
     }
 
-    const colors = isDark
-        ? ['#1B2230', '#1E3A63', '#245490', '#2E70C4', '#3E8EFF', '#8AB9FF']
-        : ['#E7ECF6', '#C7D9F5', '#9EBFEF', '#6FA0E8', '#3E8EFF', '#1F5FCC'];
-
     return (
         <motion.div variants={itemVariants} initial="initial" animate="animate">
             <div className={`${glassPanel} p-5`}>
                 <div className="mb-5 flex items-center gap-2">
-                    <div className="flex h-7 w-7 items-center justify-center border border-white/60 bg-white/50 dark:border-white/10 dark:bg-white/[0.05]">
-                        <ChartBar size={14} className="text-[#3E8EFF]" />
+                    <div className="flex h-7 w-7 items-center justify-center border border-border bg-muted">
+                        <ChartBar size={14} className="text-chart-1" />
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                        <p className="text-sm font-semibold text-foreground">
                             Daily activity
                         </p>
                         <p className={eyebrow}>Last 26 weeks</p>
@@ -92,8 +94,8 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
                             data={bucketedData}
                             from={dateBounds.from}
                             to={dateBounds.to}
-                            emptyColor={isDark ? '#1B2230' : '#E7ECF6'}
-                            colors={colors}
+                            emptyColor="var(--heatmap-0)"
+                            colors={[...HEATMAP_COLORS]}
                             minValue={0}
                             maxValue={5}
                             margin={{
@@ -108,26 +110,25 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
                             dayBorderColor="transparent"
                             theme={{
                                 background: 'transparent',
-                                text: { fill: isDark ? '#CBD5E1' : '#64748B' },
+                                text: { fill: 'var(--muted-foreground)' },
                                 labels: {
                                     text: {
                                         fontSize: 10,
-                                        fill: isDark ? '#94A3B8' : '#64748B',
-                                        fontFamily:
-                                            'Plus Jakarta Sans, sans-serif',
+                                        fill: 'var(--muted-foreground)',
+                                        fontFamily: 'Manrope, sans-serif',
                                     },
                                 },
                             }}
                             tooltip={({ day }) => {
                                 const attempts = heatmapLookup[day] ?? 0;
                                 return (
-                                    <div className="border border-white/60 bg-white/70 px-3 py-2 text-xs backdrop-blur-2xl shadow-xl dark:border-white/10 dark:bg-slate-900/80 rounded-md">
-                                        <div className="font-semibold">
+                                    <div className="border border-border bg-popover/80 px-3 py-2 text-xs backdrop-blur-2xl shadow-xl rounded-md">
+                                        <div className="font-semibold text-foreground">
                                             {day}
                                         </div>
-                                        <div className="mt-1 text-slate-600 dark:text-white/60">
+                                        <div className="mt-1 text-muted-foreground">
                                             Attempts{' '}
-                                            <span className="font-semibold text-[#3E8EFF]">
+                                            <span className="font-semibold text-chart-1">
                                                 {attempts}
                                             </span>
                                         </div>
@@ -138,12 +139,12 @@ export default function ProfileHeatmap({ heatmapData }: ProfileHeatmapProps) {
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end gap-2 text-[11px] text-slate-500 dark:text-white/50">
+                <div className="mt-4 flex items-center justify-end gap-2 text-[11px] text-muted-foreground">
                     <span>Less</span>
-                    {colors.map((color, i) => (
+                    {HEATMAP_COLORS.map((color, i) => (
                         <div
                             key={i}
-                            className="h-2.5 w-2.5 border border-white/20"
+                            className="h-2.5 w-2.5 border border-border/40"
                             style={{ backgroundColor: color }}
                         />
                     ))}

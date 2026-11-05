@@ -22,7 +22,7 @@ const UpiQRCode: React.FC<UpiQRCodeProps> = ({ amount }) => {
 
     return (
         <div className="flex flex-col items-center justify-center gap-3">
-            <h2 className="text-blue-400 text-2xl font-bold">
+            <h2 className="text-chart-1 text-2xl font-bold">
                 Scan this QR or copy the UPI link below:
             </h2>
             <QRCodeSVG

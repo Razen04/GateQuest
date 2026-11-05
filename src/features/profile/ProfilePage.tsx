@@ -18,7 +18,7 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-100 dark:bg-[#09090B]">
+            <div className="flex min-h-screen items-center justify-center bg-background">
                 <ModernLoader />
             </div>
         );
@@ -34,9 +34,9 @@ export default function ProfilePage() {
             initial="initial"
             animate="animate"
         >
-            <div className="relative min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-white pb-30 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 transition-colors duration-500 dark:from-[#06070A] dark:via-[#0A0D12] dark:to-[#0F1218] dark:text-slate-200">
+            <div className="relative min-h-screen bg-gradient-to-br from-background to-card pb-30 font-['Plus_Jakarta_Sans',sans-serif] text-foreground transition-colors duration-500">
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute left-1/2 -top-32 h-[500px] w-[500px] -translate-x-1/2 bg-[#3E8EFF]/10 blur-3xl" />
+                    <div className="absolute left-1/2 -top-32 h-[500px] w-[500px] -translate-x-1/2 bg-chart-1/10 blur-3xl" />
                 </div>
 
                 <div className="relative z-10 mx-auto max-w-6xl px-4 pt-6 sm:px-6">

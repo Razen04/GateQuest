@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 export default function ModernLoader() {
     return (
         <div
-            className="w-full h-lvh flex flex-col items-center justify-center bg-white dark:bg-zinc-950"
+            className="w-full h-lvh flex flex-col items-center justify-center bg-background"
             role="status"
             aria-busy="true"
         >
             <div className="relative w-24 h-24 flex items-center justify-center">
                 {/* Glowing Pulse Dot */}
                 <motion.div
-                    className="absolute w-4 h-4 rounded-full bg-blue-400 shadow-xl"
+                    className="absolute w-4 h-4 rounded-full bg-chart-1 shadow-xl"
                     animate={{
                         scale: [1, 1.5, 1],
                         opacity: [1, 0.6, 1],
@@ -25,7 +25,7 @@ export default function ModernLoader() {
 
                 {/* Ring Spinner */}
                 <motion.div
-                    className="absolute w-full h-full border-[5px] border-blue-200/10 border-t-blue-500 rounded-full blur-[0.6px]"
+                    className="absolute w-full h-full border-[5px] border-chart-1/10 border-t-chart-1 rounded-full blur-[0.6px]"
                     animate={{ rotate: 360 }}
                     transition={{
                         repeat: Infinity,
@@ -35,12 +35,12 @@ export default function ModernLoader() {
                 />
 
                 {/* Inner Glow Ring */}
-                <div className="w-16 h-16 rounded-full bg-blue-500/10 backdrop-blur-md shadow-inner shadow-blue-500/40"></div>
+                <div className="w-16 h-16 rounded-full bg-chart-1/10 backdrop-blur-md shadow-inner shadow-chart-1/40"></div>
             </div>
 
             <motion.div
                 aria-live="polite"
-                className="mt-5 max-w-xl text-center text-sm sm:text-base text-black dark:text-gray-300 px-6"
+                className="mt-5 max-w-xl text-center text-sm sm:text-base text-muted-foreground px-6"
             >
                 Unable to connect? Let us know!
                 <span className="flex justify-center">

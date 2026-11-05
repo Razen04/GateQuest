@@ -79,7 +79,7 @@ export function useAuthEffects() {
                         settings: {
                             sound: true,
                             autoTimer: true,
-                            darkMode: true,
+                            mode: 'dark',
                             is_beta: false,
                         },
                     };
@@ -112,7 +112,7 @@ export function useAuthEffects() {
                         settings: {
                             sound: true,
                             autoTimer: true,
-                            darkMode: true,
+                            mode: 'dark',
                             is_beta: false,
                             shareProgress: false,
                             dataCollection: false,

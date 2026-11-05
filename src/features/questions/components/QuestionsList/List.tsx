@@ -32,6 +32,7 @@ const List = ({
     setCurrentPage,
 }: ListProps) => {
     if (loading) return <ModernLoader />;
+
     return (
         <motion.div
             initial="initial"
@@ -39,7 +40,7 @@ const List = ({
             variants={stagger}
             viewport={{ once: true, amount: 0.2 }}
             ref={listRef}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:grid-cols-1 pb-20 box-border overscroll-none"
+            className="grid grid-cols-1 gap-2 box-border overscroll-none pb-20 sm:grid-cols-2 md:grid-cols-1"
         >
             <Pagination
                 currentPage={currentPage}
@@ -52,9 +53,9 @@ const List = ({
                     key={index}
                     variants={fadeInUp}
                     onClick={() => handleQuestionClick(question.id)}
-                    className="cursor-pointer border border-white/20 bg-white/20 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-xl hover:bg-white/30 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition-all"
+                    className="cursor-pointer border border-border bg-card/70 p-4 text-card-foreground shadow-sm backdrop-blur-xl backdrop-saturate-150 transition-all hover:border-primary/30 hover:bg-card hover:shadow-md"
                 >
-                    <h3 className="font-medium mb-3 text-sm md:text-base text-gray-800 dark:text-gray-200">
+                    <h3 className="mb-3 font-['Manrope'] text-sm font-semibold text-card-foreground md:text-base">
                         <Suspense fallback={<ModernLoader />}>
                             <MathRenderer
                                 text={getQuestionDisplayText(question)}
@@ -62,16 +63,14 @@ const List = ({
                         </Suspense>
                     </h3>
 
-                    <div className="flex justify-between items-center text-xs">
+                    <div className="flex items-center justify-between gap-2 text-xs font-['Manrope']">
                         <span
-                            className={`font-bold md:font-normal px-2 py-1 backdrop-blur-md border border-white/20 ${getDifficultyClassNames(
-                                question.difficulty
-                            )}`}
+                            className={`border border-border px-2 py-1 font-bold backdrop-blur-md md:font-medium ${getDifficultyClassNames(question.difficulty)}`}
                         >
                             {question.difficulty}
                         </span>
 
-                        <span className="font-semibold text-gray-600 dark:text-gray-300">
+                        <span className="text-right font-semibold text-muted-foreground">
                             {question.year
                                 ? `${(Array.isArray(question.metadata.exam)
                                       ? question.metadata.exam

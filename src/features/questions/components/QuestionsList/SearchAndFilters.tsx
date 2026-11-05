@@ -91,16 +91,16 @@ const SearchAndFilters = ({
     const currentSubject = getPracticeSubjects().find(
         (s) => s.slug === subject
     );
+
     const displayExams = currentSubject?.is_universal
         ? ['GATE', 'ISRO']
         : availableExams;
     const difficulties = ['Easy', 'Medium', 'Hard'];
 
-    const glass =
-        'bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg shadow-black/5';
+    const glass = 'border border-border bg-card/70 backdrop-blur-xl shadow-sm';
 
     const inputGlass =
-        'bg-white/50 dark:bg-zinc-800/50 backdrop-blur-md border border-white/20 dark:border-white/10 focus:ring-2 focus:ring-blue-400 transition-all';
+        'border border-input bg-background/70 text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 transition-all';
 
     const hasActiveFilters =
         searchQuery.trim() !== '' ||
@@ -112,7 +112,6 @@ const SearchAndFilters = ({
         branchFilter.length > 0 ||
         attemptFilter !== 'unattempted';
 
-    // Reset all filter states back to default
     const handleClearFilters = () => {
         setSearchQuery('');
         setDifficultyFilter([]);
@@ -125,15 +124,16 @@ const SearchAndFilters = ({
     };
 
     return (
-        <div className={`p-2 sm:p-4 mb-4 sm:mb-6 ${glass}`}>
-            <div className="flex flex-col md:flex-row gap-2 sm:gap-4">
-                <div className="flex-1 relative">
-                    <MagnifyingGlass className="absolute left-3 top-2.5 text-gray-400" />
+        <div className={`mb-4 p-2 sm:mb-6 sm:p-4 ${glass}`}>
+            {/* Search and Filter Toggle */}
+            <div className="flex flex-col gap-2 sm:gap-4 md:flex-row">
+                <div className="relative flex-1">
+                    <MagnifyingGlass className="absolute left-3 top-2.5 text-muted-foreground" />
 
                     <Input
                         type="text"
                         placeholder="Search questions..."
-                        className={`w-full pl-10 pr-2 sm:pr-4 py-2 rounded-none ${inputGlass}`}
+                        className={`w-full rounded-none py-2 pl-10 pr-2 sm:pr-4 font-['Manrope'] ${inputGlass}`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -143,7 +143,7 @@ const SearchAndFilters = ({
                     <Button
                         variant="ghost"
                         onClick={() => setShowFilters(!showFilters)}
-                        className="px-2 sm:px-4 py-2 w-fit hover:bg-white/30 dark:hover:bg-zinc-800/50 rounded-none relative"
+                        className="relative w-fit rounded-none px-2 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-4"
                     >
                         <Funnel
                             className="mr-2"
@@ -151,27 +151,26 @@ const SearchAndFilters = ({
                         />
                         <span>Filter</span>
                         {hasActiveFilters && (
-                            <span className="ml-1.5 flex h-2 w-2 rounded-full bg-blue-500" />
+                            <span className="ml-1.5 flex h-2 w-2 bg-primary" />
                         )}
                         <CaretDown
-                            className={`ml-2 transition-transform duration-500 ${
-                                showFilters ? 'rotate-180' : ''
-                            }`}
+                            className={`ml-2 transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`}
                         />
                     </Button>
                 </div>
             </div>
 
+            {/* Expandable Filters */}
             <AnimatePresence>
                 {showFilters && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="mt-4 pt-4 border-t border-white/20 dark:border-white/10 overflow-hidden"
+                        className="mt-4 overflow-hidden border-t border-border pt-4"
                     >
-                        <div className="flex items-center justify-between mb-3 px-1">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        <div className="mb-3 flex items-center justify-between px-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground font-['Sora']">
                                 Active Filters
                             </span>
 
@@ -180,7 +179,7 @@ const SearchAndFilters = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={handleClearFilters}
-                                    className="h-7 px-2 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-none flex items-center gap-1 transition-colors"
+                                    className="flex h-7 items-center gap-1 rounded-none px-2 text-xs text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive"
                                 >
                                     <ArrowCounterClockwiseIcon size={14} />
                                     Clear All
@@ -188,7 +187,7 @@ const SearchAndFilters = ({
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                             {[
                                 ...(showBranchFilter
                                     ? [
@@ -248,7 +247,7 @@ const SearchAndFilters = ({
                                     key={filter.label}
                                     className={`${glass} p-3`}
                                 >
-                                    <Label className="mb-2">
+                                    <Label className="mb-2 font-['Manrope'] text-sm font-semibold text-foreground">
                                         {filter.label}
                                     </Label>
 
@@ -258,13 +257,13 @@ const SearchAndFilters = ({
                                         value={filter.value}
                                         onValueChange={filter.setter}
                                     >
-                                        <ComboboxChips className="rounded-none">
+                                        <ComboboxChips className="rounded-none border-input bg-background/70">
                                             <ComboboxValue>
                                                 {filter.value.map((item) => (
                                                     <ComboboxChip
                                                         key={item}
                                                         showRemove
-                                                        className="max-w-[150px] truncate rounded-none"
+                                                        className="max-w-[150px] truncate rounded-none border border-border bg-secondary text-secondary-foreground"
                                                     >
                                                         {filter.render(item)}
                                                     </ComboboxChip>
@@ -273,12 +272,12 @@ const SearchAndFilters = ({
 
                                             <ComboboxChipsInput
                                                 placeholder={filter.placeholder}
-                                                className="rounded-none"
+                                                className="rounded-none font-['Manrope'] text-foreground placeholder:text-muted-foreground"
                                             />
                                         </ComboboxChips>
 
-                                        <ComboboxContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 rounded-none border border-white/20">
-                                            <ComboboxEmpty>
+                                        <ComboboxContent className="rounded-none border border-border bg-popover text-popover-foreground shadow-xl backdrop-blur-xl">
+                                            <ComboboxEmpty className="text-muted-foreground">
                                                 No {filter.label.toLowerCase()}{' '}
                                                 found.
                                             </ComboboxEmpty>
@@ -288,7 +287,7 @@ const SearchAndFilters = ({
                                                     <ComboboxItem
                                                         key={item}
                                                         value={item}
-                                                        className="rounded-none"
+                                                        className="rounded-none focus:bg-accent focus:text-accent-foreground"
                                                     >
                                                         {filter.render(item)}
                                                     </ComboboxItem>
@@ -299,8 +298,9 @@ const SearchAndFilters = ({
                                 </div>
                             ))}
 
-                            <div className={`${glass} p-3 rounded-none`}>
-                                <Label className="mb-2">
+                            {/* Attempt Filter */}
+                            <div className={`${glass} rounded-none p-3`}>
+                                <Label className="mb-2 font-['Manrope'] text-sm font-semibold text-foreground">
                                     Type of questions
                                 </Label>
 
@@ -311,42 +311,39 @@ const SearchAndFilters = ({
                                     <SelectTrigger
                                         className={`${inputGlass} w-full rounded-none`}
                                     >
-                                        <SelectValue
-                                            placeholder="Select a type"
-                                            className="rounded-none"
-                                        />
+                                        <SelectValue placeholder="Select a type" />
                                     </SelectTrigger>
 
-                                    <SelectContent className="backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border border-white/20 rounded-none">
+                                    <SelectContent className="rounded-none border border-border bg-popover text-popover-foreground shadow-xl backdrop-blur-xl">
                                         <SelectGroup>
-                                            <SelectLabel>
+                                            <SelectLabel className="text-muted-foreground">
                                                 Type of question
                                             </SelectLabel>
 
                                             <SelectItem
                                                 value="all"
-                                                className="rounded-none"
+                                                className="rounded-none focus:bg-accent focus:text-accent-foreground"
                                             >
                                                 All
                                             </SelectItem>
 
                                             <SelectItem
                                                 value="attempted"
-                                                className="rounded-none"
+                                                className="rounded-none focus:bg-accent focus:text-accent-foreground"
                                             >
                                                 Attempted Questions
                                             </SelectItem>
 
                                             <SelectItem
                                                 value="unattempted"
-                                                className="rounded-none"
+                                                className="rounded-none focus:bg-accent focus:text-accent-foreground"
                                             >
                                                 Unattempted Questions
                                             </SelectItem>
 
                                             <SelectItem
                                                 value="bookmarked"
-                                                className="rounded-none"
+                                                className="rounded-none focus:bg-accent focus:text-accent-foreground"
                                             >
                                                 Bookmarked Questions
                                             </SelectItem>

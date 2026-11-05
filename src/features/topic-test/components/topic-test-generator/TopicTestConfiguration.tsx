@@ -37,10 +37,10 @@ const TopicTestConfiguration = ({
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 space-y-6 border border-white/30 dark:border-white/10 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
+                    className="mt-4 space-y-6 border border-border bg-card/40 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl p-6"
                 >
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-3">
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
                             Selected Topics ({selectedTopics.length})
                         </h3>
 
@@ -48,7 +48,7 @@ const TopicTestConfiguration = ({
                             {visibleTopics.map((topic) => (
                                 <span
                                     key={`${topic.subjectName}-${topic.name}`}
-                                    className="inline-flex items-center gap-2 border border-blue-200/40 dark:border-blue-400/20 bg-blue-500/10 backdrop-blur-xl px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-300"
+                                    className="inline-flex items-center gap-2 border border-chart-1/30 bg-chart-1/10 backdrop-blur-xl px-3 py-1 text-xs font-medium text-chart-1"
                                 >
                                     <span className="opacity-70">
                                         {topic.subjectName}:
@@ -58,7 +58,7 @@ const TopicTestConfiguration = ({
                                         onClick={() =>
                                             onRemoveTopic(topic.name)
                                         }
-                                        className="transition-colors hover:text-red-500"
+                                        className="transition-colors hover:text-destructive"
                                     >
                                         <X weight="bold" />
                                     </button>
@@ -66,22 +66,22 @@ const TopicTestConfiguration = ({
                             ))}
 
                             {hiddenCount > 0 && (
-                                <span className="border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                <span className="border border-border bg-foreground/[0.05] backdrop-blur-xl px-3 py-1 text-xs font-medium text-muted-foreground">
                                     +{hiddenCount} more
                                 </span>
                             )}
                         </div>
                     </div>
 
-                    <div className="border-t border-white/20 dark:border-white/10" />
+                    <div className="border-t border-border" />
 
-                    <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                        <Funnel className="w-4 h-4 text-orange-500" />
+                    <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground uppercase tracking-wide">
+                        <Funnel className="w-4 h-4 text-chart-5" />
                         Step 3: Configure
                     </h3>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-3">
+                        <label className="block text-sm font-medium text-muted-foreground mb-3">
                             Number of Questions
                         </label>
 
@@ -90,7 +90,11 @@ const TopicTestConfiguration = ({
                                 <Button
                                     key={opt}
                                     onClick={() => setQuestionLimit(opt)}
-                                    className={`rounded-none px-4 py-2 text-sm font-medium transition-all ${questionLimit === opt ? 'bg-blue-600/90 text-white shadow-lg backdrop-blur-xl' : 'bg-white/30 dark:bg-white/10 text-gray-600 dark:text-gray-400 border border-white/20 hover:bg-white/50 dark:hover:bg-white/20'}`}
+                                    className={`rounded-none px-4 py-2 text-sm font-medium transition-all ${
+                                        questionLimit === opt
+                                            ? 'bg-chart-1 text-white shadow-lg backdrop-blur-xl hover:bg-chart-1/90'
+                                            : 'bg-muted/50 text-muted-foreground border border-border hover:bg-muted'
+                                    }`}
                                 >
                                     {opt === 65 ? 'Max Available' : opt}
                                 </Button>
@@ -98,12 +102,12 @@ const TopicTestConfiguration = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
+                    <div className="flex items-center justify-between border-t border-border pt-4">
                         <div>
                             <p className="text-sm font-medium">
                                 Include Attempted Questions
                             </p>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                                 Allow recycling previously seen questions.
                             </span>
                         </div>
@@ -114,12 +118,12 @@ const TopicTestConfiguration = ({
                         />
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-white/20 dark:border-white/10 pt-4">
+                    <div className="flex items-center justify-between border-t border-border pt-4">
                         <div>
                             <p className="text-sm font-medium">
                                 Record Test Activity
                             </p>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                                 Include this test in your dashboard stats.
                             </span>
                         </div>

@@ -45,9 +45,10 @@ const PROVIDER_UI: Record<
     },
     grok: {
         label: 'Grok',
-        badgeBg: 'bg-zinc-900 dark:bg-zinc-100',
+        // Grok is grayscale → maps cleanly to theme fg/bg
+        badgeBg: 'bg-foreground',
         btnClass:
-            'bg-zinc-900 hover:bg-zinc-700 text-white dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 focus:ring-zinc-500',
+            'bg-foreground hover:bg-foreground/85 text-background focus:ring-ring',
         icon: (
             <img
                 src="/ai_providers/grok.svg"
@@ -75,7 +76,7 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
     };
 
     return (
-        <div className="mt-5 mb-2 flex flex-col gap-3 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 p-4 shadow-sm transition-all duration-300">
+        <div className="mt-5 mb-2 flex flex-col gap-3 border border-border bg-muted p-4 shadow-sm transition-all duration-300">
             {/* Top Row: Info and Toggle */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -85,12 +86,12 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                         {ui.icon}
                     </div>
                     <div className="min-w-0 flex-1 sm:flex-initial">
-                        <p className="text-[15px] sm:text-sm font-semibold text-zinc-800 dark:text-zinc-100 leading-tight">
+                        <p className="text-[15px] sm:text-sm font-semibold text-foreground leading-tight">
                             Stuck on this question?
                         </p>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <p className="text-xs text-muted-foreground">
                             Get a step-by-step explanation via{' '}
-                            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                            <span className="font-medium text-foreground">
                                 {ui.label}
                             </span>
                         </p>
@@ -101,7 +102,7 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                     {!showDoubtField && (
                         <button
                             onClick={() => setShowDoubtField(true)}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
                         >
                             <ChatTeardropTextIcon size={16} />
                             Add specific doubt
@@ -133,9 +134,9 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
 
             {/* Optional Doubt Field */}
             {showDoubtField && (
-                <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700 mt-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="pt-2 border-t border-border mt-1 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex justify-between items-center mb-2">
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                             Your specific doubt (optional)
                         </label>
                         <button
@@ -143,7 +144,7 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                                 setShowDoubtField(false);
                                 setDoubt('');
                             }}
-                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                            className="text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <XIcon size={14} />
                         </button>
@@ -152,7 +153,7 @@ const AskAIBanner: React.FC<AskAIBannerProps> = ({ provider, onClick }) => {
                         value={doubt}
                         onChange={(e) => setDoubt(e.target.value)}
                         placeholder="e.g., Why is option B incorrect? or How did we get to the second step?"
-                        className="min-h-[80px] text-sm bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 focus:ring-blue-500"
+                        className="min-h-[80px] text-sm bg-background border-border focus:ring-ring"
                     />
                 </div>
             )}

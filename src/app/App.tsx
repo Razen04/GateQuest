@@ -10,6 +10,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from '@/app/routes/AppRoutes.tsx';
 import { OfflineBanner } from '@/shared/components/OfflineBanner';
+import { useApplyTheme } from '@/shared/hooks/useApplyTheme';
 import { useAuthEffects } from './effects/useAuthEffects';
 import { useGoalEffects } from './effects/useGoalEffects';
 import { useOfflineEffects } from './effects/useOfflineEffects';
@@ -17,6 +18,7 @@ import { useSettingsEffects } from './effects/useSettingsEffects';
 import { useStatsEffects } from './effects/useStatsEffects';
 
 function AppContent() {
+    useApplyTheme();
     useSettingsEffects();
     useAuthEffects();
     useGoalEffects();

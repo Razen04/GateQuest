@@ -30,7 +30,8 @@ beforeEach(() => {
         false
     );
 
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove('dark', 'amoled');
+    document.documentElement.style.colorScheme = '';
     localStorage.removeItem('theme');
 });
 
@@ -58,7 +59,6 @@ describe('debounced supabase sync', () => {
 
     it('syncs once after 1500ms when logged in and settings change', () => {
         useAuthStore.setState({ user: signedIn as never }, false);
-
         renderHook(() => useSettingsEffects());
 
         act(() => {
@@ -77,13 +77,12 @@ describe('debounced supabase sync', () => {
 
     it('debounces rapid changes into a single sync', () => {
         useAuthStore.setState({ user: signedIn as never }, false);
-
         renderHook(() => useSettingsEffects());
 
         act(() => {
             useSettingsStore.getState().setSetting('sound', false);
             vi.advanceTimersByTime(1000);
-            useSettingsStore.getState().setSetting('darkMode', false);
+            useSettingsStore.getState().setSetting('mode', 'light');
             vi.advanceTimersByTime(1000);
             useSettingsStore.getState().setSetting('autoTimer', false);
         });
@@ -125,7 +124,6 @@ describe('debounced supabase sync', () => {
 
     it('cancels the pending sync on unmount', () => {
         useAuthStore.setState({ user: signedIn as never }, false);
-
         const { unmount } = renderHook(() => useSettingsEffects());
 
         act(() => {
@@ -143,7 +141,6 @@ describe('debounced supabase sync', () => {
 
     it('does not cancel a pending sync when the component re-renders', () => {
         useAuthStore.setState({ user: signedIn as never }, false);
-
         const { rerender } = renderHook(() => useSettingsEffects());
 
         act(() => {
@@ -160,32 +157,52 @@ describe('debounced supabase sync', () => {
     });
 });
 
-describe('dark mode class', () => {
-    it('adds the dark class when darkMode is true', () => {
+describe('theme mode application', () => {
+    it('adds the dark class when mode is "dark"', () => {
         useSettingsStore.setState(
-            { settings: { ...initialSettings, darkMode: true } },
+            { settings: { ...initialSettings, mode: 'dark' } },
             false
         );
 
         renderHook(() => useSettingsEffects());
 
         expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            false
+        );
     });
 
-    it('removes the dark class when darkMode is false', () => {
+    it('removes the dark class when mode is "light"', () => {
         useSettingsStore.setState(
-            { settings: { ...initialSettings, darkMode: false } },
+            { settings: { ...initialSettings, mode: 'light' } },
             false
         );
 
         renderHook(() => useSettingsEffects());
 
         expect(document.documentElement.classList.contains('dark')).toBe(false);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            false
+        );
     });
 
-    it('reacts to darkMode changes while mounted', () => {
+    it('adds both dark and amoled classes when mode is "amoled"', () => {
         useSettingsStore.setState(
-            { settings: { ...initialSettings, darkMode: false } },
+            { settings: { ...initialSettings, mode: 'amoled' } },
+            false
+        );
+
+        renderHook(() => useSettingsEffects());
+
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            true
+        );
+    });
+
+    it('reacts to mode changes while mounted', () => {
+        useSettingsStore.setState(
+            { settings: { ...initialSettings, mode: 'light' } },
             false
         );
 
@@ -193,19 +210,53 @@ describe('dark mode class', () => {
         expect(document.documentElement.classList.contains('dark')).toBe(false);
 
         act(() => {
-            useSettingsStore.getState().setSetting('darkMode', true);
+            useSettingsStore.getState().setSetting('mode', 'dark');
         });
         expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            false
+        );
 
         act(() => {
-            useSettingsStore.getState().setSetting('darkMode', false);
+            useSettingsStore.getState().setSetting('mode', 'amoled');
+        });
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            true
+        );
+
+        act(() => {
+            useSettingsStore.getState().setSetting('mode', 'light');
         });
         expect(document.documentElement.classList.contains('dark')).toBe(false);
+        expect(document.documentElement.classList.contains('amoled')).toBe(
+            false
+        );
     });
 
-    it('persists the theme to localStorage so the next cold load has no flash', () => {
+    it('sets colorScheme to match the current mode', () => {
         useSettingsStore.setState(
-            { settings: { ...initialSettings, darkMode: true } },
+            { settings: { ...initialSettings, mode: 'light' } },
+            false
+        );
+
+        renderHook(() => useSettingsEffects());
+        expect(document.documentElement.style.colorScheme).toBe('light');
+
+        act(() => {
+            useSettingsStore.getState().setSetting('mode', 'dark');
+        });
+        expect(document.documentElement.style.colorScheme).toBe('dark');
+
+        act(() => {
+            useSettingsStore.getState().setSetting('mode', 'amoled');
+        });
+        expect(document.documentElement.style.colorScheme).toBe('dark');
+    });
+
+    it('persists the mode to localStorage so the next cold load has no flash', () => {
+        useSettingsStore.setState(
+            { settings: { ...initialSettings, mode: 'dark' } },
             false
         );
 
@@ -214,9 +265,13 @@ describe('dark mode class', () => {
         expect(localStorage.getItem('theme')).toBe('dark');
 
         act(() => {
-            useSettingsStore.getState().setSetting('darkMode', false);
+            useSettingsStore.getState().setSetting('mode', 'amoled');
         });
+        expect(localStorage.getItem('theme')).toBe('amoled');
 
+        act(() => {
+            useSettingsStore.getState().setSetting('mode', 'light');
+        });
         expect(localStorage.getItem('theme')).toBe('light');
     });
 });

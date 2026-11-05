@@ -33,26 +33,26 @@ export function QuestionGrid({
     // BOX/CARD LAYOUT FOR TOPICS
     if (isTopic) {
         return (
-            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-sm p-5 flex flex-col h-full hover:border-emerald-500/50 transition-colors">
+            <div className="bg-card border border-border shadow-sm p-5 flex flex-col h-full hover:border-chart-2/50 transition-colors">
                 <div className="flex flex-col gap-1 mb-5">
                     <div className="flex items-start justify-between">
                         <h3
-                            className="font-black uppercase tracking-tight text-xs md:text-sm line-clamp-2 pr-4 flex-1"
+                            className="font-black uppercase tracking-tight text-xs md:text-sm line-clamp-2 pr-4 flex-1 text-foreground"
                             title={title}
                         >
                             {title}
                         </h3>
-                        <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5">
+                        <span className="text-[10px] font-bold text-muted-foreground whitespace-nowrap bg-muted px-1.5 py-0.5">
                             {data.attempts.length} Qs
                         </span>
                     </div>
 
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
                         <div className="flex gap-3 text-[10px] font-mono font-bold">
-                            <span className="text-emerald-500">
+                            <span className="text-chart-2">
                                 {accuracy}% ACC
                             </span>
-                            <span className="text-slate-500">
+                            <span className="text-muted-foreground">
                                 {formatTime(Number(avgTime))} AVG
                             </span>
                         </div>
@@ -61,14 +61,13 @@ export function QuestionGrid({
 
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-auto">
                     {data.attempts.map((attempt: FullAttempt) => {
-                        let styles =
-                            'bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+                        let styles = 'bg-muted text-muted-foreground';
                         if (attempt.status === 'answered' && attempt.is_correct)
                             styles =
-                                'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400';
+                                'bg-chart-2/10 text-chart-2 border-chart-2/30';
                         else if (attempt.status === 'answered')
                             styles =
-                                'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400';
+                                'bg-destructive/10 text-destructive border-destructive/30';
 
                         return (
                             <motion.button
@@ -87,7 +86,7 @@ export function QuestionGrid({
                                     <FlagIcon
                                         size={8}
                                         weight="fill"
-                                        className="absolute -top-1 -right-1 text-violet-500"
+                                        className="absolute -top-1 -right-1 text-chart-6"
                                     />
                                 )}
                             </motion.button>
@@ -101,36 +100,39 @@ export function QuestionGrid({
     // ORIGINAL FULL-WIDTH LAYOUT FOR DIFFICULTY
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border-l-4 bg-slate-50 dark:bg-zinc-800/50 border-blue-500">
-                <h3 className="font-black uppercase tracking-tight text-sm md:text-base">
+            <div className="flex items-center justify-between p-4 border-l-4 bg-muted/50 border-chart-1">
+                <h3 className="font-black uppercase tracking-tight text-sm md:text-base text-foreground">
                     {title}{' '}
-                    <span className="text-slate-400 font-medium text-xs ml-1">
+                    <span className="text-muted-foreground font-medium text-xs ml-1">
                         ({data.attempts.length})
                     </span>
                 </h3>
                 <div className="flex gap-6 text-[10px] md:text-xs font-bold font-mono text-right">
                     <div>
-                        <p className="text-slate-400 uppercase">Avg Time</p>
-                        <p className="text-blue-500">
+                        <p className="text-muted-foreground uppercase">
+                            Avg Time
+                        </p>
+                        <p className="text-chart-1">
                             {formatTime(Number(avgTime))}
                         </p>
                     </div>
                     <div>
-                        <p className="text-slate-400 uppercase">Accuracy</p>
-                        <p className="text-blue-500">{accuracy}%</p>
+                        <p className="text-muted-foreground uppercase">
+                            Accuracy
+                        </p>
+                        <p className="text-chart-1">{accuracy}%</p>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
                 {data.attempts.map((attempt: FullAttempt) => {
-                    let styles = 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400';
+                    let styles = 'bg-muted text-muted-foreground';
                     if (attempt.status === 'answered' && attempt.is_correct)
-                        styles =
-                            'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400';
+                        styles = 'bg-chart-2/10 text-chart-2 border-chart-2/30';
                     else if (attempt.status === 'answered')
                         styles =
-                            'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400';
+                            'bg-destructive/10 text-destructive border-destructive/30';
 
                     return (
                         <motion.button
@@ -153,7 +155,7 @@ export function QuestionGrid({
                                 <FlagIcon
                                     size={10}
                                     weight="fill"
-                                    className="absolute -top-1 -right-1 text-violet-500"
+                                    className="absolute -top-1 -right-1 text-chart-6"
                                 />
                             )}
                         </motion.button>

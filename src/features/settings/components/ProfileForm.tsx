@@ -41,7 +41,7 @@ export function ProfileForm({
                     value={name}
                     onChange={(e) => onNameChange(e.target.value)}
                     disabled={disabled}
-                    className="h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold rounded-none transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                    className="h-11 border-border bg-card/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold rounded-none transition text-foreground placeholder:text-muted-foreground focus:border-chart-1 focus:ring-1 focus:ring-chart-1"
                 />
             </FormField>
 
@@ -51,7 +51,7 @@ export function ProfileForm({
                     value={email}
                     placeholder="your.email@example.com"
                     disabled
-                    className="h-11 cursor-not-allowed border-slate-900/10 bg-slate-100/50 font-['JetBrains_Mono',monospace] rounded-none text-xs text-slate-500 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-400"
+                    className="h-11 cursor-not-allowed border-border bg-muted/50 font-['JetBrains_Mono',monospace] rounded-none text-xs text-muted-foreground"
                 />
             </FormField>
 
@@ -62,7 +62,7 @@ export function ProfileForm({
                     onChange={(e) => onCollegeChange(e.target.value)}
                     placeholder="Your Institution"
                     disabled={disabled}
-                    className="h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm font-semibold transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                    className="h-11 border-border bg-card/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm font-semibold text-foreground placeholder:text-muted-foreground transition focus:border-chart-1 focus:ring-1 focus:ring-chart-1"
                 />
             </FormField>
 
@@ -72,10 +72,10 @@ export function ProfileForm({
                     value={String(targetYear)}
                     disabled={disabled}
                 >
-                    <SelectTrigger className="rounded-none h-11 border-slate-900/10 bg-white/50 font-['JetBrains_Mono',monospace] text-sm font-bold dark:border-white/10 dark:bg-white/[0.03] dark:text-white">
+                    <SelectTrigger className="rounded-none h-11 border-border bg-card/50 font-['JetBrains_Mono',monospace] text-sm font-bold text-foreground">
                         <SelectValue placeholder="Select target year" />
                     </SelectTrigger>
-                    <SelectContent className="border-slate-900/10 bg-white/90 rounded-none backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                    <SelectContent className="border-border bg-popover/90 rounded-none backdrop-blur-xl">
                         {[2027, 2028, 2029, 2030].map((year) => (
                             <SelectItem
                                 key={year}
@@ -101,9 +101,9 @@ export function ProfileForm({
                     placeholder="Write a brief intro about your background, interests, or study goals..."
                     disabled={disabled}
                     rows={3}
-                    className="resize-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm transition focus:border-[#2A5CFF] focus:ring-1 focus:ring-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                    className="resize-none border-border bg-card/50 font-['Space_Grotesk',sans-serif] rounded-none text-sm text-foreground placeholder:text-muted-foreground transition focus:border-chart-1 focus:ring-1 focus:ring-chart-1"
                 />
-                <div className="flex justify-end text-xs text-slate-400">
+                <div className="flex justify-end text-xs text-muted-foreground">
                     {about.length}/100
                 </div>
             </FormField>

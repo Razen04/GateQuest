@@ -7,18 +7,45 @@ const Branding = ({ className = '' }) => {
 
     return (
         <div
-            className={`relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-3 p-3 border border-white/20 bg-white/20 backdrop-saturate-150 shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-white/[0.06] ${className}`}
+            className={`
+                relative isolate overflow-hidden
+                flex flex-col sm:flex-row
+                items-center justify-between gap-3
+                border border-border
+                bg-card/70
+                backdrop-blur-2xl backdrop-saturate-150
+                shadow-sm
+                p-3 font-['Manrope']
+                ${className}
+            `}
         >
             {/* Glass highlight */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+            <div
+                className="
+                pointer-events-none absolute inset-0
+                bg-gradient-to-b
+                from-foreground/[0.04] to-transparent
+            "
+            />
 
             {/* Text */}
-            <span className="relative text-sm font-medium text-center text-gray-700 dark:text-gray-200">
+            <span
+                className="
+                relative text-sm font-medium
+                text-center sm:text-left
+                text-card-foreground
+            "
+            >
                 Enjoying the app? Show some love. Share it as much as possible.
             </span>
 
             {/* Actions */}
-            <div className="relative flex items-center gap-2">
+            <div
+                className="
+                relative flex items-center gap-2
+                shrink-0
+            "
+            >
                 {/* GitHub */}
                 <motion.a
                     whileHover={{ scale: 1.04, y: -1 }}
@@ -26,9 +53,24 @@ const Branding = ({ className = '' }) => {
                     href="https://github.com/Razen04/GATEQuest"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-white/20 bg-black/10 backdrop-blur-md text-foreground shadow-sm hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors"
+                    className="
+                        flex items-center gap-1.5
+                        border border-border
+                        bg-secondary/70
+                        backdrop-blur-md
+                        text-secondary-foreground
+                        shadow-sm
+                        px-3 py-1.5
+                        text-xs font-semibold
+                        transition-colors
+                        hover:bg-accent
+                        hover:text-accent-foreground
+                        focus-visible:outline-none
+                        focus-visible:ring-2
+                        focus-visible:ring-ring
+                    "
                 >
-                    <GithubLogoIcon size={16} />
+                    <GithubLogoIcon size={16} weight="bold" />
                     <span>Star on GitHub</span>
                 </motion.a>
 
@@ -37,9 +79,23 @@ const Branding = ({ className = '' }) => {
                     whileHover={{ scale: 1.04, y: -1 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => navigate('/donate')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-emerald-400/20 bg-emerald-500/10 backdrop-blur-md text-emerald-600 dark:text-emerald-400 shadow-sm hover:bg-emerald-500/20 transition-colors"
+                    className="
+                        flex items-center gap-1.5
+                        border border-primary/20
+                        bg-primary/10
+                        backdrop-blur-md
+                        text-primary
+                        shadow-sm
+                        px-3 py-1.5
+                        text-xs font-semibold
+                        transition-colors
+                        hover:bg-primary/20
+                        focus-visible:outline-none
+                        focus-visible:ring-2
+                        focus-visible:ring-ring
+                    "
                 >
-                    <CoffeeIcon size={16} />
+                    <CoffeeIcon size={16} weight="bold" />
                     <span>Buy Me a Chai</span>
                 </motion.button>
             </div>

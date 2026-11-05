@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>()(
                     await supabase.auth.signOut();
                     await clearStaleData();
                     await appStorage.nuke();
-                    window.location.reload();
+                    window.location.replace('/');
                 } catch (err) {
                     console.error('Unable to logout.');
                     toast.error('Unable to log out, please try again later.');

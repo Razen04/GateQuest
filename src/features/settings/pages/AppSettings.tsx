@@ -1,12 +1,16 @@
 import {
     BellRinging,
+    BookOpenIcon,
     Clock,
     Cpu,
+    DeviceMobileIcon,
     GitBranch,
     MoonStars,
+    MoonStarsIcon,
+    PaletteIcon,
     Sliders,
-    Sparkle,
     SpeakerHigh,
+    SunIcon,
     Timer,
     WarningCircle,
 } from '@phosphor-icons/react';
@@ -18,9 +22,19 @@ import AskAI from '@/features/settings/components/AskAI';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import { last_updated, version } from '../../../../package.json';
 
+const ACCENTS = [
+    { id: 'default', label: 'Blue (Default)', swatch: 'oklch(0.62 0.22 255)' },
+    { id: 'ocean', label: 'Ocean', swatch: 'oklch(0.62 0.22 190)' },
+    { id: 'forest', label: 'Forest', swatch: 'oklch(0.62 0.22 140)' },
+    { id: 'amber', label: 'Amber', swatch: 'oklch(0.7 0.18 70)' },
+    { id: 'rose', label: 'Rose', swatch: 'oklch(0.62 0.22 340)' },
+    { id: 'violet', label: 'Violet', swatch: 'oklch(0.6 0.22 275)' },
+] as const;
+
 const AppSettings = () => {
     const settings = useSettingsStore((s) => s.settings);
     const toggleSettings = useSettingsStore((s) => s.toggleSetting);
+    const setSetting = useSettingsStore((s) => s.setSetting);
     const isUpdatingSettings = useSettingsStore((s) => s.isUpdatingSettings);
 
     const { status, enableNotifications, disableNotifications, isProcessing } =
@@ -61,21 +75,48 @@ const AppSettings = () => {
         else enableNotifications();
     };
 
+    const THEME_MODES = [
+        {
+            id: 'light' as const,
+            label: 'Light',
+            preview: 'bg-white border-border',
+            icon: SunIcon,
+        },
+        {
+            id: 'sepia' as const,
+            label: 'Sepia',
+            preview: 'bg-[#1a140d] border-[#3a2e1e]',
+            icon: BookOpenIcon,
+        },
+        {
+            id: 'dark' as const,
+            label: 'Dark',
+            preview: 'bg-zinc-900 border-zinc-700',
+            icon: MoonStarsIcon,
+        },
+        {
+            id: 'amoled' as const,
+            label: 'AMOLED',
+            preview: 'bg-black border-zinc-800',
+            icon: DeviceMobileIcon,
+        },
+    ];
+
     return (
         <div className="space-y-8 px-2 pb-20 pt-4">
             {/* Header Title */}
-            <div className="flex items-center justify-between border-b border-slate-900/10 pb-4 dark:border-white/10">
+            <div className="flex items-center justify-between border-b border-border pb-4">
                 <div className="space-y-1">
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
+                    <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-chart-1">
                         CONTROL // CENTER
                     </p>
-                    <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                    <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-foreground">
                         Application Preferences
                     </h2>
                 </div>
-                <div className="flex items-center gap-2 border border-slate-900/10 bg-slate-50/50 px-3 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
-                    <Sliders size={16} className="text-[#2A5CFF]" />
-                    <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600 dark:text-slate-300">
+                <div className="flex items-center gap-2 border border-border bg-muted/50 px-3 py-1.5">
+                    <Sliders size={16} className="text-chart-1" />
+                    <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-muted-foreground">
                         CONFIG MATRIX
                     </span>
                 </div>
@@ -83,7 +124,7 @@ const AppSettings = () => {
 
             {/* Core Preferences Matrix */}
             <div className="space-y-3">
-                <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                     // USER EXPERIENCE & INTERACTION
                 </p>
 
@@ -106,14 +147,106 @@ const AppSettings = () => {
                         disabled={isLoading}
                     />
 
-                    <ToggleSwitch
-                        icon={<MoonStars size={20} />}
-                        title="High-Contrast Dark Theme"
-                        description="Optimize UI contrast for nighttime study and reduced eye strain"
-                        isOn={settings.darkMode}
-                        onToggle={() => toggleSettings('darkMode')}
-                        disabled={isLoading}
-                    />
+                    <div className="border border-border bg-muted/50 p-4 transition-all hover:border-muted-foreground/30">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3.5 min-w-0">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border bg-card text-muted-foreground">
+                                    <MoonStars size={20} />
+                                </div>
+                                <div className="min-w-0 space-y-0.5">
+                                    <h4 className="font-grotesk text-sm font-bold text-foreground">
+                                        Theme Mode
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground">
+                                        Choose how the interface renders. AMOLED
+                                        uses pure black to reduce power on OLED
+                                        displays.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-wrap sm:shrink-0">
+                                {THEME_MODES.map((t) => {
+                                    const active = settings.mode === t.id;
+                                    return (
+                                        <button
+                                            key={t.id}
+                                            type="button"
+                                            onClick={() =>
+                                                setSetting('mode', t.id)
+                                            }
+                                            disabled={isLoading}
+                                            className={`flex items-center gap-2 border px-2.5 py-1.5 transition-colors ${
+                                                active
+                                                    ? 'border-chart-1 bg-chart-1/10'
+                                                    : 'border-border bg-card/50 hover:border-muted-foreground/40 hover:bg-accent/30'
+                                            } disabled:cursor-not-allowed disabled:opacity-50`}
+                                        >
+                                            <div
+                                                className={`h-4 w-4 shrink-0 border ${t.preview}`}
+                                            />
+                                            <span
+                                                className={`text-[10px] font-bold uppercase tracking-wider ${
+                                                    active
+                                                        ? 'text-chart-1'
+                                                        : 'text-muted-foreground'
+                                                }`}
+                                            >
+                                                {t.label}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Accent color picker — same surface language as the mode picker */}
+                    <div className="border border-border bg-muted/50 p-4 transition-all hover:border-muted-foreground/30">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-center gap-3.5 min-w-0">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border bg-card text-muted-foreground">
+                                    <PaletteIcon size={20} />
+                                </div>
+                                <div className="min-w-0 space-y-0.5">
+                                    <h4 className="font-grotesk text-sm font-bold text-foreground">
+                                        Accent Color
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground">
+                                        Changes the highlight color across
+                                        buttons, links, and selections.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 flex-wrap sm:shrink-0">
+                                {ACCENTS.map((a) => {
+                                    const active = settings.accent === a.id;
+                                    return (
+                                        <button
+                                            key={a.id}
+                                            type="button"
+                                            onClick={() =>
+                                                setSetting('accent', a.id)
+                                            }
+                                            disabled={isLoading}
+                                            title={a.label}
+                                            aria-label={`${a.label} accent`}
+                                            aria-pressed={active}
+                                            className={`h-8 w-8 border-2 transition-all ${
+                                                active
+                                                    ? 'border-foreground scale-110'
+                                                    : 'border-border hover:scale-105 hover:border-muted-foreground'
+                                            } disabled:cursor-not-allowed disabled:opacity-50`}
+                                            style={{
+                                                backgroundColor: a.swatch,
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
 
                     <ToggleSwitch
                         icon={<BellRinging size={20} />}
@@ -137,49 +270,38 @@ const AppSettings = () => {
             </div>
 
             {/* AI Assistant Module */}
-            <div className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white p-5 shadow-sm dark:border-white/10 dark:from-white/[0.03] dark:to-white/[0.01]">
-                <div className="mb-3 flex items-center gap-2">
-                    <Sparkle
-                        size={18}
-                        className="text-[#2A5CFF]"
-                        weight="fill"
-                    />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        AI Integration (Cause Everyone is doing this shit, it is
-                        kinda helpful though)
-                    </span>
-                </div>
+            <div className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 p-5 shadow-sm">
                 <AskAI />
             </div>
 
             {/* App Telemetry Footer */}
-            <div className="border border-slate-900/10 bg-slate-50/50 p-6 dark:border-white/10 dark:bg-white/[0.02]">
+            <div className="border border-border bg-muted/50 p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Cpu size={18} className="text-slate-400" />
-                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        <Cpu size={18} className="text-muted-foreground" />
+                        <h3 className="text-sm font-bold text-foreground">
                             Build Telemetry & Info
                         </h3>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 font-['JetBrains_Mono',monospace] sm:grid-cols-2">
-                    <div className="flex items-center justify-between border border-slate-900/5 bg-white p-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between border border-border bg-card p-3.5">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <GitBranch size={16} />
                             <span className="text-xs">Version</span>
                         </div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="text-xs font-bold text-foreground">
                             v{APP_VERSION}
                         </span>
                     </div>
 
-                    <div className="flex items-center justify-between border border-slate-900/5 bg-white p-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between border border-border bg-card p-3.5">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock size={16} />
                             <span className="text-xs">Last Updated</span>
                         </div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="text-xs font-bold text-foreground">
                             {APP_LAST_UPDATED_AT}
                         </span>
                     </div>

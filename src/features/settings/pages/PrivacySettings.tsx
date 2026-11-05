@@ -25,7 +25,6 @@ import {
     AlertDialogTrigger,
 } from '@/shared/components/ui/alert-dialog';
 import { Button } from '@/shared/components/ui/button';
-import type { Settings } from '@/shared/types/Settings';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
@@ -37,7 +36,6 @@ const PrivacySettings = () => {
     const toggleSetting = useSettingsStore((s) => s.toggleSetting);
     const isUpdatingSettings = useSettingsStore((s) => s.isUpdatingSettings);
     const handleUserAnonymity = useSettingsStore((s) => s.handleUserAnonymity);
-    const userSettings = user?.settings as Settings | undefined;
 
     const handleClearData = async () => {
         try {
@@ -78,18 +76,18 @@ const PrivacySettings = () => {
                 className={`space-y-8 transition-all duration-300 ${showLogin ? 'blur-xl opacity-50' : ''}`}
             >
                 {/* Header Title */}
-                <div className="flex items-center justify-between border-b border-slate-900/10 pb-4 dark:border-white/10">
+                <div className="flex items-center justify-between border-b border-border pb-4">
                     <div className="space-y-1">
-                        <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-chart-1">
                             SECURITY // PRIVACY
                         </p>
-                        <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                        <h2 className="font-grotesk text-2xl font-black tracking-tight text-foreground">
                             Data Governance & Anonymity
                         </h2>
                     </div>
-                    <div className="flex items-center gap-2 border border-slate-900/10 bg-slate-50/50 px-3 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
-                        <LockKey size={16} className="text-[#2A5CFF]" />
-                        <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-2 border border-border bg-muted/50 px-3 py-1.5">
+                        <LockKey size={16} className="text-chart-1" />
+                        <span className="font-mono text-xs font-bold text-muted-foreground">
                             ZERO-TRUST
                         </span>
                     </div>
@@ -97,7 +95,7 @@ const PrivacySettings = () => {
 
                 {/* Privacy & Sharing Matrix */}
                 <div className="space-y-3">
-                    <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                         // VISIBILITY & SOCIAL SHARES
                     </p>
 
@@ -132,21 +130,21 @@ const PrivacySettings = () => {
                 </div>
 
                 {/* Data Management & Account Governance */}
-                <div className="space-y-4 border border-red-500/20 bg-red-500/[0.015] p-6 dark:border-red-500/20 dark:bg-red-500/[0.02]">
+                <div className="space-y-4 border border-destructive/20 bg-destructive/[0.02] p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 items-center justify-center bg-red-500/10 text-red-500">
+                            <div className="flex h-8 w-8 items-center justify-center bg-destructive/10 text-destructive">
                                 <Warning size={18} weight="bold" />
                             </div>
-                            <h3 className="font-['Space_Grotesk',sans-serif] text-base font-bold text-slate-900 dark:text-white">
+                            <h3 className="font-grotesk text-base font-bold text-foreground">
                                 Data Governance & Danger Zone
                             </h3>
                         </div>
 
                         {user && user.version_number !== undefined && (
-                            <span className="font-['JetBrains_Mono',monospace] text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                            <span className="font-mono text-[11px] font-bold text-muted-foreground">
                                 RESET QUOTA:{' '}
-                                <span className="text-red-500">
+                                <span className="text-destructive">
                                     {versionNum}/5
                                 </span>{' '}
                                 USED
@@ -154,7 +152,7 @@ const PrivacySettings = () => {
                         )}
                     </div>
 
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                         Manage your raw database records, profile snapshot
                         resets, and active session tokens.
                     </p>
@@ -166,26 +164,26 @@ const PrivacySettings = () => {
                                 <AlertDialogTrigger asChild>
                                     <Button
                                         variant="outline"
-                                        className="h-12 w-full justify-start gap-2.5 border-slate-900/10 font-['Space_Grotesk',sans-serif] rounded-none font-bold text-slate-800 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5"
+                                        className="h-12 w-full justify-start gap-2.5 border-border font-grotesk rounded-none font-bold text-foreground hover:bg-accent hover:text-accent-foreground"
                                     >
                                         <Broom
                                             size={18}
-                                            className="text-amber-500"
+                                            className="text-chart-4"
                                         />
                                         Clear Profile Data
                                     </Button>
                                 </AlertDialogTrigger>
 
-                                <AlertDialogContent className="border-slate-900/10 rounded-none bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
+                                <AlertDialogContent className="border-border rounded-none bg-popover/95 backdrop-blur-xl">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle className="font-['Space_Grotesk',sans-serif] text-xl font-black text-slate-900 dark:text-white">
+                                        <AlertDialogTitle className="font-grotesk text-xl font-black text-foreground">
                                             Re-initialize Profile Data?
                                         </AlertDialogTitle>
-                                        <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
+                                        <AlertDialogDescription className="text-sm text-muted-foreground">
                                             This action will flush your active
                                             progress, resetting you to a clean
                                             slate. You are currently on{' '}
-                                            <span className="font-['JetBrains_Mono',monospace] font-bold text-slate-900 dark:text-white">
+                                            <span className="font-mono font-bold text-foreground">
                                                 Version {versionNum}
                                             </span>
                                             . This reset can only be performed 5
@@ -195,13 +193,13 @@ const PrivacySettings = () => {
                                     </AlertDialogHeader>
 
                                     <AlertDialogFooter className="pt-2">
-                                        <AlertDialogCancel className="font-['Space_Grotesk',sans-serif] font-bold rounded-none">
+                                        <AlertDialogCancel className="font-grotesk font-bold rounded-none">
                                             Cancel
                                         </AlertDialogCancel>
                                         <AlertDialogAction
                                             onClick={handleClearData}
                                             disabled={isMaxVersionsReached}
-                                            className="bg-amber-600 font-['Space_Grotesk',sans-serif] font-bold rounded-none text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600"
+                                            className="bg-chart-4 font-grotesk font-bold rounded-none text-white hover:bg-chart-4/90"
                                         >
                                             Confirm Flush ({versionNum}/5)
                                         </AlertDialogAction>
@@ -214,19 +212,19 @@ const PrivacySettings = () => {
                             <AlertDialogTrigger asChild>
                                 <Button
                                     variant="outline"
-                                    className="h-12 w-full justify-start gap-2.5 border-red-500/20 bg-red-500/5 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-red-600 hover:bg-red-500/10 dark:border-red-500/30 dark:text-red-400"
+                                    className="h-12 w-full justify-start gap-2.5 border-destructive/20 bg-destructive/5 rounded-none font-grotesk font-bold text-destructive hover:bg-destructive/10"
                                 >
                                     <Trash size={18} />
                                     Delete Account
                                 </Button>
                             </AlertDialogTrigger>
 
-                            <AlertDialogContent className="border-red-500/30 bg-white/95 backdrop-blur-xl dark:bg-slate-950/95 rounded-none">
+                            <AlertDialogContent className="border-destructive/30 bg-popover/95 backdrop-blur-xl rounded-none">
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle className="font-['Space_Grotesk',sans-serif] rounded-none text-xl font-black text-red-600 dark:text-red-400">
+                                    <AlertDialogTitle className="font-grotesk rounded-none text-xl font-black text-destructive">
                                         Permanently Delete Account?
                                     </AlertDialogTitle>
-                                    <AlertDialogDescription className="text-sm text-slate-600 dark:text-slate-400">
+                                    <AlertDialogDescription className="text-sm text-muted-foreground">
                                         This operation is non-reversible. All
                                         account ownership, personalized
                                         preferences, and linked records will be
@@ -235,12 +233,12 @@ const PrivacySettings = () => {
                                 </AlertDialogHeader>
 
                                 <AlertDialogFooter className="pt-2">
-                                    <AlertDialogCancel className="font-['Space_Grotesk',sans-serif] font-bold rounded-none">
+                                    <AlertDialogCancel className="font-grotesk font-bold rounded-none">
                                         Cancel
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                         onClick={handleAccDelete}
-                                        className="bg-red-600 rounded-none font-['Space_Grotesk',sans-serif] font-bold text-white hover:bg-red-700"
+                                        className="bg-destructive rounded-none font-grotesk font-bold text-white hover:bg-destructive/90"
                                     >
                                         Delete Account
                                     </AlertDialogAction>
@@ -251,7 +249,7 @@ const PrivacySettings = () => {
                         {/* Auth Action (Login / Logout) */}
                         {user && user.id !== '1' ? (
                             <Button
-                                className="h-12 rounded-none w-full justify-start gap-2.5 bg-red-600 font-['Space_Grotesk',sans-serif] font-bold text-white shadow-lg shadow-red-600/20 hover:bg-red-700"
+                                className="h-12 rounded-none w-full justify-start gap-2.5 bg-destructive font-grotesk font-bold text-white shadow-lg shadow-destructive/20 hover:bg-destructive/90"
                                 onClick={() => logout()}
                             >
                                 <SignOut size={18} weight="bold" />
@@ -259,7 +257,7 @@ const PrivacySettings = () => {
                             </Button>
                         ) : (
                             <Button
-                                className="rounded-none h-12 w-full justify-start gap-2.5 bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600"
+                                className="rounded-none h-12 w-full justify-start gap-2.5 bg-chart-1 font-grotesk font-bold text-white shadow-lg shadow-chart-1/20 hover:bg-chart-1/90"
                                 onClick={() => setShowLogin(true)}
                             >
                                 <SignIn size={18} weight="bold" />

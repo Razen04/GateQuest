@@ -51,11 +51,7 @@ type QuestionHeaderProps = {
 };
 
 const Divider = () => (
-    <Dot
-        size={14}
-        weight="fill"
-        className="text-slate-300 dark:text-slate-600"
-    />
+    <Dot size={14} weight="fill" className="text-muted-foreground/50" />
 );
 
 const QuestionHeader = ({
@@ -85,14 +81,12 @@ const QuestionHeader = ({
     const currentBookmark = bookmarksMap[question.id];
     const isBookmarked = Boolean(currentBookmark);
 
-    // Fetch bookmarks for this subject when header mounts or subject changes
     useEffect(() => {
         if (subjectSlug) {
             fetchBookmarks(subjectSlug);
         }
     }, [subjectSlug, fetchBookmarks]);
 
-    // Keep textarea state in sync with existing bookmark note when modal opens
     useEffect(() => {
         if (isDialogOpen) {
             setNoteText(currentBookmark?.notes || '');
@@ -116,6 +110,7 @@ const QuestionHeader = ({
                     questionId: question.id,
                     ...(noteText.trim() ? { note: noteText.trim() } : {}),
                 });
+
                 if (val) toast.success('Question bookmarked successfully.');
                 else toast.error('Unable to bookmark.');
             }
@@ -137,9 +132,11 @@ const QuestionHeader = ({
                     subjectSlug,
                     questionId: question.id,
                 });
+
                 window.dispatchEvent(new Event('BOOKMARKS_UPDATED'));
                 toast.success('Bookmark removed');
             }
+
             setIsDialogOpen(false);
         } catch (err) {
             console.error('Failed to remove bookmark:', err);
@@ -169,145 +166,154 @@ const QuestionHeader = ({
           }`
         : 'Year Unknown';
 
+    const utilityButton =
+        'flex items-center gap-1.5 border px-3 py-1.5 text-xs font-medium backdrop-blur-md transition-colors';
+
     return (
-        <div className="border-b border-slate-200/70 bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-4 dark:border-white/10 dark:from-zinc-900 dark:to-zinc-950 sm:px-6">
-            {/* TOP ROW */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0 font-mono">
-                    <h1 className="font-['Space_Grotesk',sans-serif] text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Question {questionNumber}
-                        <span className="ml-2 text-base font-medium text-slate-400">
-                            / {totalQuestions}
-                        </span>
-                    </h1>
+        <div className="relative overflow-hidden border-b border-border bg-card/70 backdrop-blur-2xl">
+            {/* Glass Highlight */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/5 to-transparent" />
 
-                    {/* Metadata */}
-                    <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                        <span>{examLabel}</span>
+            <div className="relative px-4 py-4 sm:px-6">
+                {/* TOP ROW */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 font-mono">
+                        <h1 className="font-['Sora',sans-serif] text-2xl font-bold tracking-tight text-foreground">
+                            Question {questionNumber}
+                            <span className="ml-2 text-base font-medium text-muted-foreground">
+                                / {totalQuestions}
+                            </span>
+                        </h1>
 
-                        {question.question_type && (
-                            <>
-                                <Divider />
-                                <span>{getQuestionTypeText(question)}</span>
-                            </>
-                        )}
+                        {/* Metadata */}
+                        <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                            <span>{examLabel}</span>
 
-                        {question.marks && (
-                            <>
-                                <Divider />
-                                <span>
-                                    {question.marks} Mark
-                                    {question.marks > 1 ? 's' : ''}
+                            {question.question_type && (
+                                <>
+                                    <Divider />
+                                    <span>{getQuestionTypeText(question)}</span>
+                                </>
+                            )}
+
+                            {question.marks && (
+                                <>
+                                    <Divider />
+                                    <span>
+                                        {question.marks} Mark
+                                        {question.marks > 1 ? 's' : ''}
+                                    </span>
+                                </>
+                            )}
+
+                            {isMultipleSelection(question) && (
+                                <>
+                                    <Divider />
+                                    <span>Multiple Selection</span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Question Details */}
+                        <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                            <span title={question.id || 'Unknown'}>
+                                <span className="sm:hidden">
+                                    ID:{' '}
+                                    {question.id
+                                        ? `${question.id.slice(0, 8)}…`
+                                        : 'Unknown'}
                                 </span>
-                            </>
-                        )}
 
-                        {isMultipleSelection(question) && (
-                            <>
-                                <Divider />
-                                <span>Multiple Selection</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
-                        <span title={question.id || 'Unknown'}>
-                            <span className="sm:hidden">
-                                ID:{' '}
-                                {question.id
-                                    ? `${question.id.slice(0, 8)}…`
-                                    : 'Unknown'}
+                                <span className="hidden sm:inline">
+                                    ID: {question.id || 'Unknown'}
+                                </span>
                             </span>
 
-                            <span className="hidden sm:inline">
-                                ID: {question.id || 'Unknown'}
-                            </span>
-                        </span>
+                            <Divider />
 
-                        <Divider />
+                            <span>Subject: {question.subject}</span>
 
-                        <span>Subject: {question.subject}</span>
+                            <Divider />
 
-                        <Divider />
-
-                        <span>Topic: {question.topic}</span>
+                            <span>Topic: {question.topic}</span>
+                        </div>
                     </div>
-                </div>
 
-                {/* Right controls */}
-                <div className="flex flex-wrap items-center gap-2">
-                    <QuestionBookmark
-                        onClick={() => setIsDialogOpen(true)}
-                        isBookmarked={isBookmarked}
-                        hasNote={Boolean(currentBookmark?.notes)}
-                    />
-
-                    {timer && (
-                        <QuestionTimer
-                            minutes={timer.minutes}
-                            seconds={timer.seconds}
-                            isActive={timer.isActive}
-                            onToggle={timer.onToggle}
-                            isAnswered={isAnswered}
+                    {/* Right Controls */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <QuestionBookmark
+                            onClick={() => setIsDialogOpen(true)}
+                            isBookmarked={isBookmarked}
+                            hasNote={Boolean(currentBookmark?.notes)}
                         />
-                    )}
 
-                    <span
-                        className={`px-2.5 py-1 text-xs font-semibold ${getDifficultyClassNames(
-                            question.difficulty
-                        )}`}
-                    >
-                        {getDifficultyDisplayText()}
-                    </span>
+                        {timer && (
+                            <QuestionTimer
+                                minutes={timer.minutes}
+                                seconds={timer.seconds}
+                                isActive={timer.isActive}
+                                onToggle={timer.onToggle}
+                                isAnswered={isAnswered}
+                            />
+                        )}
 
-                    {marked && (
-                        <span className="flex items-center gap-1 border border-violet-300/30 bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-700 dark:border-violet-500/20 dark:text-violet-300">
-                            <Flag size={12} weight="fill" />
-                            Review
+                        <span
+                            className={`border border-border px-2.5 py-1 text-xs font-semibold ${getDifficultyClassNames(
+                                question.difficulty
+                            )}`}
+                        >
+                            {getDifficultyDisplayText()}
                         </span>
-                    )}
-                </div>
-            </div>
 
-            {/* Bottom utility row */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/70 pt-3 text-xs dark:border-white/10">
-                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                    <Eye size={14} />
-
-                    <span>{userCount ?? 1} studying now</span>
+                        {marked && (
+                            <span className="flex items-center gap-1 border border-violet-500/20 bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-700 dark:text-violet-300">
+                                <Flag size={12} weight="fill" />
+                                Review
+                            </span>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={onCopy}
-                        className="flex items-center gap-1.5 border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:border-gray-500/20 dark:bg-gray-500/10 dark:text-gray-300 dark:hover:bg-gray-500/20"
-                    >
-                        <CopyIcon size={14} />
-                        Copy
-                    </button>
+                {/* Bottom Utility Row */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <Eye size={14} />
+                        <span>{userCount ?? 1} studying now</span>
+                    </div>
 
-                    <button
-                        onClick={onReport}
-                        className="flex items-center gap-1.5 border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
-                    >
-                        <Warning size={14} />
-                        Report
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={onCopy}
+                            className={`${utilityButton} border-border bg-secondary/60 text-secondary-foreground hover:bg-secondary`}
+                        >
+                            <CopyIcon size={14} />
+                            Copy
+                        </button>
 
-                    <button
-                        onClick={onShare}
-                        className="flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
-                    >
-                        <ShareFat size={14} />
-                        Share
-                    </button>
+                        <button
+                            onClick={onReport}
+                            className={`${utilityButton} border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20`}
+                        >
+                            <Warning size={14} />
+                            Report
+                        </button>
+
+                        <button
+                            onClick={onShare}
+                            className={`${utilityButton} border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400`}
+                        >
+                            <ShareFat size={14} />
+                            Share
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {/* Bookmark Note Modal */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[425px] rounded-none">
+                <DialogContent className="sm:max-w-[425px] rounded-none border border-border bg-card/95 backdrop-blur-2xl">
                     <DialogHeader>
-                        <DialogTitle>
+                        <DialogTitle className="font-['Sora',sans-serif]">
                             {isBookmarked
                                 ? 'Edit Bookmark Note'
                                 : 'Add Bookmark'}
@@ -315,18 +321,20 @@ const QuestionHeader = ({
                     </DialogHeader>
 
                     <div className="grid gap-3 py-2">
-                        <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                        <label className="text-xs font-medium text-muted-foreground">
                             Notes (Optional - Max 100 characters)
                         </label>
+
                         <Textarea
                             placeholder="Add key revision formula, error insight, or notes..."
                             value={noteText}
                             onChange={(e) => setNoteText(e.target.value)}
                             maxLength={100}
                             rows={3}
-                            className="resize-none rounded-none"
+                            className="resize-none rounded-none border-input bg-background/70 focus-visible:ring-ring"
                         />
-                        <div className="flex justify-end text-xs text-slate-400">
+
+                        <div className="flex justify-end text-xs text-muted-foreground">
                             {noteText.length}/100
                         </div>
                     </div>
@@ -341,7 +349,8 @@ const QuestionHeader = ({
                                 disabled={loading}
                                 className="flex items-center gap-1 rounded-none"
                             >
-                                <Trash size={14} /> Remove
+                                <Trash size={14} />
+                                Remove
                             </Button>
                         ) : (
                             <div />
@@ -358,14 +367,16 @@ const QuestionHeader = ({
                             >
                                 Cancel
                             </Button>
+
                             <Button
                                 type="button"
                                 size="sm"
                                 onClick={handleSaveBookmark}
                                 disabled={loading || noteText.length > 100}
-                                className="flex items-center gap-1 rounded-none text-white"
+                                className="flex items-center gap-1 rounded-none"
                             >
-                                <Check size={14} /> Save
+                                <Check size={14} />
+                                Save
                             </Button>
                         </div>
                     </DialogFooter>

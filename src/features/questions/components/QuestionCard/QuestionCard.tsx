@@ -5,10 +5,8 @@ import Branding from '@/shared/components/Branding';
 import useGoal from '@/shared/hooks/useGoal';
 import { usePresence } from '@/shared/hooks/usePresence';
 import type { Question } from '@/shared/types/storage';
-// Types
-import type { Database } from '@/shared/types/supabase'; // Needed for PeerStats type
+import type { Database } from '@/shared/types/supabase';
 import { openInAI } from '@/shared/utils/aiPromptUtils';
-// Utils
 import {
     getCorrectAnswerText,
     isNumericalQuestion,
@@ -20,10 +18,6 @@ import QuestionExplanation from './QuestionExplanation';
 import QuestionHeader from './QuestionHeader';
 import QuestionPeerStats from './QuestionPeerStats';
 import ResultMessage from './ResultMessage';
-
-// Child Components
-
-// ----------------------------------------------------------------------
 
 type TimerProps = {
     minutes: string;
@@ -39,27 +33,22 @@ type PeerStatsProps = {
 };
 
 type QuestionCardProps = {
-    // Data
     question: Question;
     totalQuestions: number;
     questionNumber: number;
     subjectSlug: string | undefined;
 
-    // User State
     userAnswerIndex: number | null;
     selectedOptionIndices: number[];
     numericalAnswer: number | null;
     marked?: boolean;
 
-    // Flow State
     showAnswer: boolean;
     result: 'correct' | 'incorrect' | 'unattempted';
 
-    // Complex Sub-props
     timer?: TimerProps;
     peerStats?: PeerStatsProps;
 
-    // Handlers
     onOptionSelect?: (index: number) => void;
     onNumericalChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onShowAnswer?: () => void;
@@ -72,7 +61,6 @@ type QuestionCardProps = {
     onExplanationClick: () => void;
     onBack: () => void;
 
-    // Navigation Flags
     isFirst: boolean;
     isLast: boolean;
 };
@@ -119,25 +107,20 @@ const QuestionCard = ({
         await openInAI(question, aiProvider, aiCustomPrompt, doubt);
     };
 
-    // Derived: Check if options exist to conditionally render the options list
     const hasOptions = !!(
         question.options &&
         Array.isArray(question.options) &&
         question.options.length > 0
     );
 
-    // Derived: Get correct answer text for the numerical display
     const correctAnswerText = getCorrectAnswerText(question);
 
-    // effect to scroll to top when user go to next or previous question
     useEffect(() => {
         if (pageRef.current) pageRef.current.scrollTop = 0;
     }, [questionNumber]);
 
-    // check if the question belong to the user goal
     const isCompatible = isSubjectInGoal(question.subject_id);
 
-    // Derived: true when the user has selected an option or typed a numerical answer
     const hasSelection =
         selectedOptionIndices.length > 0 || numericalAnswer !== null;
 
@@ -157,22 +140,23 @@ const QuestionCard = ({
     }, [peerStats?.data, question.options]);
 
     return (
-        <div className="mx-auto max-w-6xl 2xl:max-w-7xl mt-4 p-6 pb-20">
-            {/* Top Back Button */}
-            <div className="flex items-center mb-4 sm:mb-6 dark:text-white">
+        <div className="mx-auto mt-4 max-w-6xl p-6 pb-20 font-['Manrope'] text-foreground 2xl:max-w-7xl">
+            {/* Back Button */}
+            <div className="mb-4 flex items-center text-foreground sm:mb-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center hover:text-blue-500 transition-colors cursor-pointer focus:outline-none"
+                    className="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     <ArrowLeft className="mr-2" />
                     <span>Back</span>
                 </button>
             </div>
 
+            {/* Branch Mismatch Warning */}
             {!isCompatible && (
-                <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-4 text-amber-700">
-                    <p className="font-bold">Branch Mismatch</p>
-                    <p>
+                <div className="mb-4 border border-chart-4/30 border-l-4 border-l-chart-4 bg-chart-4/10 p-4 text-foreground">
+                    <p className="font-bold text-chart-4">Branch Mismatch</p>
+                    <p className="text-sm text-muted-foreground">
                         This question belongs to a different branch. You can
                         view it, but answering is disabled to protect your
                         current branch progress.
@@ -183,7 +167,7 @@ const QuestionCard = ({
             {/* Main Card Container */}
             <div
                 ref={pageRef}
-                className="flex-1 max-w-6xl 2xl:max-w-7xl mx-auto mt-6 pb-4 shadow-sm  dark:text-white overflow-y-scroll bg-white dark:bg-zinc-900"
+                className="mx-auto mt-6 max-w-6xl flex-1 overflow-y-auto border border-border bg-card text-card-foreground shadow-sm 2xl:max-w-7xl"
             >
                 {/* Header Section */}
                 <QuestionHeader
@@ -201,7 +185,7 @@ const QuestionCard = ({
                 />
 
                 <div className="p-4 sm:p-6">
-                    {/* Content Section (Text & Options) */}
+                    {/* Question Content */}
                     <QuestionContent
                         env="Practice"
                         currentQuestion={question}
@@ -213,16 +197,17 @@ const QuestionCard = ({
                         optionPercentages={optionPercentages}
                     />
 
-                    {/* Numerical Input Section (Conditional) */}
+                    {/* Numerical Input */}
                     {isNumericalQuestion(question) && onShowAnswer && (
                         <div className="mb-6">
-                            <label className="block text-sm font-medium mb-2 dark:text-gray-200">
+                            <label className="mb-2 block text-sm font-semibold text-foreground">
                                 Enter your numerical answer:
                             </label>
+
                             <input
                                 ref={numInputRef}
                                 type="number"
-                                className="w-full p-3 border border-border-primary dark:border-border-primary-dark focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-zinc-800 dark:text-white"
+                                className="w-full border border-input bg-background p-3 text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                                 value={numericalAnswer ?? ''}
                                 onChange={onNumericalChange}
                                 onKeyDown={(e) => {
@@ -234,10 +219,11 @@ const QuestionCard = ({
                                 placeholder="Enter your answer"
                                 disabled={showAnswer}
                             />
+
                             {showAnswer &&
                                 numericalAnswer ===
                                     Number(correctAnswerText) && (
-                                    <p className="mt-2 text-sm text-green-600">
+                                    <p className="mt-2 text-sm font-medium text-chart-2">
                                         Correct answer: {correctAnswerText}
                                     </p>
                                 )}
@@ -266,6 +252,7 @@ const QuestionCard = ({
                     {/* Question Explanation */}
                     {showAnswer && <QuestionExplanation question={question} />}
 
+                    {/* Ask AI */}
                     {showAnswer && (
                         <AskAIBanner
                             provider={aiProvider}
@@ -288,7 +275,8 @@ const QuestionCard = ({
                     />
                 </div>
 
-                <Branding className="mx-4 md:mx-6" />
+                {/* Branding */}
+                <Branding className="mx-4 mb-4 border-border md:mx-6" />
             </div>
         </div>
     );

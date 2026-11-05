@@ -140,12 +140,17 @@ const TopicTestGeneratePage = () => {
 
     const onBack = () => navigate('/topic-test');
 
+    const modeBtnClass = (active: boolean) =>
+        `px-4 py-2 text-xs font-bold uppercase transition-all ${
+            active ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'
+        }`;
+
     return (
-        <div className="max-w-7xl mx-auto flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto flex flex-col text-foreground">
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 hover:text-blue-500 transition-colors"
+                    className="flex items-center mb-4 hover:text-chart-1 transition-colors"
                 >
                     <ArrowLeft className="mr-2" />
                     Back
@@ -158,24 +163,16 @@ const TopicTestGeneratePage = () => {
                 />
             </div>
 
-            <div className="flex bg-white/20 dark:bg-white/[0.05] border border-white/20 p-1 mx-6 mb-2 w-fit">
+            <div className="flex bg-muted/40 border border-border p-1 mx-6 mb-2 w-fit">
                 <button
                     onClick={() => setMode('custom')}
-                    className={`px-4 py-2 text-xs font-bold uppercase transition-all ${
-                        mode === 'custom'
-                            ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500'
-                            : 'text-slate-500'
-                    }`}
+                    className={modeBtnClass(mode === 'custom')}
                 >
                     Custom
                 </button>
                 <button
                     onClick={() => setMode('pyq')}
-                    className={`px-4 py-2 text-xs font-bold uppercase transition-all ${
-                        mode === 'pyq'
-                            ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500'
-                            : 'text-slate-500'
-                    }`}
+                    className={modeBtnClass(mode === 'pyq')}
                 >
                     PYQ Mock
                 </button>
@@ -190,7 +187,7 @@ const TopicTestGeneratePage = () => {
                         className="px-6"
                     >
                         {warnings.length > 0 && (
-                            <div className="text-sm text-red-500">
+                            <div className="text-sm text-destructive">
                                 {warnings.map((w) => (
                                     <p key={w}>
                                         <span className="font-bold">
@@ -202,8 +199,8 @@ const TopicTestGeneratePage = () => {
                             </div>
                         )}
 
-                        <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                            <BookIcon className="w-4 h-4 text-blue-500" />
+                        <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-foreground">
+                            <BookIcon className="w-4 h-4 text-chart-1" />
                             Select Subject
                         </label>
 
@@ -278,12 +275,12 @@ const TopicTestGeneratePage = () => {
                     animate="visible"
                     className="flex-1 p-6 pb-40"
                 >
-                    <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4 mb-4">
+                    <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
                         <div>
                             <p className="text-sm font-medium">
                                 Record Test Activity
                             </p>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                                 Include this test in your dashboard stats.
                             </span>
                         </div>

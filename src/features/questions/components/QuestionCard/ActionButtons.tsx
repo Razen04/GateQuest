@@ -33,16 +33,13 @@ const ActionButtons = ({
     hasSelection,
 }: ActionButtonsProps) => {
     return (
-        <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-white dark:bg-zinc-900 border-t border-border-primary dark:border-border-primary-dark">
+        <div className="flex fixed sm:static bottom-0 left-0 w-full z-30 p-2 gap-1 flex-row justify-between items-center bg-card border-t border-border">
             {/* Previous */}
             <Button
-                className={`rounded-none flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${
-                        isFirstQuestion
-                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
-                    }
-                `}
+                className="rounded-none flex-1 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring active:scale-95
+                    bg-secondary text-secondary-foreground
+                    enabled:hover:bg-secondary/80 enabled:active:bg-secondary/70
+                    disabled:bg-muted disabled:text-muted-foreground disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handlePrevious}
                 disabled={isFirstQuestion}
                 title="Previous"
@@ -57,7 +54,10 @@ const ActionButtons = ({
             {!showAnswer && handleSubmit && handleShowAnswer ? (
                 <>
                     <Button
-                        className="flex-1 rounded-none px-2 py-3 bg-blue-100 text-blue-700 text-base font-semibold hover:bg-blue-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-200"
+                        className="flex-1 rounded-none px-2 py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring active:scale-95
+                            bg-primary/10 text-primary
+                            enabled:hover:bg-primary/20 enabled:active:bg-primary/25
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleSubmit()}
                         title="Submit"
                         disabled={!isCompatible || !hasSelection}
@@ -71,7 +71,10 @@ const ActionButtons = ({
                         </span>
                     </Button>
                     <Button
-                        className="flex-1 px-2 py-3 rounded-none bg-purple-100 text-purple-700 text-base font-semibold hover:bg-purple-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-purple-400 active:scale-95 active:bg-purple-200"
+                        className="flex-1 px-2 py-3 rounded-none text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring active:scale-95
+                            bg-chart-2/10 text-chart-2
+                            enabled:hover:bg-chart-2/20 enabled:active:bg-chart-2/25
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => handleShowAnswer()}
                         title="Show Answer"
                         disabled={!isCompatible}
@@ -87,7 +90,9 @@ const ActionButtons = ({
                 </>
             ) : (
                 <Button
-                    className="flex-1 px-2 py-3 rounded-none bg-orange-100 text-orange-700 text-base font-semibold hover:bg-orange-200 cursor-pointer flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-orange-400 active:scale-95 active:bg-orange-200"
+                    className="flex-1 px-2 py-3 rounded-none text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring active:scale-95
+                        bg-chart-5/10 text-chart-5
+                        enabled:hover:bg-chart-5/20 enabled:active:bg-chart-5/25"
                     onClick={() => handleExplainationClick()}
                     title="Show Explanation"
                 >
@@ -99,13 +104,10 @@ const ActionButtons = ({
             )}
             {/* Next */}
             <Button
-                className={`flex-1 px-2 rounded-none py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 active:bg-blue-100
-                    ${
-                        !isLastQuestion
-                            ? 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-800 cursor-pointer'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                    }
-                `}
+                className="flex-1 px-2 rounded-none py-3 text-base font-semibold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-ring active:scale-95
+                    bg-secondary text-secondary-foreground
+                    enabled:hover:bg-secondary/80 enabled:active:bg-secondary/70
+                    disabled:bg-muted disabled:text-muted-foreground disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleNext}
                 disabled={isLastQuestion}
                 title="Next"

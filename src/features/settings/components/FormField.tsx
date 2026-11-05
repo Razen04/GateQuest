@@ -23,7 +23,7 @@ export function FormField({
             <div className="flex items-center justify-between">
                 <Label
                     htmlFor={htmlFor}
-                    className="font-['Space_Grotesk',sans-serif] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
+                    className="font-grotesk text-xs font-bold uppercase tracking-wider text-foreground"
                 >
                     {Icon && (
                         <Icon size={12} weight="bold" className="shrink-0" />
@@ -31,7 +31,7 @@ export function FormField({
                     {label}
                 </Label>
                 {tag && (
-                    <span className="font-['JetBrains_Mono',monospace] text-[10px] font-medium text-slate-400">
+                    <span className="font-mono text-[10px] font-medium text-muted-foreground">
                         {tag}
                     </span>
                 )}

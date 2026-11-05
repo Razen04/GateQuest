@@ -1,32 +1,89 @@
+// app/stores/useSettingsStore.ts
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { getCurrentUser } from '@/shared/api/auth';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template';
-import type { Settings } from '@/shared/types/Settings';
+import type { AccentId, Settings, ThemeMode } from '@/shared/types/Settings';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthStore } from './useAuthStore';
 
 const defaultSettings: Settings = {
     sound: true,
     autoTimer: true,
-    darkMode: true,
     shareProgress: true,
     dataCollection: true,
     aiProvider: 'chatgpt',
     aiCustomPrompt: DEFAULT_TEMPLATE,
     notifications: false,
     is_beta: false,
+    mode: 'dark',
+    accent: 'default',
 };
 
-const readStoredTheme = (): boolean | null => {
+const readStoredMode = (): ThemeMode | null => {
     try {
         const stored = localStorage.getItem('theme');
-        if (stored === 'dark') return true;
-        if (stored === 'light') return false;
-        return null;
+        if (
+            stored === 'light' ||
+            stored === 'dark' ||
+            stored === 'amoled' ||
+            stored === 'sepia'
+        ) {
+            return stored;
+        }
     } catch {
-        return null;
+        /* noop */
     }
+    return null;
+};
+
+const readStoredAccent = (): AccentId | null => {
+    try {
+        const stored = localStorage.getItem('accent');
+        const valid: AccentId[] = [
+            'default',
+            'ocean',
+            'forest',
+            'amber',
+            'rose',
+            'violet',
+        ];
+        if (stored && valid.includes(stored as AccentId)) {
+            return stored as AccentId;
+        }
+    } catch {
+        /* noop */
+    }
+    return null;
+};
+
+const persistMode = (mode: ThemeMode) => {
+    try {
+        localStorage.setItem('theme', mode);
+    } catch {
+        // Non-fatal
+    }
+};
+
+const persistAccent = (accent: AccentId) => {
+    try {
+        localStorage.setItem('accent', accent);
+    } catch {
+        /* noop */
+    }
+};
+
+const migrateLegacySettings = (
+    raw: Record<string, unknown>
+): Partial<Settings> => {
+    const out: Partial<Settings> = { ...raw } as Partial<Settings>;
+
+    if (!raw.mode && typeof raw.darkMode === 'boolean') {
+        out.mode = raw.darkMode ? 'dark' : 'light';
+    }
+    delete (out as Record<string, unknown>).darkMode;
+
+    return out;
 };
 
 type BooleanKeys = {
@@ -48,10 +105,10 @@ type SettingsStore = {
 export const useSettingsStore = create<SettingsStore>()(
     devtools(
         (set) => ({
-            // Lazy initializer
             settings: {
                 ...defaultSettings,
-                darkMode: readStoredTheme() ?? defaultSettings.darkMode,
+                mode: readStoredMode() ?? defaultSettings.mode,
+                accent: readStoredAccent() ?? defaultSettings.accent,
             },
             isUpdatingSettings: false,
 
@@ -59,26 +116,33 @@ export const useSettingsStore = create<SettingsStore>()(
                 const user = useAuthStore.getState().user;
                 if (!user?.settings) return;
 
+                const migrated = migrateLegacySettings(
+                    user.settings as Record<string, unknown>
+                );
+
                 set(
                     (state) => ({
-                        settings: {
-                            ...state.settings,
-                            ...user.settings,
-                        },
+                        settings: { ...state.settings, ...migrated },
                     }),
                     false,
                     'settings/hydrate'
                 );
+
+                if (migrated.mode) persistMode(migrated.mode);
+                if (migrated.accent) persistAccent(migrated.accent);
             },
 
-            setSetting: (key, value) =>
+            setSetting: (key, value) => {
                 set(
                     (state) => ({
                         settings: { ...state.settings, [key]: value },
                     }),
                     false,
                     `settings/setSetting(${String(key)})`
-                ),
+                );
+                if (key === 'mode') persistMode(value as ThemeMode);
+                if (key === 'accent') persistAccent(value as AccentId);
+            },
 
             toggleSetting: (key, val) =>
                 set(
