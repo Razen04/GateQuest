@@ -63,8 +63,8 @@ const TopicTestResult = lazy(
 const TestSolutionView = lazy(
     () => import('@/features/topic-test/components/TestSolutionView')
 );
-const TopicReviewLayout = lazy(
-    () => import('@/features/topic-test/components/TopicReviewLayout')
+const TestReviewLayout = lazy(
+    () => import('@/features/topic-test/components/TestReviewLayout')
 );
 
 export default function AppRoutes() {
@@ -154,7 +154,7 @@ export default function AppRoutes() {
                         element={<TopicTestSessionPage />}
                     />
 
-                    <Route element={<TopicReviewLayout />}>
+                    <Route element={<TestReviewLayout />}>
                         <Route
                             path="topic-test-result/:testId"
                             element={<TopicTestResult />}

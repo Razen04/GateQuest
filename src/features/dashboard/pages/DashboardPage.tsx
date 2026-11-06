@@ -1,6 +1,7 @@
 import {
     ArrowClockwiseIcon,
     ArrowRightIcon,
+    ArrowUpRightIcon,
     ChartLine,
     Compass,
     LightningIcon,
@@ -9,18 +10,14 @@ import {
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
-
 // UI Components
 import Login from '@/features/auth/components/Login';
 import Branding from '@/shared/components/Branding';
 import ModernLoader from '@/shared/components/ModernLoader';
-
 // Hooks & Utilities
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-
 import { ContinueSessionWidget } from '../components/ContinueSessionWidget';
 import StatCard from '../components/StatCard';
 import StreakMap from '../components/StreakMap';
@@ -180,9 +177,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <span className="hidden border border-border bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground sm:inline-block">
-                            <ArrowRightIcon />
-                        </span>
+                        <ArrowUpRightIcon />
                     </motion.div>
 
                     {/* Smart Revision */}
@@ -208,9 +203,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <span className="hidden border border-border bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground sm:inline-block">
-                            <ArrowRightIcon />
-                        </span>
+                        <ArrowUpRightIcon />
                     </motion.div>
                 </div>
             </section>

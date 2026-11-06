@@ -63,9 +63,14 @@ const TestReviewLayout = () => {
                         })
                     );
 
+                    const sortedAttempts = [...mappedAttempts].sort(
+                        (a, b) =>
+                            (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+                    );
+
                     if (isMounted) {
                         setSession(localData.session);
-                        setAttempts(mappedAttempts);
+                        setAttempts(sortedAttempts);
                         setLoading(false);
                     }
                     return;
@@ -113,7 +118,11 @@ const TestReviewLayout = () => {
 
                 if (isMounted) {
                     setSession(sessionData);
-                    setAttempts(attemptsData ?? []);
+                    const sorted = [...(attemptsData ?? [])].sort(
+                        (a, b) =>
+                            (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+                    );
+                    setAttempts(sorted);
                 }
             } catch (err) {
                 console.error(err);

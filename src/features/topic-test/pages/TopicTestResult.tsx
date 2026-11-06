@@ -24,20 +24,16 @@ import {
 } from 'recharts';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import type { Attempt, Question, TestSession } from '@/shared/types/storage';
+import type { Attempt, TestSession } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { QuestionGrid } from '../components/test-result/QuestionGrid';
+import type { FullAttempt } from '../types/testTypes';
 
 type OutletContext = {
     session: TestSession;
     attempts: Attempt[];
 };
-
-interface FullAttempt extends Attempt {
-    questions: Question;
-    originalIndex: number;
-}
 
 interface GroupData {
     attempts: FullAttempt[];
@@ -105,6 +101,10 @@ export default function TopicTestResult() {
 
     // Unified Data Analysis Engine
     const analysis = useMemo(() => {
+        const sortedAttempts = [...attempts].sort(
+            (a, b) => (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+        );
+
         const diffGroups: Record<string, GroupData> = {
             Easy: { attempts: [], totalTime: 0, correct: 0 },
             Medium: { attempts: [], totalTime: 0, correct: 0 },
@@ -118,7 +118,7 @@ export default function TopicTestResult() {
             NAT: { total: 0, correct: 0 },
         };
 
-        attempts.forEach((a, idx) => {
+        sortedAttempts.forEach((a, idx) => {
             const q = (a as FullAttempt).questions; // Extract full question from attempt
             const diff = q?.difficulty || 'Medium';
             const topic = q?.topic || 'Uncategorized';
@@ -155,10 +155,12 @@ export default function TopicTestResult() {
 
         // Time Sinks Identification
         const globalAvg =
-            attempts.reduce((acc, a) => acc + (a.time_spent_seconds || 0), 0) /
-            (attempts.length || 1);
+            sortedAttempts.reduce(
+                (acc, a) => acc + (a.time_spent_seconds || 0),
+                0
+            ) / (sortedAttempts.length || 1);
 
-        const timeSinks = attempts
+        const timeSinks = sortedAttempts
             .filter(
                 (a) =>
                     !a.is_correct &&
@@ -170,8 +172,7 @@ export default function TopicTestResult() {
             )
             .slice(0, 3);
 
-        // Inside the analysis useMemo in TopicTestResult.tsx
-        const pacingData = attempts.map((a, idx) => {
+        const pacingData = sortedAttempts.map((a, idx) => {
             let bgColor = 'var(--muted-foreground)';
 
             if (a.status === 'answered') {
@@ -197,13 +198,19 @@ export default function TopicTestResult() {
     return (
         <div className="max-w-7xl mx-auto pb-20">
             <div className="p-6">
-                <button
+                <motion.button
+                    whileHover={{ x: -4 }}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() => navigate('/topic-test')}
-                    className="flex items-center mb-4 text-sm font-bold uppercase tracking-tight hover:text-chart-1 transition-colors"
+                    className="mb-2 group inline-flex items-center gap-2 border border-border bg-card/60 px-3.5 py-2 font-grotesk text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-colors hover:border-chart-1/30 hover:text-chart-1"
                 >
-                    <ArrowLeftIcon className="mr-2" />
-                    Exit Report
-                </button>
+                    <ArrowLeftIcon
+                        size={16}
+                        className="transition-transform group-hover:-translate-x-0.5"
+                    />
+                    <span>Back to Hub</span>
+                </motion.button>
+
                 <PageHeader
                     primaryTitle="Topic Test"
                     secondaryTitle="Performance Report"

@@ -1,12 +1,7 @@
 import { FlagIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import type { Attempt, Question } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
-
-interface FullAttempt extends Attempt {
-    questions: Question;
-    originalIndex: number;
-}
+import type { FullAttempt } from '../../types/testTypes';
 
 interface GroupData {
     attempts: FullAttempt[];

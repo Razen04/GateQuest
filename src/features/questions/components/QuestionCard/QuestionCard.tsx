@@ -1,4 +1,5 @@
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeftIcon } from '@phosphor-icons/react';
+import { motion } from 'framer-motion';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import Branding from '@/shared/components/Branding';
@@ -141,16 +142,18 @@ const QuestionCard = ({
 
     return (
         <div className="mx-auto mt-4 max-w-6xl p-6 pb-20 font-['Manrope'] text-foreground 2xl:max-w-7xl">
-            {/* Back Button */}
-            <div className="mb-4 flex items-center text-foreground sm:mb-6">
-                <button
-                    onClick={onBack}
-                    className="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                    <ArrowLeft className="mr-2" />
-                    <span>Back</span>
-                </button>
-            </div>
+            <motion.button
+                whileHover={{ x: -4 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={onBack}
+                className="mb-1 group inline-flex items-center gap-2 border border-border bg-card/60 px-3.5 py-2 font-grotesk text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-colors hover:border-chart-1/30 hover:text-chart-1"
+            >
+                <ArrowLeftIcon
+                    size={16}
+                    className="transition-transform group-hover:-translate-x-0.5"
+                />
+                <span>Back to List</span>
+            </motion.button>
 
             {/* Branch Mismatch Warning */}
             {!isCompatible && (

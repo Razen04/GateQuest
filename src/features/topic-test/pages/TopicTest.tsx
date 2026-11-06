@@ -150,13 +150,19 @@ const TopicTest = () => {
     return (
         <div className="max-h-dvh pb-40 flex flex-col text-foreground max-w-7xl mx-auto">
             <div className="p-6">
-                <button
-                    onClick={onBack}
-                    className="flex items-center mb-4 px-3 py-2 hover:bg-accent/40 transition-colors cursor-pointer focus:outline-none"
+                <motion.button
+                    whileHover={{ x: -4 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => navigate('/dashboard')}
+                    className="mb-4 group inline-flex items-center gap-2 border border-border bg-card/60 px-3.5 py-2 font-grotesk text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-colors hover:border-chart-1/30 hover:text-chart-1"
                 >
-                    <ArrowLeftIcon className="mr-2" />
-                    <span>Back</span>
-                </button>
+                    <ArrowLeftIcon
+                        size={16}
+                        className="transition-transform group-hover:-translate-x-0.5"
+                    />
+                    <span>Back to Dashboard</span>
+                </motion.button>
+
                 <PageHeader
                     primaryTitle="Topic"
                     secondaryTitle="TestHub"
@@ -255,20 +261,20 @@ const TopicTest = () => {
 
                 <motion.div variants={itemVariants} className="my-8">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                            Progress Trends
+                        <h3 className="text-xs md:text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                            Progress
                         </h3>
 
                         <div className="flex bg-muted/40 border border-border backdrop-blur-xl p-1">
                             <button
                                 onClick={() => setViewMode('accuracy')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
+                                className={`p-2 text-xs md:text-sm font-bold uppercase transition-all ${viewMode === 'accuracy' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
                             >
                                 Accuracy
                             </button>
                             <button
                                 onClick={() => setViewMode('score')}
-                                className={`px-3 py-2 text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
+                                className={`p-2 text-xs md:text-sm font-bold uppercase transition-all ${viewMode === 'score' ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'}`}
                             >
                                 Performance %
                             </button>
