@@ -6,7 +6,7 @@ import {
     GithubLogoIcon,
 } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/components/ui/button.js';
 import { faqs } from '@/shared/data/faqs.js';
 
@@ -159,9 +159,24 @@ const About = ({ landing = false }: { landing?: boolean }) => {
                 <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                     About{' '}
                     <span className="font-semibold tracking-tight">
-                        GATE<span className={ACCENT}>Quest</span>
+                        <span className={ACCENT}>GATE</span>Quest
                     </span>
                 </h1>
+                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                    <Link
+                        to="/privacy"
+                        className="transition-colors hover:text-chart-1"
+                    >
+                        Privacy Policy
+                    </Link>
+                    <Link
+                        to="/terms"
+                        className="transition-colors hover:text-chart-1"
+                    >
+                        Terms of Service
+                    </Link>
+                    <span>© {new Date().getFullYear()} Razen</span>
+                </div>
             </header>
 
             <main>

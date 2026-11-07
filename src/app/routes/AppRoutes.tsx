@@ -5,6 +5,8 @@
 
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import PrivacyPolicy from '@/features/legal/PrivacyPolicy';
+import TermsOfService from '@/features/legal/TermsOfService';
 import { OnboardingFlow } from '@/features/onboarding/OnboardingFlow';
 import ModernLoader from '@/shared/components/ModernLoader.js';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -164,6 +166,23 @@ export default function AppRoutes() {
                             element={<TestSolutionView />}
                         />
                     </Route>
+
+                    <Route
+                        path="/privacy"
+                        element={
+                            <Suspense fallback={<ModernLoader />}>
+                                <PrivacyPolicy />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="/terms"
+                        element={
+                            <Suspense fallback={<ModernLoader />}>
+                                <TermsOfService />
+                            </Suspense>
+                        }
+                    />
 
                     <Route path="/u/:username" element={<ProfilePage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

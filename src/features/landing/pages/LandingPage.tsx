@@ -14,16 +14,14 @@ import {
     SparkleIcon,
     SunIcon,
 } from '@phosphor-icons/react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { Button } from '@/shared/components/ui/button';
-import type { SettingToggle } from '@/shared/types/Settings';
 
 const SITE = {
     name: { plain: 'GATE', accent: 'Quest' },
     tagline:
         'A simple, distraction-free way to prepare for GATE. Practice questions, track your progress, and focus on what matters.',
-    footer: 'A tool for higher studies examination preparation.',
 };
 
 const LINKS = {
@@ -348,7 +346,21 @@ function Footer() {
                 <Wordmark className="text-xs" />
             </div>
 
-            <p className="text-xs text-muted-foreground">{SITE.footer}</p>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                <Link
+                    to="/privacy"
+                    className="transition-colors hover:text-chart-1"
+                >
+                    Privacy Policy
+                </Link>
+                <Link
+                    to="/terms"
+                    className="transition-colors hover:text-chart-1"
+                >
+                    Terms of Service
+                </Link>
+                <span>© {new Date().getFullYear()} Razen</span>
+            </div>
         </footer>
     );
 }
