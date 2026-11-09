@@ -2,7 +2,6 @@ import {
     GraduationCap,
     IdentificationCard,
     Info,
-    User,
     UserGear,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
@@ -12,6 +11,8 @@ import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
 import { useProfile } from '@/features/profile/hooks/useProfile';
+import { AvatarUploadButton } from '@/shared/components/AvatarUploadButton';
+import { BannerUploadButton } from '@/shared/components/BannerUploadButton';
 import { Button } from '@/shared/components/ui/button';
 import {
     Dialog,
@@ -20,6 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/shared/components/ui/dialog';
+import { getDonorTier } from '@/shared/types/donor';
 import { syncUserToSupabase } from '@/shared/utils/helper';
 import { getSocialSettingsValue } from '../api/social-settings';
 import { GoalSettings } from '../components/GoalSettings';
@@ -145,33 +147,33 @@ const AccountSettings = () => {
     };
 
     return (
-        <div className="space-y-8 px-2 pb-20 pt-4">
-            {/* Header Identity Card */}
+        <div className="px-1 pb-20">
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 p-6 shadow-xl backdrop-blur-2xl"
+                className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 shadow-xl backdrop-blur-2xl"
             >
-                <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 bg-chart-1/10 blur-3xl" />
+                {/* Banner */}
+                <BannerUploadButton
+                    className="h-32 w-full"
+                    pencilPosition="top-right"
+                />
 
-                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-5">
-                        <div className="relative shrink-0">
-                            <div className="flex h-16 w-16 items-center justify-center overflow-hidden border border-border bg-card shadow-md transition-transform duration-300 hover:scale-105">
-                                {user?.avatar ? (
-                                    <img
-                                        src={user.avatar}
-                                        alt="User avatar"
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <User className="h-7 w-7 text-muted-foreground" />
+                <div className="px-6 pb-6">
+                    {/* ─── Identity row ─────────────────────────── */}
+                    <div className="flex items-start gap-4">
+                        {/* Avatar — half-overlaps banner */}
+                        <div className="-mt-14 shrink-0 rounded-full ring-4 ring-card">
+                            <AvatarUploadButton
+                                size="md"
+                                tier={getDonorTier(
+                                    user?.notification_tags ?? []
                                 )}
-                            </div>
+                            />
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="flex-1 min-w-0 space-y-1 pt-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
                                 <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-foreground">
                                     {user?.name || 'Anonymous Aspirant'}
@@ -205,35 +207,33 @@ const AccountSettings = () => {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={() => setOpenSocialSettings(true)}
-                        className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-border bg-background/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-foreground shadow-sm transition hover:bg-accent hover:text-accent-foreground hover:shadow-md"
-                    >
-                        <UserGear
-                            size={16}
-                            className="transition-transform group-hover:rotate-45"
-                        />
-                        <span>Manage Socials</span>
-                    </Button>
-                </div>
+                    {user?.about && (
+                        <div className="mt-5">
+                            <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs leading-relaxed text-muted-foreground">
+                                <Info
+                                    size={14}
+                                    className="mt-0.5 shrink-0 text-chart-1"
+                                />
+                                <span>{user.about}</span>
+                            </p>
+                        </div>
+                    )}
 
-                {user?.about && (
-                    <div className="mt-4 pt-3 border-t border-border">
-                        <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-muted-foreground leading-relaxed">
-                            <Info
-                                size={16}
-                                className="mt-0.5 shrink-0 text-chart-1"
-                            />
-                            <span>{user.about}</span>
-                        </p>
-                    </div>
-                )}
-
-                <div className="pt-1">
-                    <SocialLinksDisplay links={socialLinks} />
+                    {Object.keys(socialLinks).length > 0 && (
+                        <div className="mt-5 flex items-start justify-between gap-3">
+                            <SocialLinksDisplay links={socialLinks} />
+                            <button
+                                onClick={() => setOpenSocialSettings(true)}
+                                title="Manage socials"
+                                aria-label="Manage social links"
+                                className="group mt-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm opacity-70 transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <UserGear size={14} weight="bold" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </motion.div>
-
             {/* Social Settings Modal */}
             <Dialog
                 open={openSocialSettings}
@@ -259,7 +259,7 @@ const AccountSettings = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="space-y-8"
+                className="mt-8"
             >
                 <section className="space-y-6">
                     <div className="flex items-center gap-2 border-b border-border pb-3">
@@ -268,7 +268,7 @@ const AccountSettings = () => {
                             className="text-chart-1"
                         />
                         <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-foreground">
-                            Personal Dossier Settings
+                            Profile Settings
                         </h4>
                     </div>
 

@@ -378,3 +378,158 @@ body {
         }
     }
 }
+
+/* ─────────────────────────────────────────────
+   DONOR TIER RING ANIMATIONS
+   Conic rings around avatars. Class prefix `tier-`
+   avoids collisions with any existing utilities.
+   ───────────────────────────────────────────── */
+
+.tier-halo {
+    animation: tier-halo 4s ease-in-out infinite;
+}
+@keyframes tier-halo {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.tier-sw {
+    stroke-dasharray: 80 920;
+    animation: tier-sw 6s linear infinite;
+}
+.tier-sw.tier-sw-rev {
+    animation-direction: reverse;
+    animation-duration: 9s;
+}
+@keyframes tier-sw {
+    from {
+        stroke-dashoffset: 0;
+    }
+    to {
+        stroke-dashoffset: -1000;
+    }
+}
+
+.tier-rib {
+    animation: tier-swing 4.5s ease-in-out infinite alternate;
+}
+@keyframes tier-swing {
+    from {
+        transform: rotate(-4deg);
+    }
+    to {
+        transform: rotate(4deg);
+    }
+}
+
+.tier-lauS {
+    animation: tier-lsw 5.5s ease-in-out infinite alternate;
+}
+@keyframes tier-lsw {
+    from {
+        transform: rotate(-2deg);
+    }
+    to {
+        transform: rotate(2deg);
+    }
+}
+
+.tier-gl {
+    animation: tier-halo 3.6s ease-in-out infinite;
+}
+
+.tier-spin {
+    animation: tier-spin 50s linear infinite;
+    transform-origin: 0 0;
+}
+@keyframes tier-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.tier-tw {
+    animation: tier-tw 3.2s ease-in-out infinite;
+}
+@keyframes tier-tw {
+    0%,
+    100% {
+        transform: scale(0.45) rotate(0deg);
+        opacity: 0.35;
+    }
+    50% {
+        transform: scale(1) rotate(45deg);
+        opacity: 1;
+    }
+}
+
+.tier-hp {
+    animation: tier-hp 2.8s ease-in-out infinite;
+}
+@keyframes tier-hp {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+.tier-bob {
+    animation: tier-bob 3.6s ease-in-out infinite;
+}
+@keyframes tier-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2.5px);
+    }
+}
+
+.tier-glint {
+    animation: tier-glint 3.4s ease-in-out infinite;
+}
+@keyframes tier-glint {
+    0%,
+    70%,
+    100% {
+        opacity: 0;
+    }
+    82% {
+        opacity: 0.95;
+    }
+}
+
+.tier-pulse {
+    animation: tier-halo 2.6s ease-in-out infinite;
+}
+
+/* Manual pause (for animated={false} in lists) */
+.tier-paused * {
+    animation: none !important;
+}
+
+/* OS-level reduced motion — pauses animation but keeps colors */
+@media (prefers-reduced-motion: reduce) {
+    .tier-halo,
+    .tier-sw,
+    .tier-rib,
+    .tier-lauS,
+    .tier-gl,
+    .tier-spin,
+    .tier-tw,
+    .tier-hp,
+    .tier-bob,
+    .tier-glint,
+    .tier-pulse {
+        animation: none !important;
+    }
+}

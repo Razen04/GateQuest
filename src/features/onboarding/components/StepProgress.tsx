@@ -22,16 +22,16 @@ export function StepProgress({ current, total }: StepProgressProps) {
                             aria-current={isCurrent ? 'step' : undefined}
                             className={`h-1.5 transition-all duration-300 ${
                                 isCurrent
-                                    ? 'w-6 bg-[#2A5CFF]'
+                                    ? 'w-6 bg-chart-1'
                                     : isPast
-                                      ? 'w-1.5 bg-[#2A5CFF]'
-                                      : 'w-1.5 bg-slate-300 dark:bg-zinc-700'
+                                      ? 'w-1.5 bg-chart-1'
+                                      : 'w-1.5 bg-muted'
                             }`}
                         />
                     );
                 })}
             </div>
-            <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 {current} of {total}
             </span>
         </div>

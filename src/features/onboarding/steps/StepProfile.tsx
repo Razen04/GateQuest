@@ -94,15 +94,15 @@ export function StepProfile({
                                 onBlur={() => touch('username')}
                                 placeholder="your_handle"
                                 autoComplete="off"
-                                className="h-11 rounded-none border-slate-900/10 bg-white/50 font-['JetBrains_Mono',monospace] text-sm font-bold dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                                className="h-11 rounded-none border-border bg-card/50 font-mono text-sm font-bold text-foreground"
                             />
                         </FormField>
-                        <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
+                        <p className="mt-1.5 text-xs text-muted-foreground">
                             This is how other users see you. Can't be changed
                             later.
                         </p>
                         {touched.username && usernameError && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="mt-1 text-xs text-destructive">
                                 {usernameError}
                             </p>
                         )}
@@ -122,14 +122,14 @@ export function StepProfile({
                                 }
                                 onBlur={() => touch('fullName')}
                                 placeholder="Your full name"
-                                className="h-11 rounded-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                                className="h-11 rounded-none border-border bg-card/50 font-grotesk text-sm font-semibold text-foreground"
                             />
                         </FormField>
-                        <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
+                        <p className="mt-1.5 text-xs text-muted-foreground">
                             Shown on your profile. You can change this later.
                         </p>
                         {touched.fullName && fullNameError && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="mt-1 text-xs text-destructive">
                                 {fullNameError}
                             </p>
                         )}
@@ -149,7 +149,7 @@ export function StepProfile({
                             value={form.email}
                             readOnly
                             disabled
-                            className="h-11 cursor-not-allowed rounded-none border-slate-900/10 bg-slate-100/50 font-['JetBrains_Mono',monospace] text-xs text-slate-500 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-400"
+                            className="h-11 cursor-not-allowed rounded-none border-border bg-muted/50 font-mono text-xs text-muted-foreground"
                         />
                     </FormField>
 
@@ -167,14 +167,14 @@ export function StepProfile({
                                 }
                                 onBlur={() => touch('college')}
                                 placeholder="Your institution"
-                                className="h-11 rounded-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                                className="h-11 rounded-none border-border bg-card/50 font-grotesk text-sm font-semibold text-foreground"
                             />
                         </FormField>
-                        <p className="mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
+                        <p className="mt-1.5 text-xs text-muted-foreground">
                             Optional. Shows on your profile.
                         </p>
                         {touched.college && collegeError && (
-                            <p className="mt-1 text-xs text-red-500">
+                            <p className="mt-1 text-xs text-destructive">
                                 {collegeError}
                             </p>
                         )}
@@ -196,17 +196,17 @@ export function StepProfile({
                             maxLength={100}
                             rows={3}
                             placeholder="A short intro about yourself..."
-                            className="resize-none rounded-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                            className="resize-none rounded-none border-border bg-card/50 font-grotesk text-sm text-foreground"
                         />
                     </FormField>
-                    <div className="mt-1.5 flex justify-between text-xs text-slate-500 dark:text-zinc-400">
+                    <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
                         <span>A short intro shown on your profile.</span>
                         <span className="tabular-nums">
                             {form.about.length}/100
                         </span>
                     </div>
                     {touched.about && aboutError && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {aboutError}
                         </p>
                     )}
@@ -214,11 +214,11 @@ export function StepProfile({
 
                 {/* Row 4 — Socials in 2 columns on desktop */}
                 <div className="space-y-4 pt-2">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-zinc-800">
-                        <p className="font-['Space_Grotesk',sans-serif] text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <div className="flex items-center justify-between border-b border-border pb-2">
+                        <p className="font-grotesk text-xs font-bold uppercase tracking-wider text-foreground">
                             Social Links
                         </p>
-                        <span className="text-[10px] font-bold uppercase text-slate-400">
+                        <span className="text-[10px] font-bold uppercase text-muted-foreground/70">
                             Optional
                         </span>
                     </div>
@@ -241,7 +241,7 @@ export function StepProfile({
                                         )
                                     }
                                     placeholder={platform.placeholder}
-                                    className="h-10 rounded-none border-slate-900/10 bg-white/50 font-['JetBrains_Mono',monospace] text-xs dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                                    className="h-10 rounded-none border-border bg-card/50 font-mono text-xs text-foreground"
                                 />
                             </FormField>
                         ))}
@@ -252,14 +252,16 @@ export function StepProfile({
                             type="button"
                             variant="ghost"
                             onClick={() => setShowAllSocials(true)}
-                            className="w-full rounded-none text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                            className="w-full rounded-none text-xs text-muted-foreground hover:text-foreground"
                         >
                             Show more platforms ▾
                         </Button>
                     )}
 
                     {socialsError && (
-                        <p className="text-xs text-red-500">{socialsError}</p>
+                        <p className="text-xs text-destructive">
+                            {socialsError}
+                        </p>
                     )}
                 </div>
             </div>

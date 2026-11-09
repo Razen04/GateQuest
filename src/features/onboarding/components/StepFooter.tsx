@@ -23,7 +23,7 @@ export function StepFooter({
                     variant="ghost"
                     onClick={onBack}
                     disabled={isNextLoading}
-                    className="rounded-none text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                    className="rounded-none text-muted-foreground hover:text-foreground"
                 >
                     ← Back
                 </Button>
@@ -35,7 +35,7 @@ export function StepFooter({
                 type="button"
                 onClick={onNext}
                 disabled={isNextDisabled || isNextLoading}
-                className="min-w-[120px] rounded-none bg-[#2A5CFF] hover:bg-[#2A5CFF]/90"
+                className="min-w-[120px] rounded-none bg-chart-1 text-white hover:bg-chart-1/90"
             >
                 {isNextLoading ? 'Saving…' : `${nextLabel} →`}
             </Button>

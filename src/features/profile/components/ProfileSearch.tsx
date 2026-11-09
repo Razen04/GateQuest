@@ -6,7 +6,6 @@ import {
     XIcon,
 } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Command,
     CommandEmpty,
@@ -15,13 +14,17 @@ import {
     CommandList,
 } from '@/components/ui/command';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar } from '@/shared/components/Avatar';
+import { TieredAvatar } from '@/shared/components/TieredAvatar';
 import { Input } from '@/shared/components/ui/input';
+import { getDonorTier } from '@/shared/types/donor';
 import { searchUsers } from '../api/profileApi';
 
 interface SearchUser {
     id: string;
     username: string;
     avatar: string | null;
+    banner: string | null;
 }
 
 interface ProfileSearchProps {
@@ -179,19 +182,36 @@ export default function ProfileSearch({ onSelectUser }: ProfileSearchProps) {
                                                     }
                                                     className="group flex cursor-pointer items-center gap-2 rounded-none px-2 py-2 aria-selected:bg-chart-1/10"
                                                 >
-                                                    <Avatar className="h-8 w-8 border border-border">
-                                                        <AvatarImage
-                                                            src={
-                                                                user.avatar ||
-                                                                undefined
-                                                            }
-                                                        />
-                                                        <AvatarFallback className="bg-chart-1/10 text-[10px] font-bold text-chart-1">
-                                                            {getInitials(
-                                                                user.username
-                                                            )}
-                                                        </AvatarFallback>
-                                                    </Avatar>
+                                                    <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-border">
+                                                        {user.avatar ? (
+                                                            <TieredAvatar
+                                                                src={
+                                                                    user.avatar
+                                                                }
+                                                                alt={
+                                                                    user.username
+                                                                }
+                                                                tier={getDonorTier(
+                                                                    user.notification_tags
+                                                                )}
+                                                                animated={false}
+                                                                className="h-8 w-8 shrink-0"
+                                                                fallback={
+                                                                    <span className="flex h-full w-full items-center justify-center bg-chart-1/10 text-[10px] font-bold text-chart-1">
+                                                                        {getInitials(
+                                                                            user.username
+                                                                        )}
+                                                                    </span>
+                                                                }
+                                                            />
+                                                        ) : (
+                                                            <div className="flex h-full w-full items-center justify-center bg-chart-1/10 text-[10px] font-bold text-chart-1">
+                                                                {getInitials(
+                                                                    user.username
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
 
                                                     <div className="min-w-0 flex-1">
                                                         <p className="truncate text-xs font-semibold text-foreground">

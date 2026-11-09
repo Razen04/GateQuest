@@ -8,6 +8,8 @@ export type DonationData = {
     created_at: string;
     user_name: string;
     user_avatar: string;
+    user_banner: string;
+    user_notification_tags: string[];
 };
 
 export type newDonation = {

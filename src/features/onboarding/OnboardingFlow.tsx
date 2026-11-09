@@ -220,7 +220,7 @@ export function OnboardingFlow() {
     };
 
     return (
-        <div className="h-dvh overflow-scroll bg-slate-50 dark:bg-zinc-950">
+        <div className="h-dvh overflow-scroll bg-background">
             <div className="mx-auto max-w-5xl px-6 py-16 md:py-24">
                 <AnimatePresence mode="wait">
                     <StepFrame

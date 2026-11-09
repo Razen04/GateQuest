@@ -13,6 +13,7 @@ export type GuestUser = {
     id: '1';
     name?: string | null;
     avatar?: string | null;
+    banner?: string | null;
     bookmark_questions?: Json | null;
     college?: string | null;
     email?: string | null;

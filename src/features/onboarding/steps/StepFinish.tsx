@@ -54,16 +54,16 @@ export function StepFinish({
 
     return (
         <>
-            <div className="space-y-1 border border-slate-200 bg-white/40 dark:border-zinc-800 dark:bg-white/[0.03]">
+            <div className="space-y-1 border border-border bg-muted/50">
                 {rows.map((row) => (
                     <div
                         key={row.label}
-                        className="flex items-center justify-between gap-4 border-b border-slate-100 px-4 py-3 last:border-b-0 dark:border-zinc-800"
+                        className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 last:border-b-0"
                     >
-                        <span className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                             {row.label}
                         </span>
-                        <span className="text-right text-sm font-semibold text-slate-900 dark:text-white">
+                        <span className="text-right text-sm font-semibold text-foreground">
                             {row.value}
                         </span>
                     </div>
@@ -71,7 +71,7 @@ export function StepFinish({
             </div>
 
             {error && (
-                <div className="mt-6 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                <div className="mt-6 border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </div>
             )}
@@ -81,7 +81,7 @@ export function StepFinish({
                     <Button
                         onClick={onRetry}
                         disabled={isSubmitting}
-                        className="w-full rounded-none bg-[#2A5CFF] hover:bg-[#2A5CFF]/90"
+                        className="w-full rounded-none bg-chart-1 text-white hover:bg-chart-1/90"
                     >
                         {isSubmitting ? 'Retrying…' : 'Retry'}
                     </Button>

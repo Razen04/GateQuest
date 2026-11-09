@@ -157,9 +157,7 @@ const Donations: React.FC = () => {
                     </div>
                 </motion.section>
 
-                {/* ── MAIN TWO-COLUMN LAYOUT ── */}
                 <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-                    {/* LEFT COLUMN: PAYMENT TERMINAL */}
                     <motion.div
                         initial={{ opacity: 0, x: -15 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -299,7 +297,6 @@ const Donations: React.FC = () => {
                         </div>
                     </motion.div>
 
-                    {/* RIGHT COLUMN: PUBLIC PATRON LEDGER */}
                     <motion.div
                         initial={{ opacity: 0, x: 15 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -342,7 +339,7 @@ const Donations: React.FC = () => {
                                     <h3 className="mb-3 font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                         All Contributor Logs
                                     </h3>
-                                    <div className="max-h-[420px] overflow-y-auto pr-1">
+                                    <div className="max-h-[520px] overflow-y-auto pr-1">
                                         <DonorList donations={donations} />
                                     </div>
                                 </div>
