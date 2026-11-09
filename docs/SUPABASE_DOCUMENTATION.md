@@ -273,6 +273,7 @@ Stores public profile information for authenticated users. This table is linked 
 | `is_public`            | `boolean`     | `DEFAULT true`                                  | Whether the profile is visible in public search.                                         |
 | `notification_tags`    | `text[]`      | `NOT NULL`, `DEFAULT '{}'`                      | Precomputed tags for notification targeting (`branch:cs`, `exam:gate`, `role:donor`, …). |
 | `onboarding_completed` | `boolean`     | `DEFAULT false`                                 | Runs the onboarding step if the value is false otherwise skip                            |
+| `banner`               | `text`        | `NULL` allowed                                  | A URL to the user's profile banner.                                                      |
 
 **Row Level Security (RLS) Policies:**
 
