@@ -351,3 +351,7 @@ entrypoint = "./functions/process-reminders/index.ts"
 [functions.dispatch-notification]
 enabled = true
 verify_jwt = false
+
+[functions.donations]
+enabled = true
+verify_jwt = false

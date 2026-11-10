@@ -19,3 +19,25 @@ export type newDonation = {
     anonymous: boolean;
     utr: string;
 };
+
+export interface Donation {
+    id: string;
+    user_id: string | null;
+    anonymous: boolean;
+    message: string | null;
+    suggested_amount: number;
+    actual_amount: number;
+    utr: string;
+    verified: boolean;
+    created_at: string;
+    verified_at: string | null;
+    verified_by: 'manual' | 'auto' | null;
+    review_alerted_at: string | null;
+}
+
+export interface NotificationPayload {
+    title: string;
+    message: string;
+    link: string;
+    target: { type: 'user'; user_id: string };
+}

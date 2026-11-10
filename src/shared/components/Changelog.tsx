@@ -79,8 +79,7 @@ function Changelog() {
                                 ),
                                 a: ({ href, children }) => {
                                     const isGithubLink =
-                                        href?.includes('github.com') ||
-                                        href?.startsWith('#');
+                                        href?.includes('github.com') || false;
 
                                     return (
                                         <a

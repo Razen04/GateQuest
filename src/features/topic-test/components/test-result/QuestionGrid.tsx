@@ -1,5 +1,6 @@
 import { FlagIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { accuracyTextColor } from '@/features/profile/utils';
 import { formatTime } from '@/shared/utils/helper';
 import type { FullAttempt } from '../../types/testTypes';
 
@@ -44,7 +45,9 @@ export function QuestionGrid({
 
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
                         <div className="flex gap-3 text-[10px] font-mono font-bold">
-                            <span className="text-chart-2">
+                            <span
+                                className={accuracyTextColor(Number(accuracy))}
+                            >
                                 {accuracy}% ACC
                             </span>
                             <span className="text-muted-foreground">
@@ -115,7 +118,9 @@ export function QuestionGrid({
                         <p className="text-muted-foreground uppercase">
                             Accuracy
                         </p>
-                        <p className="text-chart-1">{accuracy}%</p>
+                        <p className={accuracyTextColor(Number(accuracy))}>
+                            {accuracy}%
+                        </p>
                     </div>
                 </div>
             </div>
