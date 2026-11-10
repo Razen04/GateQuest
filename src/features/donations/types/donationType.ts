@@ -29,7 +29,7 @@ export interface Donation {
     verified: boolean;
     created_at: string;
     verified_at: string | null;
-    verification_method: 'manual' | 'email_auto' | null;
+    verified_by: 'manual' | 'auto' | null;
     review_alerted_at: string | null;
 }
 

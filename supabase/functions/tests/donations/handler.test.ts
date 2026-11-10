@@ -50,7 +50,7 @@ const makeDonation = (over: Record<string, unknown> = {}) => ({
     verified: false,
     created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     verified_at: null,
-    verification_method: null,
+    verified_by: null,
     review_alerted_at: null,
     ...over,
 });

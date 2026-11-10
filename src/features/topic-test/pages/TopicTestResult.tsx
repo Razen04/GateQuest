@@ -17,6 +17,7 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import {
     Bar,
     BarChart,
+    Cell,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -343,7 +344,11 @@ export default function TopicTestResult() {
                                         return null;
                                     }}
                                 />
-                                <Bar dataKey="time" radius={[2, 2, 0, 0]} />
+                                <Bar dataKey="time" radius={[2, 2, 0, 0]}>
+                                    {analysis.pacingData.map((entry, i) => (
+                                        <Cell key={i} fill={entry.fill} />
+                                    ))}
+                                </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

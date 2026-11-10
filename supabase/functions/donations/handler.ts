@@ -1,28 +1,10 @@
 /// <reference lib="deno.ns" />
 
-import { buildAdminAlert } from '../../../src/features/donations/services/buildAdminAlert.ts';
-import { buildUserThankYou } from '../../../src/features/donations/services/buildUserThankYou.ts';
-import { findStalePending } from '../../../src/features/donations/services/findStalePending.ts';
-import { matchTransaction } from '../../../src/features/donations/services/matchTransaction.ts';
-import {
-    type BankEmailInput,
-    type ParsedTransaction,
-    parseBankEmail,
-} from '../../../src/features/donations/services/parseBankEmail.ts';
-import type { Donation } from '../../../src/features/donations/types/donationType.ts';
-import { fetchRecentBankEmails as defaultFetchEmails } from './gmail.ts';
+import { createClient } from 'npm:@supabase/supabase-js';
+import { createNotification } from '../_shared/notifications.ts';
+import { parseEmail } from '../_shared/parseEmail.ts';
 
-export interface VerifyDeps {
-    /** Injected for tests. Defaults to the Gmail API fetcher. */
-    fetchRecentBankEmails?: () => Promise<BankEmailInput[]>;
-}
-
-interface VerifySummary {
-    processed: number;
-    verified: number;
-    alerted: number;
-    errors: number;
-}
+const MAX_BODY_BYTES = 100_000;
 
 function json(body: unknown, status = 200): Response {
     return new Response(JSON.stringify(body), {
@@ -31,208 +13,241 @@ function json(body: unknown, status = 200): Response {
     });
 }
 
-function getEnv(name: string): string {
-    const value = Deno.env.get(name);
-    if (!value) throw new Error(`Missing env: ${name}`);
-    return value;
+/**
+ * Extracts the Supabase project ref from SUPABASE_URL and returns a
+ * deep link to the donations table in the dashboard. Falls back to
+ * the project dashboard root if the URL can't be parsed.
+ */
+function getAdminDonationsUrl(): string {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const match = supabaseUrl.match(/^https:\/\/([^.]+)\.supabase\.co/);
+    const ref = match?.[1];
+
+    if (!ref) return '/donate'; // graceful fallback
+    return `https://supabase.com/dashboard/project/${ref}/editor`;
 }
 
-async function supabase(
-    method: 'GET' | 'POST' | 'PATCH',
-    path: string,
-    body?: unknown
-): Promise<unknown> {
-    const url = getEnv('SUPABASE_URL');
-    const key = getEnv('SUPABASE_SERVICE_ROLE_KEY');
-
-    const init: RequestInit = {
-        method,
-        headers: {
-            apikey: key,
-            Authorization: `Bearer ${key}`,
-            'Content-Type': 'application/json',
-            Prefer:
-                method === 'PATCH' ? 'return=representation' : 'return=minimal',
-        },
-    };
-    if (body !== undefined) init.body = JSON.stringify(body);
-
-    const res = await fetch(`${url}${path}`, init);
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`${method} ${path} failed: ${res.status} ${text}`);
+async function sendAdminAlert(
+    supabase: ReturnType<typeof createClient>,
+    payload: { title: string; message: string }
+): Promise<void> {
+    const adminUserId = Deno.env.get('ADMIN_USER_ID');
+    if (!adminUserId) {
+        console.error(
+            '[donation-webhook] ADMIN_USER_ID not set — skipping admin alert'
+        );
+        return;
     }
-    if (method === 'GET' || method === 'PATCH') return await res.json();
-    return null;
+
+    await createNotification(supabase, {
+        title: payload.title,
+        message: payload.message,
+        link: getAdminDonationsUrl(),
+        type: 'alert',
+        target: { type: 'user', user_id: adminUserId },
+    });
 }
 
-export async function handleVerifyDonations(
-    req: Request,
-    deps: VerifyDeps = {}
-): Promise<Response> {
-    // ── Gate 1: method ─────────────────────────────────────────────
+export async function handleDonationWebhook(req: Request): Promise<Response> {
+    // ─── Method gate ──────────────────────────────────────────────
     if (req.method !== 'POST') {
         return json({ error: 'Method not allowed' }, 405);
     }
 
-    // ── Gate 2: cron secret ────────────────────────────────────────
-    const expected = Deno.env.get('CRON_ISOLATED_SECRET');
-    const provided = req.headers.get('x-cron-secret');
-    if (!provided || provided !== expected) {
+    // ─── Auth gate — matches CRON_ISOLATED_SECRET pattern ────────
+    const providedSecret = req.headers.get('x-cron-secret');
+    const expectedSecret = Deno.env.get('DONATION_WEBHOOK_SECRET');
+
+    if (!expectedSecret) {
+        console.error(
+            '[donation-webhook] DONATION_WEBHOOK_SECRET not configured'
+        );
+        return json({ error: 'Server misconfigured' }, 500);
+    }
+
+    if (!providedSecret || providedSecret !== expectedSecret) {
         return json({ error: 'Unauthorized' }, 401);
     }
 
-    const summary: VerifySummary = {
-        processed: 0,
-        verified: 0,
-        alerted: 0,
-        errors: 0,
-    };
+    // ─── Body size guard ─────────────────────────────────────────
+    const contentLength = Number(req.headers.get('content-length') ?? '0');
+    if (contentLength > MAX_BODY_BYTES) {
+        return json({ error: 'Body too large' }, 413);
+    }
 
-    // ── Fetch bank emails ──────────────────────────────────────────
-    const fetchEmails = deps.fetchRecentBankEmails ?? defaultFetchEmails;
-    let emails: BankEmailInput[];
+    // ─── JSON parse ──────────────────────────────────────────────
+    let payload: { body?: unknown };
     try {
-        emails = await fetchEmails();
-    } catch (err) {
-        console.error('Failed to fetch bank emails:', err);
-        return json({ error: 'Email fetch failed' }, 500);
+        payload = await req.json();
+    } catch {
+        return json({ error: 'Invalid JSON body' }, 400);
     }
 
-    // ── Parse + dedupe by UTR ──────────────────────────────────────
-    // First-seen wins: if two emails carry the same UTR, we trust the
-    // first parse rather than the last.
-    const uniqueByUtr = new Map<string, ParsedTransaction>();
-    for (const email of emails) {
-        const parsed = parseBankEmail(email);
-        if (!parsed) continue;
-        if (!uniqueByUtr.has(parsed.utr)) {
-            uniqueByUtr.set(parsed.utr, parsed);
-        }
-    }
-    const uniqueParsed = [...uniqueByUtr.values()];
-    summary.processed = uniqueParsed.length;
-
-    // ── Autoverify ─────────────────────────────────────────────────
-    if (uniqueParsed.length > 0) {
-        const utrFilter = uniqueParsed.map((p) => p.utr).join(',');
-
-        let candidates: Donation[] = [];
-        try {
-            candidates = (await supabase(
-                'GET',
-                `/rest/v1/donations?utr=in.(${utrFilter})&select=*`
-            )) as Donation[];
-        } catch (err) {
-            console.error('Failed to query donations by UTR:', err);
-            summary.errors++;
-            // Fall through to stale detection — it's independent of
-            // email matching and may still be useful.
-        }
-
-        const now = new Date().toISOString();
-
-        for (const txn of uniqueParsed) {
-            const result = matchTransaction(txn, candidates);
-            if (result.kind !== 'autoverify') continue;
-
-            try {
-                const updated = await supabase(
-                    'PATCH',
-                    `/rest/v1/donations?id=eq.${result.donationId}&verified=eq.false`,
-                    {
-                        verified: true,
-                        actual_amount: result.actualAmount,
-                        verification_method: 'email_auto',
-                        verified_at: now,
-                    }
-                );
-
-                // Optimistic lock: empty response means the row was
-                // already verified by a concurrent run.
-                if (Array.isArray(updated) && updated.length === 0) continue;
-
-                summary.verified++;
-
-                // Notify donor if we know who they are. Use the parsed
-                // amount — the bank is the source of truth for what was
-                // actually paid, not the suggested amount.
-                const donor = candidates.find(
-                    (d) => d.id === result.donationId
-                );
-                if (donor && donor.user_id) {
-                    const updatedDonation: Donation = {
-                        ...donor,
-                        actual_amount: result.actualAmount,
-                        verified: true,
-                        verification_method: 'email_auto',
-                        verified_at: now,
-                    };
-                    const payload = buildUserThankYou(updatedDonation);
-                    if (payload) {
-                        await supabase(
-                            'POST',
-                            '/rest/v1/notifications',
-                            payload
-                        );
-                    }
-                }
-            } catch (err) {
-                console.error(
-                    `Failed to verify donation ${result.donationId}:`,
-                    err
-                );
-                summary.errors++;
-            }
-        }
+    if (typeof payload.body !== 'string' || payload.body.length === 0) {
+        return json({ error: 'body must be a non-empty string' }, 400);
     }
 
-    // ── Stale pending alerts ───────────────────────────────────────
-    // Runs regardless of email parsing — this is a separate safety net.
-    try {
-        const adminId = getEnv('ADMIN_USER_ID');
-        const pending = (await supabase(
-            'GET',
-            '/rest/v1/donations?verified=eq.false&review_alerted_at=is.null&select=*'
-        )) as Donation[];
-
-        const stale = findStalePending(new Date(), pending);
-
-        for (const donation of stale) {
-            try {
-                const now = new Date().toISOString();
-
-                // Mark FIRST, notify SECOND. If notification fails, the
-                // donation is still marked and won't be re-alerted on the
-                // next cron tick — trade-off: rare silent loss vs.
-                // frequent duplicate alerts. Matches the test contract.
-                const updated = await supabase(
-                    'PATCH',
-                    `/rest/v1/donations?id=eq.${donation.id}&review_alerted_at=is.null`,
-                    { review_alerted_at: now }
-                );
-
-                if (Array.isArray(updated) && updated.length === 0) continue;
-
-                summary.alerted++;
-
-                await supabase(
-                    'POST',
-                    '/rest/v1/notifications',
-                    buildAdminAlert(donation, adminId)
-                );
-            } catch (err) {
-                console.error(
-                    `Failed to alert for donation ${donation.id}:`,
-                    err
-                );
-                summary.errors++;
-            }
-        }
-    } catch (err) {
-        console.error('Stale donation query failed:', err);
-        summary.errors++;
+    if (payload.body.length > MAX_BODY_BYTES) {
+        return json({ error: 'Email body too large' }, 413);
     }
 
-    return json(summary, 200);
+    // ─── Supabase admin client ───────────────────────────────────
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !serviceRoleKey) {
+        return json({ error: 'Server misconfigured' }, 500);
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    // ─── Parse the email ─────────────────────────────────────────
+    const parsed = parseEmail(payload.body);
+
+    if (parsed.status === 'debit') {
+        return json({ status: 'skipped', reason: 'debit email' });
+    }
+
+    if (parsed.status === 'unparseable') {
+        if (parsed.looksLikeTransaction) {
+            await sendAdminAlert(supabase, {
+                title: '⚠️ Unparseable transaction email',
+                message:
+                    `A Canara Bank transaction email could not be parsed. ` +
+                    `Reason: ${parsed.reason}. Manual review may be required.`,
+            });
+        }
+        return json({ status: 'skipped', reason: parsed.reason });
+    }
+
+    // ─── We have { utr, amount } ─────────────────────────────────
+    const { utr, amount: emailAmount } = parsed;
+
+    // ─── Lookup donation by UTR ──────────────────────────────────
+    const { data: donation, error: lookupError } = await supabase
+        .from('donations')
+        .select('id, user_id, suggested_amount, verified, utr')
+        .eq('utr', utr)
+        .maybeSingle();
+
+    if (lookupError) {
+        console.error('[donation-webhook] lookup error:', lookupError);
+        return json({ error: 'Database lookup failed' }, 500);
+    }
+
+    // ─── No matching donation ────────────────────────────────────
+    if (!donation) {
+        // Dedup: only alert once per UTR per 6 hours.
+        // Without this, an unmatched email (user paid but never
+        // submitted the form) triggers a fresh admin alert every
+        // 5-minute cron cycle for the full 2-hour window → 24 alerts.
+        const { count: recentAlertCount } = await supabase
+            .from('notifications')
+            .select('id', { count: 'exact', head: true })
+            .eq('type', 'alert')
+            .eq('title', '💸 Unmatched payment received')
+            .ilike('message', `%UTR ${utr}%`)
+            .gte(
+                'created_at',
+                new Date(Date.now() - 6 * 3600_000).toISOString()
+            );
+
+        if ((recentAlertCount ?? 0) === 0) {
+            await sendAdminAlert(supabase, {
+                title: '💸 Unmatched payment received',
+                message:
+                    `Received ₹${emailAmount.toFixed(2)} (UTR ${utr}) ` +
+                    `but no donation exists with this UTR. The donor may ` +
+                    `not have submitted the form yet, or may have entered ` +
+                    `a different UTR.`,
+            });
+        } else {
+            console.log(
+                `[donation-webhook] unmatched alert suppressed (already sent for UTR ${utr})`
+            );
+        }
+
+        return json({
+            status: 'unmatched',
+            utr,
+            email_amount: emailAmount,
+        });
+    }
+    // ─── Already verified — idempotent ───────────────────────────
+    if (donation.verified) {
+        return json({
+            status: 'already_verified',
+            donation_id: donation.id,
+            utr,
+        });
+    }
+
+    // ─── Amount comparison ───────────────────────────────────────
+    const suggestedAmount = Number(donation.suggested_amount);
+    const amountMatched = Math.abs(suggestedAmount - emailAmount) < 0.01;
+
+    // ─── Atomic verify (guards against concurrent calls) ─────────
+    const { data: updated, error: updateError } = await supabase
+        .from('donations')
+        .update({
+            verified: true,
+            verified_by: 'auto',
+            verified_at: new Date().toISOString(),
+            actual_amount: emailAmount,
+        })
+        .eq('id', donation.id)
+        .eq('verified', false)
+        .select('id')
+        .maybeSingle();
+
+    if (updateError) {
+        console.error('[donation-webhook] update error:', updateError);
+        return json({ error: 'Database update failed' }, 500);
+    }
+
+    if (!updated) {
+        // Race condition — someone else verified between SELECT and UPDATE
+        return json({
+            status: 'already_verified',
+            donation_id: donation.id,
+            utr,
+        });
+    }
+
+    // ─── Notify user (skips guests with NULL user_id) ────────────
+    if (donation.user_id) {
+        if (amountMatched) {
+            await createNotification(supabase, {
+                title: '🎉 Donation Verified',
+                message:
+                    `Thanks for supporting GATEQuest! Your ` +
+                    `₹${emailAmount.toFixed(2)} donation has been confirmed.`,
+                link: '/donate',
+                type: 'update',
+                target: { type: 'user', user_id: donation.user_id },
+            });
+        } else {
+            await createNotification(supabase, {
+                title: 'Donation Verified',
+                message:
+                    `We received ₹${emailAmount.toFixed(2)} on our end ` +
+                    `(you entered ₹${suggestedAmount.toFixed(2)}). ` +
+                    `Your donation has been verified at the actual ` +
+                    `amount received.`,
+                link: '/donate',
+                type: 'update',
+                target: { type: 'user', user_id: donation.user_id },
+            });
+        }
+    }
+
+    return json({
+        status: 'verified',
+        donation_id: donation.id,
+        utr,
+        email_amount: emailAmount,
+        suggested_amount: suggestedAmount,
+        amount_matched: amountMatched,
+    });
 }
