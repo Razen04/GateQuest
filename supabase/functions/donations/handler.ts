@@ -1,10 +1,14 @@
 /// <reference lib="deno.ns" />
 
-import { createClient } from 'npm:@supabase/supabase-js';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js';
 import { createNotification } from '../_shared/notifications.ts';
 import { parseEmail } from '../_shared/parseEmail.ts';
 
 const MAX_BODY_BYTES = 100_000;
+
+type WebhookDeps = {
+    supabaseFactory?: () => SupabaseClient;
+};
 
 function json(body: unknown, status = 200): Response {
     return new Response(JSON.stringify(body), {
@@ -28,7 +32,7 @@ function getAdminDonationsUrl(): string {
 }
 
 async function sendAdminAlert(
-    supabase: ReturnType<typeof createClient>,
+    supabase: SupabaseClient,
     payload: { title: string; message: string }
 ): Promise<void> {
     const adminUserId = Deno.env.get('ADMIN_USER_ID');
@@ -48,7 +52,10 @@ async function sendAdminAlert(
     });
 }
 
-export async function handleDonationWebhook(req: Request): Promise<Response> {
+export async function handleDonationWebhook(
+    req: Request,
+    deps: WebhookDeps = {}
+): Promise<Response> {
     // ─── Method gate ──────────────────────────────────────────────
     if (req.method !== 'POST') {
         return json({ error: 'Method not allowed' }, 405);
@@ -98,9 +105,11 @@ export async function handleDonationWebhook(req: Request): Promise<Response> {
         return json({ error: 'Server misconfigured' }, 500);
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-    });
+    const supabase = deps.supabaseFactory
+        ? deps.supabaseFactory()
+        : createClient(supabaseUrl, serviceRoleKey, {
+              auth: { persistSession: false, autoRefreshToken: false },
+          });
 
     // ─── Parse the email ─────────────────────────────────────────
     const parsed = parseEmail(payload.body);
