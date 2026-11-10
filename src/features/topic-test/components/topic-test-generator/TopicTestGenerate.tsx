@@ -38,6 +38,7 @@ const TopicTestGeneratePage = () => {
     );
     const [questionLimit, setQuestionLimit] = useState<number>(20);
     const [includeAttempted, setIncludeAttempted] = useState(false);
+    const [onlyUnattempted, setOnlyUnattempted] = useState(false);
     const [recordActivity, setRecordActivity] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -85,6 +86,7 @@ const TopicTestGeneratePage = () => {
                 p_already_attempted_questions: includeAttempted,
                 p_branch_id: userGoal?.branch_id,
                 p_record_activity: recordActivity,
+                p_only_unattempted: onlyUnattempted,
             });
 
             if (error) throw error;
@@ -260,6 +262,8 @@ const TopicTestGeneratePage = () => {
                             setQuestionLimit={setQuestionLimit}
                             includeAttempted={includeAttempted}
                             setIncludeAttempted={setIncludeAttempted}
+                            onlyUnattempted={onlyUnattempted}
+                            setOnlyUnattempted={setOnlyUnattempted}
                             onRemoveTopic={(topicId: string) =>
                                 removeTopic(topicId)
                             }

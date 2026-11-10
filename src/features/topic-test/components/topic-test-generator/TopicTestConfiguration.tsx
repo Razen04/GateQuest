@@ -11,6 +11,8 @@ interface TopicTestConfigurationProps {
     questionLimit: number | 'all';
     setIncludeAttempted: React.Dispatch<React.SetStateAction<boolean>>;
     includeAttempted: boolean;
+    onlyUnattempted: boolean;
+    setOnlyUnattempted: React.Dispatch<React.SetStateAction<boolean>>;
     onRemoveTopic: (topic: string) => void;
     setRecordActivity: React.Dispatch<React.SetStateAction<boolean>>;
     recordActivity: boolean;
@@ -24,6 +26,8 @@ const TopicTestConfiguration = ({
     questionLimit,
     setIncludeAttempted,
     includeAttempted,
+    onlyUnattempted,
+    setOnlyUnattempted,
     onRemoveTopic,
     setRecordActivity,
     recordActivity,
@@ -115,6 +119,22 @@ const TopicTestConfiguration = ({
                         <ToggleSwitch
                             isOn={includeAttempted}
                             onToggle={() => setIncludeAttempted((v) => !v)}
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-border pt-4">
+                        <div>
+                            <p className="text-sm font-medium">
+                                Only New Questions
+                            </p>
+                            <span className="text-xs text-muted-foreground">
+                                Exclude every question you have attempted before.
+                            </span>
+                        </div>
+
+                        <ToggleSwitch
+                            isOn={onlyUnattempted}
+                            onToggle={() => setOnlyUnattempted((v) => !v)}
                         />
                     </div>
 
