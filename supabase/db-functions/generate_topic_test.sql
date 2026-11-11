@@ -1,4 +1,4 @@
-create or replace function generate_topic_test (p_filters jsonb, p_question_count int, p_total_seconds int, p_already_attempted_questions boolean, p_branch_id text, p_record_activity boolean, p_only_unattempted boolean default false)
+create or replace function generate_topic_test (p_filters jsonb, p_question_count int, p_total_seconds int, p_already_attempted_questions boolean, p_branch_id text, p_record_activity boolean)
     returns jsonb
     language plpgsql
     security definer
@@ -82,7 +82,6 @@ from
         and q.topic = fp.topic
     left join user_history uh on q.id = uh.question_id
         left join revision_queue rq on q.id = rq.question_id
-    where not coalesce(p_only_unattempted, false) or uh.question_id is null
 ),
 bucket_new as (
     select
@@ -105,7 +104,8 @@ bucket_rev as (
     from
         pool
     where
-        is_revision
+        p_already_attempted_questions
+        and is_revision
         and id not in (
             select
                 id

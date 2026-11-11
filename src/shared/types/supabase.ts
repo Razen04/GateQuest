@@ -1156,7 +1156,6 @@ export type Database = {
                     p_filters: Json;
                     p_question_count: number;
                     p_record_activity: boolean;
-                    p_only_unattempted?: boolean;
                     p_total_seconds: number;
                 };
                 Returns: Json;
