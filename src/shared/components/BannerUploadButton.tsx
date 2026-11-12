@@ -1,8 +1,10 @@
-import { PencilSimple, SpinnerIcon } from '@phosphor-icons/react';
+import { LockSimple, PencilSimple, SpinnerIcon } from '@phosphor-icons/react';
 import { type ChangeEvent, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { Banner } from '@/shared/components/Banner';
+import { getDonorTier } from '@/shared/types/donor';
 import { compressBanner } from '@/shared/utils/image/compressImage';
 import { gifToWebm } from '@/shared/utils/image/gifToWebm';
 import { validateImageFile } from '@/shared/utils/image/validateImage';
@@ -12,13 +14,11 @@ import {
     uploadBanner,
 } from '@/shared/utils/supabaseStorage';
 
-const IMAGE_MAX_BYTES = 2 * 1024 * 1024; // 2 MB
-const GIF_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+const IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+const GIF_MAX_BYTES = 5 * 1024 * 1024;
 
 interface BannerUploadButtonProps {
-    /** Height class for the banner strip (e.g. "h-40", "h-20") */
     className?: string;
-    /** Vertical position of the pencil badge — top-right by default */
     pencilPosition?: 'top-right' | 'bottom-right';
 }
 
@@ -31,21 +31,34 @@ export function BannerUploadButton({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const isGuest = !user || user.id === '1';
+    const tier = getDonorTier(user?.notification_tags);
+    const canUploadStatic = !isGuest && tier >= 1;
+    const canUploadAnimated = !isGuest && tier >= 2;
 
     const handleClick = () => {
-        if (uploading || isGuest) return;
+        if (uploading) return;
+        if (!canUploadStatic) {
+            navigate('/donate');
+            return;
+        }
         fileInputRef.current?.click();
     };
 
     const handleFile = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         e.target.value = '';
-        if (!file || isGuest) return;
+        if (!file) return;
+
+        if (!canUploadStatic) {
+            toast.error('Banner uploads are available for supporters');
+            return;
+        }
 
         const validation = await validateImageFile(file, {
-            allowGif: true,
+            allowGif: canUploadAnimated,
             imageMaxBytes: IMAGE_MAX_BYTES,
             gifMaxBytes: GIF_MAX_BYTES,
         });
@@ -73,23 +86,23 @@ export function BannerUploadButton({
                 }
             }
 
-            const { url } = await uploadBanner(user.id, uploadBlob);
+            const { url } = await uploadBanner(user!.id, uploadBlob);
 
             const { error: dbError } = await supabase
                 .from('users')
                 .update({ banner: url })
-                .eq('id', user.id);
+                .eq('id', user!.id);
 
             if (dbError) {
                 await deleteBannerByUrl(url);
                 throw dbError;
             }
 
-            if (user.banner && user.banner !== url) {
-                await deleteBannerByUrl(user.banner);
+            if (user!.banner && user!.banner !== url) {
+                await deleteBannerByUrl(user!.banner);
             }
 
-            setUser({ ...user, banner: url });
+            setUser({ ...user!, banner: url });
             toast.success('Banner updated');
         } catch (err) {
             console.error('Banner upload failed:', err);
@@ -110,7 +123,7 @@ export function BannerUploadButton({
 
     return (
         <div className="group relative overflow-hidden">
-            {/* Banner image or placeholder */}
+            {/* Banner or placeholder */}
             {displaySrc ? (
                 <Banner
                     src={displaySrc}
@@ -118,15 +131,46 @@ export function BannerUploadButton({
                         uploading ? 'opacity-60' : ''
                     }`}
                 />
-            ) : (
-                <div
-                    className={`${className} flex items-center justify-center bg-gradient-to-br from-muted to-muted/40 text-xs font-medium uppercase tracking-wider text-muted-foreground`}
+            ) : canUploadStatic ? (
+                /* Empty state, tier 1+ — clickable CTA to add a banner */
+                <button
+                    type="button"
+                    onClick={handleClick}
+                    className={`${className} flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-muted to-muted/40 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                 >
-                    No banner set
+                    <PencilSimple size={22} weight="bold" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                        Add a banner
+                    </span>
+                    <span className="text-[10px] opacity-70">
+                        {canUploadAnimated ? 'Image or GIF' : 'Image only'}
+                    </span>
+                </button>
+            ) : (
+                /* Empty state, tier 0 — locked hint */
+                <div
+                    className={`${className} flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-muted to-muted/40 text-muted-foreground`}
+                >
+                    <LockSimple
+                        size={18}
+                        weight="bold"
+                        className="text-chart-4"
+                    />
+                    <span className="text-[11px] font-medium">
+                        Supporters unlock custom banners and avatars
+                    </span>
+                    {!isGuest && (
+                        <Link
+                            to="/donate"
+                            className="text-[10px] font-medium text-chart-1 hover:underline"
+                        >
+                            Learn more →
+                        </Link>
+                    )}
                 </div>
             )}
 
-            {/* Uploading overlay */}
+            {/* Upload-in-progress overlay */}
             {uploading && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/30 backdrop-blur-[1px]">
                     <SpinnerIcon
@@ -136,8 +180,8 @@ export function BannerUploadButton({
                 </div>
             )}
 
-            {/* Pencil badge */}
-            {!uploading && (
+            {/* Pencil / Lock badge */}
+            {!uploading && displaySrc && (
                 <button
                     type="button"
                     onClick={handleClick}
@@ -145,21 +189,39 @@ export function BannerUploadButton({
                     title={
                         isGuest
                             ? 'Sign in to change your banner'
-                            : displaySrc
-                              ? 'Change banner'
-                              : 'Add banner'
+                            : !canUploadStatic
+                              ? 'Banner uploads available for supporters'
+                              : displaySrc
+                                ? 'Change banner'
+                                : 'Add banner'
                     }
-                    aria-label="Change banner"
-                    className={`absolute ${pencilClass} flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-md backdrop-blur-sm opacity-70 transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 disabled:hover:bg-card`}
+                    aria-label={
+                        canUploadStatic
+                            ? 'Change banner'
+                            : 'Banner uploads available for supporters'
+                    }
+                    className={`absolute ${pencilClass} flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card/90 shadow-md backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 ${
+                        canUploadStatic
+                            ? 'text-muted-foreground opacity-70 hover:opacity-100'
+                            : 'text-chart-4 opacity-90'
+                    }`}
                 >
-                    <PencilSimple size={14} weight="bold" />
+                    {canUploadStatic ? (
+                        <PencilSimple size={14} weight="bold" />
+                    ) : (
+                        <LockSimple size={14} weight="bold" />
+                    )}
                 </button>
             )}
 
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept={
+                    canUploadAnimated
+                        ? 'image/jpeg,image/png,image/webp,image/gif'
+                        : 'image/jpeg,image/png,image/webp'
+                }
                 onChange={handleFile}
                 className="hidden"
             />

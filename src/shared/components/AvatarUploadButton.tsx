@@ -1,8 +1,10 @@
-import { PencilSimple, SpinnerIcon } from '@phosphor-icons/react';
+import { LockSimple, PencilSimple, SpinnerIcon } from '@phosphor-icons/react';
 import { type ChangeEvent, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { Avatar } from '@/shared/components/Avatar';
+import { getDonorTier } from '@/shared/types/donor';
 import { compressImage } from '@/shared/utils/image/compressImage';
 import { gifToWebm } from '@/shared/utils/image/gifToWebm';
 import { validateImageFile } from '@/shared/utils/image/validateImage';
@@ -11,15 +13,12 @@ import {
     deleteAvatarByUrl,
     uploadAvatar,
 } from '@/shared/utils/supabaseStorage';
-import type { DonorTier } from '../types/donor';
-import { TieredAvatar } from './TieredAvatar';
 
-const IMAGE_MAX_BYTES = 1 * 1024 * 1024; // 1MB
-const GIF_MAX_BYTES = 3 * 1024 * 1024; // 3MB
+const IMAGE_MAX_BYTES = 1 * 1024 * 1024;
+const GIF_MAX_BYTES = 3 * 1024 * 1024;
 
 interface AvatarUploadButtonProps {
     size?: 'sm' | 'md' | 'lg';
-    tier?: DonorTier;
 }
 
 const SIZE_MAP = {
@@ -40,30 +39,44 @@ const ICON_SIZE_MAP = {
     lg: 14,
 } as const;
 
-export function AvatarUploadButton({
-    size = 'md',
-    tier = 0,
-}: AvatarUploadButtonProps) {
+export function AvatarUploadButton({ size = 'md' }: AvatarUploadButtonProps) {
     const user = useAuthStore((s) => s.user);
     const setUser = useAuthStore((s) => s.setUser);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const isGuest = !user || user.id === '1';
+    const tier = getDonorTier(user?.notification_tags);
+    const canUploadStatic = !isGuest && tier >= 1;
+    const canUploadAnimated = !isGuest && tier >= 2;
 
     const handleClick = () => {
-        if (uploading || isGuest) return;
+        if (uploading) return;
+        if (!canUploadStatic) {
+            // Soft redirect — not a modal, not an alert.
+            // Takes the user to the donations page where perks are explained.
+            navigate('/donate');
+            return;
+        }
         fileInputRef.current?.click();
     };
 
     const handleFile = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        e.target.value = ''; // allow re-selecting same file
-        if (!file || isGuest) return;
+        e.target.value = '';
+        if (!file) return;
+
+        // Defensive client-side guard — RLS blocks anyway, but this
+        // prevents wasting cycles on compression / WebM conversion
+        if (!canUploadStatic) {
+            toast.error('Avatar uploads are available for supporters');
+            return;
+        }
 
         const validation = await validateImageFile(file, {
-            allowGif: true,
+            allowGif: canUploadAnimated,
             imageMaxBytes: IMAGE_MAX_BYTES,
             gifMaxBytes: GIF_MAX_BYTES,
         });
@@ -73,7 +86,6 @@ export function AvatarUploadButton({
             return;
         }
 
-        // Instant preview
         const localPreview = URL.createObjectURL(file);
         setPreviewUrl(localPreview);
         setUploading(true);
@@ -92,26 +104,23 @@ export function AvatarUploadButton({
                 }
             }
 
-            const { url } = await uploadAvatar(user.id, uploadBlob);
+            const { url } = await uploadAvatar(user!.id, uploadBlob);
 
-            // Update DB
             const { error: dbError } = await supabase
                 .from('users')
                 .update({ avatar: url })
-                .eq('id', user.id);
+                .eq('id', user!.id);
 
             if (dbError) {
-                // Rollback: delete the just-uploaded file
                 await deleteAvatarByUrl(url);
                 throw dbError;
             }
 
-            // Best-effort delete of old avatar
-            if (user.avatar && user.avatar !== url) {
-                await deleteAvatarByUrl(user.avatar);
+            if (user!.avatar && user!.avatar !== url) {
+                await deleteAvatarByUrl(user!.avatar);
             }
 
-            setUser({ ...user, avatar: url });
+            setUser({ ...user!, avatar: url });
             toast.success('Profile picture updated');
         } catch (err) {
             console.error('Avatar upload failed:', err);
@@ -126,52 +135,77 @@ export function AvatarUploadButton({
     if (!user) return null;
 
     return (
-        <div className="group relative inline-block">
-            <TieredAvatar
-                src={previewUrl || user.avatar}
-                alt={user.name || 'User avatar'}
-                tier={tier}
-                priority
-                className={`${SIZE_MAP[size]} shrink-0`}
-            />
+        <div className="group inline-flex flex-col items-center gap-1.5">
+            <div className="relative">
+                <Avatar
+                    src={previewUrl || user.avatar}
+                    alt={user.name || 'User avatar'}
+                    priority
+                    className={`${SIZE_MAP[size]} rounded-full border border-border object-cover shadow-sm transition-opacity ${
+                        uploading ? 'opacity-50' : ''
+                    }`}
+                />
 
-            {/* Uploading overlay — dim avatar + centered spinner */}
-            {uploading && (
-                <div
-                    className={`pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-background/40 backdrop-blur-[1px]`}
-                >
-                    <SpinnerIcon
-                        size={size === 'sm' ? 16 : size === 'md' ? 18 : 20}
-                        className="animate-spin text-chart-1"
-                    />
-                </div>
-            )}
+                {/* Upload-in-progress overlay */}
+                {uploading && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-background/40 backdrop-blur-[1px]">
+                        <SpinnerIcon
+                            size={size === 'sm' ? 16 : size === 'md' ? 18 : 20}
+                            className="animate-spin text-chart-1"
+                        />
+                    </div>
+                )}
 
-            {/* Pencil badge — bottom-right, hidden during upload */}
-            {!uploading && (
-                <button
-                    type="button"
-                    onClick={handleClick}
-                    disabled={isGuest}
-                    title={
-                        isGuest
-                            ? 'Sign in to change your avatar'
-                            : 'Change profile picture'
+                {/* Pencil / Lock badge */}
+                {!uploading && (
+                    <button
+                        type="button"
+                        onClick={handleClick}
+                        disabled={isGuest}
+                        title={
+                            isGuest
+                                ? 'Sign in to change your avatar'
+                                : !canUploadStatic
+                                  ? 'Avatar uploads available for supporters'
+                                  : 'Change profile picture'
+                        }
+                        aria-label={
+                            canUploadStatic
+                                ? 'Change profile picture'
+                                : 'Avatar uploads available for supporters'
+                        }
+                        className={`absolute -bottom-0.5 -right-0.5 flex ${BADGE_SIZE_MAP[size]} items-center justify-center rounded-full border border-border bg-card shadow-md transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 ${
+                            canUploadStatic
+                                ? 'text-muted-foreground opacity-70 hover:opacity-100'
+                                : 'text-chart-4 opacity-90'
+                        }`}
+                    >
+                        {canUploadStatic ? (
+                            <PencilSimple
+                                size={ICON_SIZE_MAP[size]}
+                                weight="bold"
+                            />
+                        ) : (
+                            <LockSimple
+                                size={ICON_SIZE_MAP[size]}
+                                weight="bold"
+                            />
+                        )}
+                    </button>
+                )}
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={
+                        canUploadAnimated
+                            ? 'image/jpeg,image/png,image/webp,image/gif'
+                            : 'image/jpeg,image/png,image/webp'
                     }
-                    aria-label="Change profile picture"
-                    className={`absolute -bottom-0.5 -right-0.5 flex ${BADGE_SIZE_MAP[size]} items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md opacity-70 transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 disabled:hover:bg-card`}
-                >
-                    <PencilSimple size={ICON_SIZE_MAP[size]} weight="bold" />
-                </button>
-            )}
-
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={handleFile}
-                className="hidden"
-            />
+                    onChange={handleFile}
+                    className="hidden"
+                />
+            </div>
         </div>
     );
 }

@@ -1,4 +1,3 @@
-// src/shared/components/TieredAvatar.tsx
 import type { ReactNode } from 'react';
 import type { DonorTier } from '@/shared/types/donor';
 import { DONOR_TIER_LABELS } from '@/shared/types/donor';

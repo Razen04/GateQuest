@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 interface AvatarProps {
     src: string | null | undefined;
     alt: string;
     className?: string;
-    fallback?: string;
+    fallback?: ReactNode;
     /** Set true for above-the-fold avatars to skip lazy loading */
     priority?: boolean;
 }
@@ -13,11 +13,16 @@ export function Avatar({
     src,
     alt,
     className = '',
-    fallback = '/default-avatar.png',
+    fallback = '/icons/logo.svg',
     priority = false,
 }: AvatarProps) {
     const [errored, setErrored] = useState(false);
     const resolved = !src || errored ? fallback : src;
+
+    // Render fallback component when no image is available
+    if (typeof resolved !== 'string') {
+        return <>{resolved}</>;
+    }
 
     // WebM (converted from GIF) — render as looping video
     if (resolved.endsWith('.webm')) {
