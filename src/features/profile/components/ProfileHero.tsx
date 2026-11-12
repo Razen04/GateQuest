@@ -16,7 +16,6 @@ import { motion } from 'framer-motion';
 import type { JSX } from 'react';
 import CodeforcesIcon from '@/icons/codeforces.svg';
 import LeetcodeIcon from '@/icons/leetcode.svg';
-import { Avatar } from '@/shared/components/Avatar';
 import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
 
@@ -48,14 +47,16 @@ interface ProfileHeroProps {
     profile: ProfileData['profile'];
 }
 
+import { UserCircleIcon } from '@phosphor-icons/react';
 import { Banner } from '@/shared/components/Banner';
 import { TieredAvatar } from '@/shared/components/TieredAvatar';
+import { TieredName } from '@/shared/components/TieredName';
 import { getDonorTier } from '@/shared/types/donor';
 
 export default function ProfileHero({ profile }: ProfileHeroProps) {
     const displayName = profile.name || 'Anonymous User';
     const displayUsername = profile.username || 'user';
-    const displayInitials = displayName.substring(0, 2).toUpperCase();
+    const displayTier = getDonorTier(profile.notification_tags);
 
     const activeSocials = Object.entries(profile.socials || {}).filter(
         ([, val]) => val !== null && val !== ''
@@ -102,15 +103,19 @@ export default function ProfileHero({ profile }: ProfileHeroProps) {
                             priority
                             className="h-20 w-20 shrink-0 sm:h-24 sm:w-24"
                             fallback={
-                                <span className="flex h-full w-full items-center justify-center bg-primary text-lg font-bold text-primary-foreground">
-                                    {displayInitials}
-                                </span>
+                                <UserCircleIcon
+                                    size={32}
+                                    className="text-chart-1"
+                                />
                             }
                         />
 
                         <div className="min-w-0 flex-1">
-                            <h1 className="truncate font-['Sora',sans-serif] text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                                {displayName}
+                            <h1 className="truncate font-['Sora',sans-serif] text-xl font-bold tracking-tight sm:text-2xl">
+                                <TieredName
+                                    name={displayName}
+                                    tier={displayTier}
+                                />
                             </h1>
 
                             <p className="text-xs font-medium text-chart-1">

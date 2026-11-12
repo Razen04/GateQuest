@@ -1,9 +1,9 @@
 import { UserCircle } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import * as React from 'react';
-import { Avatar } from '@/shared/components/Avatar';
 import { Banner } from '@/shared/components/Banner';
 import { TieredAvatar } from '@/shared/components/TieredAvatar';
+import { TieredName } from '@/shared/components/TieredName';
 import { getDonorTier } from '@/shared/types/donor';
 import type { DonationData } from '../types/donationType';
 
@@ -12,7 +12,6 @@ type DonorListProps = {
 };
 
 const DonorList: React.FC<DonorListProps> = ({ donations }) => {
-    console.log(donations);
     return (
         <ul className="space-y-3">
             {donations.map((donation) => {
@@ -79,13 +78,23 @@ const DonorList: React.FC<DonorListProps> = ({ donations }) => {
                                 <div className="flex justify-between items-start gap-2">
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-sm truncate text-foreground">
+                                            <span className="font-semibold text-sm truncate">
                                                 {donation.anonymous ||
-                                                !donation.user_name
-                                                    ? 'Anonymous'
-                                                    : donation.user_name}
+                                                !donation.user_name ? (
+                                                    <span className="text-foreground">
+                                                        Anonymous
+                                                    </span>
+                                                ) : (
+                                                    <TieredName
+                                                        name={
+                                                            donation.user_name
+                                                        }
+                                                        tier={getDonorTier(
+                                                            donation.user_notification_tags
+                                                        )}
+                                                    />
+                                                )}
                                             </span>
-
                                             <span className="text-xs text-muted-foreground whitespace-nowrap">
                                                 {formatDistanceToNow(
                                                     new Date(

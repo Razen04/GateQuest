@@ -1,10 +1,10 @@
 import {
-    ArrowRight,
-    CaretDown,
-    CaretUp,
-    CurrencyInr,
-    EyeSlash,
-    Info,
+    ArrowRightIcon,
+    CaretDownIcon,
+    CaretUpIcon,
+    CurrencyInrIcon,
+    EyeSlashIcon,
+    InfoIcon,
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useRef, useState } from 'react';
@@ -60,7 +60,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
             {/* Header Title */}
             <div>
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-chart-1">
-                    TERMINAL // STEP 01
+                    STEP 01
                 </p>
                 <h2 className="font-grotesk text-2xl font-black tracking-tight text-foreground">
                     Configure Contribution
@@ -75,16 +75,16 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                     className="flex w-full items-center justify-between p-4 text-left transition hover:bg-accent/50"
                 >
                     <div className="flex items-center gap-2.5">
-                        <Info size={18} className="text-chart-1" />
+                        <InfoIcon size={18} className="text-chart-1" />
                         <span className="font-grotesk text-xs font-bold uppercase tracking-wider text-foreground">
                             Protocol Instructions & Verification Guidelines
                         </span>
                     </div>
                     <div className="bg-muted p-1 text-muted-foreground">
                         {instructionOpen ? (
-                            <CaretUp size={14} />
+                            <CaretUpIcon size={14} />
                         ) : (
-                            <CaretDown size={14} />
+                            <CaretDownIcon size={14} />
                         )}
                     </div>
                 </button>
@@ -163,7 +163,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
 
                 {/* Custom Amount Input */}
                 <div className="relative">
-                    <CurrencyInr
+                    <CurrencyInrIcon
                         size={18}
                         className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
@@ -207,7 +207,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
 
             {/* Anonymous Toggle Option */}
             <ToggleSwitch
-                icon={<EyeSlash size={20} />}
+                icon={<EyeSlashIcon size={20} />}
                 title="Anonymous Contribution"
                 description="Hide your profile details on the public patron log"
                 isOn={anonymous}
@@ -221,7 +221,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                 className="group relative flex h-12 w-full items-center justify-center gap-2 rounded-none bg-chart-1 font-grotesk text-sm font-bold text-white transition-all hover:bg-chart-1/90 hover:shadow-lg hover:shadow-chart-1/25 active:scale-[0.99]"
             >
                 Generate Dynamic QR Code
-                <ArrowRight
+                <ArrowRightIcon
                     size={16}
                     className="transition-transform group-hover:translate-x-1"
                 />

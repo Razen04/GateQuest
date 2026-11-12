@@ -13,7 +13,7 @@ import { useStatsStore } from '@/app/stores/useStatsStore';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { AvatarUploadButton } from '@/shared/components/AvatarUploadButton';
 import { BannerUploadButton } from '@/shared/components/BannerUploadButton';
-import { Button } from '@/shared/components/ui/button';
+import { TieredName } from '@/shared/components/TieredName';
 import {
     Dialog,
     DialogContent,
@@ -161,22 +161,22 @@ const AccountSettings = () => {
                 />
 
                 <div className="px-6 pb-6">
-                    {/* ─── Identity row ─────────────────────────── */}
                     <div className="flex items-start gap-4">
-                        {/* Avatar — half-overlaps banner */}
                         <div className="-mt-14 shrink-0 rounded-full ring-4 ring-card">
-                            <AvatarUploadButton
-                                size="md"
-                                tier={getDonorTier(
-                                    user?.notification_tags ?? []
-                                )}
-                            />
+                            <AvatarUploadButton size="md" />
                         </div>
 
                         <div className="flex-1 min-w-0 space-y-1 pt-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
-                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-foreground">
-                                    {user?.name || 'Anonymous Aspirant'}
+                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight">
+                                    <TieredName
+                                        name={
+                                            user?.name || 'Anonymous Aspirant'
+                                        }
+                                        tier={getDonorTier(
+                                            user?.notification_tags
+                                        )}
+                                    />
                                 </h3>
                                 <span className="border border-border bg-muted px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-muted-foreground">
                                     v{user?.version_number ?? '1.0'}

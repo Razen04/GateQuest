@@ -36,7 +36,7 @@ const AnimatedTabs: React.FC<AnimatedTabsProps> = ({
     return (
         <div
             className={cn(
-                'relative w-full overflow-hidden p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                'relative w-full overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
                 className
             )}
         >
