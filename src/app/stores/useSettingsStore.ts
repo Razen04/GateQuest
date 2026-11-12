@@ -1,8 +1,12 @@
-// app/stores/useSettingsStore.ts
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { getCurrentUser } from '@/shared/api/auth';
 import { DEFAULT_TEMPLATE } from '@/shared/data/ai_prompt_template';
+import {
+    getDonorTier,
+    isAccentLocked,
+    isModeLocked,
+} from '@/shared/types/donor';
 import type { AccentId, Settings, ThemeMode } from '@/shared/types/Settings';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthStore } from './useAuthStore';
@@ -132,7 +136,32 @@ export const useSettingsStore = create<SettingsStore>()(
                 if (migrated.accent) persistAccent(migrated.accent);
             },
 
-            setSetting: (key, value) => {
+            setSetting: <K extends keyof Settings>(
+                key: K,
+                value: Settings[K]
+            ) => {
+                // ─── Tier guard: silently drop locked values ──────────────
+                const user = useAuthStore.getState().user;
+                const tier = getDonorTier(user?.notification_tags);
+
+                if (key === 'mode' && isModeLocked(value as ThemeMode, tier)) {
+                    console.warn(
+                        `[settings] blocked write of locked mode "${value}" for tier ${tier}`
+                    );
+                    return;
+                }
+
+                if (
+                    key === 'accent' &&
+                    isAccentLocked(value as AccentId, tier)
+                ) {
+                    console.warn(
+                        `[settings] blocked write of locked accent "${value}" for tier ${tier}`
+                    );
+                    return;
+                }
+
+                // ─── Existing write logic ─────────────────────────────────
                 set(
                     (state) => ({
                         settings: { ...state.settings, [key]: value },
@@ -140,6 +169,7 @@ export const useSettingsStore = create<SettingsStore>()(
                     false,
                     `settings/setSetting(${String(key)})`
                 );
+
                 if (key === 'mode') persistMode(value as ThemeMode);
                 if (key === 'accent') persistAccent(value as AccentId);
             },

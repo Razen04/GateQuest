@@ -17,6 +17,19 @@ vi.mock('@/shared/api/auth', () => ({
 
 const initialSettingsState = useSettingsStore.getState();
 
+function grantTier(tier: 0 | 1 | 2 | 3) {
+    useAuthStore.setState(
+        {
+            user: {
+                id: 'u1',
+                notification_tags:
+                    tier > 0 ? ['role:donor', `donor:tier-${tier}`] : [],
+            } as never,
+        },
+        false
+    );
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
     useSettingsStore.setState({
@@ -39,6 +52,7 @@ describe('setSetting', () => {
     });
 
     it('updates mode when called with a ThemeMode value', () => {
+        grantTier(1);
         useSettingsStore.getState().setSetting('mode', 'amoled');
 
         expect(useSettingsStore.getState().settings.mode).toBe('amoled');

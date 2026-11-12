@@ -20,6 +20,19 @@ import { useSettingsEffects } from '../useSettingsEffects';
 
 const initialSettings = useSettingsStore.getState().settings;
 
+function grantTier(tier: 0 | 1 | 2 | 3) {
+    useAuthStore.setState(
+        {
+            user: {
+                id: 'u1',
+                notification_tags:
+                    tier > 0 ? ['role:donor', `donor:tier-${tier}`] : [],
+            } as never,
+        },
+        false
+    );
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers();
@@ -201,6 +214,7 @@ describe('theme mode application', () => {
     });
 
     it('reacts to mode changes while mounted', () => {
+        grantTier(1);
         useSettingsStore.setState(
             { settings: { ...initialSettings, mode: 'light' } },
             false
@@ -255,6 +269,7 @@ describe('theme mode application', () => {
     });
 
     it('persists the mode to localStorage so the next cold load has no flash', () => {
+        grantTier(1);
         useSettingsStore.setState(
             { settings: { ...initialSettings, mode: 'dark' } },
             false
