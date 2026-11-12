@@ -30,7 +30,6 @@ declare
     v_tags text[];
     v_has_any_verified boolean;
 begin
-    -- Lock the user row so concurrent donation verifications serialize
     perform
         1
     from
@@ -38,10 +37,6 @@ begin
     where
         id = v_user_id
     for update;
-    -- Cumulative verified total.
-    -- Excludes NULL actual_amount so that unverified or incomplete rows
-    -- don't affect the tier (defensive — verified rows should always have
-    -- actual_amount set by the webhook or by admin manual action).
     select
         COALESCE(SUM(actual_amount), 0)
     into
@@ -52,7 +47,6 @@ begin
         user_id = v_user_id
         and verified = true
         and actual_amount is not null;
-    -- Compute tier from cumulative total
     v_tier := case when v_total >= 569 then
         3
     when v_total >= 169 then
@@ -62,8 +56,6 @@ begin
     else
         0
     end;
-    -- Does the user have any verified donation at all?
-    -- Determines role:donor independent of current tier.
     select
         exists (
             select
@@ -75,8 +67,6 @@ begin
                 and verified = true)
     into
         v_has_any_verified;
-    -- Fetch existing tags, stripping any existing donor:tier-* tags
-    -- (we're about to write the correct one).
     select
         COALESCE(array_agg(t) filter (where t not like 'donor:tier-%'), array[]::text[])
     into
@@ -88,15 +78,13 @@ begin
                 from users
                 where
                     id = v_user_id), array[]::text[])) t;
-    -- Add role:donor if any verified donation exists (permanent, never removed)
     if v_has_any_verified and not ('role:donor' = any (v_tags)) then
-        v_tags := v_tags || 'role:donor';
+        -- array_append is unambiguous — always appends an element
+        v_tags := array_append(v_tags, 'role:donor'::text);
     end if;
-    -- Add the current tier tag (only if tier >= 1)
     if v_tier >= 1 then
-        v_tags := v_tags || ('donor:tier-' || v_tier::text);
+        v_tags := array_append(v_tags, 'donor:tier-' || v_tier::text);
     end if;
-    -- Write back
     update
         users
     set

@@ -115,40 +115,46 @@ export type Database = {
             donations: {
                 Row: {
                     actual_amount: number | null;
+                    alerted_at: string | null;
                     anonymous: boolean | null;
                     created_at: string | null;
                     id: string;
                     message: string | null;
                     suggested_amount: number | null;
                     user_id: string | null;
-                    utr: string | null;
+                    utr: string;
                     verified: boolean | null;
                     verified_at: string | null;
+                    verified_by: string | null;
                 };
                 ComputedFields: never;
                 Insert: {
                     actual_amount?: number | null;
+                    alerted_at?: string | null;
                     anonymous?: boolean | null;
                     created_at?: string | null;
                     id?: string;
                     message?: string | null;
                     suggested_amount?: number | null;
                     user_id?: string | null;
-                    utr?: string | null;
+                    utr: string;
                     verified?: boolean | null;
                     verified_at?: string | null;
+                    verified_by?: string | null;
                 };
                 Update: {
                     actual_amount?: number | null;
+                    alerted_at?: string | null;
                     anonymous?: boolean | null;
                     created_at?: string | null;
                     id?: string;
                     message?: string | null;
                     suggested_amount?: number | null;
                     user_id?: string | null;
-                    utr?: string | null;
+                    utr?: string;
                     verified?: boolean | null;
                     verified_at?: string | null;
+                    verified_by?: string | null;
                 };
                 Relationships: [
                     {
@@ -1184,10 +1190,15 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
+            get_monthly_donation_total: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
             get_my_dashboard: {
                 Args: Record<PropertyKey, never>;
                 Returns: Json;
             };
+            get_my_tier: { Args: Record<PropertyKey, never>; Returns: number };
             get_public_profile: { Args: { p_username: string }; Returns: Json };
             get_topic_counts: {
                 Args: { p_subject_id: string };
@@ -1228,8 +1239,10 @@ export type Database = {
                     donation_id: string;
                     message: string;
                     user_avatar: string;
+                    user_banner: string;
                     user_id: string;
                     user_name: string;
+                    user_notification_tags: string[];
                     verified: boolean;
                 }[];
             };
@@ -1271,6 +1284,10 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
+            recompute_user_tier: {
+                Args: { v_user_id: string };
+                Returns: undefined;
+            };
             refresh_dynamic_difficulty: {
                 Args: Record<PropertyKey, never>;
                 Returns: undefined;
@@ -1308,6 +1325,10 @@ export type Database = {
                 Args: { p_note?: string; p_question_id: string };
                 Returns: boolean;
             };
+            trigger_donation_alerts: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
             update_question_bookmark_note: {
                 Args: { p_note?: string; p_question_id: string };
                 Returns: undefined;
@@ -1315,6 +1336,10 @@ export type Database = {
             update_status_of_weekly_set: {
                 Args: { v_set_id: string };
                 Returns: Json;
+            };
+            user_can_upload_animated: {
+                Args: Record<PropertyKey, never>;
+                Returns: boolean;
             };
         };
         Enums: {

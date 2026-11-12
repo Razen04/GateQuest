@@ -28,6 +28,7 @@ export type GuestUser = {
     is_public?: boolean | null;
     about?: string | null;
     onboarding_completed?: boolean | null;
+    notification_tags?: string[] | null;
 };
 
 export type AppUser = AuthenticatedAppUser | GuestUser;

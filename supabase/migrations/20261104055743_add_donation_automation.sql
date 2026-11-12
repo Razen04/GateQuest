@@ -1,40 +1,78 @@
--- Adds the columns used by the automated donation verification pipeline
--- (issue #112). Existing verified donations were all manually verified
--- (the automation did not exist), so they are backfilled as 'manual'.
--- Nullable because pending donations have no method yet.
+-- ─────────────────────────────────────────────────────────────────
+-- Donation automation columns + indexes (issue #112)
+--
+-- Adds the columns used by the automated donation verification pipeline:
+--   verified_by  — how the donation was verified ('auto' via email
+--                  webhook, 'manual' via admin). NULL while pending.
+--   alerted_at   — dedup marker for the 30-min pending-review alert
+--                  cron. NULL until first alert fires.
+--
+-- Also enforces UTR uniqueness as NOT NULL (was nullable before) and
+-- adds partial indexes for the two hot cron queries.
+-- ─────────────────────────────────────────────────────────────────
+-- 1. Add columns
 alter table public.donations
-    add column if not exists verification_method text,
-    add column if not exists review_alerted_at timestamptz;
+    add column if not exists verified_by text,
+    add column if not exists alerted_at timestamptz;
 
--- Anything already marked verified was verified by a human.
+-- 2. Backfill: anything already verified was verified by a human
+--    (the automation didn't exist when these rows were created).
 update
     public.donations
 set
-    verification_method = 'manual'
+    verified_by = 'manual'
 where
     verified = true
-    and verification_method is null;
+    and verified_by is null;
 
--- NULL is allowed for pending rows; only verified rows get a method.
+-- 3. Constraint: restrict verified_by to known values
+--    (drop first in case a prior partial run left a stale version)
 alter table public.donations
-    add constraint donations_verification_method_check check (verification_method in ('manual', 'email_auto'));
+    drop constraint if exists donations_verified_by_check;
 
--- NOT NULL constraint on utr
+alter table public.donations
+    add constraint donations_verified_by_check check (verified_by in ('auto', 'manual'));
+
+-- 4. UTR is required — every donation must have a reference to match
+--    against email alerts. Guard against existing NULLs first.
+do $$
+begin
+    if exists (
+        select
+            1
+        from
+            public.donations
+        where
+            utr is null) then
+    raise exception 'Cannot set utr NOT NULL — % rows have NULL utr. '
+             'Backfill or delete them first.', (
+            select
+                count(*)
+            from
+                public.donations
+            where
+                utr is null);
+end if;
+end
+$$;
+
 alter table public.donations
     alter column utr set not null;
 
--- The 5-minute job queries: verified = false AND review_alerted_at IS NULL
--- ordered by created_at. Partial index keeps it tiny.
-create index if not exists donations_pending_unaudited_idx on public.donations (created_at)
+-- 5. Partial index for the 30-min pending alert cron:
+--      WHERE verified = false AND alerted_at IS NULL
+--      AND created_at < now() - '30 minutes'
+create index if not exists idx_donations_pending_unalerted on public.donations (created_at)
 where
-    verified = false and review_alerted_at is null;
+    verified = false and alerted_at is null;
 
--- Admin view filters by method. Partial because pending rows are excluded.
-create index if not exists donations_verification_method_idx on public.donations (verification_method)
+-- 6. Partial index for admin dashboard filtering
+create index if not exists idx_donations_verified_by on public.donations (verified_by)
 where
-    verification_method is not null;
+    verified_by is not null;
 
-comment on column public.donations.verification_method is 'How the donation was verified: ''manual'' (admin) or ''email_auto'' (automated). NULL while pending.';
+-- 7. Column comments
+comment on column public.donations.verified_by is 'How the donation was verified: ''manual'' (admin) or ''auto'' (email automation). NULL while pending.';
 
-comment on column public.donations.review_alerted_at is 'When the 1-hour pending-review alert was sent. Prevents duplicate alerts.';
+comment on column public.donations.alerted_at is 'When the 30-min pending alert was sent. Prevents duplicate alerts. NULL until first alert.';
 

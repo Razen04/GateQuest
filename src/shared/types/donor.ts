@@ -1,3 +1,5 @@
+import type { ThemeMode } from './Settings';
+
 /**
  * Donor tier levels.
  * 0 = not a donor
@@ -96,4 +98,44 @@ const NEXT_TIER: Record<DonorTier, DonorTier | null> = {
 
 export function getNextTier(tier: DonorTier): DonorTier | null {
     return NEXT_TIER[tier];
+}
+
+// ─── Tier gating helpers ────────────────────────────────────────
+// Central place to answer "is this option locked for this tier?"
+// Future options just add to the free list; no changes at call sites.
+
+export const FREE_MODES: readonly ThemeMode[] = ['light', 'dark', 'sepia'];
+export const FREE_ACCENTS = ['default'] as const;
+
+export function isModeLocked(mode: ThemeMode, tier: DonorTier): boolean {
+    if (tier >= 1) return false;
+    return !FREE_MODES.includes(mode);
+}
+
+export function isAccentLocked(accent: string, tier: DonorTier): boolean {
+    if (tier >= 1) return false;
+    return !(FREE_ACCENTS as readonly string[]).includes(accent);
+}
+
+/**
+ * Returns the mode that should actually be applied to the DOM.
+ * If the stored mode is locked for this tier, falls back to 'dark'
+ * (safest — most users prefer dark over light when AMOLED is locked).
+ */
+export function resolveEffectiveMode(
+    storedMode: ThemeMode,
+    tier: DonorTier
+): ThemeMode {
+    return isModeLocked(storedMode, tier) ? 'dark' : storedMode;
+}
+
+/**
+ * Returns the accent that should actually be applied to the DOM.
+ * Locked accents fall back to 'default'.
+ */
+export function resolveEffectiveAccent(
+    storedAccent: string,
+    tier: DonorTier
+): string {
+    return isAccentLocked(storedAccent, tier) ? 'default' : storedAccent;
 }
