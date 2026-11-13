@@ -194,3 +194,4 @@ limit p_question_count;
         id = v_new_test_id;
     return jsonb_build_object('test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks);
 end;
+$$;
