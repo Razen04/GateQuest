@@ -7,8 +7,10 @@ create or replace function public.recompute_user_tier (v_user_id uuid)
 declare
     v_total numeric;
     v_tier smallint;
+    v_old_tier smallint;
     v_tags text[];
     v_has_any_verified boolean;
+    v_tier_label text;
 begin
     perform
         1
@@ -36,6 +38,25 @@ begin
     else
         0
     end;
+    -- Capture the tier the user had BEFORE this recompute, so we can
+    -- detect an upgrade. Read from tags, not from a separate column —
+    -- tags are the source of truth.
+    select
+        case when 'donor:tier-3' = any (notification_tags) then
+            3
+        when 'donor:tier-2' = any (notification_tags) then
+            2
+        when 'donor:tier-1' = any (notification_tags) then
+            1
+        else
+            0
+        end
+    into
+        v_old_tier
+    from
+        users
+    where
+        id = v_user_id;
     select
         exists (
             select
@@ -59,7 +80,6 @@ begin
                 where
                     id = v_user_id), array[]::text[])) t;
     if v_has_any_verified and not ('role:donor' = any (v_tags)) then
-        -- array_append is unambiguous — always appends an element
         v_tags := array_append(v_tags, 'role:donor'::text);
     end if;
     if v_tier >= 1 then
@@ -71,8 +91,26 @@ begin
         notification_tags = v_tags
     where
         id = v_user_id;
+    -- ── Fire tier upgrade notification (only on upgrade) ────────
+    if v_tier > v_old_tier then
+        v_tier_label := case v_tier
+        when 1 then
+            'Bronze'
+        when 2 then
+            'Gold'
+        when 3 then
+            'Platinum'
+        end;
+        begin
+            insert into notifications (title, message, link, type, target)
+                values (format('🎉 Welcome to %s tier', v_tier_label), format('Your cumulative donations have reached the %s tier. Thank you for supporting GATEQuest!', v_tier_label), '/donate', 'update', jsonb_build_object('type', 'user', 'user_id', v_user_id));
+        exception
+            when others then
+                -- Never let a notification failure abort tier recompute
+                raise WARNING 'Tier upgrade notification failed for user %: %', v_user_id, SQLERRM;
+        end;
+    end if;
 end;
-$$;
 
-grant execute on function public.recompute_user_tier (uuid) to service_role;
+$$;
 
