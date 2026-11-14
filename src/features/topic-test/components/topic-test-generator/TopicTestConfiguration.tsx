@@ -108,7 +108,9 @@ const TopicTestConfiguration = ({
                                 Include Attempted Questions
                             </p>
                             <span className="text-xs text-muted-foreground">
-                                Allow recycling previously seen questions.
+                                Include previously attempted questions,
+                                including incorrect questions due for Smart
+                                Revision.
                             </span>
                         </div>
 

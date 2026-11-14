@@ -4,6 +4,7 @@
 - Donations page redesigned with Mission/Contribute tabs, a live ₹2,500 monthly infrastructure goal, and the public patron ledger with perks for donors. More at [Donation Page](https://gate-quest.vercel.app/donate)
 - Question accuracy colors are now threshold-based instead of always green.
 - Fixed pacing chart bars to correctly reflect correct/incorrect/skipped status.
+- Fixed the behaviour of "Include Attempted Questions" toggle to not include any seen question if turned off in the tests. [#117](https://github.com/Razen04/GateQuest/issues/117) by [@Morpheus004](https://github.com/Morpheus004)
 - Topic Test history sync fixed. [#116](https://github.com/Razen04/GateQuest/issues/116)
 - Added [Privacy Policy](https://gate-quest.vercel.app/privacy) and [Terms of Service](terms) pages.
 
