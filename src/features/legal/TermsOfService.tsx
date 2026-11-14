@@ -1,7 +1,7 @@
 import termsContent from '@/shared/data/legal/terms.md?raw';
 import { LegalPage } from './LegalPage';
 
-const LAST_UPDATED = 'November 7, 2026';
+const LAST_UPDATED = 'November 14, 2026';
 
 export default function TermsOfService() {
     return (

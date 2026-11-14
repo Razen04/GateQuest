@@ -1,5 +1,3 @@
-# Terms of Service
-
 Short version: use the app fairly, don't be a jerk, and if something breaks, I'm not liable. Full version below.
 
 ## Using the app
@@ -48,11 +46,12 @@ What you send to those providers is governed by their privacy policies, not mine
 Donations are voluntary, non-refundable tips to keep the app running.
 
 - You need to actually own the money you're donating.
-- You're not buying anything — no goods, no services, no special access.
+- You're not buying anything instead you will be getting perks which can be withdrawn in any case.
 - Donations aren't tax-deductible.
 - Your donation appears publicly on the ledger **unless** you mark it anonymous.
+- The perks structure can be changed at any time.
 
-I never see your card or UPI credentials. Only the UTR reference number for verification.
+I never see your card or UPI credentials, except your UPI registered name. Only the UTR reference number for verification.
 
 ## Uptime
 
