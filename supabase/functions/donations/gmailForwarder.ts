@@ -1,74 +1,85 @@
 /**
- * GATEQuest — Canara Bank donation email forwarder
+ * GATEQuest - Canara Bank donation email forwarder
  *
- * Runs every 5 minutes:
- *   1. Searches Gmail for Canara Bank emails from the last 2 hours
- *      that haven't been labeled "gatequest-processed"
- *   2. POSTs each email body to the donation-webhook edge function
- *   3. Applies the processed label on verified/skipped outcomes
- *      (unmatched emails stay unlabeled → will retry next cycle,
- *       handles the "user pays before submitting form" case)
+ * Runs every 5 minutes. Uses message-ID tracking (in Script Properties)
+ * instead of Gmail labels as the exclusion mechanism, because Canara
+ * puts every alert in one giant thread (same subject + sender), and
+ * thread-level labels would block future messages in that thread.
  *
- * Setup:
- *   1. Set Script Properties (Project Settings → Script Properties):
- *        WEBHOOK_URL    = https://<prod-ref>.supabase.co/functions/v1/donation-webhook
- *        WEBHOOK_SECRET = <same value as DONATION_WEBHOOK_SECRET on Supabase>
- *   2. Run setUpTrigger() once → grant permissions → creates 5-min trigger
- *   3. Optional: run testOnce() to manually test before enabling trigger
+ * Labels are still applied for visual reference in Gmail, but are NOT
+ * used in the search query.
+ *
+ * WARNING: this file must contain only ASCII characters. Em-dashes,
+ * emoji, box-drawing characters, and smart quotes will cause
+ * "Unexpected token ILLEGAL" parse errors in Apps Script.
  */
 
 const CONFIG = {
-    SEARCH_QUERY:
-        'from:canarabank.com newer_than:2h -label:gatequest-processed',
-    PROCESSED_LABEL: 'gatequest-processed',
+    SEARCH_QUERY: 'from:canarabank.com newer_than:2h',
+    VISUAL_LABEL: 'gatequest-processed',
+    PROCESSED_IDS_KEY: 'gatequest_processed_message_ids',
+    MAX_PROCESSED_IDS: 100,
     MAX_THREADS: 20,
 };
 
-/**
- * Main polling function. Called by the time-driven trigger.
- */
 function pollGmail() {
+    const currentMinute = new Date().getMinutes();
+    if (currentMinute % 2 !== 0) {
+        return; // silently skip
+    }
     const props = PropertiesService.getScriptProperties();
     const webhookUrl = props.getProperty('WEBHOOK_URL');
     const webhookSecret = props.getProperty('WEBHOOK_SECRET');
 
     if (!webhookUrl || !webhookSecret) {
         Logger.log(
-            '❌ ERROR: WEBHOOK_URL or WEBHOOK_SECRET not set in Script Properties'
+            '[ERROR] WEBHOOK_URL or WEBHOOK_SECRET not set in Script Properties'
         );
         return;
     }
 
-    const label = getOrCreateLabel(CONFIG.PROCESSED_LABEL);
+    // Load the set of already-processed message IDs
+    const processedIds = loadProcessedIds(props);
+    const processedSet = new Set(processedIds);
+
+    // Search ALL Canara emails in the window - no label filter.
+    // Threads can contain many messages; we filter per-message below.
     const threads = GmailApp.search(CONFIG.SEARCH_QUERY, 0, CONFIG.MAX_THREADS);
 
-    Logger.log(`📬 Found ${threads.length} unprocessed thread(s)`);
+    Logger.log('[INFO] Found ' + threads.length + ' thread(s) in window');
+
+    const label = getOrCreateLabel(CONFIG.VISUAL_LABEL);
+    const cutoffMs = Date.now() - 2 * 3600 * 1000;
 
     let processed = 0;
     let skipped = 0;
     let unmatched = 0;
     let errored = 0;
 
-    for (const thread of threads) {
+    for (let i = 0; i < threads.length; i++) {
+        const thread = threads[i];
         const messages = thread.getMessages();
-        let threadProcessed = false;
+        let anyProcessed = false;
 
-        for (const message of messages) {
-            // Defensive: skip if already labeled (search should exclude)
-            if (
-                message
-                    .getThread()
-                    .getLabels()
-                    .some((l) => l.getName() === CONFIG.PROCESSED_LABEL)
-            ) {
+        for (let j = 0; j < messages.length; j++) {
+            const message = messages[j];
+            const msgId = message.getId();
+
+            // Already processed this exact message?
+            if (processedSet.has(msgId)) {
                 skipped++;
-                threadProcessed = true;
-                break;
+                continue;
+            }
+
+            // Skip messages older than the 2-hour window even if the
+            // thread was found (threads can span days with Canara)
+            if (message.getDate().getTime() < cutoffMs) {
+                continue;
             }
 
             const body = message.getPlainBody();
             if (!body || body.length === 0) {
-                Logger.log(`⚠️  Empty body in message ${message.getId()}`);
+                Logger.log('[WARN] Empty body in message ' + msgId);
                 skipped++;
                 continue;
             }
@@ -76,50 +87,72 @@ function pollGmail() {
             const result = postToWebhook(webhookUrl, webhookSecret, body);
 
             if (!result) {
-                // Network or HTTP error — don't label, retry next cycle
                 errored++;
                 Logger.log(
-                    `❌ Message ${message.getId()}: webhook call failed, will retry`
+                    '[ERROR] Message ' +
+                        msgId +
+                        ': webhook call failed, will retry'
                 );
                 continue;
             }
 
-            Logger.log(
-                `✅ Message ${message.getId()}: ${JSON.stringify(result)}`
-            );
+            Logger.log('[OK] Message ' + msgId + ': ' + JSON.stringify(result));
 
             if (shouldMarkProcessed(result)) {
-                thread.addLabel(label);
+                processedSet.add(msgId);
+                anyProcessed = true;
                 processed++;
-                threadProcessed = true;
-                break; // one label per thread is sufficient
             } else {
-                // Unmatched — leave unlabeled, retry next cycle
+                // Unmatched - don't add to set, retry next cycle
                 unmatched++;
             }
         }
 
-        if (!threadProcessed) {
-            Logger.log(
-                `⏸️  Thread ${thread.getId()}: no processable message yet`
-            );
+        // Visual label only - has no effect on search anymore
+        if (anyProcessed) {
+            thread.addLabel(label);
         }
     }
 
+    // Persist the processed set (trim to last N)
+    saveProcessedIds(props, processedSet);
+
     Logger.log(
-        `🏁 Cycle complete: processed=${processed}, skipped=${skipped}, ` +
-            `unmatched=${unmatched}, errored=${errored}`
+        '[DONE] Cycle complete: processed=' +
+            processed +
+            ', skipped=' +
+            skipped +
+            ', unmatched=' +
+            unmatched +
+            ', errored=' +
+            errored +
+            ', tracked_ids=' +
+            processedSet.size
     );
 }
 
-/**
- * Determines whether to apply the processed label based on the webhook result.
- *
- *   verified / already_verified → label (done, no retry needed)
- *   skipped (debit/promotional) → label (no retry needed)
- *   unmatched                    → don't label (retry for late submissions)
- *   anything else / null         → don't label (retry on error)
- */
+function loadProcessedIds(props) {
+    try {
+        const raw = props.getProperty(CONFIG.PROCESSED_IDS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        Logger.log(
+            '[WARN] Corrupt processed-IDs property, resetting: ' + e.message
+        );
+        return [];
+    }
+}
+
+function saveProcessedIds(props, set) {
+    const arr = Array.from(set);
+    // Keep only the most recent N - search window is 2h, so 100 is
+    // massive overkill (typically 0-2 messages/day)
+    const trimmed = arr.slice(-CONFIG.MAX_PROCESSED_IDS);
+    props.setProperty(CONFIG.PROCESSED_IDS_KEY, JSON.stringify(trimmed));
+}
+
 function shouldMarkProcessed(result) {
     if (!result || !result.status) return false;
     const status = result.status;
@@ -130,10 +163,6 @@ function shouldMarkProcessed(result) {
     );
 }
 
-/**
- * POSTs the email body to the webhook endpoint.
- * Returns parsed JSON response, or null on any error.
- */
 function postToWebhook(url, secret, body) {
     try {
         const response = UrlFetchApp.fetch(url, {
@@ -146,128 +175,144 @@ function postToWebhook(url, secret, body) {
 
         const code = response.getResponseCode();
         if (code < 200 || code >= 300) {
-            Logger.log(`⚠️  HTTP ${code}: ${response.getContentText()}`);
+            Logger.log(
+                '[WARN] HTTP ' + code + ': ' + response.getContentText()
+            );
             return null;
         }
 
         return JSON.parse(response.getContentText());
     } catch (err) {
-        Logger.log(`❌ Fetch error: ${err.message}`);
+        Logger.log('[ERROR] Fetch error: ' + err.message);
         return null;
     }
 }
 
-/**
- * Returns the label, creating it if it doesn't exist.
- */
 function getOrCreateLabel(name) {
     let label = GmailApp.getUserLabelByName(name);
     if (!label) {
         label = GmailApp.createLabel(name);
-        Logger.log(`🏷️  Created label "${name}"`);
+        Logger.log('[INFO] Created label "' + name + '"');
     }
     return label;
 }
 
 /**
  * Sets up the 5-minute trigger. Run manually ONCE.
- * Removes any existing triggers first to avoid duplicates.
  */
 function setUpTrigger() {
-    // Delete existing triggers to prevent duplicates
     const existing = ScriptApp.getProjectTriggers();
     existing.forEach((t) => ScriptApp.deleteTrigger(t));
-    Logger.log(`🧹 Removed ${existing.length} existing trigger(s)`);
+    Logger.log('[INFO] Removed ' + existing.length + ' existing trigger(s)');
 
-    // Create a 5-minute interval trigger
-    ScriptApp.newTrigger('pollGmail').timeBased().everyMinutes(5).create();
+    // 1-minute trigger, but pollGmail() skips odd minutes
+    ScriptApp.newTrigger('pollGmail').timeBased().everyMinutes(1).create();
 
-    Logger.log('✅ Trigger created: pollGmail every 5 minutes');
-    Logger.log('👉 To disable: run removeTrigger() or use the Apps Script UI');
+    Logger.log(
+        '[OK] Trigger created: pollGmail every 1 minute, runs on even minutes only'
+    );
 }
 
-/**
- * Removes all triggers. Use to pause the automation without deleting code.
- */
 function removeTrigger() {
     const existing = ScriptApp.getProjectTriggers();
-    existing.forEach((t) => ScriptApp.deleteTrigger(t));
-    Logger.log(`🗑️  Removed ${existing.length} trigger(s)`);
+    for (let i = 0; i < existing.length; i++) {
+        ScriptApp.deleteTrigger(existing[i]);
+    }
+    Logger.log('[INFO] Removed ' + existing.length + ' trigger(s)');
 }
 
 /**
- * Manual test entry point. Runs one cycle without setting up a trigger.
- * Use this to validate Gmail access + webhook connectivity before enabling.
+ * Manual test entry point.
  */
 function testOnce() {
-    Logger.log('🧪 Running one test cycle...');
+    Logger.log('[TEST] Running one test cycle...');
     pollGmail();
-    Logger.log('🧪 Test cycle complete');
+    Logger.log('[TEST] Test cycle complete');
 }
 
 /**
- * Diagnostic: lists Canara emails from the last 7 days without posting.
- * Use this first to verify the search query matches real emails.
+ * Recovery helper for the current incident AND for ad-hoc debugging:
+ * temporarily widens the search to reprocess historical emails.
+ *
+ * Pass daysBack = 2 for a 48-hour lookback (safe - legitimately only
+ * affects last 48 hours of Canara emails).
+ *
+ * Also clears the processed-ID set so historical messages get
+ * reprocessed (idempotent - verified donations return already_verified,
+ * debits get skipped).
+ */
+function recoverMissedEmails(daysBack) {
+    const props = PropertiesService.getScriptProperties();
+
+    // Clear processed IDs so we reprocess from scratch within the window
+    props.deleteProperty(CONFIG.PROCESSED_IDS_KEY);
+    Logger.log('[INFO] Cleared processed-ID set');
+
+    // Temporarily swap the search window
+    const originalQuery = CONFIG.SEARCH_QUERY;
+    CONFIG.SEARCH_QUERY = 'from:canarabank.com newer_than:' + daysBack + 'd';
+
+    Logger.log(
+        '[INFO] Running recovery poll over last ' + daysBack + ' day(s)...'
+    );
+    try {
+        pollGmail();
+    } finally {
+        CONFIG.SEARCH_QUERY = originalQuery;
+    }
+
+    Logger.log('[OK] Recovery complete. Processed-ID set has been rebuilt.');
+    Logger.log(
+        '[INFO] Next scheduled poll will return to normal 2-hour window.'
+    );
+}
+
+/**
+ * Diagnostic: lists all Canara emails in the window with their IDs,
+ * dates, and whether they're tracked as processed.
  */
 function diagnose() {
-    // Which account is this script running as?
-    const activeEmail = Session.getActiveUser().getEmail();
-    const effectiveEmail = Session.getEffectiveUser().getEmail();
-    Logger.log(`👤 Active user:    ${activeEmail}`);
-    Logger.log(`👤 Effective user: ${effectiveEmail}`);
+    const props = PropertiesService.getScriptProperties();
+    const processedSet = new Set(loadProcessedIds(props));
 
-    // Test 1: Search all mail (including Spam/Trash) for "Canara"
-    const threads1 = GmailApp.search('Canara newer_than:60d', 0, 10);
-    Logger.log(
-        `🔍 Test 1 — "Canara newer_than:60d" (excl. spam/trash): ${threads1.length}`
-    );
+    Logger.log('[INFO] Active user: ' + Session.getActiveUser().getEmail());
+    Logger.log('[INFO] Tracked processed IDs: ' + processedSet.size);
+    Logger.log('[INFO] Search query: ' + CONFIG.SEARCH_QUERY);
 
-    // Test 2: Search everything including Spam/Trash
-    const threads2 = GmailApp.search(
-        'in:anywhere Canara newer_than:60d',
-        0,
-        10
-    );
-    Logger.log(
-        `🔍 Test 2 — "in:anywhere Canara" (incl. spam/trash): ${threads2.length}`
-    );
+    const threads = GmailApp.search(CONFIG.SEARCH_QUERY, 0, 20);
+    Logger.log('[INFO] Found ' + threads.length + ' thread(s)');
 
-    // Test 3: Search Spam specifically
-    const threads3 = GmailApp.search('in:spam Canara newer_than:60d', 0, 10);
-    Logger.log(`🔍 Test 3 — "in:spam Canara": ${threads3.length}`);
-
-    // Test 4: Search for the exact phrase from the body
-    const threads4 = GmailApp.search(
-        '"Thanking you for banking with Canara Bank" newer_than:60d',
-        0,
-        10
-    );
-    Logger.log(`🔍 Test 4 — body phrase: ${threads4.length}`);
-
-    // Log a few results if any found
-    const anyThreads = [threads1, threads2, threads3, threads4].find(
-        (arr) => arr.length > 0
-    );
-    if (anyThreads) {
-        Logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        Logger.log('📋 Sample matches:');
-        for (const thread of anyThreads.slice(0, 3)) {
-            const messages = thread.getMessages();
-            for (const message of messages) {
-                Logger.log(`   Date:    ${message.getDate().toISOString()}`);
-                Logger.log(`   From:    ${message.getFrom()}`);
-                Logger.log(`   Subject: ${message.getSubject()}`);
-                Logger.log(
-                    `   Labels:  ${message
-                        .getThread()
-                        .getLabels()
-                        .map((l) => l.getName())
-                        .join(', ')}`
-                );
-                Logger.log('   ───');
-            }
+    for (let i = 0; i < threads.length; i++) {
+        const thread = threads[i];
+        const messages = thread.getMessages();
+        Logger.log(
+            '--- Thread ' +
+                thread.getId() +
+                ' : ' +
+                messages.length +
+                ' message(s) ---'
+        );
+        for (let j = 0; j < messages.length; j++) {
+            const message = messages[j];
+            const msgId = message.getId();
+            const isProcessed = processedSet.has(msgId);
+            const date = message.getDate().toISOString();
+            const subject = message.getSubject();
+            const bodyPreview = message
+                .getPlainBody()
+                .substring(0, 80)
+                .replace(/\s+/g, ' ');
+            Logger.log(
+                '   ' +
+                    (isProcessed ? '[X]' : '[ ]') +
+                    ' ' +
+                    msgId +
+                    '  ' +
+                    date +
+                    '  ' +
+                    subject
+            );
+            Logger.log('      "' + bodyPreview + '..."');
         }
-    } else {
-        Logger.log('❌ No results from ANY search variation — see notes below');
     }
 }
