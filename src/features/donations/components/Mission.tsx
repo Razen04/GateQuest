@@ -41,7 +41,7 @@ const Mission = () => {
 
                     <p className="text-muted-foreground">
                         Note: Currently the perks will be permanent, this may
-                        change in future.
+                        change in future, even for existing supporters.
                     </p>
 
                     <p className="pt-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground/70">

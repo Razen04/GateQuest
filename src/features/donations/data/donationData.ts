@@ -23,7 +23,6 @@ export const TIERS = [
             'Gold color name across app',
             'Gold profile frame',
             'Animated GIF avatars & banners',
-            'Advanced analytics',
         ],
     },
     {

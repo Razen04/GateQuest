@@ -13,7 +13,7 @@ import ToggleSwitch from '@/shared/components/ToggleSwitch.tsx';
 import { Button } from '@/shared/components/ui/button.tsx';
 import { Input } from '@/shared/components/ui/input.tsx';
 import { Textarea } from '@/shared/components/ui/textarea.tsx';
-import instructions from '@/shared/data/donationInstructions.ts';
+import instructions from '../data/donationInstructions.ts';
 
 type DonationBoxProps = {
     setStep: React.Dispatch<
@@ -40,7 +40,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
     setAnonymous,
     setShowQR,
 }) => {
-    const [instructionOpen, setInstructionOpen] = useState<boolean>(false);
+    const [instructionOpen, setInstructionOpen] = useState<boolean>(true);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     const handleGenerateQR = () => {
@@ -57,7 +57,6 @@ const DonationBox: React.FC<DonationBoxProps> = ({
 
     return (
         <div ref={containerRef} className="space-y-6">
-            {/* Header Title */}
             <div>
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-chart-1">
                     STEP 01
@@ -67,7 +66,6 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                 </h2>
             </div>
 
-            {/* Collapsible Guidelines / Instructions */}
             <div className="overflow-hidden border border-border bg-muted/50 transition-all">
                 <button
                     type="button"
@@ -77,7 +75,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                     <div className="flex items-center gap-2.5">
                         <InfoIcon size={18} className="text-chart-1" />
                         <span className="font-grotesk text-xs font-bold uppercase tracking-wider text-foreground">
-                            Protocol Instructions & Verification Guidelines
+                            Instructions & Verification Guidelines (DO NOT SKIP)
                         </span>
                     </div>
                     <div className="bg-muted p-1 text-muted-foreground">
@@ -102,7 +100,7 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                                 {instructions.map((item, idx) => (
                                     <li key={idx} className="flex gap-2.5">
                                         <span className="font-mono text-[10px] font-bold text-chart-1">
-                                            0{idx + 1}.
+                                            {idx + 1}.
                                         </span>
                                         <div>
                                             <p>{item.text}</p>
@@ -130,7 +128,6 @@ const DonationBox: React.FC<DonationBoxProps> = ({
                 </AnimatePresence>
             </div>
 
-            {/* Select Amount Grid */}
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <label className="font-mono text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
