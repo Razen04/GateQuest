@@ -1,4 +1,13 @@
-# v0.11.0 - 2026-10-23 (Latest)
+# v0.12.0 - 2026-11-12 (Latest)
+
+- Donations auto-verify within ~5 minutes (mostly maybe); uncertain matches alert the admin for manual review. [#112](https://github.com/Razen04/GateQuest/issues/112)
+- Donations page redesigned with Mission/Contribute tabs, a live ₹2,500 monthly infrastructure goal, and the public patron ledger with perks for donors. More at [Donation Page](https://gate-quest.vercel.app/donate)
+- Question accuracy colors are now threshold-based instead of always green.
+- Fixed pacing chart bars to correctly reflect correct/incorrect/skipped status.
+- Topic Test history sync fixed. [#116](https://github.com/Razen04/GateQuest/issues/116)
+- Added [Privacy Policy](https://gate-quest.vercel.app/privacy) and [Terms of Service](terms) pages.
+
+# v0.11.0 - 2026-10-23
 
 - Revamped notifications with targeting and cross-device read state. [#10](https://github.com/Razen04/GateQuest/issues/10)
 - Added a first-time onboarding flow for username, goal, year, and profile. [#114](https://github.com/Razen04/GateQuest/issues/114)
