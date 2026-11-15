@@ -1,77 +1,86 @@
-CREATE OR REPLACE FUNCTION generate_weekly_revision_set(
-		p_valid_subjects uuid[],
-    p_target_exams text[], 
-		p_branch_id text
-)
-RETURNS json AS $$
-DECLARE
-    v_user_id UUID;
-    v_set_id UUID;
-    v_start_of_week DATE;
-    v_questions_added INT;
-BEGIN
-    v_user_id := auth.uid();
-    IF v_user_id IS NULL THEN RAISE EXCEPTION 'Not authenticated'; END IF;
-
-    -- Calculate the start of the week (Sunday)
-    v_start_of_week := (CURRENT_DATE - EXTRACT(DOW FROM CURRENT_DATE)::int)::date;
-
-    -- Check if a set already exists for this user/week/branch
-    SELECT id INTO v_set_id
-    FROM weekly_revision_set
-    WHERE generated_for = v_user_id 
-      AND start_of_week = v_start_of_week
-      AND branch_id = p_branch_id;
-
-    IF v_set_id IS NOT NULL THEN
-        RETURN json_build_object ('success', true, 'status', 'existing', 'message', 'Set already present for this week.');
-    END IF;
-
-    -- Create the new revision set header
-    INSERT INTO weekly_revision_set (generated_for, start_of_week, status, created_at, exam_tags, branch_id)
-    VALUES (v_user_id, v_start_of_week, 'pending', now(), p_target_exams, p_branch_id)
-    RETURNING id INTO v_set_id;
-
-    WITH RankedQueue AS (
-        SELECT DISTINCT ON (uiq.question_id)
+create or replace function public.generate_weekly_revision_set (p_valid_subjects uuid[], p_target_exams text[], p_branch_id text)
+    returns json
+    as $$
+declare
+    v_user_id uuid;
+    v_set_id uuid;
+    v_start_of_week date;
+    v_questions_added int;
+begin
+    v_user_id := auth.uid ();
+    if v_user_id is null then
+        raise exception 'Not authenticated';
+    end if;
+    v_start_of_week := (current_date - EXTRACT(DOW from current_date)::int)::date;
+    select
+        id
+    into
+        v_set_id
+    from
+        weekly_revision_set
+    where
+        generated_for = v_user_id
+        and start_of_week = v_start_of_week
+        and branch_id = p_branch_id;
+    if v_set_id is not null then
+        return json_build_object('success', true, 'status', 'existing', 'message', 'Set already present for this week.');
+    end if;
+    insert into weekly_revision_set (generated_for, start_of_week, status, created_at, exam_tags, branch_id)
+        values (v_user_id, v_start_of_week, 'pending', now(), p_target_exams, p_branch_id)
+    returning
+        id
+    into
+        v_set_id;
+    with RankedQueue as (
+        select distinct on (uiq.question_id)
             uiq.question_id,
             uiq.box,
             uiq.added_at
-        FROM user_incorrect_queue uiq
-        JOIN questions q ON uiq.question_id = q.id
-        JOIN subjects s ON q.subject_id = s.id 
-        CROSS JOIN LATERAL jsonb_array_elements_text(
-            CASE 
-                WHEN jsonb_typeof(q.metadata->'exam') = 'array' THEN q.metadata->'exam'
-                WHEN q.metadata->'exam' IS NOT NULL THEN jsonb_build_array(q.metadata->>'exam')
-                ELSE '[]'::jsonb
-            END
-        ) AS expanded_tags(tag)
-        WHERE uiq.user_id = v_user_id
-          AND uiq.next_review_at <= NOW() 
-          AND q.subject_id = ANY(p_valid_subjects)
-          AND q.verified = true 
-          AND (
-                -- Rule 1: Always include mistakes for Universal subjects
-                s.is_universal = true 
-                OR 
-                -- Rule 2: For core subjects, filter by current branch 'set' or exam tags
-                (q.metadata->>'set' = UPPER(p_branch_id) OR expanded_tags.tag = ANY(p_target_exams))
-          )
-    )
-    INSERT INTO revision_set_questions (set_id, question_id)
-    SELECT v_set_id, question_id
-    FROM RankedQueue
-    ORDER BY box ASC, added_at ASC -- Prioritize lower boxes (more frequent mistakes)
-    LIMIT 30;
-
+        from
+            user_incorrect_queue uiq
+            join questions q on uiq.question_id = q.id
+            join subjects s on q.subject_id = s.id
+            cross join lateral jsonb_array_elements_text(
+                case when jsonb_typeof(q.metadata -> 'exam') = 'array' then
+                    q.metadata -> 'exam'
+                when q.metadata -> 'exam' is not null then
+                    jsonb_build_array(q.metadata ->> 'exam')
+                else
+                    '[]'::jsonb
+                end) as expanded_tags (tag)
+        where
+            uiq.user_id = v_user_id
+            and uiq.next_review_at <= NOW()
+            and q.subject_id = any (p_valid_subjects)
+            and q.verified = true
+            and (s.is_universal = true
+                or (q.metadata ->> 'set' = UPPER(p_branch_id)
+                    or expanded_tags.tag = any (p_target_exams)))
+            and (q.metadata ->> 'mockId' is null
+                or public.user_can_access_mock (q.metadata ->> 'mockId')))
+    insert into revision_set_questions (set_id, question_id)
+    select
+        v_set_id,
+        question_id
+    from
+        RankedQueue
+    order by
+        box asc,
+        added_at asc
+    limit 30;
     GET DIAGNOSTICS v_questions_added = ROW_COUNT;
+    update
+        weekly_revision_set
+    set
+        total_questions = v_questions_added
+    where
+        id = v_set_id;
+    return json_build_object('success', true, 'status', 'created', 'message', 'Generated new smart revision set.');
+exception
+    when others then
+        raise exception 'Failed to generate revision set: %', SQLERRM;
+end;
 
-    UPDATE weekly_revision_set SET total_questions = v_questions_added WHERE id = v_set_id;
-
-    RETURN json_build_object('success', true, 'status', 'created', 'message', 'Generated new smart revision set.');
-EXCEPTION WHEN OTHERS THEN
-    RAISE EXCEPTION 'Failed to generate revision set: %', SQLERRM;
-END;
-$$ LANGUAGE plpgsql;
+$$
+language plpgsql;
 

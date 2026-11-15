@@ -14,5 +14,12 @@ export const syncTestFromSupabaseToDexie = async (
 
     if (!testSession || !attempts || !questions) return;
 
+    // Mock sessions bypass Dexie entirely. Mock questions must never
+    // enter the offline cache — they're fetched fresh from Supabase by
+    // useMockSession (Phase 6) to close the devtools-extraction vector.
+    if ((testSession as { paper_id?: string }).paper_id?.startsWith('mock-')) {
+        return;
+    }
+
     await initializeTestSession(testSession, attempts, questions);
 };
