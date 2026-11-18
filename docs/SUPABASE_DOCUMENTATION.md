@@ -205,16 +205,18 @@ A complete inventory of every object in the `public` schema and the surrounding 
 
 ### Cron Jobs
 
-Scheduled via `pg_cron`. Three invoke the `process-reminders` Edge Function, two run pure SQL.
+Scheduled via `pg_cron`. Four invoke the `process-reminders` Edge Function, four run pure SQL.
 
-| Job                               | Schedule     | Action                                         |
-| :-------------------------------- | :----------- | :--------------------------------------------- |
-| `refresh-peer-stats-midnight`     | `0 0 * * *`  | `select public.refresh_question_peer_stats();` |
-| `nightly-difficulty-sync`         | `0 0 * * *`  | `select refresh_dynamic_difficulty();`         |
-| `revision-hourly-reminder`        | `0 * * * *`  | POST `?task=revision-hourly`                   |
-| `weekend-topic-test-saturday`     | `30 3 * * 6` | POST `?task=weekend-topic-test`                |
-| `weekend-topic-test-sunday`       | `30 3 * * 0` | POST `?task=weekend-topic-test`                |
-| `donation-reminder-every-2-weeks` | `30 6 * * 0` | POST `?task=donation-reminder`                 |
+| Job                               | Schedule     | Action                                           |
+| :-------------------------------- | :----------- | :----------------------------------------------- |
+| `refresh-peer-stats-midnight`     | `0 0 * * *`  | `select public.refresh_question_peer_stats();`   |
+| `nightly-difficulty-sync`         | `0 0 * * *`  | `select refresh_dynamic_difficulty();`           |
+| `prune-topic-test-history`        | `0 4 * * *`  | `select public.prune_topic_test_history();`      |
+| `notify-mocks`                    | `* * * * *`  | `select public.notify_mocks();`                  |
+| `revision-hourly-reminder`        | `0 * * * *`  | POST `?task=revision-hourly`                     |
+| `weekend-topic-test-saturday`     | `30 3 * * 6` | POST `?task=weekend-topic-test`                  |
+| `weekend-topic-test-sunday`       | `30 3 * * 0` | POST `?task=weekend-topic-test`                  |
+| `donation-reminder-every-2-weeks` | `30 6 * * 0` | POST `?task=donation-reminder`                   |
 
 ---
 
@@ -937,6 +939,8 @@ Standard own-rows-only pattern:
 | `idx_one_active_test_per_user_branch_active` | `user_id, branch_id` (partial: `status <> 'completed'`) | B-tree, UNIQUE | **Enforces one active test per (user, branch).** Trying to insert a second active test violates the constraint; both `generate_topic_test` and `create_test_from_paper` guard against this before insert. |
 | `idx_topic_tests_user_status`                | `user_id, status`                                       | B-tree         | Optimises "get my active test" and "get my test history" queries.                                                                                                                                         |
 | `idx_topic_tests_paper`                      | `user_id, paper_id` (partial: `paper_id IS NOT NULL`)   | B-tree         | Feeds paper-scoped analytics and the paper history view.                                                                                                                                                  |
+| `idx_topic_tests_completed_paper`            | `paper_id` (partial: `status = 'completed'`)            | B-tree         | Serves `get_mock_leaderboard` and `get_mock_analysis`, which filter by bare `paper_id` across all users. Without it those queries seq-scan.                                                                 |
+| `idx_topic_tests_active_paper`               | `paper_id` (partial: `status <> 'completed'`)           | B-tree         | Serves the five-minute `expire_mock_sessions` sweep. Stays tiny because at most one non-completed row exists per `(user, branch)`.                                                                          |
 
 **Triggers:**
 
@@ -953,6 +957,20 @@ The trigger fires when `status` transitions to `'completed'` for the first time 
 - **`record_activity` is enforced by the trigger, not the writer.** A test with `record_activity = false` still grades and stores scores in `topic_tests` — it just doesn't propagate attempts to `user_question_activity`. This allows a user to do a test without affecting their dashboard, which is the whole point of the toggle in the test configuration UI.
 - **`paper_id` is null for custom tests.** The name is a slight misnomer — a custom Topic Test has no "paper." The column exists to distinguish "came from a PYQ catalog" from "came from a topic selection," and the client uses this to render history differently (paper label vs. topic list).
 - **`updated_at` is bumped manually.** Unlike `questions.updated_at`, which uses a `moddatetime` trigger, `topic_tests.updated_at` is set by each RPC that touches the row. This is because updates happen from multiple clients (timer persists, status changes, grading) and a trigger would need to distinguish "meaningful" from "cosmetic" updates.
+- **History retention.** The nightly `prune-topic-test-history` cron keeps only the newest 10 completed non-mock sessions per `(user_id, branch_id)` for free users. Donor tiers (`>= 1`) are exempt, and official mock attempts are never pruned — they back the leaderboard, mock catalog and the `already_attempted` gate. Practice-from-mock sessions (`mock-*-practice-*`) are ordinary history. Long-term analytics survive because they live in `user_question_activity`, not here.
+
+---
+
+### Mock exams — operational notes
+
+Mock configuration lives in `mocks` (schedule, gating, label, announcement) and `mock_questions` (paper composition). The client catalog is built by `get_mock_catalog`; the start path is `create_test_from_mock`.
+
+- **Start burst.** Creating a mock session inserts one `topic_tests` row plus one `topic_tests_attempts` row per question (~65). 500 users starting in the same second is ~32,500 inserts. The lobby therefore applies a deterministic per-user delay of up to **30 seconds** before calling `create_test_from_mock` (`src/features/topic-test/utils/stagger.ts`). The delay is clamped so it never consumes the final **90 seconds** of the live window, and practice runs outside the window skip it entirely.
+- **Submit burst.** Automatic submits (timer / window expiry) apply a deterministic delay of up to **10 seconds** before `submit_test_grading`. Manual `Finish` clicks are never delayed. Because starts are staggered, normal finish times are already spread; the submit delay covers the synchronized window-close case.
+- **Determinism.** Both delays hash `(user_id, mock_id | session_id)` with FNV-1a, so retries, resumes and page reloads always land in the same slot instead of re-randomising.
+- **Indexes.** `idx_topic_tests_completed_paper` serves the leaderboard/analysis `paper_id` lookups; `idx_topic_tests_active_paper` serves the `expire_mock_sessions` sweep. Existing indexes lead with `user_id` and cannot serve either query.
+- **Notifications.** The `notify-mocks` cron broadcasts once when a mock is scheduled and once about a minute before it starts; see [Job: `notify-mocks`](#job-notify-mocks).
+- **Free-plan sizing.** Staggering smooths the peaks but does not change the storage ceiling. Mock attempts are retained forever for leaderboard integrity, so recurring 500-user mocks should run on Pro (8 GB disk) rather than Free (500 MB).
 
 ---
 
@@ -2612,14 +2630,15 @@ All jobs are stored in `cron.job`. The `active` column is `true` for all current
 
 ### Job Inventory
 
-| Job                               | Schedule (UTC) | Type     | Action                                         |
-| :-------------------------------- | :------------- | :------- | :--------------------------------------------- |
-| `refresh-peer-stats-midnight`     | `0 0 * * *`    | Pure SQL | `select public.refresh_question_peer_stats();` |
-| `nightly-difficulty-sync`         | `0 0 * * *`    | Pure SQL | `select refresh_dynamic_difficulty();`         |
-| `revision-hourly-reminder`        | `0 * * * *`    | HTTP     | POST `?task=revision-hourly`                   |
-| `weekend-topic-test-saturday`     | `30 3 * * 6`   | HTTP     | POST `?task=weekend-topic-test`                |
-| `weekend-topic-test-sunday`       | `30 3 * * 0`   | HTTP     | POST `?task=weekend-topic-test`                |
-| `donation-reminder-every-2-weeks` | `30 6 * * 0`   | HTTP     | POST `?task=donation-reminder`                 |
+| Job                               | Schedule (UTC) | Type     | Action                                           |
+| :-------------------------------- | :------------- | :------- | :----------------------------------------------- |
+| `refresh-peer-stats-midnight`     | `0 0 * * *`    | Pure SQL | `select public.refresh_question_peer_stats();`   |
+| `nightly-difficulty-sync`         | `0 0 * * *`    | Pure SQL | `select refresh_dynamic_difficulty();`           |
+| `prune-topic-test-history`        | `0 4 * * *`    | Pure SQL | `select public.prune_topic_test_history();`      |
+| `revision-hourly-reminder`        | `0 * * * *`    | HTTP     | POST `?task=revision-hourly`                     |
+| `weekend-topic-test-saturday`     | `30 3 * * 6`   | HTTP     | POST `?task=weekend-topic-test`                  |
+| `weekend-topic-test-sunday`       | `30 3 * * 0`   | HTTP     | POST `?task=weekend-topic-test`                  |
+| `donation-reminder-every-2-weeks` | `30 6 * * 0`   | HTTP     | POST `?task=donation-reminder`                   |
 
 Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 
@@ -2627,6 +2646,8 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 | :-------------------------------- | :------------- | :------------- |
 | `refresh-peer-stats-midnight`     | 00:00          | 05:30          |
 | `nightly-difficulty-sync`         | 00:00          | 05:30          |
+| `prune-topic-test-history`        | 04:00          | 09:30          |
+| `notify-mocks`                    | every minute   | every minute   |
 | `revision-hourly-reminder`        | every hour :00 | every hour :30 |
 | `weekend-topic-test-saturday`     | Sat 03:30      | Sat 09:00      |
 | `weekend-topic-test-sunday`       | Sun 03:30      | Sun 09:00      |
@@ -2659,6 +2680,54 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 **Why nightly:** Same reasoning as peer stats — the aggregation is expensive, and difficulty scores are display-only (the Easy/Medium/Hard badge). A day of staleness is invisible.
 
 **Why pure SQL and not an Edge Function:** No network I/O. The whole computation is Postgres-native — reading `user_question_activity`, aggregating via `v_user_cycle_stats`, writing back to `subjects`. Sending this to an Edge Function would add cold-start latency and a round-trip for zero benefit.
+
+---
+
+### Job: `prune-topic-test-history`
+
+**Schedule:** `0 4 * * *` (daily at 04:00 UTC)
+**Type:** Pure SQL
+**Command:** `select public.prune_topic_test_history();`
+
+**Purpose:** Trims old test sessions for free users while preserving data that official features depend on.
+
+**What is deleted:** Completed non-mock sessions beyond the newest 10 per `(user_id, branch_id)` for users whose donor tier is 0. `topic_tests_attempts` follows via `ON DELETE CASCADE`.
+
+**What is never deleted:**
+
+- **Official mock attempts** (`paper_id LIKE 'mock-%'` excluding `-practice-`). The leaderboard, mock catalog, result pages and the `already_attempted` gate read `topic_tests`, so pruning a mock row would corrupt standings and re-open the attempt. Exempt forever.
+- **In-progress sessions** (`status <> 'completed'`).
+- **Donor history** — `get_user_tier(user_id) >= 1`. Donors keep unlimited history, and a tier lapse never retroactively prunes rows.
+- **Long-term analytics** — `user_question_activity` is a separate table and is untouched; dashboards, streaks and heatmaps are unaffected.
+
+**Practice-from-mock:** `paper_id LIKE 'mock-%-practice-%'` is ordinary practice history and is pruned like any other test.
+
+**Privileges:** The function is `SECURITY DEFINER` and bypasses RLS because it operates across all users. `EXECUTE` is revoked from `anon` and `authenticated`; only the cron owner and `service_role` can run it.
+
+**Cost:** One indexed window-function pass over completed sessions, plus cascade deletes for the overflow only. The index `idx_topic_tests_user_branch_completed` backs the ranking.
+
+---
+
+### Job: `notify-mocks`
+
+**Schedule:** `* * * * *` (every minute)
+**Type:** Pure SQL
+**Command:** `select public.notify_mocks();`
+
+**Purpose:** Keeps mock exams visible. It inserts two broadcast notifications per mock, exactly once each:
+
+1. **New mock scheduled** — as soon as a `scheduled`/`live` row exists with `starts_at` more than a minute away.
+2. **Mock starts in ~1 minute** — once the start is inside the next 90 seconds.
+
+Both target `{"type":"broadcast"}`, so every user sees them in the notification dialog and receives a push through `dispatch-notification`. Both carry `link = '/topic-test-generate?tab=mocks'`, so the push opens the mock tab rather than a specific lobby. The 90-second reminder window (rather than exactly 60) guarantees a reminder even when a mock starts off the minute boundary; the cron itself only runs once a minute.
+
+**Deduplication:** `mocks.schedule_notified_at` and `mocks.start_reminder_sent_at` are the idempotency keys. `notify_mocks()` locks pending rows with `FOR UPDATE SKIP LOCKED` and stamps the column in the same transaction as the insert, so overlapping runs cannot double-send. Both columns are written only by this function.
+
+**Deploy behaviour:** The migration stamps `schedule_notified_at` on all pre-existing mocks, so deploying this feature does not re-announce old mocks. Future reminders for still-upcoming mocks remain pending. Mocks that already started are stamped too and are never back-broadcast.
+
+**Privileges:** `SECURITY DEFINER` and cron-only. `EXECUTE` is revoked from `anon` and `authenticated`.
+
+**Cost:** Two indexed lookups per minute. The partial indexes `idx_mocks_pending_schedule_notice` and `idx_mocks_pending_start_reminder` keep each sweep proportional to the number of pending mocks (normally zero).
 
 ---
 
