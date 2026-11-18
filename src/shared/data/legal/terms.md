@@ -4,7 +4,9 @@ Short version: use the app fairly, don't be a jerk, and if something breaks, I'm
 
 By using this app, you agree to these terms. If you don't like them, mail me to let me know why: **badbyeworld[at]proton.me**
 
-The app is run by **Razen**, one person, as a free tool for GATE prep. **Not affiliated with IITs, IISc, the GATE organising body, or any government agency.**
+The app is run by [**Razen**](https://github.com/Razen04), one person, as a free tool for engineering exams prep. **Not affiliated with IITs, IISc, the GATE organising body, or any government agency.**
+
+You can look around as a guest without an account. Signing in with Google gets you progress, profiles and donations.
 
 You need to be at least **13**. If you're under 18, get a parent or guardian's okay first.
 
@@ -17,7 +19,7 @@ You need to be at least **13**. If you're under 18, get a parent or guardian's o
 
 ## What not to do
 
-- Don't cheat or game the system (fake scores, fake streaks, manipulating rankings).
+- Don't cheat or game the system (fake scores, fake streaks, manipulating rankings). This includes the live mock leaderboards as they're first-attempt only, and leaving fullscreen three times auto-submits your attempt.
 - Don't try to break into other people's accounts.
 - Don't scrape, bot, or automate the app without asking.
 - Don't upload anything harmful, illegal, or spammy.
@@ -46,12 +48,12 @@ What you send to those providers is governed by their privacy policies, not mine
 Donations are voluntary, non-refundable tips to keep the app running.
 
 - You need to actually own the money you're donating.
-- You're not buying anything instead you will be getting perks which can be withdrawn in any case.
+- You're not buying anything — you get perks, and those can be withdrawn or changed at any time. Right now they cover supporter themes and accents, a custom AI prompt, animated profile media, mock analysis and leaderboards, re-attempts, and unlimited test history.
 - Donations aren't tax-deductible.
-- Your donation appears publicly on the ledger **unless** you mark it anonymous.
-- The perks structure can be changed at any time.
+- Your donation shows on the public ledger **unless** you mark it anonymous. That flag only changes what people see and the record itself still keeps the details.
+- Verification is automatic: the payment confirmation is matched against your UTR, and verified donations set your supporter tier (₹50 / ₹169 / ₹569).
 
-I never see your card or UPI credentials, except your UPI registered name. Only the UTR reference number for verification.
+I never see your card or UPI credentials only the amount and UTR from the confirmation.
 
 ## Uptime
 

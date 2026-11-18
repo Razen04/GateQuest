@@ -10,7 +10,7 @@ import {
     Warning,
 } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/app/stores/useAuthStore';
+import { purgeLocalData, useAuthStore } from '@/app/stores/useAuthStore';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import {
@@ -29,6 +29,7 @@ import { supabase } from '@/shared/utils/supabaseClient';
 
 const PrivacySettings = () => {
     const user = useAuthStore((s) => s.user);
+    const setUser = useAuthStore((s) => s.setUser);
     const showLogin = useAuthStore((s) => s.showLogin);
     const setShowLogin = useAuthStore((s) => s.setShowLogin);
     const logout = useAuthStore((s) => s.logout);
@@ -59,8 +60,17 @@ const PrivacySettings = () => {
             const { error } = await supabase.rpc('delete_account');
             if (error) throw error;
 
+            // The auth row is already gone at this point, so clean the
+            // browser first — don't depend on signOut() succeeding.
+            await purgeLocalData(['theme', 'accent']);
+            try {
+                await supabase.auth.signOut();
+            } catch {
+                // session is already invalid; local data is wiped either way
+            }
+            setUser(null);
+            window.location.replace('/');
             toast.success('Account deleted successfully.');
-            logout();
         } catch (error) {
             console.error('Unable to delete account: ', error);
             toast.error('Unable to delete account.');
@@ -68,7 +78,7 @@ const PrivacySettings = () => {
     };
 
     const versionNum = user?.version_number ?? 0;
-    const isMaxVersionsReached = versionNum >= 5;
+    const isMaxVersionsReached = versionNum > 5;
 
     return (
         <div className="space-y-8 px-2 pb-20 pt-4">
@@ -145,7 +155,7 @@ const PrivacySettings = () => {
                             <span className="font-mono text-[11px] font-bold text-muted-foreground">
                                 RESET QUOTA:{' '}
                                 <span className="text-destructive">
-                                    {versionNum}/5
+                                    {Math.min(versionNum, 5)}/5
                                 </span>{' '}
                                 USED
                             </span>
@@ -201,7 +211,8 @@ const PrivacySettings = () => {
                                             disabled={isMaxVersionsReached}
                                             className="bg-chart-4 font-grotesk font-bold rounded-none text-white hover:bg-chart-4/90"
                                         >
-                                            Confirm Flush ({versionNum}/5)
+                                            Confirm Flush (
+                                            {Math.min(versionNum, 5)}/5)
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>

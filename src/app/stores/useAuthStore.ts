@@ -12,9 +12,16 @@ const STALE_KEYS = [
     'weekly_set_info',
 ] as const;
 
-const clearStaleData = async (): Promise<void> => {
+/**
+ * Wipes everything the app keeps in the browser: stale localStorage keys,
+ * the Cache Storage entries and the whole IndexedDB database. Account
+ * deletion passes the theme keys as extras; normal logout keeps them.
+ */
+export const purgeLocalData = async (
+    extraKeys: string[] = []
+): Promise<void> => {
     try {
-        STALE_KEYS.forEach((k) => {
+        [...STALE_KEYS, ...extraKeys].forEach((k) => {
             localStorage.removeItem(k);
         });
     } catch (e) {
@@ -27,6 +34,8 @@ const clearStaleData = async (): Promise<void> => {
     } catch (e) {
         console.warn('⚠️ Cache Storage clearing error:', e);
     }
+
+    await appStorage.nuke();
 };
 
 // Types
@@ -91,8 +100,7 @@ export const useAuthStore = create<AuthState>()(
             logout: async () => {
                 try {
                     await supabase.auth.signOut();
-                    await clearStaleData();
-                    await appStorage.nuke();
+                    await purgeLocalData();
                     window.location.replace('/');
                 } catch (err) {
                     console.error('Unable to logout.');
