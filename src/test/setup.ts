@@ -1,6 +1,11 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
+// supabase-js validates these at module load. CI has no .env.local, so
+// provide harmless placeholders before any test module is imported.
+vi.stubEnv('VITE_SUPABASE_PROJECT_URL', 'https://test.supabase.co');
+vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'test-anon-key');
+
 // jsdom does not implement PointerEvent APIs. Radix primitives (Select,
 // Combobox, Dropdown, Popover) call these during open and silently bail
 // when they throw. Polyfilling lets the dropdowns render in tests.

@@ -218,9 +218,9 @@ describe('useTopicTestGenerator', () => {
 
         it('clearSelection empties the list', async () => {
             const { result } = await hydrateAndSelect();
-            result.current.availableTopics.forEach((t) =>
-                act(() => result.current.toggleTopic(t))
-            );
+            result.current.availableTopics.forEach((t) => {
+                act(() => result.current.toggleTopic(t));
+            });
             expect(result.current.selectedTopics).toHaveLength(2);
 
             act(() => result.current.clearSelection());
@@ -252,17 +252,17 @@ describe('useTopicTestGenerator', () => {
 
         it('uses questionCount when includeAttempted is true', async () => {
             const { result } = await hydrateWithCounts(true);
-            result.current.availableTopics.forEach((t) =>
-                act(() => result.current.toggleTopic(t))
-            );
+            result.current.availableTopics.forEach((t) => {
+                act(() => result.current.toggleTopic(t));
+            });
             expect(result.current.poolSize).toBe(16);
         });
 
         it('uses unattemptedCount when includeAttempted is false', async () => {
             const { result } = await hydrateWithCounts(false);
-            result.current.availableTopics.forEach((t) =>
-                act(() => result.current.toggleTopic(t))
-            );
+            result.current.availableTopics.forEach((t) => {
+                act(() => result.current.toggleTopic(t));
+            });
             expect(result.current.poolSize).toBe(6);
         });
 

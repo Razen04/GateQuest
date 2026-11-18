@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     try {
         const { subscription } = await req.json();
 
-        if (!subscription || !subscription.endpoint) {
+        if (!subscription?.endpoint) {
             throw new Error(
                 'Missing browser subscription endpoint credentials.'
             );

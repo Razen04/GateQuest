@@ -5,8 +5,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 html,
 body {
@@ -514,6 +514,7 @@ body {
 
 /* Manual pause (for animated={false} in lists) */
 .tier-paused * {
+    /* biome-ignore lint/complexity/noImportantStyles: must override running keyframes */
     animation: none !important;
 }
 
@@ -530,6 +531,7 @@ body {
     .tier-bob,
     .tier-glint,
     .tier-pulse {
+        /* biome-ignore lint/complexity/noImportantStyles: must override running keyframes */
         animation: none !important;
     }
 }

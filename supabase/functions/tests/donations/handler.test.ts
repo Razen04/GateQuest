@@ -59,7 +59,7 @@ function createMockSupabase(config: MockConfig): {
                 state.insertData = data;
                 return builder;
             },
-            update(data: unknown) {
+            update(_data: unknown) {
                 state.op = 'update';
                 return builder;
             },
@@ -86,6 +86,7 @@ function createMockSupabase(config: MockConfig): {
                 }
                 return { data: null, error: null };
             },
+            // biome-ignore lint/suspicious/noThenProperty: mock is intentionally thenable so `await` works
             then(resolve: (v: unknown) => void, reject: (e: unknown) => void) {
                 try {
                     if (state.op === 'insert') {
@@ -134,7 +135,9 @@ let envStub: { restore(): void };
 
 beforeEach(() => {
     // Reset to baseline before each test
-    Object.keys(mutableEnv).forEach((k) => delete mutableEnv[k]);
+    Object.keys(mutableEnv).forEach((k) => {
+        delete mutableEnv[k];
+    });
     Object.assign(mutableEnv, BASE_ENV);
 
     envStub = stub(Deno.env, 'get', (key: string) => mutableEnv[key]);

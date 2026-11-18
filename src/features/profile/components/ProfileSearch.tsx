@@ -14,7 +14,6 @@ import {
     CommandList,
 } from '@/components/ui/command';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar } from '@/shared/components/Avatar';
 import { TieredAvatar } from '@/shared/components/TieredAvatar';
 import { Input } from '@/shared/components/ui/input';
 import { getDonorTier } from '@/shared/types/donor';

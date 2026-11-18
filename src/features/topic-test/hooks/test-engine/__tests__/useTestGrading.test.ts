@@ -7,12 +7,20 @@ const {
     mockSubmitTestGrading,
     mockFetchTestById,
     mockGetAttemptsBySessionId,
+    mockAuthState,
 } = vi.hoisted(() => ({
     mockGetTestSession: vi.fn(),
     mockUpdateAttempts: vi.fn(),
     mockSubmitTestGrading: vi.fn(),
     mockFetchTestById: vi.fn(),
     mockGetAttemptsBySessionId: vi.fn(),
+    mockAuthState: { user: { id: 'test-user' } },
+}));
+
+vi.mock('@/app/stores/useAuthStore', () => ({
+    useAuthStore: Object.assign(() => mockAuthState, {
+        getState: () => mockAuthState,
+    }),
 }));
 
 vi.mock('@/features/topic-test/services/testSession', () => ({

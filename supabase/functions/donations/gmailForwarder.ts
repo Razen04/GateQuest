@@ -154,7 +154,7 @@ function saveProcessedIds(props, set) {
 }
 
 function shouldMarkProcessed(result) {
-    if (!result || !result.status) return false;
+    if (!result?.status) return false;
     const status = result.status;
     return (
         status === 'verified' ||
@@ -202,7 +202,9 @@ function getOrCreateLabel(name) {
  */
 function setUpTrigger() {
     const existing = ScriptApp.getProjectTriggers();
-    existing.forEach((t) => ScriptApp.deleteTrigger(t));
+    existing.forEach((t) => {
+        ScriptApp.deleteTrigger(t);
+    });
     Logger.log('[INFO] Removed ' + existing.length + ' existing trigger(s)');
 
     // 1-minute trigger, but pollGmail() skips odd minutes

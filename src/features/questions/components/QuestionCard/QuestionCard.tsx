@@ -8,11 +8,11 @@ import { usePresence } from '@/shared/hooks/usePresence';
 import type { Question } from '@/shared/types/storage';
 import type { Database } from '@/shared/types/supabase';
 import { openInAI } from '@/shared/utils/aiPromptUtils';
+import { hasEnoughPeerData } from '../../utils/peerStats';
 import {
     getCorrectAnswerText,
     isNumericalQuestion,
 } from '../../utils/questionUtils';
-import { hasEnoughPeerData } from '../../utils/peerStats';
 import ActionButtons from './ActionButtons';
 import AskAIBanner from './AskAIBanner';
 import QuestionContent from './QuestionContent';

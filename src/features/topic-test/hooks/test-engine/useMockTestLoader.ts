@@ -96,8 +96,12 @@ const useMockTestLoader = (testId: string) => {
             );
 
             const merged = new Map<string, Attempt>();
-            supabaseAttempts.forEach((a) => merged.set(a.question_id, a));
-            pendingLocal.forEach((a) => merged.set(a.question_id, a));
+            supabaseAttempts.forEach((a) => {
+                merged.set(a.question_id, a);
+            });
+            pendingLocal.forEach((a) => {
+                merged.set(a.question_id, a);
+            });
 
             const attempts = Array.from(merged.values()).sort(
                 (a, b) => a.attempt_order - b.attempt_order
