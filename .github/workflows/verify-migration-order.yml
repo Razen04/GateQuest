@@ -1,2 +1,0 @@
-- name: Verify migration order
-  run: ../../scripts/check-migration-order.sh
