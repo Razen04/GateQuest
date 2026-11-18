@@ -9,7 +9,6 @@ import useTest from '@/features/topic-test/hooks/test-engine/useTest';
 import { Button } from '@/shared/components/ui/button';
 import QuestionPalette from './QuestionPallete';
 import TestControlBar from './TestControlBar';
-// Sub-components
 import TestHeader from './TestHeader';
 
 const ActiveTest = () => {
@@ -22,72 +21,53 @@ const ActiveTest = () => {
         handleJumpTo,
         handleSubmit,
         questions,
+        isMockMode,
+        mockLabel,
+        finishUnlockAt,
     } = useTest();
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
     const [showCalc, setShowCalc] = useState(false);
 
-    // Derived States
     const currentIndex = navigation.currentIndex;
     const totalQuestions = questions?.length || 0;
     const currentQ = questions?.[currentIndex];
 
-    // If data isn't loaded yet, show nothing
     if (!currentQ) return null;
 
     const currentAttempt = answers.answers.get(currentQ.id);
     const isFirst = currentIndex === 0;
     const isLast = currentIndex === totalQuestions - 1;
 
-    // useTestAnswer requires this for saving to DB
-    // Find the permanent index of this question in the master list
     const realIndex = questions.findIndex((q) => q.id === currentQ.id);
     const attemptOrder = realIndex + 1;
-    // Question Type Logic
     const isMSQ = isMultipleSelection(currentQ);
     const isNAT = isNumericalQuestion(currentQ);
 
-    // Data Normalization
-    // MSQ: Expects array of numbers. If undefined, give empty array.
     const msqSelection: number[] =
         isMSQ && Array.isArray(currentAttempt?.user_answer)
             ? currentAttempt?.user_answer
             : [];
 
-    // MCQ: Expects single number. If undefined or array, give null.
     const mcqSelection: number | null =
         !isMSQ && !isNAT && typeof currentAttempt?.user_answer === 'number'
             ? currentAttempt?.user_answer
             : null;
 
-    // NAT: Expects string or number.
-    // Get the raw value
     const rawVal = currentAttempt?.user_answer;
-
-    // Normalize: If it's a number or string, use it. If it's an array or null, use empty string.
     const natValue =
         typeof rawVal === 'number' || typeof rawVal === 'string' ? rawVal : '';
 
-    // Handlers
     const handleOptionClick = (optionIndex: number) => {
         if (isMSQ) {
-            // MSQ Logic: Toggle the index in the array
             const currentArr = Array.isArray(currentAttempt?.user_answer)
                 ? [...currentAttempt!.user_answer]
                 : [];
-
             const existsAt = currentArr.indexOf(optionIndex);
-            if (existsAt > -1) {
-                currentArr.splice(existsAt, 1); // Remove
-            } else {
-                currentArr.push(optionIndex); // Add
-            }
-
-            // Sort for consistency
+            if (existsAt > -1) currentArr.splice(existsAt, 1);
+            else currentArr.push(optionIndex);
             currentArr.sort((a, b) => a - b);
-
             answers.selectOption(currentQ.id, currentArr, attemptOrder);
         } else {
-            // MCQ Logic: Just set the value
             answers.selectOption(currentQ.id, optionIndex, attemptOrder);
         }
     };
@@ -108,9 +88,7 @@ const ActiveTest = () => {
 
     const isReviewMarked = answers.isMarkedForReview(currentQ.id);
 
-    // ActiveTest.tsx logic
     const allAttempts = Array.from(answers.answers.values());
-
     const answeredCount = allAttempts.filter(
         (a) => a.status === 'answered'
     ).length;
@@ -126,7 +104,10 @@ const ActiveTest = () => {
             <TestHeader
                 timeDisplay={timer.timeDisplay}
                 questionStatus={`${currentIndex + 1} of ${totalQuestions}`}
-                onEndTest={handleSubmit}
+                onEndTest={() => handleSubmit()}
+                isMockMode={isMockMode}
+                title={isMockMode ? mockLabel : 'Custom Test'}
+                finishUnlockAt={finishUnlockAt}
             />
 
             <div className="flex flex-1 overflow-hidden relative">
@@ -159,13 +140,10 @@ const ActiveTest = () => {
 
                                 {showCalc && (
                                     <>
-                                        {/* BACKDROP (works for both desktop + mobile) */}
                                         <div
                                             className="fixed inset-0 z-40 bg-black/30"
                                             onClick={() => setShowCalc(false)}
                                         />
-
-                                        {/* DESKTOP */}
                                         <div className="hidden md:block absolute right-0 mt-2 z-50">
                                             <div
                                                 className="relative w-[475px] h-[350px] bg-popover shadow-2xl overflow-hidden"
@@ -179,8 +157,6 @@ const ActiveTest = () => {
                                                 />
                                             </div>
                                         </div>
-
-                                        {/* MOBILE */}
                                         <div className="md:hidden fixed inset-x-0 bottom-0 z-50 flex items-end">
                                             <div
                                                 className="w-full h-[60vh] bg-popover overflow-hidden relative"
@@ -199,7 +175,6 @@ const ActiveTest = () => {
                             </div>
                         </div>
 
-                        {/* Render Text & Options */}
                         <QuestionContent
                             env="Test"
                             currentQuestion={currentQ}
@@ -210,7 +185,6 @@ const ActiveTest = () => {
                             onOptionSelect={handleOptionClick}
                         />
 
-                        {/* Render Numerical Input (Conditionally) */}
                         {isNAT && (
                             <div className="mt-6 p-4 border bg-muted border-border">
                                 <label className="block text-sm font-semibold mb-3 text-foreground">
@@ -218,8 +192,7 @@ const ActiveTest = () => {
                                 </label>
                                 <input
                                     type="number"
-                                    className="w-full p-3 text-lg border bg-background border-border text-foreground placeholder:text-muted-foreground
-                                             focus:ring-2 focus:ring-chart-1 focus:border-chart-1"
+                                    className="w-full p-3 text-lg border bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-chart-1 focus:border-chart-1"
                                     placeholder="Enter value..."
                                     value={natValue}
                                     onChange={handleNumericalChange}
@@ -236,7 +209,7 @@ const ActiveTest = () => {
                         markedForReview={answers.isMarkedForReview}
                         isAnswered={answers.isAnswered}
                         isVisited={answers.isVisited}
-                        isOpen={true} // always open on desktop
+                        isOpen={true}
                         onToggle={() => {}}
                         onJumpTo={handleJumpTo}
                         answeredCount={answeredCount}
@@ -246,7 +219,6 @@ const ActiveTest = () => {
                     />
                 </aside>
 
-                {/* MOBILE PALETTE */}
                 <div className="md:hidden">
                     <QuestionPalette
                         questions={questions}

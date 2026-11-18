@@ -14,6 +14,37 @@ export const getDifficultyClassNames = (difficulty: string) => {
     return 'bg-gray-100 text-gray-700'; // Default fallback
 };
 
+/**
+ * Mock-series questions are tagged with `paperType: 'mock'` in their
+ * metadata. That flag is what distinguishes them from regular PYQs in
+ * the practice list and question header.
+ */
+export const isMockQuestion = (q: Question): boolean =>
+    q.metadata?.paperType?.toLowerCase() === 'mock';
+
+/**
+ * Source badge text.
+ *
+ * Mocks read `EXAM BRANCH MOCK YEAR` (e.g. "GATE CS MOCK 2026") so the
+ * branch is visible where the shift number would normally sit. Regular
+ * PYQs keep `EXAM SET YEAR`.
+ */
+export const getQuestionSourceLabel = (q: Question): string => {
+    if (!q.year) return 'Year Unknown';
+
+    const exams = Array.isArray(q.metadata?.exam)
+        ? q.metadata.exam
+        : [q.metadata?.exam || 'GATE'];
+    const branch = q.metadata?.set?.trim();
+
+    const parts = [exams.join(' / ').toUpperCase()];
+    if (branch) parts.push(branch);
+    if (isMockQuestion(q)) parts.push('QUEST MOCK');
+    parts.push(String(q.year));
+
+    return parts.join(' ');
+};
+
 // Determine if current question is a multiple selection question
 export const isMultipleSelection = (currentQuestion: Question) => {
     if (!currentQuestion) return false;

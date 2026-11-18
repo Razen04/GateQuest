@@ -58,7 +58,7 @@ const Layout = () => {
         });
     }, [location.pathname]);
 
-    const FOCUS_PATHS = ['/topic-test'];
+    const FOCUS_PATHS = ['/topic-test', '/mock-tests'];
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
     const hideMobileNavigation = FOCUS_PATHS.some(

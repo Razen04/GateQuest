@@ -136,11 +136,18 @@ const Navbar = () => {
     const isMobile = width < 1024;
 
     // Hide Navbar during test attempt screens
-    const isAttemptPage =
+
+    const isTopicAttemptPage =
         /\/topic-test\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/attempt/i.test(
             location.pathname
         );
-    if (isAttemptPage) {
+
+    const isMockAttemptPage =
+        /\/mock-tests\/attempt\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/?$/i.test(
+            location.pathname
+        );
+
+    if (isTopicAttemptPage || isMockAttemptPage) {
         return null;
     }
 

@@ -23,7 +23,9 @@ import type { Question } from '@/shared/types/storage.js';
 import useBookmark from '../../hooks/useBookmark';
 import {
     getDifficultyClassNames,
+    getQuestionSourceLabel,
     getQuestionTypeText,
+    isMockQuestion,
     isMultipleSelection,
 } from '../../utils/questionUtils.js';
 import QuestionBookmark from './QuestionBookmark.js';
@@ -155,16 +157,18 @@ const QuestionHeader = ({
         return normalized.charAt(0).toUpperCase() + normalized.slice(1);
     };
 
-    const examLabel = question.year
-        ? `${(Array.isArray(question.metadata.exam)
-              ? question.metadata.exam
-              : [question.metadata.exam || 'GATE']
-          )
-              .join(' / ')
-              .toUpperCase()} ${question.year}${
-              question.metadata.set ? ` • ${question.metadata.set}` : ''
-          }`
-        : 'Year Unknown';
+    const examLabel = isMockQuestion(question)
+        ? getQuestionSourceLabel(question)
+        : question.year
+          ? `${(Array.isArray(question.metadata.exam)
+                ? question.metadata.exam
+                : [question.metadata.exam || 'GATE']
+            )
+                .join(' / ')
+                .toUpperCase()} ${question.year}${
+                question.metadata.set ? ` • ${question.metadata.set}` : ''
+            }`
+          : 'Year Unknown';
 
     const utilityButton =
         'flex items-center gap-1.5 border px-3 py-1.5 text-xs font-medium backdrop-blur-md transition-colors';

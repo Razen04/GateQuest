@@ -9,6 +9,7 @@ import {
     HighlighterIcon,
     SlidersIcon,
     TargetIcon,
+    TrophyIcon,
     XIcon,
 } from '@phosphor-icons/react';
 import React, { useEffect, useState } from 'react';
@@ -51,6 +52,12 @@ const sessionThemes: Record<string, SessionTheme> = {
         iconBg: 'bg-chart-2/10',
         hoverBorder: 'hover:border-chart-2/40',
         badge: 'border-chart-2/20 bg-chart-2/10 text-chart-2',
+    },
+    mock: {
+        iconColor: 'text-chart-1',
+        iconBg: 'bg-chart-1/10',
+        hoverBorder: 'hover:border-chart-1/40',
+        badge: 'border-chart-1/20 bg-chart-1/10 text-chart-1',
     },
 };
 
@@ -159,8 +166,45 @@ export const ContinueSessionWidget = () => {
         }
     }
 
+    // Mock Test Route
+    else if (segments[0] === 'mock-tests') {
+        theme = sessionThemes.mock;
+
+        if (segments[1] === 'attempt') {
+            cardTitle = 'Mock Test In Progress';
+            cardSubtitle =
+                'The clock is running and the window will not wait for you.';
+            badgeText = 'Live Mock';
+            Icon = ClockIcon;
+            isLiveTest = true;
+        } else if (segments[1] === 'result') {
+            cardTitle = 'Mock Test Result';
+            cardSubtitle =
+                'Your score is waiting. The leaderboard is watching.';
+            badgeText = 'Score Card';
+            Icon = ChartBarIcon;
+        } else if (segments[1] && segments[2] === 'leaderboard') {
+            cardTitle = 'Mock Test Leaderboard';
+            cardSubtitle =
+                'See where you landed against the rest of the batch.';
+            badgeText = 'Rankings';
+            Icon = TrophyIcon;
+        } else if (segments[1]) {
+            cardTitle = 'Mock Test Lobby';
+            cardSubtitle = 'Read the rules, then start when you are ready.';
+            badgeText = 'Exam Gate';
+            Icon = ClockIcon;
+        } else {
+            cardTitle = 'GateQuest Mock Series';
+            cardSubtitle = 'Scheduled mocks, live windows, and past results.';
+            badgeText = 'Mock Hub';
+            Icon = TrophyIcon;
+        }
+    }
+
     // Topic Test Route
     else if (
+        segments[0] &&
         [
             'topic-test',
             'topic-test-generate',
