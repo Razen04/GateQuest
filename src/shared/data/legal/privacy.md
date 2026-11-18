@@ -27,6 +27,10 @@ You can also poke around as a guest without signing in. In that case there's no 
 
 **I am not interested in selling data.**
 
+### Umami Analytics
+
+The website collects anonymised data via [Umami Analytics](https://umami.is/).
+
 ## Who else sees it
 
 Just the services that make the app work:
