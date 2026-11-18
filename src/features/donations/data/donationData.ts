@@ -10,7 +10,8 @@ export const TIERS = [
             'Bronze color name across app',
             'AMOLED mode + all accents',
             'Custom AI prompt',
-            'Discord patron role',
+            'Leaderboard, Analysis and have Mock questions in normal app flow.',
+            'Unlimited Tests history.',
         ],
     },
     {
@@ -23,6 +24,7 @@ export const TIERS = [
             'Gold color name across app',
             'Gold profile frame',
             'Animated GIF avatars & banners',
+            'Discord patron role (Contact me on Discord for this)',
         ],
     },
     {
