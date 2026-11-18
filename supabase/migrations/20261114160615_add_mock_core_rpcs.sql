@@ -1,38 +1,18 @@
 -- ═══════════════════════════════════════════════════════════════════
 -- Mock Test Series: core RPCs
 --
--- Three functions and one cron schedule:
+-- (consolidated — absorbs patch_create_test_from_mock_record_activity
+--  and expose_active_test_in_mock_catalog)
 --
---   create_test_from_mock   — the write path. Assembles a session from
---                             a mock's questions, enforces the full
---                             guard ordering, returns a structured
---                             status payload.
---
---   get_mock_catalog        — the read path. One round trip returning
---                             server truth per mock: live/released
---                             flags, can_attempt, session info.
---
---   expire_mock_sessions    — the cron. Auto-submits any mock session
---                             still open past its window, so "live" is
---                             actually live.
---
--- Two deviations from the plan, flagged for review:
---
---   1. active_exists guard applies to re-attempts. The plan skipped
---      it, but that would let the INSERT hit
---      idx_one_active_test_per_user_branch_active and throw a raw
---      constraint error instead of a clean active_exists payload.
---      Always checking is correct: the completed mock is not in the
---      active set, so re-attempts pass cleanly when nothing else is
---      open.
---
---   2. temp_mock_questions uses DROP TABLE IF EXISTS + CREATE TEMP
---      ... ON COMMIT DROP rather than CREATE TEMP alone. The plan's
---      version throws "table already exists" if the function is called
---      twice in the same transaction (which happens in pgTAP).
+--   create_test_from_mock   — write path. Reads one row from `mocks`,
+--                             assembles attempts from `mock_questions`.
+--                             `p_record_activity` default false.
+--   get_mock_catalog        — read path. Plain SELECT from `mocks`,
+--                             no metadata aggregation. Returns
+--                             active_test_id/label + display hints.
+--   expire_mock_sessions    — cron. Joins `mocks` for window check.
 -- ═══════════════════════════════════════════════════════════════════
--- ─── create_test_from_mock — the write path ───────────────────────
-create or replace function public.create_test_from_mock (p_mock_id text, p_branch_id text)
+create or replace function public.create_test_from_mock (p_mock_id text, p_branch_id text, p_record_activity boolean default false)
     returns jsonb
     language plpgsql
     security definer
@@ -46,11 +26,8 @@ declare
     v_existing_status text;
     v_blocking_test_id uuid;
     v_blocking_paper text;
-    v_starts_at timestamptz;
-    v_ends_at timestamptz;
-    v_duration_seconds int;
-    v_attempt_min_tier smallint;
-    v_label text;
+    v_mock record;
+    v_window_ends_at timestamptz;
     v_time_allowed int;
     v_actual_count int;
     v_total_marks int;
@@ -58,42 +35,42 @@ declare
     v_is_re_attempt boolean := false;
     v_attempt_number int;
     v_new_paper_id text;
-    v_attempts jsonb;
 begin
     if v_user_id is null then
         raise exception 'Not authenticated';
     end if;
+    -- performs concurrent test creation for the same user and branch
+    perform
+        pg_advisory_xact_lock(hashtextextended(v_user_id::text || ':' || lower(p_branch_id), 0));
     v_my_tier := public.get_my_tier ();
-    -- ─── Read mock facts from questions (never from client) ───
     select
-        min((q.metadata ->> 'mockStartsAt')::timestamptz),
-        max((q.metadata ->> 'mockDurationSeconds')::int),
-        max(coalesce((q.metadata ->> 'mockAttemptMinTier')::smallint, 0)),
-        max(q.metadata ->> 'mockLabel'),
+        *
+    into
+        v_mock
+    from
+        public.mocks
+    where
+        id = p_mock_id
+        and upper(branch) = upper(p_branch_id)
+        and status in ('scheduled', 'live');
+    if not FOUND then
+        raise exception 'Unknown mock % for branch %', p_mock_id, p_branch_id;
+    end if;
+    v_window_ends_at := v_mock.starts_at + make_interval(secs => v_mock.duration_seconds);
+    select
         count(*),
         sum(coalesce(q.marks, 1))
     into
-        v_starts_at,
-        v_duration_seconds,
-        v_attempt_min_tier,
-        v_label,
         v_actual_count,
         v_total_marks
     from
-        public.questions q
+        public.mock_questions mq
+        join public.questions q on q.id = mq.question_id
     where
-        q.metadata ->> 'mockId' = p_mock_id
-        and upper(q.metadata ->> 'set') = upper(p_branch_id);
+        mq.mock_id = p_mock_id;
     if coalesce(v_actual_count, 0) = 0 then
-        raise exception 'Unknown mock % for branch %', p_mock_id, p_branch_id;
+        raise exception 'Mock % has no questions', p_mock_id;
     end if;
-    if v_starts_at is null or v_duration_seconds is null then
-        raise exception 'Mock % missing mockStartsAt or mockDurationSeconds', p_mock_id;
-    end if;
-    v_ends_at := v_starts_at + make_interval(secs => v_duration_seconds);
-    -- ─── Existing session check (base mock OR its -rN attempts) ───
-    -- Deliberately excludes '-practice-' sessions: those are separate
-    -- from the mock attempt flow.
     select
         id,
         status
@@ -111,12 +88,10 @@ begin
     limit 1;
     if v_existing_test_id is not null then
         if v_existing_status = 'completed' then
-            -- Completed session: donors can re-attempt, free users cannot.
             if v_my_tier < 1 then
                 return jsonb_build_object('status', 're_attempt_gated', 'test_id', v_existing_test_id, 'min_tier', 1);
             end if;
             v_is_re_attempt := true;
-            -- Compute next re-attempt number from existing attempts
             select
                 count(*)
             into
@@ -129,18 +104,11 @@ begin
                     or paper_id like p_mock_id || '-r%');
             v_new_paper_id := p_mock_id || '-r' || (v_attempt_number + 1);
         else
-            -- Ongoing session — resume
             return jsonb_build_object('status', 'already_attempted', 'test_id', v_existing_test_id, 'session_status', v_existing_status);
         end if;
     else
         v_new_paper_id := p_mock_id;
     end if;
-    -- ─── Active test guard ───
-    -- ALWAYS enforced, including for re-attempts. The DB has a partial
-    -- unique index on (user_id, branch_id) WHERE status <> 'completed',
-    -- so any open test (practice, another mock, etc.) would cause the
-    -- INSERT below to throw a raw constraint violation. Catching it
-    -- here gives the client a clean actionable response.
     select
         id,
         paper_id
@@ -157,47 +125,27 @@ begin
     if v_blocking_test_id is not null then
         return jsonb_build_object('status', 'active_exists', 'test_id', v_blocking_test_id, 'blocking_paper_id', v_blocking_paper);
     end if;
-    -- ─── Window check ───
-    if now() < v_starts_at then
-        return jsonb_build_object('status', 'not_live', 'starts_at', v_starts_at);
+    if now() < v_mock.starts_at then
+        return jsonb_build_object('status', 'not_live', 'starts_at', v_mock.starts_at);
     end if;
-    -- ─── Attempt gate (reserved for future; currently 0 for all mocks) ───
-    if v_attempt_min_tier > 0 and v_my_tier < v_attempt_min_tier then
-        return jsonb_build_object('status', 'attempt_gated', 'min_tier', v_attempt_min_tier, 'my_tier', v_my_tier);
+    if v_mock.attempt_min_tier > 0 and v_my_tier < v_mock.attempt_min_tier then
+        return jsonb_build_object('status', 'attempt_gated', 'min_tier', v_mock.attempt_min_tier, 'my_tier', v_my_tier);
     end if;
-    -- ─── Time allowed ───
-    -- In-window: remaining seconds until window close.
-    -- After window: full duration (practice mode).
-    if now() < v_ends_at then
-        v_time_allowed := greatest (0, floor(extract(epoch from (v_ends_at - now()))))::int;
+    if now() < v_window_ends_at then
+        v_time_allowed := greatest (0, floor(extract(epoch from (v_window_ends_at - now()))))::int;
     else
-        v_time_allowed := v_duration_seconds;
+        v_time_allowed := v_mock.duration_seconds;
     end if;
     if v_time_allowed < 60 then
         return jsonb_build_object('status', 'window_closing', 'seconds_left', v_time_allowed);
     end if;
-    -- ─── Tier-conditional activity recording ───
-    -- Free users: attempts are recorded in topic_tests_attempts but NOT
-    -- synced to user_question_activity / user_incorrect_queue. Donors
-    -- get the full integration. submit_test_grading must respect this
-    -- flag; verify with the grep in the plan's pre-flight checks.
-    v_record_activity := v_my_tier >= 1;
-    -- ─── Build the paper and create the session ───
-    drop table if exists temp_mock_questions;
-    create TEMP table temp_mock_questions on commit drop as
-    select
-        q.id, coalesce(q.marks, 1) as marks, case when q.metadata ->> 'section' = 'GA' then
-            0
-        else
-            1
-        end as section_order, q.question_number
-    from
-        public.questions q
-    where
-        q.metadata ->> 'mockId' = p_mock_id
-        and upper(q.metadata ->> 'set') = upper(p_branch_id);
+    v_record_activity := case when v_my_tier < 1 then
+        false
+    else
+        coalesce(p_record_activity, false)
+    end;
     insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
-        values (v_user_id, array[coalesce(v_label, p_mock_id)], v_actual_count, v_time_allowed, 'created', v_total_marks, p_branch_id, v_new_paper_id, v_record_activity)
+        values (v_user_id, array[v_mock.label], v_actual_count, v_time_allowed, 'created', v_total_marks, p_branch_id, v_new_paper_id, v_record_activity)
     returning
         id
     into
@@ -205,20 +153,27 @@ begin
     insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status)
     select
         v_new_test_id,
-        id,
-        row_number() over (order by section_order, question_number),
+        mq.question_id,
+        row_number() over (order by case when q.metadata ->> 'section' = 'GA' then
+                0
+            else
+                1
+            end, mq.position),
         'unvisited'
     from
-        temp_mock_questions;
-    return jsonb_build_object('status', 'created', 'test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks, 'time_allowed', v_time_allowed, 'results_at', v_ends_at, 'is_re_attempt', v_is_re_attempt);
+        public.mock_questions mq
+        join public.questions q on q.id = mq.question_id
+    where
+        mq.mock_id = p_mock_id;
+    return jsonb_build_object('status', 'created', 'test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks, 'time_allowed', v_time_allowed, 'results_at', v_window_ends_at, 'is_re_attempt', v_is_re_attempt, 'record_activity', v_record_activity);
 end;
 $$;
 
-grant execute on function public.create_test_from_mock (text, text) to authenticated;
+grant execute on function public.create_test_from_mock (text, text, boolean) to authenticated;
 
-comment on function public.create_test_from_mock (text, text) is 'Creates a mock test session. Reads schedule, duration, and attempt gate from questions.metadata->>mock*. Every gate enforced server-side, nothing trusted from caller. Returns {status: created|not_live|already_attempted|active_exists|attempt_gated|re_attempt_gated|window_closing, ...}.';
+comment on function public.create_test_from_mock (text, text, boolean) is 'Creates a mock test session. Reads schedule, duration, and gates from the `mocks` row; assembles attempts from `mock_questions`. Guard order: already_attempted → re_attempt_gated → active_exists → not_live → attempt_gated → window_closing → created.';
 
--- ─── get_mock_catalog — the read path ─────────────────────────────
+-- ─── get_mock_catalog ───────────────────────────────────────────
 create or replace function public.get_mock_catalog (p_branch_id text)
     returns jsonb
     language sql
@@ -226,82 +181,93 @@ create or replace function public.get_mock_catalog (p_branch_id text)
     security definer
     set search_path = 'public'
     as $$
-    with facts as (
-        select
-            q.metadata ->> 'mockId' as mock_id,
-            max(q.metadata ->> 'mockLabel') as label,
-            min((q.metadata ->> 'mockStartsAt')::timestamptz) as starts_at,
-            max((q.metadata ->> 'mockDurationSeconds')::int) as duration_seconds,
-            max(coalesce((q.metadata ->> 'mockAttemptMinTier')::smallint, 0)) as attempt_min_tier,
-            max(coalesce((q.metadata ->> 'mockPostMinTier')::smallint, 0)) as post_min_tier,
-            count(*) as question_count,
-            sum(coalesce(q.marks, 1)) as total_marks
-        from
-            public.questions q
-        where
-            q.metadata ->> 'mockId' is not null
-            and upper(q.metadata ->> 'set') = upper(p_branch_id)
-        group by
-            1
+    with user_sessions as (
+        select distinct on (base_mock_id)
+            base_mock_id,
+            session_id,
+            session_status,
+            session_score,
+            created_at
+        from (
+            select
+                regexp_replace(t.paper_id, '-r[0-9]+$', '') as base_mock_id,
+                t.id as session_id,
+                t.status as session_status,
+                case when t.status = 'completed' then
+                    t.score
+                else
+                    null
+                end as session_score,
+                t.created_at
+            from
+                public.topic_tests t
+            where
+                t.user_id = auth.uid ()
+                and t.paper_id like 'mock-%') sub
+        order by
+            base_mock_id,
+            created_at desc
 ),
-mine as (
-    -- Strip '-rN' suffix so re-attempts collapse under the base mock.
-    -- Practice sessions ('-practice-') do not match the -rN pattern
-    -- and therefore won't appear here — they're not mock attempts.
-    select distinct on (base_mock_id)
-        base_mock_id,
-        session_id,
-        session_status,
-        session_score,
-        created_at
-    from (
-        select
-            regexp_replace(t.paper_id, '-r[0-9]+$', '') as base_mock_id,
-            t.id as session_id,
-            t.status as session_status,
-            case when t.status = 'completed' then
-                t.score
-            else
-                null
-            end as session_score,
-            t.created_at
-        from
-            public.topic_tests t
-        where
-            t.user_id = auth.uid ()
-            and t.paper_id like 'mock-%') sub
-    order by
-        base_mock_id,
-        created_at desc
+active as (
+    select
+        id,
+        topics[1] as label
+    from
+        public.topic_tests
+    where
+        user_id = auth.uid ()
+        and upper(branch_id) = upper(p_branch_id)
+        and status <> 'completed'
+    limit 1
 )
 select
-    coalesce(jsonb_agg(jsonb_build_object('mock_id', f.mock_id, 'label', f.label, 'starts_at', f.starts_at, 'ends_at', f.starts_at + make_interval(secs => f.duration_seconds), 'duration_seconds', f.duration_seconds, 'question_count', f.question_count, 'total_marks', f.total_marks, 'attempt_min_tier', f.attempt_min_tier, 'post_min_tier', f.post_min_tier, 'is_live', now() >= f.starts_at
-            and now() < f.starts_at + make_interval(secs => f.duration_seconds), 'results_released', now() >= f.starts_at + make_interval(secs => f.duration_seconds), 'can_attempt', auth.uid () is not null
-and (f.attempt_min_tier = 0
-    or public.get_my_tier () >= f.attempt_min_tier), 'attempt_lock_reason', case when auth.uid () is null then
+    coalesce(jsonb_agg(jsonb_build_object('mock_id', m.id, 'label', m.label, 'starts_at', m.starts_at, 'ends_at', m.starts_at + make_interval(secs => m.duration_seconds), 'duration_seconds', m.duration_seconds, 'question_count', (
+                    select
+                        count(*)
+                    from public.mock_questions
+                where
+                    mock_id = m.id), 'total_marks', (
+                    select
+                        coalesce(sum(q.marks), 1)
+                    from public.mock_questions mq
+                    join public.questions q on q.id = mq.question_id
+                where
+                    mq.mock_id = m.id), 'attempt_min_tier', m.attempt_min_tier, 'post_min_tier', m.post_min_tier, 'series_number', m.series_number, 'blurb', m.blurb, 'announcement', m.announcement, 'is_live', now() >= m.starts_at
+            and now() < m.starts_at + make_interval(secs => m.duration_seconds), 'results_released', now() >= m.starts_at + make_interval(secs => m.duration_seconds), 'can_attempt', auth.uid () is not null
+and (m.attempt_min_tier = 0
+    or public.get_my_tier () >= m.attempt_min_tier), 'attempt_lock_reason', case when auth.uid () is null then
     'login_required'
-when f.attempt_min_tier > 0
-    and public.get_my_tier () < f.attempt_min_tier then
+when m.attempt_min_tier > 0
+    and public.get_my_tier () < m.attempt_min_tier then
     'tier_required'
 else
     null
-end, 'session_id', m.session_id, 'session_status', m.session_status, 'session_score', case when m.session_status = 'completed'
-    and now() >= f.starts_at + make_interval(secs => f.duration_seconds) then
-    m.session_score
+end, 'session_id', s.session_id, 'session_status', s.session_status, 'session_score', case when s.session_status = 'completed'
+    and now() >= m.starts_at + make_interval(secs => m.duration_seconds) then
+    s.session_score
 else
     null
-end)
-order by f.mock_id), '[]'::jsonb)
+end, 'active_test_id', (
+    select
+        id
+    from active), 'active_test_label', (
+    select
+        label
+    from active))
+order by m.series_number NULLS last, m.starts_at), '[]'::jsonb)
 from
-    facts f
-    left join mine m on m.base_mock_id = f.mock_id;
+    public.mocks m
+    left join user_sessions s on s.base_mock_id = m.id
+where
+    upper(m.branch) = upper(p_branch_id)
+    and m.status in ('scheduled', 'live', 'archived');
 $$;
 
 grant execute on function public.get_mock_catalog (text) to authenticated;
 
-comment on function public.get_mock_catalog (text) is 'Returns one row per mock for the given branch. All gating values (can_attempt, is_live, results_released, session_score) are the server''s verdict — the client never re-derives them. session_score is NULL while embargoed, populated only after results_released.';
+comment on function public.get_mock_catalog (text) is 'Returns one row per mock for the branch. All gating values computed from the `mocks` row — no metadata aggregation. Source of truth for the client.';
 
--- ─── expire_mock_sessions — the cron ──────────────────────────────
+-- ─── expire_mock_sessions ───────────────────────────────────────
 create or replace function public.expire_mock_sessions ()
     returns int
     language plpgsql
@@ -318,49 +284,38 @@ begin
         t.id
     from
         public.topic_tests t
+        join public.mocks m on t.paper_id = m.id
+            or t.paper_id like m.id || '-r%'
     where
         t.paper_id like 'mock-%'
         and t.paper_id not like '%-practice-%'
         and t.status <> 'completed'
-        and exists (
-            select
-                1
-            from
-                public.questions q
-            where
-                q.metadata ->> 'mockId' = regexp_replace(t.paper_id, '-r[0-9]+$', '')
-                and now() >= (q.metadata ->> 'mockStartsAt')::timestamptz + make_interval(secs => (q.metadata ->> 'mockDurationSeconds')::int))
-            loop
-                begin
-                    -- Collect current attempts from the DB (server's view, not
-                    -- the client's). The heartbeat writes every 60s, so a user
-                    -- who vanishes loses at most the final minute of answers.
-                    select
-                        coalesce(jsonb_agg(jsonb_build_object('question_id', a.question_id, 'user_answer', a.user_answer, 'marked_for_review', a.marked_for_review, 'status', a.status, 'time_spent_seconds', a.time_spent_seconds, 'attempt_order', a.attempt_order)), '[]'::jsonb)
-                    into
-                        v_attempts
-                    from
-                        public.topic_tests_attempts a
-                    where
-                        a.session_id = v_session.id;
-                    perform
-                        public.submit_test_grading (v_session.id, v_attempts, 0);
-                    -- Belt-and-suspenders: if submit_test_grading didn't flip
-                    -- status to 'completed', do it here. A second cron cycle
-                    -- would otherwise re-process the same session forever.
-                    update
-                        public.topic_tests
-                    set
-                        status = 'completed'
-                    where
-                        id = v_session.id
-                        and status <> 'completed';
-                    v_count := v_count + 1;
-                exception
-                    when others then
-                        -- One failed session doesn't abort the batch
-                        raise WARNING 'expire_mock_sessions failed for %: %', v_session.id, SQLERRM;
-                end;
+        and now() >= m.starts_at + make_interval(secs => m.duration_seconds)
+    for update
+        of t skip locked loop
+            begin
+                select
+                    coalesce(jsonb_agg(jsonb_build_object('question_id', a.question_id, 'user_answer', a.user_answer, 'marked_for_review', a.marked_for_review, 'status', a.status, 'time_spent_seconds', a.time_spent_seconds, 'attempt_order', a.attempt_order)), '[]'::jsonb)
+                into
+                    v_attempts
+                from
+                    public.topic_tests_attempts a
+                where
+                    a.session_id = v_session.id;
+                perform
+                    public.submit_test_grading (v_session.id, v_attempts, 0);
+                update
+                    public.topic_tests
+                set
+                    status = 'completed'
+                where
+                    id = v_session.id
+                    and status <> 'completed';
+                v_count := v_count + 1;
+            exception
+                when others then
+                    raise WARNING 'expire_mock_sessions failed for %: %', v_session.id, SQLERRM;
+            end;
     end loop;
     return v_count;
 end;
@@ -369,9 +324,8 @@ $$;
 
 grant execute on function public.expire_mock_sessions () to service_role;
 
-comment on function public.expire_mock_sessions () is 'Auto-submits any mock session still open past its window end. Idempotent: submit_test_grading short-circuits on completed sessions. Runs every 5 minutes via pg_cron. Returns count of sessions completed in this invocation.';
+comment on function public.expire_mock_sessions () is 'Auto-submits any mock session still open past its window end. Joins `mocks` for the window boundary. Idempotent — submit_test_grading short-circuits on completed sessions. Runs every 5 minutes via pg_cron.';
 
--- Schedule the cron
 do $$
 begin
     if exists (

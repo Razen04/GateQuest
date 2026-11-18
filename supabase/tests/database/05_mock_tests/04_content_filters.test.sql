@@ -3,14 +3,9 @@ select
     plan (10);
 \set user_free  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 \set user_donor 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
--- Unique subject per file so no other test's fixture or seed data
--- contaminates the count assertions. Every other test in the suite
--- uses 11111111-1111-1111-1111-111111111111 which has fixture rows
--- from prior test files (and possibly seed questions), making any
--- "count all questions for this subject" assertion non-deterministic.
 \set subject_id '4e4e4e4e-4e4e-4e4e-4e4e-4e4e4e4e4e4e'
-\set q_reg     '77777777-0000-0000-0000-000000000001'
-\set q_mock    '77777777-0000-0000-0000-000000000002'
+\set q_reg      '77777777-0000-0000-0000-000000000001'
+\set q_mock     '77777777-0000-0000-0000-000000000002'
 -- ─── Fixtures ─────────────────────────────────────────────────────
 insert into auth.users (id, email)
 values
@@ -42,22 +37,35 @@ values
     (:'user_donor', 'cs', '["gate"]'::jsonb, true)
 on conflict
     do nothing;
--- Force is_universal = false via DO UPDATE so the exam-tag filter
--- always applies (universal subjects bypass it). Safe even if the
--- subject happens to exist from seed data.
+-- ─── Subject ──────────────────────────────────────────────────────
 insert into public.subjects (id, name, slug, is_universal)
     values (:'subject_id', 'Test', 'test-04-mock-filter', false)
 on conflict (id)
     do update set
         is_universal = false,
         slug = EXCLUDED.slug;
--- Non-mock question
+-- ─── Mock configuration ───────────────────────────────────────────
+insert into public.mocks (id, label, branch, starts_at, duration_seconds, attempt_min_tier, post_min_tier, status)
+    values ('mock-filter-test', 'Filter Test', 'cs', now() - interval '4 hours', 10800, 0, 1, 'live')
+on conflict (id)
+    do update set
+        label = EXCLUDED.label,
+        branch = EXCLUDED.branch,
+        starts_at = EXCLUDED.starts_at,
+        duration_seconds = EXCLUDED.duration_seconds,
+        attempt_min_tier = EXCLUDED.attempt_min_tier,
+        post_min_tier = EXCLUDED.post_min_tier,
+        status = EXCLUDED.status;
+-- ─── Regular question ─────────────────────────────────────────────
 insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
     values (:'q_reg', 2025, 1, 'Test', :'subject_id', 'Topic A', 'multiple-choice', 'Regular?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'E', 'Test', 'test', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
--- Mock question
+-- ─── Mock question ────────────────────────────────────────────────
 insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
-    values (:'q_mock', 2026, 1, 'Test', :'subject_id', 'Topic B', 'multiple-choice', 'Mock?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'E', 'Test', 'test', true, jsonb_build_object('mockId', 'mock-filter-test', 'mockLabel', 'Filter Test', 'mockStartsAt', now() - interval '4 hours', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 0, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
--- Completed mock sessions for both users
+    values (:'q_mock', 2026, 1, 'Test', :'subject_id', 'Topic B', 'multiple-choice', 'Mock?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'E', 'Test', 'test', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
+-- Associate question with mock through the new relationship table.
+insert into public.mock_questions (mock_id, question_id, position)
+    values ('mock-filter-test', :'q_mock', 1);
+-- ─── Completed mock sessions for both users ───────────────────────
 insert into public.topic_tests (id, user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
 values
     ('c0000000-0000-0000-0000-000000000001', :'user_free', array['Filter Test'], 1, 0, 'completed', 1, 'cs', 'mock-filter-test', false),
@@ -66,13 +74,14 @@ insert into public.topic_tests_attempts (session_id, question_id, attempt_order,
 values
     ('c0000000-0000-0000-0000-000000000001', :'q_mock', 1, 'answered'),
     ('c0000000-0000-0000-0000-000000000002', :'q_mock', 1, 'answered');
--- Incorrect queue entries (1 mock + 1 non-mock per user)
+-- ─── Incorrect queue entries ──────────────────────────────────────
 insert into public.user_incorrect_queue (user_id, question_id, box, added_at, next_review_at)
 values
     (:'user_free', :'q_reg', 1, now(), now() - interval '1 hour'),
     (:'user_free', :'q_mock', 1, now(), now() - interval '1 hour'),
     (:'user_donor', :'q_reg', 1, now(), now() - interval '1 hour'),
     (:'user_donor', :'q_mock', 1, now(), now() - interval '1 hour');
+-- ─── Tests start below ────────────────────────────────────────────
 -- ═════════════════════════════════════════════════════════════════
 -- get_topic_counts
 -- ═════════════════════════════════════════════════════════════════

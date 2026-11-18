@@ -24,29 +24,28 @@ on conflict
     do nothing;
 create or replace function _insert_mock_questions (p_mock_id text, p_starts_at timestamptz, p_duration_sec int, p_attempt_min_tier int)
     returns void
-    language sql
+    language plpgsql
     as $fn$
-    insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
-    select
-        gen_random_uuid (),
-        2026,
-        n,
-        'T',
-        '11111111-1111-1111-1111-111111111111',
-        'Topic',
-        'multiple-choice',
-        'Q' || n,
-        array['A', 'B', 'C', 'D'],
-        '[0]'::jsonb,
-        1,
-        'Easy',
-        'E',
-        'T',
-        'test',
-        true,
-        jsonb_build_object('mockId', p_mock_id, 'mockLabel', p_mock_id, 'mockStartsAt', p_starts_at, 'mockDurationSeconds', p_duration_sec, 'mockAttemptMinTier', p_attempt_min_tier, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')
-    from
-        generate_series(1, 3) n;
+declare
+    v_question_id uuid;
+    v_position int := 0;
+begin
+    insert into public.mocks (id, label, branch, starts_at, duration_seconds, attempt_min_tier, post_min_tier, status)
+        values (p_mock_id, p_mock_id, 'cs', p_starts_at, p_duration_sec, p_attempt_min_tier, 1, 'scheduled')
+    on conflict (id)
+        do update set
+            starts_at = excluded.starts_at,
+            duration_seconds = excluded.duration_seconds,
+            attempt_min_tier = excluded.attempt_min_tier,
+            status = excluded.status;
+    for v_position in 1..3 loop
+        v_question_id := gen_random_uuid ();
+        insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
+            values (v_question_id, 2026, v_position, 'T', '11111111-1111-1111-1111-111111111111', 'Topic', 'multiple-choice', 'Q' || v_position, array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'E', 'T', 'test', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
+        insert into public.mock_questions (mock_id, question_id, position)
+            values (p_mock_id, v_question_id, v_position);
+    end loop;
+end;
 $fn$;
 select
     _insert_mock_questions ('mock-upcoming', now() + interval '1 hour', 10800, 0);

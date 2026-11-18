@@ -29,68 +29,118 @@ insert into public.subjects (id, name, slug, is_universal)
     values (:'subject_id', 'T', 't', false)
 on conflict
     do nothing;
--- ─── Fixture: expired mock (window ended 1 hour ago) ─────────────
+-- ─── Fixture: expired mock (window ended 1 hour ago) ──────────────
+insert into public.mocks (id, label, branch, starts_at, duration_seconds, attempt_min_tier, post_min_tier, status)
+    values ('mock-exptest', 'Mock Exp', 'cs', now() - interval '4 hours', 10800, 0, 1, 'scheduled');
+create temporary table _expired_mock_questions (
+    question_id uuid primary key,
+    position int not null
+) on commit drop;
+with inserted as (
 insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
+    select
+        gen_random_uuid (),
+        2026,
+        n,
+        'T',
+        :'subject_id',
+        'Topic',
+        'multiple-choice',
+        'Expired Mock Q' || n,
+        array['A',
+        'B',
+        'C',
+        'D'],
+        '[0]'::jsonb,
+        1,
+        'Easy',
+        'E',
+        'T',
+        'test',
+        true,
+        jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English')
+    from
+        generate_series(1, 2) n
+    returning
+        id,
+        question_number)
+insert into _expired_mock_questions (question_id, position)
 select
-    gen_random_uuid (),
-    2026,
-    n,
-    'T',
-    :'subject_id',
-    'Topic',
-    'multiple-choice',
-    'Q' || n,
-    array['A', 'B', 'C', 'D'],
-    '[0]'::jsonb,
-    1,
-    'Easy',
-    'E',
-    'T',
-    'test',
-    true,
-    jsonb_build_object('mockId', 'mock-exptest', 'mockLabel', 'Mock Exp', 'mockStartsAt', now() - interval '4 hours', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')
+    id,
+    row_number() over (order by question_number)
 from
-    generate_series(1, 2) n;
+    inserted;
+insert into public.mock_questions (mock_id, question_id, position)
+select
+    'mock-exptest',
+    question_id,
+    position
+from
+    _expired_mock_questions;
 -- Stuck session — participant (ongoing, past window)
 insert into public.topic_tests (id, user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
     values (:'session_stuck', :'participant', array['Mock Exp'], 2, 5000, 'ongoing', 2, 'cs', 'mock-exptest', false);
 insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status, user_answer)
 select
     :'session_stuck',
-    id,
-    row_number() over (),
+    question_id,
+    position,
     'answered',
     to_jsonb (0)
 from
-    public.questions
-where
-    metadata ->> 'mockId' = 'mock-exptest';
--- ─── Fixture: live mock (window still open) ──────────────────────
+    _expired_mock_questions;
+-- ─── Fixture: live mock (window still open) ───────────────────────
+insert into public.mocks (id, label, branch, starts_at, duration_seconds, attempt_min_tier, post_min_tier, status)
+    values ('mock-livetest', 'Mock Live', 'cs', now() - interval '30 minutes', 10800, 0, 1, 'scheduled');
+create temporary table _live_mock_questions (
+    question_id uuid primary key,
+    position int not null
+) on commit drop;
+with inserted as (
 insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
+    select
+        gen_random_uuid (),
+        2026,
+        n,
+        'T',
+        :'subject_id',
+        'Topic',
+        'multiple-choice',
+        'Live Mock Q' || n,
+        array['A',
+        'B',
+        'C',
+        'D'],
+        '[0]'::jsonb,
+        1,
+        'Easy',
+        'E',
+        'T',
+        'test',
+        true,
+        jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English')
+    from
+        generate_series(1, 2) n
+    returning
+        id,
+        question_number)
+insert into _live_mock_questions (question_id, position)
 select
-    gen_random_uuid (),
-    2026,
-    n,
-    'T',
-    :'subject_id',
-    'Topic',
-    'multiple-choice',
-    'Q' || n,
-    array['A', 'B', 'C', 'D'],
-    '[0]'::jsonb,
-    1,
-    'Easy',
-    'E',
-    'T',
-    'test',
-    true,
-    jsonb_build_object('mockId', 'mock-livetest', 'mockLabel', 'Mock Live', 'mockStartsAt', now() - interval '30 min', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')
+    id,
+    row_number() over (order by question_number)
 from
-    generate_series(1, 2) n;
+    inserted;
+insert into public.mock_questions (mock_id, question_id, position)
+select
+    'mock-livetest',
+    question_id,
+    position
+from
+    _live_mock_questions;
 -- Live session — participant_2 (different user, same branch)
--- Same branch, different user → unique index allows it
 insert into public.topic_tests (id, user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
     values (:'session_live', :'participant_2', array['Mock Live'], 2, 8000, 'ongoing', 2, 'cs', 'mock-livetest', false);
+-- ─── Tests ────────────────────────────────────────────────────────
 -- ─── Tests ────────────────────────────────────────────────────────
 -- Test 1: expire_mock_sessions completes only the stuck session
 select

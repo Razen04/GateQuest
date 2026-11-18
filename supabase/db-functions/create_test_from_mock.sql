@@ -12,11 +12,9 @@ declare
     v_existing_status text;
     v_blocking_test_id uuid;
     v_blocking_paper text;
-    v_starts_at timestamptz;
-    v_ends_at timestamptz;
-    v_duration_seconds int;
-    v_attempt_min_tier smallint;
-    v_label text;
+    v_mock record;
+    v_window_ends_at timestamptz;
+    v_session_ends_at timestamptz;
     v_time_allowed int;
     v_actual_count int;
     v_total_marks int;
@@ -28,33 +26,41 @@ begin
     if v_user_id is null then
         raise exception 'Not authenticated';
     end if;
+    -- Prevent concurrent test creation for the same user and branch.
+    perform
+        pg_advisory_xact_lock(hashtextextended(v_user_id::text || ':' || lower(p_branch_id), 0));
     v_my_tier := public.get_my_tier ();
+    -- Read authoritative mock configuration.
     select
-        min((q.metadata ->> 'mockStartsAt')::timestamptz),
-        max((q.metadata ->> 'mockDurationSeconds')::int),
-        max(coalesce((q.metadata ->> 'mockAttemptMinTier')::smallint, 0)),
-        max(q.metadata ->> 'mockLabel'),
-        count(*),
-        sum(coalesce(q.marks, 1))
+        *
     into
-        v_starts_at,
-        v_duration_seconds,
-        v_attempt_min_tier,
-        v_label,
+        v_mock
+    from
+        public.mocks
+    where
+        id = p_mock_id
+        and upper(branch) = upper(p_branch_id)
+        and status in ('scheduled', 'live');
+    if not FOUND then
+        raise exception 'Unknown mock % for branch %', p_mock_id, p_branch_id;
+    end if;
+    v_window_ends_at := v_mock.starts_at + make_interval(secs => v_mock.duration_seconds);
+    -- Get question count and marks from the join table.
+    select
+        count(*),
+        coalesce(sum(coalesce(q.marks, 1)), 0)
+    into
         v_actual_count,
         v_total_marks
     from
-        public.questions q
+        public.mock_questions mq
+        join public.questions q on q.id = mq.question_id
     where
-        q.metadata ->> 'mockId' = p_mock_id
-        and upper(q.metadata ->> 'set') = upper(p_branch_id);
+        mq.mock_id = p_mock_id;
     if coalesce(v_actual_count, 0) = 0 then
-        raise exception 'Unknown mock % for branch %', p_mock_id, p_branch_id;
+        raise exception 'Mock % has no questions', p_mock_id;
     end if;
-    if v_starts_at is null or v_duration_seconds is null then
-        raise exception 'Mock % missing mockStartsAt or mockDurationSeconds', p_mock_id;
-    end if;
-    v_ends_at := v_starts_at + make_interval(secs => v_duration_seconds);
+    -- Check previous attempts.
     select
         id,
         status
@@ -93,6 +99,7 @@ begin
     else
         v_new_paper_id := p_mock_id;
     end if;
+    -- Prevent another active test in the same branch.
     select
         id,
         paper_id
@@ -109,54 +116,55 @@ begin
     if v_blocking_test_id is not null then
         return jsonb_build_object('status', 'active_exists', 'test_id', v_blocking_test_id, 'blocking_paper_id', v_blocking_paper);
     end if;
-    if now() < v_starts_at then
-        return jsonb_build_object('status', 'not_live', 'starts_at', v_starts_at);
+    -- Mock must have started.
+    if now() < v_mock.starts_at then
+        return jsonb_build_object('status', 'not_live', 'starts_at', v_mock.starts_at);
     end if;
-    if v_attempt_min_tier > 0 and v_my_tier < v_attempt_min_tier then
-        return jsonb_build_object('status', 'attempt_gated', 'min_tier', v_attempt_min_tier, 'my_tier', v_my_tier);
+    -- Attempt tier gate.
+    if v_mock.attempt_min_tier > 0 and v_my_tier < v_mock.attempt_min_tier then
+        return jsonb_build_object('status', 'attempt_gated', 'min_tier', v_mock.attempt_min_tier, 'my_tier', v_my_tier);
     end if;
-    if now() < v_ends_at then
-        v_time_allowed := greatest (0, floor(extract(epoch from (v_ends_at - now()))))::int;
+    -- Calculate allowed time and effective session end.
+    if now() < v_window_ends_at then
+        v_time_allowed := greatest (0, floor(extract(epoch from (v_window_ends_at - now()))))::int;
+        v_session_ends_at := v_window_ends_at;
     else
-        v_time_allowed := v_duration_seconds;
+        v_time_allowed := v_mock.duration_seconds;
+        v_session_ends_at := now() + make_interval(secs => v_mock.duration_seconds);
     end if;
     if v_time_allowed < 60 then
         return jsonb_build_object('status', 'window_closing', 'seconds_left', v_time_allowed);
     end if;
-    -- Record-attempt gate: tier-1+ AND explicit opt-in, default FALSE
+    -- Free users cannot record activity through mock attempts.
     v_record_activity := case when v_my_tier < 1 then
         false
     else
         coalesce(p_record_activity, false)
     end;
-    drop table if exists temp_mock_questions;
-    create TEMP table temp_mock_questions on commit drop as
-    select
-        q.id, coalesce(q.marks, 1) as marks, case when q.metadata ->> 'section' = 'GA' then
-            0
-        else
-            1
-        end as section_order, q.question_number
-    from
-        public.questions q
-    where
-        q.metadata ->> 'mockId' = p_mock_id
-        and upper(q.metadata ->> 'set') = upper(p_branch_id);
-    insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
-        values (v_user_id, array[coalesce(v_label, p_mock_id)], v_actual_count, v_time_allowed, 'created', v_total_marks, p_branch_id, v_new_paper_id, v_record_activity)
+    -- Create session with authoritative timing fields.
+    insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity, mock_duration_seconds, mock_ends_at, mock_label)
+        values (v_user_id, array[v_mock.label], v_actual_count, v_time_allowed, 'created', v_total_marks, p_branch_id, v_new_paper_id, v_record_activity, v_mock.duration_seconds, v_session_ends_at, v_mock.label)
     returning
         id
     into
         v_new_test_id;
+    -- Assemble attempts: GA first, followed by configured position.
     insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status)
     select
         v_new_test_id,
-        id,
-        row_number() over (order by section_order, question_number),
+        mq.question_id,
+        row_number() over (order by case when q.metadata ->> 'section' = 'GA' then
+                0
+            else
+                1
+            end, mq.position),
         'unvisited'
     from
-        temp_mock_questions;
-    return jsonb_build_object('status', 'created', 'test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks, 'time_allowed', v_time_allowed, 'results_at', v_ends_at, 'is_re_attempt', v_is_re_attempt, 'record_activity', v_record_activity);
+        public.mock_questions mq
+        join public.questions q on q.id = mq.question_id
+    where
+        mq.mock_id = p_mock_id;
+    return jsonb_build_object('status', 'created', 'test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks, 'time_allowed', v_time_allowed, 'results_at', v_window_ends_at, 'is_re_attempt', v_is_re_attempt, 'record_activity', v_record_activity);
 end;
 $$;
 

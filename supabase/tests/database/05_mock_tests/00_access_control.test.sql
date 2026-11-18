@@ -1,19 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════
--- Mock access control
---
--- Verifies:
---   1. RLS blocks non-participants from reading mock questions
---   2. RLS preserves existing behavior for non-mock questions
---   3. user_has_question_in_session behaves correctly across session states
---   4. user_can_access_mock requires BOTH tier-1+ AND completed session
---   5. The two helpers are independent — RLS is more permissive than
---      the practice-flow helper (participants see questions during
---      the exam; only donors get practice integration)
---
--- Runs as authenticated role via SET LOCAL role + request.jwt.claim.sub.
--- pgTAP runs inside BEGIN/ROLLBACK; if any test fails, schema is
--- unchanged.
--- ═══════════════════════════════════════════════════════════════════
 begin;
 select
     plan (10);
@@ -41,37 +25,51 @@ insert into public.subjects (id, name, slug, is_universal)
     values (:'subject_id', 'Test Subject', 'test-subject', false)
 on conflict (id)
     do nothing;
--- Mock 1: two questions
+-- Real mock records
+insert into public.mocks (id, label, branch, starts_at, duration_seconds, attempt_min_tier, post_min_tier, status)
+values
+    ('mock-test-01', 'Test Mock 1', 'CS', '2026-12-07T09:30:00+05:30', 10800, 0, 1, 'scheduled'),
+    ('mock-test-02', 'Test Mock 2', 'CS', '2026-12-14T09:30:00+05:30', 10800, 0, 1, 'scheduled')
+on conflict (id)
+    do nothing;
+-- ─── Questions ────────────────────────────────────────────────────
 insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
 values
-    (:'mock1_q1', 2026, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock Q1?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('mockId', 'mock-test-01', 'mockLabel', 'Test Mock 1', 'mockStartsAt', '2026-12-07T09:30:00+05:30', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')),
-    (:'mock1_q2', 2026, 2, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock Q2?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('mockId', 'mock-test-01', 'mockLabel', 'Test Mock 1', 'mockStartsAt', '2026-12-07T09:30:00+05:30', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
--- Mock 2: one question (for cross-mock isolation test)
-insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
-    values (:'mock2_q1', 2026, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock 2 Q1?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('mockId', 'mock-test-02', 'mockLabel', 'Test Mock 2', 'mockStartsAt', '2026-12-14T09:30:00+05:30', 'mockDurationSeconds', 10800, 'mockAttemptMinTier', 0, 'mockPostMinTier', 1, 'set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
--- Non-mock question (existing behavior preservation)
-insert into public.questions (id, year, question_number, subject, subject_id, topic, question_type, question, options, correct_answer, marks, difficulty, explanation, source, added_by, verified, metadata)
-    values (:'regular_q', 2025, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Regular Q?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English'));
+    (:'mock1_q1', 2026, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock Q1?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')),
+    (:'mock1_q2', 2026, 2, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock Q2?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')),
+    (:'mock2_q1', 2026, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Mock 2 Q1?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'mock', 'exam', jsonb_build_array('GATE'), 'language', 'English')),
+    (:'regular_q', 2025, 1, 'Test Subject', :'subject_id', 'Topic', 'multiple-choice', 'Regular Q?', array['A', 'B', 'C', 'D'], '[0]'::jsonb, 1, 'Easy', 'Explanation', 'Test', 'test-user', true, jsonb_build_object('set', 'CS', 'section', 'TECH', 'paperType', 'official', 'exam', jsonb_build_array('GATE'), 'language', 'English'))
+on conflict (id)
+    do nothing;
+-- Actual mock-question relationships
+insert into public.mock_questions (mock_id, question_id, position)
+values
+    ('mock-test-01', :'mock1_q1', 1),
+    ('mock-test-01', :'mock1_q2', 2),
+    ('mock-test-02', :'mock2_q1', 1)
+on conflict (mock_id, question_id)
+    do nothing;
 -- ═══════════════════════════════════════════════════════════════════
 -- Pre-session state
 -- ═══════════════════════════════════════════════════════════════════
-set LOCAL role authenticated;
+set local role authenticated;
 select
     set_config('request.jwt.claim.sub', :'other_user', true);
 select
     set_config('request.jwt.claims', jsonb_build_object('sub', :'other_user', 'role', 'authenticated')::text, true);
--- Test 1 — user_has_question_in_session false for non-participant
+-- Test 1
 select
     is (public.user_has_question_in_session (:'mock1_q1'::uuid),
         false,
         'non-participant has no session for mock-test-01 q1');
--- Test 2 — non-participant sees 0 mock questions via RLS
+-- Test 2
 select
-    results_eq ($$SELECT count(*)::int FROM public.questions WHERE metadata->>'mockId' = 'mock-test-01'$$, array[0], 'non-participant sees 0 mock-test-01 questions');
--- Test 3 — non-participant sees the specific non-mock fixture by id
--- (Broader non-mock visibility is intentional; asserting by id is
--- seed-data-independent and precisely targets the "existing behavior
--- preserved" invariant.)
+    results_eq ($$
+        select
+            count(*)::int from public.questions
+            where
+                id in ('99999999-0000-0000-0000-000000000001', '99999999-0000-0000-0000-000000000002') $$, array[0], 'non-participant sees 0 mock-test-01 questions');
+-- Test 3
 select
     is ((
             select
@@ -80,13 +78,13 @@ select
                 public.questions
             where
                 id = :'regular_q'::uuid), 1, 'non-participant sees the non-mock fixture question by id');
--- Test 4 — user_can_access_mock false for non-participant
+-- Test 4
 select
     is (public.user_can_access_mock ('mock-test-01'),
         false,
         'non-participant cannot access mock-test-01 in flow');
 -- ═══════════════════════════════════════════════════════════════════
--- Ongoing session (participant takes the mock)
+-- Ongoing session
 -- ═══════════════════════════════════════════════════════════════════
 reset role;
 select
@@ -99,29 +97,37 @@ insert into public.topic_tests_attempts (session_id, question_id, attempt_order,
 values
     ('66666666-0000-0000-0000-000000000001', :'mock1_q1', 1, 'answered'),
     ('66666666-0000-0000-0000-000000000001', :'mock1_q2', 2, 'unvisited');
--- Test 5 — user_has_question_in_session true during ongoing session
-set LOCAL role authenticated;
+set local role authenticated;
 select
     set_config('request.jwt.claim.sub', :'participant', true);
 select
     set_config('request.jwt.claims', jsonb_build_object('sub', :'participant', 'role', 'authenticated')::text, true);
+-- Test 5
 select
     is (public.user_has_question_in_session (:'mock1_q1'::uuid),
         true,
         'participant has session for mock-test-01 q1 (ongoing)');
--- Test 6 — participant sees their session's mock questions via RLS
+-- Test 6
 select
-    results_eq ($$SELECT count(*)::int FROM public.questions WHERE metadata->>'mockId' = 'mock-test-01'$$, array[2], 'participant sees 2 mock-test-01 questions during ongoing session');
--- Test 7 — participant CANNOT see a different mock's questions
+    results_eq ($$
+        select
+            count(*)::int from public.questions
+            where
+                id in ('99999999-0000-0000-0000-000000000001', '99999999-0000-0000-0000-000000000002') $$, array[2], 'participant sees 2 mock-test-01 questions during ongoing session');
+-- Test 7
 select
-    results_eq ($$SELECT count(*)::int FROM public.questions WHERE metadata->>'mockId' = 'mock-test-02'$$, array[0], 'participant cannot see mock-test-02 questions (no session)');
--- Test 8 — user_can_access_mock false when session is ongoing (needs completed)
+    results_eq ($$
+        select
+            count(*)::int from public.questions
+            where
+                id = '99999999-1111-0000-0000-000000000001' $$, array[0], 'participant cannot see mock-test-02 questions (no session)');
+-- Test 8
 select
     is (public.user_can_access_mock ('mock-test-01'),
         false,
-        'ongoing session does not grant practice-flow access (must be completed)');
+        'ongoing session does not grant practice-flow access');
 -- ═══════════════════════════════════════════════════════════════════
--- Completed session, tier-0 (user took mock before becoming a donor)
+-- Completed session, tier-0
 -- ═══════════════════════════════════════════════════════════════════
 reset role;
 select
@@ -135,25 +141,24 @@ set
     score = 1
 where
     id = '66666666-0000-0000-0000-000000000001';
--- Confirm participant has no donor tier tag
 update
     public.users
 set
     notification_tags = array[]::text[]
 where
     id = :'participant';
-set LOCAL role authenticated;
+set local role authenticated;
 select
     set_config('request.jwt.claim.sub', :'participant', true);
 select
     set_config('request.jwt.claims', jsonb_build_object('sub', :'participant', 'role', 'authenticated')::text, true);
--- Test 9 — tier-0 with completed session still cannot access in flow
+-- Test 9
 select
     is (public.user_can_access_mock ('mock-test-01'),
         false,
         'tier-0 with completed session still cannot access in practice flow');
 -- ═══════════════════════════════════════════════════════════════════
--- Completed session, tier-1+ (user is a donor)
+-- Completed session, tier-1+
 -- ═══════════════════════════════════════════════════════════════════
 reset role;
 update
@@ -162,12 +167,12 @@ set
     notification_tags = array['role:donor', 'donor:tier-1']
 where
     id = :'participant';
-set LOCAL role authenticated;
+set local role authenticated;
 select
     set_config('request.jwt.claim.sub', :'participant', true);
 select
     set_config('request.jwt.claims', jsonb_build_object('sub', :'participant', 'role', 'authenticated')::text, true);
--- Test 10 — tier-1+ with completed session can access
+-- Test 10
 select
     is (public.user_can_access_mock ('mock-test-01'),
         true,
