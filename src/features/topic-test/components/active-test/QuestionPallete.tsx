@@ -1,9 +1,14 @@
 import clsx from 'clsx';
 import React from 'react';
 import { Button } from '@/shared/components/ui/button';
+import type { Question } from '@/shared/types/storage';
+import {
+    getPaletteSections,
+    type PaletteSection,
+} from '../../utils/questionPalette';
 
 interface QuestionPaletteProps {
-    questions: { id: string }[];
+    questions: Question[];
     currentIndex: number;
     isAnswered: (id: string) => boolean;
     markedForReview: (id: string) => boolean;
@@ -56,6 +61,98 @@ const Stats = ({
     </div>
 );
 
+interface PaletteGridProps {
+    sections: PaletteSection[];
+    questions: Question[];
+    currentIndex: number;
+    isAnswered: (id: string) => boolean;
+    markedForReview: (id: string) => boolean;
+    isVisited: (id: string) => boolean;
+    onJumpTo: (index: number) => void;
+    mobile?: boolean;
+    onSelect?: () => void;
+}
+
+const PaletteGrid = ({
+    sections,
+    questions,
+    currentIndex,
+    isAnswered,
+    markedForReview,
+    isVisited,
+    onJumpTo,
+    mobile = false,
+    onSelect,
+}: PaletteGridProps) => (
+    <>
+        {sections.map((section) => (
+            <React.Fragment key={section.label ?? 'all'}>
+                {section.label && (
+                    <h2 className="col-span-4 w-full border-b border-border pb-1 pt-2 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {section.label}
+                    </h2>
+                )}
+
+                {section.indices.map((index) => {
+                    const question = questions[index];
+                    if (!question) return null;
+
+                    const answered = isAnswered(question.id);
+                    const review = markedForReview(question.id);
+                    const active = index === currentIndex;
+                    const visited = isVisited(question.id);
+
+                    const stateClasses = clsx(
+                        active && 'ring-2 ring-chart-1',
+                        review && 'bg-chart-6/15 text-chart-6',
+                        answered && !review && 'bg-chart-2/15 text-chart-2',
+                        visited &&
+                            !answered &&
+                            !review &&
+                            'bg-chart-4/15 text-chart-4',
+                        !visited &&
+                            !answered &&
+                            !review &&
+                            'bg-muted text-muted-foreground',
+                        'hover:bg-accent'
+                    );
+
+                    if (mobile) {
+                        return (
+                            <Button
+                                key={question.id}
+                                onClick={() => {
+                                    onJumpTo(index);
+                                    onSelect?.();
+                                }}
+                                className={clsx(
+                                    'h-14 w-14 rounded-none text-lg font-medium flex items-center justify-center transition duration-200',
+                                    stateClasses
+                                )}
+                            >
+                                {index + 1}
+                            </Button>
+                        );
+                    }
+
+                    return (
+                        <button
+                            key={question.id}
+                            onClick={() => onJumpTo(index)}
+                            className={clsx(
+                                'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200',
+                                stateClasses
+                            )}
+                        >
+                            {index + 1}
+                        </button>
+                    );
+                })}
+            </React.Fragment>
+        ))}
+    </>
+);
+
 const QuestionPalette: React.FC<QuestionPaletteProps> = ({
     questions,
     currentIndex,
@@ -70,6 +167,8 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
     visitedNotAnswered,
     unvisitedCount,
 }) => {
+    const sections = getPaletteSections(questions);
+
     return (
         <div>
             {/* DESKTOP */}
@@ -94,43 +193,15 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
                         unvisitedCount={unvisitedCount}
                     />
                     <div className="grid grid-cols-4 gap-2">
-                        {questions.map((q, idx) => {
-                            const answered = isAnswered(q.id);
-                            const review = markedForReview(q.id);
-                            const active = idx === currentIndex;
-                            const visited = isVisited(q.id);
-                            return (
-                                <button
-                                    key={q.id}
-                                    onClick={() => onJumpTo(idx)}
-                                    className={clsx(
-                                        'h-14 w-14 text-lg font-medium flex items-center justify-center transition duration-200',
-
-                                        active && 'ring-2 ring-chart-1',
-
-                                        review && 'bg-chart-6/15 text-chart-6',
-
-                                        answered &&
-                                            !review &&
-                                            'bg-chart-2/15 text-chart-2',
-
-                                        visited &&
-                                            !answered &&
-                                            !review &&
-                                            'bg-chart-4/15 text-chart-4',
-
-                                        !visited &&
-                                            !answered &&
-                                            !review &&
-                                            'bg-muted text-muted-foreground',
-
-                                        'hover:bg-accent'
-                                    )}
-                                >
-                                    {idx + 1}
-                                </button>
-                            );
-                        })}
+                        <PaletteGrid
+                            sections={sections}
+                            questions={questions}
+                            currentIndex={currentIndex}
+                            isAnswered={isAnswered}
+                            markedForReview={markedForReview}
+                            isVisited={isVisited}
+                            onJumpTo={onJumpTo}
+                        />
                     </div>
                 </div>
             </aside>
@@ -161,48 +232,17 @@ const QuestionPalette: React.FC<QuestionPaletteProps> = ({
 
                     <div className="flex-1 p-4 pb-20">
                         <div className="grid grid-cols-4 gap-3 place-items-center">
-                            {questions.map((q, idx) => {
-                                const answered = isAnswered(q.id);
-                                const review = markedForReview(q.id);
-                                const active = idx === currentIndex;
-                                const visited = isVisited(q.id);
-
-                                return (
-                                    <Button
-                                        key={q.id}
-                                        onClick={() => {
-                                            onJumpTo(idx);
-                                            onToggle();
-                                        }}
-                                        className={clsx(
-                                            'h-14 w-14 rounded-none text-lg font-medium flex items-center justify-center transition duration-200',
-
-                                            active && 'ring-2 ring-chart-1',
-
-                                            review &&
-                                                'bg-chart-6/15 text-chart-6',
-
-                                            answered &&
-                                                !review &&
-                                                'bg-chart-2/15 text-chart-2',
-
-                                            visited &&
-                                                !answered &&
-                                                !review &&
-                                                'bg-chart-4/15 text-chart-4',
-
-                                            !visited &&
-                                                !answered &&
-                                                !review &&
-                                                'bg-muted text-muted-foreground',
-
-                                            'hover:bg-accent'
-                                        )}
-                                    >
-                                        {idx + 1}
-                                    </Button>
-                                );
-                            })}
+                            <PaletteGrid
+                                sections={sections}
+                                questions={questions}
+                                currentIndex={currentIndex}
+                                isAnswered={isAnswered}
+                                markedForReview={markedForReview}
+                                isVisited={isVisited}
+                                onJumpTo={onJumpTo}
+                                mobile
+                                onSelect={onToggle}
+                            />
                         </div>
                     </div>
                 </div>
