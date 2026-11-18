@@ -216,6 +216,98 @@ export type Database = {
                     },
                 ];
             };
+            mock_questions: {
+                Row: {
+                    mock_id: string;
+                    position: number;
+                    question_id: string;
+                };
+                ComputedFields: never;
+                Insert: {
+                    mock_id: string;
+                    position: number;
+                    question_id: string;
+                };
+                Update: {
+                    mock_id?: string;
+                    position?: number;
+                    question_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'mock_questions_mock_id_fkey';
+                        columns: ['mock_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'mocks';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'mock_questions_question_id_fkey';
+                        columns: ['question_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            mocks: {
+                Row: {
+                    announcement: string | null;
+                    attempt_min_tier: number;
+                    blurb: string | null;
+                    branch: string;
+                    created_at: string;
+                    duration_seconds: number;
+                    id: string;
+                    label: string;
+                    peer_stats_refreshed_at: string | null;
+                    post_min_tier: number;
+                    schedule_notified_at: string | null;
+                    series_number: number | null;
+                    start_reminder_sent_at: string | null;
+                    starts_at: string;
+                    status: string;
+                    updated_at: string;
+                };
+                ComputedFields: never;
+                Insert: {
+                    announcement?: string | null;
+                    attempt_min_tier?: number;
+                    blurb?: string | null;
+                    branch: string;
+                    created_at?: string;
+                    duration_seconds: number;
+                    id: string;
+                    label: string;
+                    peer_stats_refreshed_at?: string | null;
+                    post_min_tier?: number;
+                    schedule_notified_at?: string | null;
+                    series_number?: number | null;
+                    start_reminder_sent_at?: string | null;
+                    starts_at: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    announcement?: string | null;
+                    attempt_min_tier?: number;
+                    blurb?: string | null;
+                    branch?: string;
+                    created_at?: string;
+                    duration_seconds?: number;
+                    id?: string;
+                    label?: string;
+                    peer_stats_refreshed_at?: string | null;
+                    post_min_tier?: number;
+                    schedule_notified_at?: string | null;
+                    series_number?: number | null;
+                    start_reminder_sent_at?: string | null;
+                    starts_at?: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             notification_reads: {
                 Row: {
                     notification_id: string;
@@ -607,10 +699,14 @@ export type Database = {
                     correct_count: number | null;
                     created_at: string | null;
                     id: string;
+                    mock_duration_seconds: number | null;
+                    mock_ends_at: string | null;
+                    mock_label: string | null;
                     paper_id: string | null;
                     record_activity: boolean;
                     remaining_time_seconds: number;
                     score: number | null;
+                    started_at: string | null;
                     status: string | null;
                     topics: string[] | null;
                     total_marks: number | null;
@@ -627,10 +723,14 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    mock_duration_seconds?: number | null;
+                    mock_ends_at?: string | null;
+                    mock_label?: string | null;
                     paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds: number;
                     score?: number | null;
+                    started_at?: string | null;
                     status?: string | null;
                     topics?: string[] | null;
                     total_marks?: number | null;
@@ -646,10 +746,14 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    mock_duration_seconds?: number | null;
+                    mock_ends_at?: string | null;
+                    mock_label?: string | null;
                     paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds?: number;
                     score?: number | null;
+                    started_at?: string | null;
                     status?: string | null;
                     topics?: string[] | null;
                     total_marks?: number | null;
@@ -1137,6 +1241,14 @@ export type Database = {
                 Args: Record<PropertyKey, never>;
                 Returns: Json;
             };
+            create_test_from_mock: {
+                Args: {
+                    p_branch_id: string;
+                    p_mock_id: string;
+                    p_record_activity?: boolean;
+                };
+                Returns: Json;
+            };
             create_test_from_paper: {
                 Args: {
                     p_branch: string;
@@ -1154,6 +1266,43 @@ export type Database = {
             delete_account: {
                 Args: Record<PropertyKey, never>;
                 Returns: undefined;
+            };
+            expire_mock_sessions: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
+            fetch_practice_questions: {
+                Args: { p_last_fetched_at?: string; p_subject_id: string };
+                Returns: {
+                    added_by: string | null;
+                    answer_text: string | null;
+                    correct_answer: NonNullable<Json>;
+                    created_at: string | null;
+                    difficulty: string | null;
+                    explanation: string | null;
+                    id: string;
+                    marks: number | null;
+                    metadata: Json | null;
+                    options: string[] | null;
+                    question: string;
+                    question_number: number | null;
+                    question_type: string;
+                    source: string | null;
+                    source_url: string | null;
+                    subject: string;
+                    subject_id: string | null;
+                    tags: string[] | null;
+                    topic: string | null;
+                    updated_at: string | null;
+                    verified: boolean | null;
+                    year: number;
+                }[];
+                SetofOptions: {
+                    from: '*';
+                    to: 'questions';
+                    isOneToOne: false;
+                    isSetofReturn: true;
+                };
             };
             generate_topic_test: {
                 Args: {
@@ -1190,6 +1339,17 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
+            get_mock_analysis: { Args: { p_test_id: string }; Returns: Json };
+            get_mock_catalog: { Args: { p_branch_id: string }; Returns: Json };
+            get_mock_leaderboard: {
+                Args: { p_mock_id: string };
+                Returns: Json;
+            };
+            get_mock_session_time: {
+                Args: { p_test_id: string };
+                Returns: Json;
+            };
+            get_mock_summary: { Args: { p_test_id: string }; Returns: Json };
             get_monthly_donation_total: {
                 Args: Record<PropertyKey, never>;
                 Returns: number;
@@ -1230,6 +1390,7 @@ export type Database = {
                     topic: string;
                 }[];
             };
+            get_user_tier: { Args: { p_user_id: string }; Returns: number };
             get_verified_donations: {
                 Args: Record<PropertyKey, never>;
                 Returns: {
@@ -1284,9 +1445,23 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
+            is_mock_question: {
+                Args: { p_question_id: string };
+                Returns: boolean;
+            };
+            notify_mocks: { Args: Record<PropertyKey, never>; Returns: number };
+            practice_from_mock: { Args: { p_mock_id: string }; Returns: Json };
+            prune_topic_test_history: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
             recompute_user_tier: {
                 Args: { v_user_id: string };
                 Returns: undefined;
+            };
+            refresh_closed_mock_stats: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
             };
             refresh_dynamic_difficulty: {
                 Args: Record<PropertyKey, never>;
@@ -1294,6 +1469,10 @@ export type Database = {
             };
             refresh_question_peer_stats: {
                 Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
+            refresh_question_peer_stats_for_questions: {
+                Args: { p_question_ids?: string[] | null };
                 Returns: undefined;
             };
             resolve_notification_target: {
@@ -1337,8 +1516,16 @@ export type Database = {
                 Args: { v_set_id: string };
                 Returns: Json;
             };
+            user_can_access_mock: {
+                Args: { p_mock_id: string };
+                Returns: boolean;
+            };
             user_can_upload_animated: {
                 Args: Record<PropertyKey, never>;
+                Returns: boolean;
+            };
+            user_has_question_in_session: {
+                Args: { p_question_id: string };
                 Returns: boolean;
             };
         };

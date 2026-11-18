@@ -1,21 +1,29 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockGetTestSession, mockUpdateAttempts, mockSubmitTestGrading } =
-    vi.hoisted(() => ({
-        mockGetTestSession: vi.fn(),
-        mockUpdateAttempts: vi.fn(),
-        mockSubmitTestGrading: vi.fn(),
-    }));
+const {
+    mockGetTestSession,
+    mockUpdateAttempts,
+    mockSubmitTestGrading,
+    mockFetchTestById,
+    mockGetAttemptsBySessionId,
+} = vi.hoisted(() => ({
+    mockGetTestSession: vi.fn(),
+    mockUpdateAttempts: vi.fn(),
+    mockSubmitTestGrading: vi.fn(),
+    mockFetchTestById: vi.fn(),
+    mockGetAttemptsBySessionId: vi.fn(),
+}));
 
 vi.mock('@/features/topic-test/services/testSession', () => ({
     getTestSession: mockGetTestSession,
     updateAttempts: mockUpdateAttempts,
+    getAttemptsBySessionId: mockGetAttemptsBySessionId,
 }));
 
-// ✅ alias path — matches what the hook actually imports
 vi.mock('@/features/topic-test/api/topicTest', () => ({
     submitTestGrading: mockSubmitTestGrading,
+    fetchTestById: mockFetchTestById,
 }));
 
 import useTestGrading from '@/features/topic-test/hooks/test-engine/useTestGrading';
@@ -70,11 +78,53 @@ describe('useTestGrading', () => {
         expect(result.current.isSubmitting).toBe(false);
     });
 
-    it('throws when getTestSession returns null', async () => {
+    it('throws "Session not found" when Dexie misses and Supabase misses', async () => {
         mockGetTestSession.mockResolvedValueOnce(null);
+        mockFetchTestById.mockResolvedValueOnce({
+            data: null,
+            error: new Error('not found'),
+        });
         const { result } = renderHook(() => useTestGrading());
         await expect(result.current.submitTest('test-1')).rejects.toThrow(
-            'No test session present'
+            'Session not found'
+        );
+    });
+
+    it('throws "No attempts found" when Supabase session exists but attempts are empty', async () => {
+        mockGetTestSession.mockResolvedValueOnce(null);
+        mockFetchTestById.mockResolvedValueOnce({
+            data: { remaining_time_seconds: 600 },
+            error: null,
+        });
+        mockGetAttemptsBySessionId.mockResolvedValueOnce([]);
+        const { result } = renderHook(() => useTestGrading());
+        await expect(result.current.submitTest('test-1')).rejects.toThrow(
+            'No attempts found'
+        );
+    });
+
+    it('falls back to Supabase when Dexie has no session (mock path)', async () => {
+        mockGetTestSession.mockResolvedValueOnce(null);
+        mockFetchTestById.mockResolvedValueOnce({
+            data: { remaining_time_seconds: 600 },
+            error: null,
+        });
+        mockGetAttemptsBySessionId.mockResolvedValueOnce([
+            { question_id: 'q1', user_answer: 2 /* ... */ },
+        ]);
+        mockSubmitTestGrading.mockResolvedValueOnce({
+            data: { total_score: 3, correct_count: 1, incorrect_count: 0 },
+            error: null,
+        });
+        const { result } = renderHook(() => useTestGrading());
+        const out = await result.current.submitTest('test-1');
+        expect(out.totalScore).toBe(3);
+        expect(mockSubmitTestGrading).toHaveBeenCalledWith(
+            'test-1',
+            expect.arrayContaining([
+                expect.objectContaining({ question_id: 'q1' }),
+            ]),
+            600
         );
     });
 

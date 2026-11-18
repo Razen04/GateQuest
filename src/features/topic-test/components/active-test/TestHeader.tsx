@@ -19,76 +19,117 @@ import {
 } from '@/shared/components/ui/alert-dialog';
 import { Button } from '@/shared/components/ui/button';
 import { useFullscreen } from '@/shared/hooks/useFullScreen';
+import { formatTime } from '@/shared/utils/helper';
 
 interface TestHeaderProps {
-    timeDisplay: string; // 00:00
+    timeDisplay: string;
     questionStatus: string;
     onEndTest: () => void;
+    /** When true, hide back button + leave dialog. */
+    isMockMode?: boolean;
+    /** Custom header title. Defaults to "Custom Test". */
+    title?: string | undefined;
+    /**
+     * Unix ms before which the Finish button is disabled. Undefined =
+     * always enabled. Re-renders every second from parent's timer tick.
+     */
+    finishUnlockAt?: number | undefined;
 }
 
 const isTimeCritical = (timeDisplay: string) => {
     const [minutes, seconds] = timeDisplay.split(':').map(Number);
+    if (minutes === undefined || seconds === undefined) return false;
     if (Number.isNaN(minutes) || Number.isNaN(seconds)) return false;
-    return minutes ? minutes < 5 : false;
+    return minutes < 5;
 };
 
 const TestHeader: React.FC<TestHeaderProps> = ({
     timeDisplay,
     questionStatus,
     onEndTest,
+    isMockMode = false,
+    title = 'Custom Test',
+    finishUnlockAt,
 }) => {
     const critical = isTimeCritical(timeDisplay);
     const navigate = useNavigate();
-    const onBack = () => {
-        navigate('/topic-test');
-    };
-
+    const onBack = () => navigate('/topic-test');
     const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+    const finishEnabled =
+        finishUnlockAt === undefined || Date.now() >= finishUnlockAt;
+    const finishLockedSeconds = finishEnabled
+        ? 0
+        : Math.floor((finishUnlockAt! - Date.now()) / 1000);
+
+    const finishButton = (
+        <Button
+            size="sm"
+            disabled={!finishEnabled}
+            title={
+                finishEnabled
+                    ? undefined
+                    : `Finish unlocks in ${formatTime(finishLockedSeconds)}`
+            }
+            className={`rounded-none h-8 px-3 ${
+                finishEnabled
+                    ? 'bg-destructive hover:bg-destructive/90 text-white'
+                    : 'bg-muted text-muted-foreground'
+            }`}
+        >
+            {finishEnabled
+                ? 'Finish'
+                : `Finish in ${formatTime(finishLockedSeconds)}`}
+        </Button>
+    );
 
     return (
         <header className="sticky top-0 z-10 bg-card border-b border-border">
             <div className="flex items-center justify-between gap-3 px-4 py-2">
-                {/* Left Section: Back Action & Test Title */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-none h-8 px-2.5 shrink-0"
-                            >
-                                <ArrowLeftIcon className="w-4 h-4" />
-                                <span className="hidden sm:inline">Back</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-none">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will pause the test, but this is not
-                                    advisable and you should complete the test
-                                    in one sitting.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-none">
-                                    Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="rounded-none"
-                                    onClick={onBack}
+                    {!isMockMode && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="rounded-none h-8 px-2.5 shrink-0"
                                 >
-                                    Leave Test
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                                    <ArrowLeftIcon className="w-4 h-4" />
+                                    <span className="hidden sm:inline">
+                                        Back
+                                    </span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-none">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Are you absolutely sure?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will pause the test, but this is
+                                        not advisable and you should complete
+                                        the test in one sitting.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-none">
+                                        Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="rounded-none"
+                                        onClick={onBack}
+                                    >
+                                        Leave Test
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
 
                     <div className="min-w-0 flex items-center gap-2">
                         <h1 className="hidden md:block truncate text-xs font-semibold sm:text-sm text-foreground">
-                            Custom Test
+                            {title}
                         </h1>
                         <span className="text-muted-foreground text-xs hidden md:block">
                             •
@@ -99,7 +140,6 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Center Section: Timer */}
                 <div className="flex justify-center shrink-0">
                     <div
                         className={`px-3 py-1 text-sm sm:text-base flex items-center gap-1.5 font-mono font-bold tabular-nums rounded-none transition ${
@@ -114,9 +154,7 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Right Section: Finish Action */}
                 <div className="flex items-center gap-2 justify-end flex-1">
-                    {/* Fullscreen Button (Desktop Only) */}
                     <Button
                         variant="outline"
                         size="sm"
@@ -141,37 +179,38 @@ const TestHeader: React.FC<TestHeaderProps> = ({
                         )}
                     </Button>
 
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
-                                size="sm"
-                                className="bg-destructive hover:bg-destructive/90 text-white rounded-none h-8 px-3"
-                            >
-                                Finish
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-none">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Are you absolutely sure?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-none">
-                                    Cancel
-                                </AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="rounded-none bg-destructive hover:bg-destructive/90 text-white"
-                                    onClick={onEndTest}
-                                >
-                                    Finish Test
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    {finishEnabled ? (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                {finishButton}
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-none">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Are you absolutely sure?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {isMockMode
+                                            ? 'This action cannot be undone. Your attempt will be graded and locked.'
+                                            : 'This action cannot be undone.'}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="rounded-none">
+                                        Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="rounded-none bg-destructive hover:bg-destructive/90 text-white"
+                                        onClick={onEndTest}
+                                    >
+                                        Finish Test
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    ) : (
+                        finishButton
+                    )}
                 </div>
             </div>
         </header>

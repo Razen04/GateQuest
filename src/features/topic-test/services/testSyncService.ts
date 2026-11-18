@@ -14,5 +14,10 @@ export const syncTestFromSupabaseToDexie = async (
 
     if (!testSession || !attempts || !questions) return;
 
+    const paperId = testSession.paper_id ?? '';
+    const isPracticeSession = paperId.includes('-practice-');
+    const isPureMockAttempt = paperId.startsWith('mock-') && !isPracticeSession;
+    if (isPureMockAttempt) return;
+
     await initializeTestSession(testSession, attempts, questions);
 };

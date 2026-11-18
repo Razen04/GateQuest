@@ -139,3 +139,32 @@ export function resolveEffectiveAccent(
 ): string {
     return isAccentLocked(storedAccent, tier) ? 'default' : storedAccent;
 }
+
+// ─── Mock-specific gates ─────────────────────────────────────────
+// Two independent gates:
+//   Attempt gate — can the user START this mock?
+//   Post gate    — can the user see ANALYSIS after completing?
+//
+// Re-attempts are separately gated to tier-1 regardless of the mock's
+// post tier (server-side enforcement in create_test_from_mock).
+
+export function isMockAttemptLocked(
+    attemptMinTier: number,
+    tier: DonorTier
+): boolean {
+    if (attemptMinTier <= 0) return false;
+    return tier < attemptMinTier;
+}
+
+export function isMockPostLocked(
+    postMinTier: number,
+    tier: DonorTier
+): boolean {
+    if (postMinTier <= 0) return false;
+    return tier < postMinTier;
+}
+
+/** Re-attempts are always tier-1+, even for beta mocks. */
+export function isMockReAttemptLocked(tier: DonorTier): boolean {
+    return tier < 1;
+}

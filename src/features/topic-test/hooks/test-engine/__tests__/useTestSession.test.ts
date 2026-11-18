@@ -177,7 +177,10 @@ describe('useTestSession', () => {
             await result.current.handleSubmit();
         });
 
-        expect(gradingMock.submitTest).toHaveBeenCalledWith('test-1');
+        expect(gradingMock.submitTest).toHaveBeenCalledWith(
+            'test-1',
+            undefined
+        );
         expect(mockUseNavigate).toHaveBeenCalledWith(
             '/topic-test-result/test-1',
             {
@@ -232,6 +235,10 @@ describe('useTestSession', () => {
         });
 
         expect(gradingMock.submitTest).toHaveBeenCalledTimes(1);
+        // Automatic submits are staggered; manual Finish is not.
+        expect(gradingMock.submitTest).toHaveBeenCalledWith('test-1', {
+            stagger: true,
+        });
     });
 
     it('heartbeat fires immediately on mount and again every 60s', async () => {

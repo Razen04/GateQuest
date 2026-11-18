@@ -6,6 +6,7 @@ import { fadeInUp, stagger } from '@/shared/utils/motionVariants.ts';
 import {
     getDifficultyClassNames,
     getQuestionDisplayText,
+    getQuestionSourceLabel,
 } from '../../utils/questionUtils.ts';
 
 const MathRenderer = lazy(() => import('../Renderers/MathRenderer.tsx'));
@@ -71,14 +72,7 @@ const List = ({
                         </span>
 
                         <span className="text-right font-semibold text-muted-foreground">
-                            {question.year
-                                ? `${(Array.isArray(question.metadata.exam)
-                                      ? question.metadata.exam
-                                      : [question.metadata.exam || 'GATE']
-                                  )
-                                      .join(' / ')
-                                      .toUpperCase()} ${question.metadata.set} ${question.year}`
-                                : 'Year Unknown'}
+                            {getQuestionSourceLabel(question)}
                         </span>
                     </div>
                 </motion.div>

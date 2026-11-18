@@ -38,7 +38,16 @@ export const fetchTestById = async (testId: string) => {
     return { data, error };
 };
 
-export const fetchTestHistory = async (userId: string, branchId: string) => {
+export const TEST_HISTORY_PAGE_SIZE = 10;
+
+export const fetchTestHistory = async (
+    userId: string,
+    branchId: string,
+    options: { limit?: number; offset?: number } = {}
+) => {
+    const limit = options.limit ?? TEST_HISTORY_PAGE_SIZE;
+    const offset = options.offset ?? 0;
+
     const { data, error } = await supabase
         .from('topic_tests')
         .select('*')
@@ -46,7 +55,7 @@ export const fetchTestHistory = async (userId: string, branchId: string) => {
         .eq('branch_id', branchId)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })
-        .limit(10);
+        .range(offset, offset + limit - 1);
     return { data, error };
 };
 

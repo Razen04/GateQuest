@@ -29,6 +29,8 @@ import { getCurrentUser } from '@/shared/api/auth';
 import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
+import { getDonorTier } from '@/shared/types/donor';
+import type { TestSession } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { updateTestStatus } from '../api/topicTest';
@@ -59,18 +61,28 @@ const TopicTest = () => {
     }
 
     const userId = useAuthStore((s) => s.user?.id);
+    const donorTier = getDonorTier(
+        useAuthStore((s) => s.user?.notification_tags)
+    );
     const {
         loading,
+        loadingMore,
+        hasMore,
         activeTest,
         history: testHistory,
-    } = useTopicTestHubData(userId, userGoal?.branch_id);
+        loadMore,
+    } = useTopicTestHubData(userId, userGoal?.branch_id, donorTier);
 
     const [viewMode, setViewMode] = useState<'accuracy' | 'score'>('accuracy');
 
-    const chartData = useMemo(() => {
-        if (!testHistory) return [];
+    // Donors can load their full history, but the progress chart stays
+    // readable by only plotting the newest 10 attempts.
+    const chartHistory = useMemo(() => testHistory.slice(0, 10), [testHistory]);
 
-        return [...testHistory]
+    const chartData = useMemo(() => {
+        if (!chartHistory) return [];
+
+        return [...chartHistory]
             .filter((t) => t.status === 'completed')
             .reverse()
             .map((t, idx) => ({
@@ -85,28 +97,60 @@ const TopicTest = () => {
                     ? parseFloat(((t.score / t.total_marks) * 100).toFixed(2))
                     : 0,
             }));
-    }, [testHistory]);
+    }, [chartHistory]);
+
+    function getDisplayRemainingSeconds(t: TestSession): number {
+        const paperId = t.paper_id ?? '';
+        const isMock =
+            paperId.startsWith('mock-') && !paperId.includes('-practice-');
+
+        if (!isMock || !t.mock_ends_at || !t.mock_duration_seconds) {
+            return t.remaining_time_seconds ?? 0;
+        }
+
+        const now = Date.now();
+        const endsAtMs = new Date(t.mock_ends_at).getTime();
+        const durationSec = t.mock_duration_seconds;
+        const startedAtMs = t.started_at
+            ? new Date(t.started_at).getTime()
+            : now;
+        const elapsedSec = Math.floor((now - startedAtMs) / 1000);
+        const remainingByDuration = durationSec - elapsedSec;
+        const remainingByWindow = Math.floor((endsAtMs - now) / 1000);
+
+        return Math.max(0, Math.min(remainingByDuration, remainingByWindow));
+    }
 
     if (loading) {
         return <ModernLoader />;
     }
 
     const handleStartTest = async () => {
+        if (!activeTest) return;
+
+        const paperId = activeTest.paper_id ?? '';
+        const isMock =
+            paperId.startsWith('mock-') && !paperId.includes('-practice-');
+
+        if (isMock) {
+            navigate(`/mock-tests/attempt/${activeTest.id}`);
+            return;
+        }
+
         try {
             const user = await getCurrentUser();
             if (!user) throw new Error('No user');
 
-            if (activeTest?.status === 'created') {
+            if (activeTest.status === 'created') {
                 const { error } = await updateTestStatus(
                     activeTest.id,
                     'ongoing'
                 );
-
                 if (error) throw error;
             }
 
             await syncTestFromSupabaseToDexie(user.id, userGoal?.branch_id);
-            navigate(`/topic-test/${activeTest?.id}/attempt`);
+            navigate(`/topic-test/${activeTest.id}/attempt`);
         } catch (err) {
             console.error(err);
             toast.error('Failed to start test. Please check your connection.');
@@ -114,15 +158,20 @@ const TopicTest = () => {
     };
 
     const handleResume = () => {
-        if (activeTest) navigate(`/topic-test/${activeTest.id}/attempt`);
+        if (!activeTest) return;
+        const paperId = activeTest.paper_id ?? '';
+        const isMock =
+            paperId.startsWith('mock-') && !paperId.includes('-practice-');
+
+        if (isMock) {
+            navigate(`/mock-tests/attempt/${activeTest.id}`);
+        } else {
+            navigate(`/topic-test/${activeTest.id}/attempt`);
+        }
     };
 
     const handleGenerateNew = () => {
         navigate('/topic-test-generate');
-    };
-
-    const onBack = () => {
-        navigate('/dashboard');
     };
 
     // helper: map status to icon & colors
@@ -164,7 +213,7 @@ const TopicTest = () => {
                 </motion.button>
 
                 <PageHeader
-                    primaryTitle="Topic"
+                    primaryTitle="Custom"
                     secondaryTitle="TestHub"
                     caption="Resume your practice or start a new drilling session."
                 />
@@ -179,12 +228,12 @@ const TopicTest = () => {
                 <motion.div variants={itemVariants}>
                     {activeTest ? (
                         <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                                    In Progress
-                                </h3>
+                            <div className="bg-white/20 backdrop-blur-md px-3 py-1 flex items-center gap-2 text-xs font-mono">
+                                <Timer weight="fill" />
+                                {formatTime(
+                                    getDisplayRemainingSeconds(activeTest)
+                                )}
                             </div>
-
                             <div className="bg-gradient-to-br from-chart-1 to-chart-1/70 backdrop-blur-2xl border border-white/20 p-5 text-white shadow-xl relative overflow-hidden">
                                 <div className="relative z-10">
                                     <div className="flex justify-between items-start mb-4">
@@ -382,59 +431,112 @@ const TopicTest = () => {
 
                     <div>
                         {testHistory?.length ? (
-                            testHistory.map((test) => {
-                                const { icon, cls } = getStatusDisplay(
-                                    test.status
-                                );
-                                const testName = getTestName(test.completed_at);
-                                const timeTookForTest = Math.round(
-                                    Math.ceil(test.total_questions * 2.77) *
-                                        60 -
+                            <>
+                                {testHistory.map((test) => {
+                                    const { icon, cls } = getStatusDisplay(
+                                        test.status
+                                    );
+
+                                    // ─── Mock-aware name + time ───
+                                    const paperId =
+                                        (test as { paper_id?: string })
+                                            .paper_id ?? '';
+                                    const isMock =
+                                        paperId.startsWith('mock-') &&
+                                        !paperId.includes('-practice-');
+
+                                    const testName =
+                                        isMock && test.topics?.[0]
+                                            ? test.topics[0]
+                                            : getTestName(test.completed_at);
+
+                                    const startedAt = (
+                                        test as { started_at?: string | null }
+                                    ).started_at;
+                                    let timeTookSeconds: number | null = null;
+                                    if (
+                                        isMock &&
+                                        startedAt &&
+                                        test.completed_at
+                                    ) {
+                                        timeTookSeconds = Math.round(
+                                            (new Date(
+                                                test.completed_at
+                                            ).getTime() -
+                                                new Date(startedAt).getTime()) /
+                                                1000
+                                        );
+                                    } else if (
+                                        test.total_questions &&
                                         test.remaining_time_seconds
-                                );
+                                    ) {
+                                        timeTookSeconds = Math.round(
+                                            Math.ceil(
+                                                test.total_questions * 2.77
+                                            ) *
+                                                60 -
+                                                test.remaining_time_seconds
+                                        );
+                                    }
 
-                                return (
-                                    <div
-                                        key={test.id}
-                                        onClick={() =>
-                                            navigate(
-                                                `/topic-test-result/${test.id}`
-                                            )
-                                        }
-                                        className="bg-card/50 backdrop-blur-xl border border-border p-4 my-2 flex items-center justify-between hover:border-chart-1/50 transition-colors cursor-pointer"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`p-2 ${cls}`}>
-                                                {icon}
+                                    return (
+                                        <div
+                                            key={test.id}
+                                            onClick={() =>
+                                                navigate(
+                                                    `/topic-test-result/${test.id}`
+                                                )
+                                            }
+                                            className="bg-card/50 backdrop-blur-xl border border-border p-4 my-2 flex items-center justify-between hover:border-chart-1/50 transition-colors cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className={`p-2 ${cls}`}>
+                                                    {icon}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-sm font-semibold text-foreground">
+                                                        {testName}
+                                                    </h3>
+                                                    <h4 className="text-xs text-muted-foreground flex items-center gap-2">
+                                                        Time taken:{' '}
+                                                        {timeTookSeconds != null
+                                                            ? formatTime(
+                                                                  timeTookSeconds
+                                                              )
+                                                            : '—'}
+                                                    </h4>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="text-sm font-semibold text-foreground">
-                                                    {testName}
-                                                </h3>
-                                                <h4 className="text-xs text-muted-foreground flex items-center gap-2">
-                                                    Time taken:{' '}
-                                                    {test.total_questions &&
-                                                    test.remaining_time_seconds
-                                                        ? formatTime(
-                                                              timeTookForTest
-                                                          )
-                                                        : '—'}
-                                                </h4>
+
+                                            <div className="text-right">
+                                                <div
+                                                    className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-chart-2' : test.accuracy < 40 ? 'text-destructive' : 'text-chart-4') : 'text-muted-foreground'}`}
+                                                >
+                                                    {test.accuracy?.toFixed(
+                                                        2
+                                                    ) ?? 0}
+                                                    %
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
                                             </div>
                                         </div>
-
-                                        <div className="text-right">
-                                            <div
-                                                className={`text-lg font-bold ${test.accuracy !== undefined ? (test.accuracy >= 80 ? 'text-chart-2' : test.accuracy < 40 ? 'text-destructive' : 'text-chart-4') : 'text-muted-foreground'}`}
-                                            >
-                                                {test.accuracy?.toFixed(2) ?? 0}
-                                                %
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">{`${test.score?.toFixed(2)}/${test.total_marks}`}</p>
-                                        </div>
+                                    );
+                                })}
+                                {hasMore && (
+                                    <div className="flex justify-center pt-3">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={loadMore}
+                                            disabled={loadingMore}
+                                        >
+                                            {loadingMore
+                                                ? 'Loading…'
+                                                : 'Load more attempts'}
+                                        </Button>
                                     </div>
-                                );
-                            })
+                                )}
+                            </>
                         ) : (
                             <p className="text-sm text-muted-foreground">
                                 No previous attempts

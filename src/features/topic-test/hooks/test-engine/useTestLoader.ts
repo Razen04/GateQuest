@@ -2,10 +2,17 @@ import { useEffect, useState } from 'react';
 import { getTestSession } from '@/features/topic-test/services/testSession';
 import type { Attempt, Question, TestSession } from '@/shared/types/storage';
 
+export type MockMeta = {
+    durationSeconds: number;
+    endsAt: number;
+    label: string;
+};
+
 export type TestData = {
     session: TestSession;
     questions: Question[];
     attempts: Attempt[];
+    mockMeta?: MockMeta;
 };
 
 const useTestLoader = (testId: string) => {

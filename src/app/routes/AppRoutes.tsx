@@ -68,6 +68,18 @@ const TestSolutionView = lazy(
 const TestReviewLayout = lazy(
     () => import('@/features/topic-test/components/TestReviewLayout')
 );
+const MockTestAttempt = lazy(
+    () => import('@/features/topic-test/pages/MockTestAttempt')
+);
+const MockTestLobby = lazy(
+    () => import('@/features/topic-test/pages/MockTestLobby')
+);
+const MockTestResult = lazy(
+    () => import('@/features/topic-test/pages/MockTestResult')
+);
+const MockTestLeaderboard = lazy(
+    () => import('@/features/topic-test/pages/MockTestLeaderboard')
+);
 
 export default function AppRoutes() {
     const loading = useAuthStore((s) => s.loading);
@@ -166,6 +178,24 @@ export default function AppRoutes() {
                             element={<TestSolutionView />}
                         />
                     </Route>
+
+                    {/* Mock Tests */}
+                    <Route
+                        path="mock-tests/attempt/:testId"
+                        element={<MockTestAttempt />}
+                    />
+                    <Route
+                        path="mock-tests/:mockId"
+                        element={<MockTestLobby />}
+                    />
+                    <Route
+                        path="mock-tests/result/:testId"
+                        element={<MockTestResult />}
+                    />
+                    <Route
+                        path="mock-tests/:mockId/leaderboard"
+                        element={<MockTestLeaderboard />}
+                    />
 
                     <Route
                         path="/privacy"

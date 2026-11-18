@@ -1,22 +1,15 @@
 import {
     ArrowRightIcon,
-    ArrowsClockwiseIcon,
-    BookOpenIcon,
-    ChartBarIcon,
-    ChartLineUpIcon,
-    CloudArrowUpIcon,
     CoffeeIcon,
     DiscordLogoIcon,
-    GitBranchIcon,
     GithubLogoIcon,
     MoonIcon,
-    SlidersHorizontalIcon,
-    SparkleIcon,
     SunIcon,
 } from '@phosphor-icons/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { Button } from '@/shared/components/ui/button';
+import { FEATURES, IMAGES } from '../data/landingData';
 
 const SITE = {
     name: { plain: 'GATE', accent: 'Quest' },
@@ -35,92 +28,7 @@ const ROUTES = {
     start: '/dashboard',
 };
 
-const IMAGES = {
-    logoSvg: '/icons/logo.svg',
-    logoPng: '/icons/logo.png',
-
-    desktop: {
-        dark: '/screenshots/Desktop.png',
-        light: '/screenshots/DesktopLight.png',
-    },
-    ipad: {
-        dark: '/screenshots/iPadDark.png',
-        light: '/screenshots/iPadLight.png',
-    },
-    mobile: {
-        dark: '/screenshots/Dashboard.png',
-        light: '/screenshots/DashboardLight.png',
-    },
-};
-
 const ACCENT = 'text-[#0066CC] dark:text-[#3399FF]';
-
-const FEATURES = [
-    {
-        icon: ChartLineUpIcon,
-        title: 'Interactive Dashboard',
-        description:
-            'Follow a personalized study roadmap and a daily streak graph that shows how consistent your practice has been.',
-        tag: 'Study overview',
-        span: 'lg:col-span-2',
-    },
-    {
-        icon: BookOpenIcon,
-        title: 'Question Library',
-        description:
-            'Previous-year questions organized by subject, year, and difficulty.',
-        tag: 'Practice',
-        span: 'lg:col-span-1',
-    },
-    {
-        icon: ArrowsClockwiseIcon,
-        title: 'Smart Revision',
-        description:
-            'Spaced revision, weekly recovery sets, and timed topic tests to strengthen weak areas.',
-        tag: 'Active recall',
-        span: 'lg:col-span-1',
-    },
-    {
-        icon: ChartBarIcon,
-        title: 'Performance Tracking',
-        description:
-            'Accuracy, completion, and subject-wise progress. Bookmarks and notes help you revisit hard questions.',
-        tag: 'Analytics',
-        span: 'lg:col-span-1',
-    },
-    {
-        icon: SparkleIcon,
-        title: 'AskAI',
-        description:
-            'Step-by-step explanations, problem breakdowns, and quick doubt clearing for FREE.',
-        tag: 'AI assistant',
-        span: 'lg:col-span-1',
-    },
-    {
-        icon: GitBranchIcon,
-        title: 'Multi-Branch Support',
-        description:
-            'Switch between target branches while shared subject progress, mistakes, and goals stay in sync.',
-        tag: 'Flexible preparation',
-        span: 'lg:col-span-2',
-    },
-    {
-        icon: SlidersHorizontalIcon,
-        title: 'Made to Fit You',
-        description:
-            'Light or dark mode, optional audio feedback, and a built-in timer to practice under exam-like conditions.',
-        tag: 'Customizable',
-        span: 'lg:col-span-2',
-    },
-    {
-        icon: CloudArrowUpIcon,
-        title: 'Sync & Install',
-        description:
-            'Keep your progress in sync across devices and install GATEQuest as a desktop or mobile app.',
-        tag: 'Cross-device',
-        span: 'lg:col-span-2',
-    },
-];
 
 function scrollToId(id: string) {
     const reduceMotion = window.matchMedia(
@@ -136,8 +44,8 @@ function Wordmark({ className = '' }: { className?: string }) {
         <span
             className={`font-semibold tracking-tight text-foreground ${className}`}
         >
-            {SITE.name.plain}
-            <span className={ACCENT}>{SITE.name.accent}</span>
+            <span className={ACCENT}>{SITE.name.plain}</span>
+            {SITE.name.accent}
         </span>
     );
 }
@@ -157,7 +65,6 @@ function NavigationMenu({
         <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur">
             <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5 sm:px-8">
                 <div className="flex items-center gap-2.5">
-                    <img src={IMAGES.logoSvg} alt="" className="h-7 w-7" />
                     <Wordmark className="text-sm hidden md:block" />
                 </div>
 

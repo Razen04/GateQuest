@@ -153,11 +153,11 @@ const TopicTestLobby = () => {
                     className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-chart-1 mb-4 transition-colors"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Topic Tests
+                    Back to Custom Test
                 </button>
 
                 <PageHeader
-                    primaryTitle="Topic Test"
+                    primaryTitle="Custom Test"
                     secondaryTitle={
                         isResume ? 'Resume Session' : 'Ready to Start?'
                     }

@@ -1,7 +1,8 @@
-# v0.12.0 - 2026-11-12 (Latest)
+# v0.12.0 - 2026-11-18 (Latest)
 
 - Donations auto-verify within ~5 minutes (mostly maybe); uncertain matches alert the admin for manual review. [#112](https://github.com/Razen04/GateQuest/issues/112)
 - Donations page redesigned with Mission/Contribute tabs, a live ₹2,500 monthly infrastructure goal, and the public patron ledger with perks for donors. More at [Donation Page](https://gate-quest.vercel.app/donate)
+- Added [Mock Tests](https://gate-quest.vercel.app/topic-test-generate?tab=mocks). Papers open at a scheduled time, with a lobby countdown before you can start.
 - Question accuracy colors are now threshold-based instead of always green.
 - Fixed pacing chart bars to correctly reflect correct/incorrect/skipped status.
 - Fixed the behaviour of "Include Attempted Questions" toggle to not include any seen question if turned off in the tests. [#117](https://github.com/Razen04/GateQuest/issues/117) by [@Morpheus004](https://github.com/Morpheus004)
