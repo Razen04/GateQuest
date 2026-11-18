@@ -39,7 +39,8 @@ begin
         v_topic_names
     from
         jsonb_to_recordset(p_filters) as f (topic text);
-    create temp table temp_selected_questions on commit drop as
+    drop table if exists temp_selected_questions;
+    create TEMP table temp_selected_questions on commit drop as
     with filter_params as (
         select
             subject_id,
@@ -81,8 +82,21 @@ from
         left join revision_queue rq on q.id = rq.question_id
     where
         q.verified = true
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'))
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
 ),
 bucket_new as (
     select

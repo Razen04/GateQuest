@@ -36,8 +36,8 @@ create or replace function public.get_topic_counts (p_subject_id uuid)
         topic text,
         question_count bigint,
         unattempted_count bigint,
-        subject_id uuid
-    )
+        subject_id uuid)
+    language plpgsql
     as $$
 declare
     v_user_version int;
@@ -66,13 +66,25 @@ where
     q.subject_id = p_subject_id
         and q.topic is not null
         and q.verified = true
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'))
-    group by
-        q.topic;
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
+        group by
+            q.topic;
 end;
-$$
-language plpgsql;
+$$;
 
 -- ─── get_exam_subject_counts ──────────────────────────────────────
 create or replace function public.get_exam_subject_counts (target_exams text[])
@@ -100,10 +112,23 @@ begin
 where (s.is_universal = true
         or expanded_tags.tag = any (target_exams))
         and q.verified = true
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'))
-    group by
-        q.subject_id;
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
+        group by
+            q.subject_id;
 end;
 $$
 language plpgsql;
@@ -139,23 +164,28 @@ begin
         and q.subject_id = any (p_valid_subjects)
         and q.verified = true
         and (s.is_universal = true
-            or (q.metadata ->> 'set' = UPPER(v_current_branch_id)))
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'));
+            or q.metadata ->> 'set' = UPPER(v_current_branch_id))
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)));
     return v_count;
 end;
 $$
 language plpgsql;
 
 -- ─── generate_weekly_revision_set ─────────────────────────────────
--- adds:
---   · mock filter (standard clause)
---   · 'empty' early return: if no eligible questions, do not create an
---     empty set row, return status 'empty' instead of 'created'.
---     Matches the intent documented in 03_generate_weekly_revision_set/
---     empty.test.sql. This was a pre-existing gap: the function used to
---     create a row with total_questions = 0, which the empty test
---     explicitly rejects.
 create or replace function public.generate_weekly_revision_set (p_valid_subjects uuid[], p_target_exams text[], p_branch_id text)
     returns json
     as $$
@@ -185,10 +215,7 @@ begin
     if v_set_id is not null then
         return json_build_object('success', true, 'status', 'existing', 'message', 'Set already present for this week.');
     end if;
-    -- Quick eligibility check. Using EXISTS instead of COUNT keeps this
-    -- cheap — the planner bails on the first match. Filters are the
-    -- exact same set the INSERT below uses, so if this returns false
-    -- the INSERT would have produced zero rows.
+    -- Quick eligibility check.
     select
         exists (
             select
@@ -213,15 +240,28 @@ begin
                 and (s.is_universal = true
                     or (q.metadata ->> 'set' = UPPER(p_branch_id)
                         or expanded_tags.tag = any (p_target_exams)))
-                and (q.metadata ->> 'mockId' is null
-                    or public.user_can_access_mock (q.metadata ->> 'mockId'))
-            limit 1)
-into
-    v_has_eligible;
+                and (not exists (
+                        select
+                            1
+                        from
+                            public.mock_questions mq
+                        where
+                            mq.question_id = q.id)
+                        or exists (
+                            select
+                                1
+                            from
+                                public.mock_questions mq
+                            where
+                                mq.question_id = q.id
+                                and public.user_can_access_mock (mq.mock_id)))
+                    limit 1)
+        into
+            v_has_eligible;
     if not v_has_eligible then
         return json_build_object('success', true, 'status', 'empty', 'message', 'No questions due for review this week.');
     end if;
-    -- Create the set header now that we know there is content to fill it.
+    -- Create the set header.
     insert into weekly_revision_set (generated_for, start_of_week, status, created_at, exam_tags, branch_id)
         values (v_user_id, v_start_of_week, 'pending', now(), p_target_exams, p_branch_id)
     returning
@@ -253,9 +293,22 @@ into
             and (s.is_universal = true
                 or (q.metadata ->> 'set' = UPPER(p_branch_id)
                     or expanded_tags.tag = any (p_target_exams)))
-            and (q.metadata ->> 'mockId' is null
-                or public.user_can_access_mock (q.metadata ->> 'mockId')))
-    insert into revision_set_questions (set_id, question_id)
+            and (not exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id)
+                    or exists (
+                        select
+                            1
+                        from
+                            public.mock_questions mq
+                        where
+                            mq.question_id = q.id
+                            and public.user_can_access_mock (mq.mock_id))))
+        insert into revision_set_questions (set_id, question_id)
     select
         v_set_id,
         question_id
@@ -282,10 +335,6 @@ $$
 language plpgsql;
 
 -- ─── generate_topic_test ──────────────────────────────────────────
--- Additions vs the live version:
---   · pool CTE: WHERE q.verified = true (was missing — real leak)
---   · pool CTE: mock filter
---   · v_total_marks: coalesce(sum(marks), 0) (NULL safety)
 -- NOTE: p_total_seconds is accepted but IGNORED. The function computes
 -- v_actual_count * 162. Fixing that is a separate concern — flagged here
 -- so it isn't forgotten.
@@ -371,8 +420,21 @@ from
         left join revision_queue rq on q.id = rq.question_id
     where
         q.verified = true
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'))
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
 ),
 bucket_new as (
     select
@@ -481,3 +543,4 @@ from
     return jsonb_build_object('test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks);
 end;
 $$;
+

@@ -6,15 +6,28 @@ create or replace function public.fetch_practice_questions (p_subject_id uuid, p
     set search_path = 'public'
     as $$
     select
-        *
+        q.*
     from
-        public.questions
+        public.questions q
     where
-        verified = true
-        and subject_id = p_subject_id
+        q.verified = true
+        and q.subject_id = p_subject_id
         and (p_last_fetched_at is null
-            or updated_at > p_last_fetched_at)
-        and (metadata ->> 'mockId' is null
-            or public.user_can_access_mock (metadata ->> 'mockId'));
+            or q.updated_at > p_last_fetched_at)
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)));
 $$;
 

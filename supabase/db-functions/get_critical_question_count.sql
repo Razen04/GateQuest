@@ -28,9 +28,22 @@ begin
         and q.subject_id = any (p_valid_subjects)
         and q.verified = true
         and (s.is_universal = true
-            or (q.metadata ->> 'set' = UPPER(v_current_branch_id)))
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'));
+            or q.metadata ->> 'set' = UPPER(v_current_branch_id))
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)));
     return v_count;
 end;
 $$

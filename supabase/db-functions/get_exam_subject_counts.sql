@@ -23,10 +23,23 @@ begin
 where (s.is_universal = true
         or expanded_tags.tag = any (target_exams))
         and q.verified = true
-        and (q.metadata ->> 'mockId' is null
-            or public.user_can_access_mock (q.metadata ->> 'mockId'))
-    group by
-        q.subject_id;
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
+        group by
+            q.subject_id;
 end;
 $$
 language plpgsql;
