@@ -50,7 +50,7 @@ describe('isMockQuestion', () => {
 describe('getQuestionSourceLabel', () => {
     it('labels mock questions as EXAM BRANCH MOCK YEAR', () => {
         expect(getQuestionSourceLabel(makeQuestion())).toBe(
-            'GATE CS MOCK 2026'
+            'GATE CS QUEST MOCK 2026'
         );
     });
 
@@ -82,7 +82,7 @@ describe('getQuestionSourceLabel', () => {
                     },
                 })
             )
-        ).toBe('GATE / DA CS MOCK 2025');
+        ).toBe('GATE / DA CS QUEST MOCK 2025');
     });
 
     it('omits an empty branch', () => {
@@ -97,7 +97,7 @@ describe('getQuestionSourceLabel', () => {
                     },
                 })
             )
-        ).toBe('GATE MOCK 2026');
+        ).toBe('GATE QUEST MOCK 2026');
     });
 
     it('falls back when the year is missing', () => {

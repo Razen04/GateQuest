@@ -1,6 +1,7 @@
 import { ChartBar, SpinnerGap } from '@phosphor-icons/react';
 import type { Database } from '@/shared/types/supabase.ts';
 import { formatTime } from '@/shared/utils/helper';
+import { hasEnoughPeerData, MIN_PEER_ATTEMPTS } from '../../utils/peerStats';
 
 type BenchmarkData = Database['public']['Tables']['question_peer_stats']['Row'];
 
@@ -46,6 +47,27 @@ const QuestionPeerStats = ({
     const { total_attempts, correct_attempts, avg_time_seconds } = data;
 
     const safeTotal = total_attempts || 0;
+
+    if (!hasEnoughPeerData(safeTotal)) {
+        return (
+            <div className="mt-6 mb-2 border border-dashed border-border bg-muted p-4 text-center shadow-sm text-muted-foreground">
+                <ChartBar
+                    className="mx-auto mb-2 h-6 w-6 text-muted-foreground"
+                    weight="duotone"
+                />
+                <p className="font-medium text-foreground">
+                    Not enough data yet
+                </p>
+                <p className="mt-1 text-xs">
+                    {safeTotal === 1
+                        ? 'Only 1 person has attempted this question.'
+                        : `Only ${safeTotal} people have attempted this question.`}{' '}
+                    Statistics unlock at {MIN_PEER_ATTEMPTS} attempts.
+                </p>
+            </div>
+        );
+    }
+
     const safeCorrect = correct_attempts || 0;
 
     const correctPercent =

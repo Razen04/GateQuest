@@ -260,6 +260,7 @@ export type Database = {
                     duration_seconds: number;
                     id: string;
                     label: string;
+                    peer_stats_refreshed_at: string | null;
                     post_min_tier: number;
                     schedule_notified_at: string | null;
                     series_number: number | null;
@@ -278,6 +279,7 @@ export type Database = {
                     duration_seconds: number;
                     id: string;
                     label: string;
+                    peer_stats_refreshed_at?: string | null;
                     post_min_tier?: number;
                     schedule_notified_at?: string | null;
                     series_number?: number | null;
@@ -295,6 +297,7 @@ export type Database = {
                     duration_seconds?: number;
                     id?: string;
                     label?: string;
+                    peer_stats_refreshed_at?: string | null;
                     post_min_tier?: number;
                     schedule_notified_at?: string | null;
                     series_number?: number | null;
@@ -1456,12 +1459,20 @@ export type Database = {
                 Args: { v_user_id: string };
                 Returns: undefined;
             };
+            refresh_closed_mock_stats: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
             refresh_dynamic_difficulty: {
                 Args: Record<PropertyKey, never>;
                 Returns: undefined;
             };
             refresh_question_peer_stats: {
                 Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
+            refresh_question_peer_stats_for_questions: {
+                Args: { p_question_ids?: string[] | null };
                 Returns: undefined;
             };
             resolve_notification_target: {

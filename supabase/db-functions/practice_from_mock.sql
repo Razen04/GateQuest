@@ -16,11 +16,15 @@ declare
     v_label text;
     v_new_test_id uuid;
     v_new_paper_id text;
+    v_record_activity boolean;
 begin
     if v_user_id is null then
         raise exception 'Not authenticated';
     end if;
     v_my_tier := coalesce(public.get_my_tier (), 0);
+    -- Only donors feed UQA. Free-tier practice stays isolated so repeated
+    -- practice cannot skew first-attempt peer stats or dynamic difficulty.
+    v_record_activity := v_my_tier >= 1;
     -- Must have completed the mock or a practice session for it.
     select
         exists (
@@ -90,7 +94,7 @@ begin
     end if;
     v_new_paper_id := p_mock_id || '-practice-' || extract(epoch from now())::bigint::text;
     insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity)
-        values (v_user_id, array[coalesce(v_label, p_mock_id) || ' (Practice)'], v_question_count, v_question_count * 162, 'created', v_total_marks, v_branch_id, v_new_paper_id, true)
+        values (v_user_id, array[coalesce(v_label, p_mock_id) || ' (Practice)'], v_question_count, v_question_count * 162, 'created', v_total_marks, v_branch_id, v_new_paper_id, v_record_activity)
     returning
         id
     into

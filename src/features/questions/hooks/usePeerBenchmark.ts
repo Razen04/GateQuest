@@ -3,8 +3,9 @@ import { toast } from 'sonner';
 import { appStorage } from '@/storage/storageService';
 import { type Benchmark, fetchQuestionPeerStats } from '../api/quesitons';
 
-// 12 hours in milliseconds
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+// 30 minutes in milliseconds. Kept short so a freshly closed mock shows
+// up without a hard refresh.
+const CACHE_TTL_MS = 30 * 60 * 1000;
 const UUID_REGEX =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

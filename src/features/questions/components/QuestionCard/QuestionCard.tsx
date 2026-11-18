@@ -12,6 +12,7 @@ import {
     getCorrectAnswerText,
     isNumericalQuestion,
 } from '../../utils/questionUtils';
+import { hasEnoughPeerData } from '../../utils/peerStats';
 import ActionButtons from './ActionButtons';
 import AskAIBanner from './AskAIBanner';
 import QuestionContent from './QuestionContent';
@@ -132,7 +133,8 @@ const QuestionCard = ({
             | undefined;
         const total = peerStats?.data?.total_attempts ?? 0;
 
-        if (!dist || total === 0 || !question.options?.length) return null;
+        if (!dist || !hasEnoughPeerData(total) || !question.options?.length)
+            return null;
 
         return question.options.map((_, i) => {
             const count = dist[String(i)] ?? 0;

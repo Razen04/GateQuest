@@ -19,7 +19,7 @@ The database is designed around a few core concepts. Understanding their relatio
 - **`branch_subjects`**: Links subjects to branches to ensure users only see content relevant to their stream.
 - **`questions`**: Contains all the exam questions. This is the central content of the app.
 - **`user_question_activity`**: Acts as a logbook. Every time a user attempts a question, a record is created here, linking a `user` to a `question`.
-- **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question, calculated from the `user_question_activity` data.
+- **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question. It is built from first practice attempts in `user_question_activity` plus completed official mock attempts in `topic_tests` (once the mock window closes).
 - **`question_reports`**: Allows users to report issues with specific questions.
 - **`question_bookmarks`**: Stores user question bookmarks with notes attached for later revision.
 - **`notifications`**: Stores notification rows with targeting metadata. Each row describes _who_ should receive it; delivery across push and in-app channels is handled by a dedicated dispatcher pipeline.
@@ -138,9 +138,11 @@ A complete inventory of every object in the `public` schema and the surrounding 
 
 | Function                                                                                            | Purpose                                      |
 | :-------------------------------------------------------------------------------------------------- | :------------------------------------------- |
-| [`insert_user_question_activity_batch(batch jsonb)`](#function-insert_user_question_activity_batch) | Batched attempt recording + revision context |
-| [`refresh_question_peer_stats()`](#function-refresh_question_peer_stats)                            | Rebuild `question_peer_stats` from activity  |
-| [`refresh_dynamic_difficulty()`](#function-refresh_dynamic_difficulty)                              | Recompute dynamic difficulty scores          |
+| [`insert_user_question_activity_batch(batch jsonb)`](#function-insert_user_question_activity_batch) | Batched attempt recording + revision context         |
+| [`refresh_question_peer_stats()`](#function-refresh_question_peer_stats)                            | Full rebuild of `question_peer_stats`                |
+| [`refresh_question_peer_stats_for_questions(uuid[])`](#function-refresh_question_peer_stats_for_questions) | Rebuild stats for specific questions only       |
+| [`refresh_closed_mock_stats()`](#function-refresh_closed_mock_stats)                                | Fold newly closed mocks into peer stats + difficulty |
+| [`refresh_dynamic_difficulty()`](#function-refresh_dynamic_difficulty)                              | Recompute dynamic difficulty scores                  |
 
 **Spaced Repetition**
 
@@ -205,18 +207,22 @@ A complete inventory of every object in the `public` schema and the surrounding 
 
 ### Cron Jobs
 
-Scheduled via `pg_cron`. Four invoke the `process-reminders` Edge Function, four run pure SQL.
+Scheduled via `pg_cron`. Six run pure SQL, four invoke the `process-reminders` Edge Function.
 
-| Job                               | Schedule     | Action                                           |
-| :-------------------------------- | :----------- | :----------------------------------------------- |
-| `refresh-peer-stats-midnight`     | `0 0 * * *`  | `select public.refresh_question_peer_stats();`   |
-| `nightly-difficulty-sync`         | `0 0 * * *`  | `select refresh_dynamic_difficulty();`           |
-| `prune-topic-test-history`        | `0 4 * * *`  | `select public.prune_topic_test_history();`      |
-| `notify-mocks`                    | `* * * * *`  | `select public.notify_mocks();`                  |
-| `revision-hourly-reminder`        | `0 * * * *`  | POST `?task=revision-hourly`                     |
-| `weekend-topic-test-saturday`     | `30 3 * * 6` | POST `?task=weekend-topic-test`                  |
-| `weekend-topic-test-sunday`       | `30 3 * * 0` | POST `?task=weekend-topic-test`                  |
-| `donation-reminder-every-2-weeks` | `30 6 * * 0` | POST `?task=donation-reminder`                   |
+| Job                               | Schedule     | Action                                                |
+| :-------------------------------- | :----------- | :---------------------------------------------------- |
+| `refresh-peer-stats-midnight`     | `0 0 * * *`  | `select public.refresh_question_peer_stats();`        |
+| `nightly-difficulty-sync`         | `0 0 * * *`  | `select refresh_dynamic_difficulty();`                |
+| `prune-topic-test-history`        | `0 4 * * *`  | `select public.prune_topic_test_history();`           |
+| `refresh-mock-stats`              | `* * * * *`  | `select public.refresh_closed_mock_stats();`          |
+| `notify-mocks`                    | `* * * * *`  | `select public.notify_mocks();`                       |
+| `expire-mock-sessions`            | `*/5 * * * *` | `select public.expire_mock_sessions();`               |
+| `revision-hourly-reminder`        | `0 * * * *`  | POST `?task=revision-hourly`                          |
+| `weekend-topic-test-saturday`     | `30 3 * * 6` | POST `?task=weekend-topic-test`                       |
+| `weekend-topic-test-sunday`       | `30 3 * * 0` | POST `?task=weekend-topic-test`                       |
+| `donation-reminder-every-2-weeks` | `30 6 * * 0` | POST `?task=donation-reminder`                        |
+
+`refresh-peer-stats-midnight` is configured in the hosted/remote databases directly; it has no `cron.schedule` call in the local migrations, so a fresh local stack started with `supabase db reset` will not contain it. `refresh-mock-stats`, `expire-mock-sessions`, `notify-mocks`, `prune-topic-test-history` and `nightly-difficulty-sync` are all scheduled from migrations.
 
 ---
 
@@ -777,8 +783,12 @@ The old `FOR SELECT USING (true)` policy that used to be on this table has been 
 
 **Notes:**
 
-- **How it stays current.** Refreshed nightly by the `refresh-peer-stats-midnight` cron (`0 0 * * *`), which calls `refresh_question_peer_stats()`. This is a full-table refresh — every row is recomputed from `user_question_activity`. On a catalog with hundreds of thousands of attempts, it takes a few seconds. The trade-off is that stats are up to 24 hours stale, which is fine for a "compare to peers" feature.
-- **First-attempt semantics.** Only rows with `attempt_number = 1` contribute. A user who retries a question 10 times and gets it right on the 10th attempt contributes to `wrong_attempts`, not `correct_attempts`. This is the correct metric — it reflects first-look ability, not eventual learning.
+- **How it stays current.** Two paths:
+  - `refresh-peer-stats-midnight` (`0 0 * * *`, hosted/remote only) calls `refresh_question_peer_stats()` for a full rebuild. Every row is recomputed from both contribution sources. On a catalog with hundreds of thousands of attempts this takes a few seconds.
+  - `refresh-mock-stats` (`* * * * *`) calls `refresh_closed_mock_stats()`, which folds each newly closed mock into the stats within a minute of its window ending and stamps `mocks.peer_stats_refreshed_at`. This is what makes mock questions current before the nightly rebuild.
+- **Client cache.** Each question's row is cached in IndexedDB for 30 minutes, so a freshly closed mock shows up without a hard refresh. The 10-attempt display gate is also client-side.
+- **Contribution sources.** First practice attempts from `user_question_activity` (`attempt_number = 1`) plus completed official mock attempts read from `topic_tests`/`topic_tests_attempts`. Mock attempts are only counted after the mock window closes, never while results are embargoed. `mock-*-practice-*` sessions are excluded. One contribution per (user, question): the mock attempt wins; a question skipped in the mock (`user_answer is null`) falls back to the practice row. Nothing is written back to `user_question_activity`.
+- **First-attempt semantics.** Only a user's first attempt contributes. A user who retries a question 10 times and gets it right on the 10th attempt contributes to `wrong_attempts`, not `correct_attempts`; re-attempts of a mock (`mock-id-r2`) collapse into the first completion. This reflects first-look ability, not eventual learning.
 - **`option_distribution` covers one attempt per option.** For MSQ questions, a single attempt can contribute to multiple options (the user selected two). So the sum of option counts can exceed `total_attempts`. This is correct for the "what fraction of users picked A" question — but the client should divide each count by `total_attempts`, not by the sum of counts.
 - **`NULL` vs. `{}` for `option_distribution`.** `NULL` means no first attempts recorded any option indices (either a brand new question or a numerical-only question). `{}` would mean an empty distribution — a state the refresh never produces. The client treats `NULL` as "no bars to show" and skips rendering.
 - **`updated_at` is not `created_at`.** Rows are inserted by the refresh function and updated on conflict. There's no separate "when was this question first tracked" timestamp — if it matters, `questions.created_at` serves that purpose.
@@ -1849,12 +1859,45 @@ Processes a batch of question attempts — writes each to `user_question_activit
 
 **Security:** `SECURITY DEFINER`
 **Returns:** `void`
+**Arguments:** None.
 
-Full-table refresh of `question_peer_stats` from `user_question_activity`. Called nightly by the `refresh-peer-stats-midnight` cron.
+Thin wrapper that calls `refresh_question_peer_stats_for_questions(null::uuid[])`, i.e. a full rebuild of `question_peer_stats`. Called nightly by the `refresh-peer-stats-midnight` cron in the hosted/remote databases, and once as a backfill by migration `20261118140000_add_mock_peer_stats.sql`. There is no local `cron.schedule` entry for it; local stacks get the per-mock refresh from `refresh-mock-stats` instead.
 
-**Detailed documentation:** See [the existing entry](#function-refresh_question_peer_stats) above for the CTE structure, option-distribution assembly, and the `ON CONFLICT` upsert.
+**Note on `SECURITY DEFINER`:** Required because the function reads attempt data across all users. RLS on `user_question_activity` restricts reads to `auth.uid()`, and the refresh needs the full picture.
 
-**Note on `SECURITY DEFINER`:** Required because the function reads `user_question_activity` across all users. RLS on that table restricts reads to `auth.uid()`, and the refresh needs the full picture.
+---
+
+### Function: `refresh_question_peer_stats_for_questions`
+
+**Security:** `SECURITY DEFINER`
+**Returns:** `void`
+**Arguments:** `p_question_ids uuid[] default null` — `null` rebuilds every question; an empty array is a no-op.
+
+The actual aggregation behind `question_peer_stats`. It builds one contribution per (user, question) from two sources:
+
+1. `mock_first` — the **earliest completed official mock attempt** (`paper_id like 'mock-%'`, excluding `-practice-%`), only after `mocks.starts_at + duration_seconds <= now()`. Skipped questions (`user_answer is null`) and re-attempts are excluded.
+2. `practice_first` — `user_question_activity` rows with `attempt_number = 1`.
+
+A mock contribution wins over the practice row; a question skipped in the mock falls back to the practice row. From those contributions it computes `total_attempts`, correct/wrong counts, average time and the per-option `option_distribution`, then upserts into `question_peer_stats` with `ON CONFLICT (question_id) DO UPDATE`. It never writes back to `user_question_activity`.
+
+**Note:** There is no attempt-count threshold in this function — questions with a single contribution still get a row. The 10-attempt minimum is a client-side display gate (`hasEnoughPeerData` in `src/features/questions/utils/peerStats.ts`).
+
+---
+
+### Function: `refresh_closed_mock_stats`
+
+**Security:** `SECURITY DEFINER`
+**Returns:** `integer` (number of mocks folded in)
+**Arguments:** None. Cron-only; `EXECUTE` is revoked from `anon`/`authenticated`.
+
+Scheduled by `refresh-mock-stats` (`* * * * *`). For each mock whose window has closed and which has not yet been stamped (`peer_stats_refreshed_at is null or < window end`), it:
+
+1. Collects the distinct question IDs from completed official sessions for that mock (excluding `-practice-%`).
+2. Calls `refresh_question_peer_stats_for_questions(ids)` — an empty list is a harmless no-op.
+3. Stamps `mocks.peer_stats_refreshed_at = now()`, making the sweep idempotent.
+4. After the loop, calls `refresh_dynamic_difficulty()` once if anything was refreshed, so donor mock attempts that landed in `user_question_activity` are reflected immediately instead of waiting for `nightly-difficulty-sync`.
+
+Per-mock failures are logged as warnings so one bad mock cannot stall the others.
 
 ---
 
@@ -2635,10 +2678,14 @@ All jobs are stored in `cron.job`. The `active` column is `true` for all current
 | `refresh-peer-stats-midnight`     | `0 0 * * *`    | Pure SQL | `select public.refresh_question_peer_stats();`   |
 | `nightly-difficulty-sync`         | `0 0 * * *`    | Pure SQL | `select refresh_dynamic_difficulty();`           |
 | `prune-topic-test-history`        | `0 4 * * *`    | Pure SQL | `select public.prune_topic_test_history();`      |
+| `refresh-mock-stats`              | `* * * * *`    | Pure SQL | `select public.refresh_closed_mock_stats();`     |
+| `expire-mock-sessions`            | `*/5 * * * *`  | Pure SQL | `select public.expire_mock_sessions();`          |
 | `revision-hourly-reminder`        | `0 * * * *`    | HTTP     | POST `?task=revision-hourly`                     |
 | `weekend-topic-test-saturday`     | `30 3 * * 6`   | HTTP     | POST `?task=weekend-topic-test`                  |
 | `weekend-topic-test-sunday`       | `30 3 * * 0`   | HTTP     | POST `?task=weekend-topic-test`                  |
 | `donation-reminder-every-2-weeks` | `30 6 * * 0`   | HTTP     | POST `?task=donation-reminder`                   |
+
+`refresh-peer-stats-midnight` is present in the hosted/remote databases but is not created by any local migration. The other jobs above are scheduled from `supabase/migrations` and are created by `supabase db reset` / `db push`.
 
 Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 
@@ -2647,6 +2694,8 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 | `refresh-peer-stats-midnight`     | 00:00          | 05:30          |
 | `nightly-difficulty-sync`         | 00:00          | 05:30          |
 | `prune-topic-test-history`        | 04:00          | 09:30          |
+| `refresh-mock-stats`              | every minute   | every minute   |
+| `expire-mock-sessions`            | every 5 min    | every 5 min    |
 | `notify-mocks`                    | every minute   | every minute   |
 | `revision-hourly-reminder`        | every hour :00 | every hour :30 |
 | `weekend-topic-test-saturday`     | Sat 03:30      | Sat 09:00      |
@@ -2660,12 +2709,39 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 **Schedule:** `0 0 * * *` (daily at 00:00 UTC)
 **Type:** Pure SQL
 **Command:** `select public.refresh_question_peer_stats();`
+**Availability:** Configured in the hosted/remote databases. It is not created by a local migration, so a fresh local stack does not have this job.
 
-**Purpose:** Recomputes the `question_peer_stats` aggregate table from `user_question_activity`. This is what keeps the "68% of users got this right" statistic current.
+**Purpose:** Full rebuild of the `question_peer_stats` aggregate table. `refresh_question_peer_stats()` delegates to `refresh_question_peer_stats_for_questions(null)`, so every row is recomputed from both contribution sources: first practice attempts in `user_question_activity` and completed official mock attempts in `topic_tests` (after their window closes). This is what keeps the "68% of users got this right" statistic current.
 
-**Why nightly:** The aggregation is a full-table scan of `user_question_activity` — potentially hundreds of thousands of rows. Running it on every read would be prohibitive; running it on every attempt would also be too expensive. Nightly is the sweet spot: stats are at most 24 hours stale, which is invisible for a "compare to peers" feature.
+**Why nightly:** The aggregation is a full scan of all contribution rows — potentially hundreds of thousands. Running it on every read or every attempt would be prohibitive. The minutely `refresh-mock-stats` job covers newly closed mocks in the meantime, so this nightly pass is a safety net / full rebuild rather than the only refresh path.
 
-**Cost:** A full refresh on a catalog with ~500K attempts takes 2-5 seconds. The `ON CONFLICT (question_id) DO UPDATE` pattern means only new/changed rows trigger writes, so the update phase is fast. The read phase (aggregating activity) is the bulk of the cost.
+**Cost:** A full refresh on a catalog with ~500K attempts takes 2-5 seconds. The `ON CONFLICT (question_id) DO UPDATE` pattern means only new/changed rows trigger writes, so the update phase is fast. The read phase (aggregating activity and mock attempts) is the bulk of the cost.
+
+---
+
+### Job: `refresh-mock-stats`
+
+**Schedule:** `* * * * *` (every minute)
+**Type:** Pure SQL
+**Command:** `select public.refresh_closed_mock_stats();`
+
+**Purpose:** Makes mock questions current as soon as a mock window closes. For every closed mock whose `peer_stats_refreshed_at` has not been stamped, it gathers the official question IDs, calls `refresh_question_peer_stats_for_questions(ids)` for just those questions, stamps the mock, and — if anything changed — calls `refresh_dynamic_difficulty()` once so donor attempts are reflected without waiting for `nightly-difficulty-sync`.
+
+**Why not on every submission:** Refreshing during a live window burns CPU on data nobody can see and would expose partial results. The scoping to closed mocks also keeps each run cheap.
+
+**Idempotence:** `peer_stats_refreshed_at` is the marker; a second run returns 0 mocks refreshed. Failures are isolated per mock with `FOR UPDATE SKIP LOCKED` and warnings.
+
+---
+
+### Job: `expire-mock-sessions`
+
+**Schedule:** `*/5 * * * *` (every 5 minutes)
+**Type:** Pure SQL
+**Command:** `select public.expire_mock_sessions();`
+
+**Purpose:** Force-submits any official mock session still open after `mocks.starts_at + duration_seconds`, using the answers recorded so far and 0 remaining time, then marks it completed. Practice-from-mock sessions (`mock-*-practice-*`) are excluded.
+
+**Why it matters:** A user who closes the tab during a mock still gets a graded attempt, the countdown ends deterministically for everyone, and the session reaches `completed` state so results/RPCs treat it consistently. `submit_test_grading()` short-circuits on already-completed sessions, so overlapping runs are harmless.
 
 ---
 
