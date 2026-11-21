@@ -1,5 +1,6 @@
 import {
     ArrowRightIcon,
+    ArrowsClockwiseIcon,
     ArrowUpRightIcon,
     ChartLineUpIcon,
     LockIcon,
@@ -16,7 +17,11 @@ import type {
     MockSummaryResponse,
 } from '@/shared/types/mock';
 import type { Attempt } from '@/shared/types/storage';
-import { getMockAnalysis, getMockSummary } from '../api/mockTest';
+import {
+    getMockAnalysis,
+    getMockSummary,
+    practiceFromMock,
+} from '../api/mockTest';
 import { fetchAttemptsWithQuestions } from '../api/topicTest';
 import MockLeaderboardSection from '../components/mock/MockLeaderboardSection';
 import MockResultsEmbargo from '../components/mock/MockResultsEmbargo';
@@ -44,6 +49,9 @@ export default function MockTestResult() {
 
     const [attempts, setAttempts] = useState<Attempt[]>([]);
     const [attemptsLoading, setAttemptsLoading] = useState(false);
+
+    const [startingPractice, setStartingPractice] = useState(false);
+    const [practiceError, setPracticeError] = useState<string | null>(null);
 
     const fetchSummary = useCallback(async () => {
         if (!testId) return;
@@ -96,6 +104,39 @@ export default function MockTestResult() {
             cancelled = true;
         };
     }, [analysisUnlocked, testId, attempts.length]);
+
+    const handlePractice = useCallback(async () => {
+        if (
+            !summary ||
+            !('results_released' in summary) ||
+            !summary.results_released ||
+            !summary.mock_id
+        )
+            return;
+        setStartingPractice(true);
+        setPracticeError(null);
+
+        const res = await practiceFromMock(summary.mock_id);
+        setStartingPractice(false);
+
+        if ('error' in res) {
+            const messages: Record<string, string> = {
+                must_complete_first: 'Complete the mock before practicing it.',
+                tier_required: 'Practice requires a donor tier.',
+                active_exists:
+                    'You have an ongoing test. Finish it before starting this practice.',
+                mock_not_found: 'This mock is no longer available.',
+            };
+            setPracticeError(
+                messages[res.error] ?? 'Could not start practice.'
+            );
+            return;
+        }
+
+        if (res.status === 'created') {
+            navigate(`/topic-test/${res.test_id}/attempt`);
+        }
+    }, [summary, navigate]);
 
     if (!testId) return <Navigate to={PICKER_PATH} replace />;
 
@@ -327,18 +368,43 @@ export default function MockTestResult() {
                                     {analysisNote}
                                 </p>
                             )}
-                            <Button
-                                onClick={() =>
-                                    navigate(`/topic-test-review/${testId}/0`)
-                                }
-                                className="rounded-none"
-                            >
-                                Review Solutions
-                                <ArrowUpRightIcon
-                                    size={14}
-                                    className="ml-1.5"
-                                />
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Button
+                                    onClick={() =>
+                                        navigate(
+                                            `/topic-test-review/${testId}/0`
+                                        )
+                                    }
+                                    className="rounded-none"
+                                >
+                                    Review Solutions
+                                    <ArrowUpRightIcon
+                                        size={14}
+                                        className="ml-1.5"
+                                    />
+                                </Button>
+                                {summary.mock_id && (
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => void handlePractice()}
+                                        disabled={startingPractice}
+                                        className="rounded-none"
+                                    >
+                                        <ArrowsClockwiseIcon
+                                            size={14}
+                                            className="mr-1.5"
+                                        />
+                                        {startingPractice
+                                            ? 'Starting…'
+                                            : 'Practice This Mock'}
+                                    </Button>
+                                )}
+                            </div>
+                            {practiceError && (
+                                <p className="mt-2 text-xs text-destructive">
+                                    {practiceError}
+                                </p>
+                            )}
                         </>
                     )}
 
