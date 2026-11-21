@@ -11,7 +11,7 @@ import { LeaderboardAvatar } from '../components/mock/leaderboard/LeaderboardAva
 import { RankBadge } from '../components/mock/leaderboard/RankBadge';
 import MockResultsEmbargo from '../components/mock/MockResultsEmbargo';
 import { TestPageShell } from '../components/TestPageShell';
-import { formatCountdown } from '../utils/mockFormat';
+import { fmtNum, formatCountdown } from '../utils/mockFormat';
 
 const PICKER_PATH = '/topic-test-generate?tab=mocks';
 
@@ -280,7 +280,7 @@ export default function MockTestLeaderboard() {
                                             </Link>
                                         </td>
                                         <td className="px-3 py-2.5 text-right font-mono font-bold text-foreground">
-                                            {entry.score}
+                                            {fmtNum(entry.score)}
                                         </td>
                                         <td className="px-3 py-2.5 text-right font-mono text-muted-foreground hidden sm:table-cell">
                                             {formatCountdown(

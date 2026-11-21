@@ -97,11 +97,6 @@ const Mission = () => {
                         </div>
                     ))}
                 </div>
-
-                <p className="mt-5 border-t border-border pt-3 text-[11px] italic text-muted-foreground/70">
-                    Every perk is a one-time unlock — your tier is permanent
-                    once you reach it, even if you never donate again.
-                </p>
             </section>
 
             <p className="text-center font-serif text-xs italic leading-relaxed text-muted-foreground">

@@ -17,16 +17,16 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
         >
             <div
                 className="relative flex items-center justify-between gap-1 rounded-full px-2 py-2.5
-                           bg-white/10 dark:bg-black/20
-                           backdrop-blur-[36px] backdrop-saturate-[200%]
-                           border border-white/20 dark:border-white/10
-                           shadow-[0_8px_32px_rgba(0,0,0,0.16),0_1px_0_rgba(255,255,255,0.4)_inset,0_-1px_0_rgba(0,0,0,0.06)_inset]"
+                       bg-card/80
+                       backdrop-blur-[36px] backdrop-saturate-[200%]
+                       border border-border
+                       shadow-[0_8px_32px_var(--glass-shadow),0_1px_0_var(--glass-edge)_inset,0_-1px_0_var(--glass-shadow)_inset]"
             >
-                {/* Top specular highlight — the "glass catching light" edge */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-full bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+                {/* Top specular highlight */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-full bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
 
-                {/* Soft internal glow, subtler than before so it doesn't wash out icons */}
-                <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/15 via-transparent to-black/[0.02] dark:from-white/[0.06]" />
+                {/* Soft internal glass glow */}
+                <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-foreground/[0.04] via-transparent to-transparent" />
 
                 {tabs.map((tab) => {
                     const isActive = location.pathname.startsWith(tab.path);
@@ -36,7 +36,7 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
                         <button
                             key={tab.id}
                             onClick={() => handleTabClick(tab.path)}
-                            className="relative flex-1 flex justify-center focus-visible:outline-none"
+                            className="relative flex-1 flex justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                             <motion.div
                                 whileTap={{ scale: 0.92 }}
@@ -56,17 +56,17 @@ const MobileDock = ({ tabs, handleTabClick }: MobileDockProp) => {
                                             damping: 32,
                                         }}
                                         className="absolute inset-0 rounded-full
-                                                   bg-white/40 dark:bg-white/[0.14]
-                                                   backdrop-blur-[24px] backdrop-saturate-[180%]
-                                                   border border-white/40 dark:border-white/15
-                                                   shadow-[0_4px_14px_rgba(0,0,0,0.10),0_1px_0_rgba(255,255,255,0.6)_inset]"
+                                               bg-chart-1/10
+                                               backdrop-blur-[24px] backdrop-saturate-[180%]
+                                               border border-chart-1/20
+                                               shadow-[0_4px_14px_var(--glass-shadow),0_1px_0_var(--glass-edge)_inset]"
                                     />
                                 )}
 
                                 <div
                                     className={`relative z-10 flex flex-col items-center justify-center leading-none transition-colors duration-200 ${
                                         isActive
-                                            ? 'text-foreground'
+                                            ? 'text-chart-1'
                                             : 'text-muted-foreground'
                                     }`}
                                 >
