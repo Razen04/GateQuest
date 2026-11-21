@@ -1,4 +1,4 @@
-# v0.12.0 - 2026-11-18 (Latest)
+# v0.12.0 - 2026-11-21 (Latest)
 
 - Donations auto-verify within ~5 minutes (mostly maybe); uncertain matches alert the admin for manual review. [#112](https://github.com/Razen04/GateQuest/issues/112)
 - Donations page redesigned with Mission/Contribute tabs, a live ₹2,500 monthly infrastructure goal, and the public patron ledger with perks for donors. More at [Donation Page](https://gate-quest.vercel.app/donate)
