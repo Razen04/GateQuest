@@ -7,7 +7,8 @@
 - Fixed pacing chart bars to correctly reflect correct/incorrect/skipped status.
 - Fixed the behaviour of "Include Attempted Questions" toggle to not include any seen question if turned off in the tests. [#117](https://github.com/Razen04/GateQuest/issues/117) by [@Morpheus004](https://github.com/Morpheus004)
 - Topic Test history sync fixed. [#116](https://github.com/Razen04/GateQuest/issues/116)
-- Added [Privacy Policy](https://gate-quest.vercel.app/privacy) and [Terms of Service](terms) pages.
+- Read notifications of last 30 days remain visible in the notification tab.
+- Added [Privacy Policy](https://gate-quest.vercel.app/privacy) and [Terms of Service](https://gate-quest.vercel.app/terms) pages.
 
 # v0.11.0 - 2026-10-23
 
