@@ -23,18 +23,18 @@ const TopicTestFooter = ({
     subtitle,
 }: TopicTestFooterProps) => {
     return (
-        <div className="fixed inset-x-0 bottom-0 max-w-7xl mx-auto h-18 backdrop-blur-lg border-t border-gray-200 dark:border-zinc-800 p-4 z-50">
+        <div className="fixed inset-x-0 bottom-0 max-w-7xl mx-auto h-18 backdrop-blur-lg border-t border-border p-4 z-50">
             <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-bold">
                         Estimated Time of test
                     </span>
-                    <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-                        <ClockIcon className="w-5 h-5 text-blue-500 shrink-0" />
+                    <div className="flex items-center gap-2 text-foreground">
+                        <ClockIcon className="w-5 h-5 text-chart-1 shrink-0" />
                         <span className="text-xl font-bold">
                             {estimatedTime}m
                         </span>
-                        <span className="text-sm text-gray-400 font-medium">
+                        <span className="text-sm text-muted-foreground font-medium">
                             ({finalQuestionCount} Qs)
                         </span>
                     </div>
@@ -42,17 +42,17 @@ const TopicTestFooter = ({
 
                 {subtitle && (
                     <div className="hidden md:flex flex-col items-end min-w-0">
-                        <span className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-bold">
                             Paper
                         </span>
-                        <span className="text-sm font-semibold truncate max-w-xs">
+                        <span className="text-sm font-semibold truncate max-w-xs text-foreground">
                             {subtitle}
                         </span>
                     </div>
                 )}
 
                 <Button
-                    className="rounded-none shrink-0"
+                    className="rounded-none shrink-0 bg-chart-1 text-white hover:bg-chart-1/90"
                     disabled={isGenerating || !canGenerate}
                     onClick={handleStartTest}
                 >

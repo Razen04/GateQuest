@@ -3,7 +3,9 @@ import { useGoalStore } from '@/app/stores/useGoalStore';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 export function useGoalEffects() {
-    const userIdRef = useRef<string | null>(null);
+    // `undefined` = never initialized, `null` = guest, string = logged-in user.
+    // Distinguishes "first event" (undefined → anything) from a true no-change.
+    const userIdRef = useRef<string | null | undefined>(undefined);
 
     useEffect(() => {
         const {

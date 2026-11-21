@@ -21,13 +21,13 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
     if (Object.keys(links).length === 0) return null;
 
     return (
-        <div className="flex items-center gap-3 mt-3 text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-3 mt-3 text-muted-foreground">
             {links.github_url && (
                 <a
                     href={links.github_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-blue-500"
+                    className="hover:text-chart-1 transition-colors"
                 >
                     <GithubLogoIcon size={20} />
                 </a>
@@ -37,7 +37,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.linkedin_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-blue-500"
+                    className="hover:text-chart-1 transition-colors"
                 >
                     <LinkedinLogoIcon size={20} />
                 </a>
@@ -47,7 +47,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.x_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-blue-500"
+                    className="hover:text-chart-1 transition-colors"
                 >
                     <XLogoIcon size={20} />
                 </a>
@@ -57,7 +57,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.youtube_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-red-500"
+                    className="hover:text-red-500 transition-colors"
                 >
                     <YoutubeLogoIcon size={20} />
                 </a>
@@ -67,7 +67,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.reddit_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-orange-500"
+                    className="hover:text-orange-500 transition-colors"
                 >
                     <RedditLogoIcon size={20} />
                 </a>
@@ -77,7 +77,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.spotify_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-green-500"
+                    className="hover:text-green-500 transition-colors"
                 >
                     <SpotifyLogoIcon size={20} />
                 </a>
@@ -87,7 +87,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                     href={links.mastodon_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-purple-500"
+                    className="hover:text-purple-500 transition-colors"
                 >
                     <MastodonLogoIcon size={20} />
                 </a>
@@ -111,7 +111,7 @@ export default function SocialLinksDisplay({ links }: SocialLinksDisplayProps) {
                         toast.success('Lemmy handle copied!');
                     }}
                     title={`Copy Lemmy Handle: ${links.lemmy_url}`}
-                    className="hover:text-blue-400 transition-colors"
+                    className="hover:text-chart-1 transition-colors"
                 >
                     <FediverseLogoIcon size={20} />
                 </button>

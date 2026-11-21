@@ -1,12 +1,15 @@
-import { ArrowLeft, BookIcon } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight, BookIcon } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useTopicTestGenerator } from '@/features/topic-test/hooks/useTopicTestGenerator';
+import ModernLoader from '@/shared/components/ModernLoader';
 import PageHeader from '@/shared/components/PageHeader';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
+import { Button } from '@/shared/components/ui/button';
 import {
     Select,
     SelectContent,
@@ -18,20 +21,79 @@ import {
 } from '@/shared/components/ui/select';
 import useGoal from '@/shared/hooks/useGoal';
 import type { PyqPaper } from '@/shared/types/pyq';
+import type { TestSession } from '@/shared/types/storage';
 import { SubjectIconMap } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
 import { supabase } from '@/shared/utils/supabaseClient';
-import { createTestFromPaper } from '../../api/topicTest';
+import { createTestFromPaper, getActiveTest } from '../../api/topicTest';
+import ActiveTestBlocker, {
+    getActiveTestLabel,
+    getActiveTestResumePath,
+} from './ActiveTestBlocker';
+import MockTestPicker from './MockTestPicker';
 import PyqPaperPicker from './PyqPaperPicker';
 import TopicsSelection from './TopicsSelection';
 import TopicTestConfiguration from './TopicTestConfiguration';
 import TopicTestFooter from './TopicTestFooter';
+
+type Mode = 'custom' | 'pyq' | 'mocks';
+
+const isMode = (v: string | null): v is Mode =>
+    v === 'custom' || v === 'pyq' || v === 'mocks';
 
 const TopicTestGeneratePage = () => {
     const navigate = useNavigate();
     const userGoal = useGoalStore((s) => s.userGoal);
     const { getPracticeSubjects } = useGoal();
     const subjects = getPracticeSubjects();
+    const userId = useAuthStore((s) => s.user?.id);
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [mode, setModeState] = useState<Mode>(() => {
+        const t = searchParams.get('tab');
+        return isMode(t) ? t : 'custom';
+    });
+
+    // ─── Active-test gate ───────────────────────────────────
+    const [activeTest, setActiveTest] = useState<TestSession | null>(null);
+    const [activeLoading, setActiveLoading] = useState(true);
+
+    useEffect(() => {
+        if (!userId || !userGoal?.branch_id) {
+            setActiveLoading(false);
+            return;
+        }
+        let cancelled = false;
+        (async () => {
+            setActiveLoading(true);
+            try {
+                const { data } = await getActiveTest(
+                    userId,
+                    userGoal.branch_id!
+                );
+                if (!cancelled)
+                    setActiveTest((data as unknown as TestSession) ?? null);
+            } catch {
+                if (!cancelled) setActiveTest(null);
+            } finally {
+                if (!cancelled) setActiveLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [userId, userGoal?.branch_id]);
+
+    const previewMode =
+        searchParams.get('preview') === '1' && activeTest !== null;
+
+    const switchMode = (next: Mode) => {
+        setModeState(next);
+        const params = new URLSearchParams(searchParams);
+        if (next === 'custom') params.delete('tab');
+        else params.set('tab', next);
+        setSearchParams(params, { replace: true });
+    };
 
     const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
         null
@@ -40,8 +102,6 @@ const TopicTestGeneratePage = () => {
     const [includeAttempted, setIncludeAttempted] = useState(false);
     const [recordActivity, setRecordActivity] = useState(true);
     const [isGenerating, setIsGenerating] = useState(false);
-
-    const [mode, setMode] = useState<'custom' | 'pyq'>('custom');
     const [selectedPaper, setSelectedPaper] = useState<PyqPaper | null>(null);
 
     const {
@@ -59,10 +119,10 @@ const TopicTestGeneratePage = () => {
         includeAttempted,
     });
 
-    const finalQuestionCount = useMemo(() => {
-        return Math.min(questionLimit, poolSize);
-    }, [questionLimit, poolSize]);
-
+    const finalQuestionCount = useMemo(
+        () => Math.min(questionLimit, poolSize),
+        [questionLimit, poolSize]
+    );
     const estimatedTime = Math.ceil(finalQuestionCount * 2.76);
 
     const handleStartTest = async () => {
@@ -70,14 +130,12 @@ const TopicTestGeneratePage = () => {
             toast.warning('Not enough questions in selected topics.');
             return;
         }
-
         try {
             setIsGenerating(true);
             const topicFilter = selectedTopics.map((t) => ({
                 subject_id: t.subjectId,
                 topic: t.name,
             }));
-
             const { data, error } = await supabase.rpc('generate_topic_test', {
                 p_filters: topicFilter,
                 p_question_count: finalQuestionCount,
@@ -86,9 +144,7 @@ const TopicTestGeneratePage = () => {
                 p_branch_id: userGoal?.branch_id,
                 p_record_activity: recordActivity,
             });
-
             if (error) throw error;
-
             navigate(`/topic-test/${data?.test_id}`);
         } catch (err) {
             console.error(err);
@@ -100,7 +156,6 @@ const TopicTestGeneratePage = () => {
 
     const handleStartPyq = async () => {
         if (!selectedPaper || !userGoal?.branch_id) return;
-
         if (selectedPaper.branch === 'XL') {
             const optionals = userGoal.additional_subjects ?? [];
             if (optionals.length !== 2) {
@@ -110,7 +165,6 @@ const TopicTestGeneratePage = () => {
                 return;
             }
         }
-
         try {
             setIsGenerating(true);
             const optionalSubjectIds =
@@ -140,48 +194,114 @@ const TopicTestGeneratePage = () => {
 
     const onBack = () => navigate('/topic-test');
 
+    const modeBtnClass = (active: boolean) =>
+        `px-4 py-2 text-xs font-bold uppercase transition-all ${
+            active ? 'bg-card shadow-sm text-chart-1' : 'text-muted-foreground'
+        }`;
+
+    // ─── Loading (active test check) ────────────────────────
+    if (activeLoading) return <ModernLoader />;
+
+    // ─── Blocked (active test, not preview) ─────────────────
+    if (activeTest && !previewMode) {
+        return (
+            <div className="max-w-7xl mx-auto flex flex-col text-foreground">
+                <div className="p-6">
+                    <button
+                        onClick={onBack}
+                        className="flex items-center mb-4 hover:text-chart-1 transition-colors"
+                    >
+                        <ArrowLeft className="mr-2" />
+                        Back
+                    </button>
+                    <PageHeader
+                        primaryTitle="Custom"
+                        secondaryTitle="Test Generate"
+                        caption="Select topics across subjects and build your practice test."
+                    />
+                </div>
+                <div className="px-6 pb-40">
+                    <ActiveTestBlocker activeTest={activeTest} />
+                </div>
+            </div>
+        );
+    }
+
+    // ─── Preview banner (preview mode, active test) ─────────
+    const resumePath = activeTest
+        ? getActiveTestResumePath(activeTest)
+        : '/topic-test';
+    const resumeLabel = activeTest ? getActiveTestLabel(activeTest) : '';
+
+    const displayedMode: Mode = previewMode ? 'mocks' : mode;
+
     return (
-        <div className="max-w-7xl mx-auto flex flex-col text-slate-900 dark:text-slate-100">
+        <div className="max-w-7xl mx-auto flex flex-col text-foreground">
             <div className="p-6">
                 <button
                     onClick={onBack}
-                    className="flex items-center mb-4 hover:text-blue-500 transition-colors"
+                    className="flex items-center mb-4 hover:text-chart-1 transition-colors"
                 >
                     <ArrowLeft className="mr-2" />
                     Back
                 </button>
-
                 <PageHeader
-                    primaryTitle="Topic"
+                    primaryTitle="Custom"
                     secondaryTitle="Test Generate"
                     caption="Select topics across subjects and build your practice test."
                 />
             </div>
 
-            <div className="flex bg-white/20 dark:bg-white/[0.05] border border-white/20 p-1 mx-6 mb-2 w-fit">
-                <button
-                    onClick={() => setMode('custom')}
-                    className={`px-4 py-2 text-xs font-bold uppercase transition-all ${
-                        mode === 'custom'
-                            ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500'
-                            : 'text-slate-500'
-                    }`}
-                >
-                    Custom
-                </button>
-                <button
-                    onClick={() => setMode('pyq')}
-                    className={`px-4 py-2 text-xs font-bold uppercase transition-all ${
-                        mode === 'pyq'
-                            ? 'bg-white/70 dark:bg-white/10 shadow-sm text-blue-500'
-                            : 'text-slate-500'
-                    }`}
-                >
-                    PYQ Mock
-                </button>
-            </div>
+            {/* Tabs — hidden in preview */}
+            {!previewMode && (
+                <div className="flex bg-muted/40 border border-border p-1 mx-6 mb-2 w-fit">
+                    <button
+                        onClick={() => switchMode('custom')}
+                        className={modeBtnClass(mode === 'custom')}
+                    >
+                        Custom
+                    </button>
+                    <button
+                        onClick={() => switchMode('pyq')}
+                        className={modeBtnClass(mode === 'pyq')}
+                    >
+                        PYQ Mock
+                    </button>
+                    <button
+                        onClick={() => switchMode('mocks')}
+                        className={modeBtnClass(mode === 'mocks')}
+                    >
+                        Quest Mocks
+                    </button>
+                </div>
+            )}
 
-            {mode === 'custom' ? (
+            {/* Preview banner */}
+            {previewMode && (
+                <div className="mx-6 mb-4 border border-chart-4/30 bg-chart-4/5 p-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm text-foreground">
+                        <strong>Preview only</strong> — you have an ongoing test
+                        {resumeLabel && (
+                            <span className="text-muted-foreground">
+                                {' '}
+                                ({resumeLabel})
+                            </span>
+                        )}
+                        . Finish it to start a new one.
+                    </p>
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate(resumePath)}
+                        className="rounded-none"
+                    >
+                        Resume Test
+                        <ArrowRight size={14} className="ml-1.5" />
+                    </Button>
+                </div>
+            )}
+
+            {/* Custom mode */}
+            {displayedMode === 'custom' && (
                 <>
                     <motion.div
                         variants={containerVariants}
@@ -190,7 +310,7 @@ const TopicTestGeneratePage = () => {
                         className="px-6"
                     >
                         {warnings.length > 0 && (
-                            <div className="text-sm text-red-500">
+                            <div className="text-sm text-destructive">
                                 {warnings.map((w) => (
                                     <p key={w}>
                                         <span className="font-bold">
@@ -202,8 +322,8 @@ const TopicTestGeneratePage = () => {
                             </div>
                         )}
 
-                        <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                            <BookIcon className="w-4 h-4 text-blue-500" />
+                        <label className="text-sm mb-2 font-semibold uppercase tracking-wide flex items-center gap-2 text-foreground">
+                            <BookIcon className="w-4 h-4 text-chart-1" />
                             Select Subject
                         </label>
 
@@ -224,7 +344,6 @@ const TopicTestGeneratePage = () => {
                                             const SubjectIcon = SubjectIconMap[
                                                 s.icon_name || 'default'
                                             ] as React.ElementType;
-
                                             return (
                                                 <SelectItem
                                                     className="rounded-none"
@@ -256,7 +375,6 @@ const TopicTestGeneratePage = () => {
                             selectedSubjectId={selectedSubjectId}
                             includeAttempted={includeAttempted}
                         />
-
                         <TopicTestConfiguration
                             selectedTopics={selectedTopics}
                             questionLimit={questionLimit}
@@ -271,29 +389,30 @@ const TopicTestGeneratePage = () => {
                         />
                     </motion.div>
                 </>
-            ) : (
+            )}
+
+            {/* PYQ mode */}
+            {displayedMode === 'pyq' && (
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
                     className="flex-1 p-6 pb-40"
                 >
-                    <div className="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4 mb-4">
+                    <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
                         <div>
                             <p className="text-sm font-medium">
                                 Record Test Activity
                             </p>
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-muted-foreground">
                                 Include this test in your dashboard stats.
                             </span>
                         </div>
-
                         <ToggleSwitch
                             isOn={recordActivity}
                             onToggle={() => setRecordActivity((v) => !v)}
                         />
                     </div>
-
                     <PyqPaperPicker
                         selectedPaper={selectedPaper}
                         onSelect={setSelectedPaper}
@@ -301,7 +420,20 @@ const TopicTestGeneratePage = () => {
                 </motion.div>
             )}
 
-            {mode === 'custom' ? (
+            {/* Mocks mode */}
+            {displayedMode === 'mocks' && (
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="flex-1 p-6 pb-40"
+                >
+                    <MockTestPicker />
+                </motion.div>
+            )}
+
+            {/* Footers — only for custom + pyq in normal mode */}
+            {!previewMode && displayedMode === 'custom' && (
                 <TopicTestFooter
                     estimatedTime={estimatedTime}
                     finalQuestionCount={finalQuestionCount}
@@ -309,7 +441,8 @@ const TopicTestGeneratePage = () => {
                     canGenerate={canGenerate}
                     isGenerating={isGenerating}
                 />
-            ) : (
+            )}
+            {!previewMode && displayedMode === 'pyq' && (
                 <TopicTestFooter
                     estimatedTime={selectedPaper?.durationMinutes ?? 0}
                     finalQuestionCount={selectedPaper?.questionCount ?? 0}

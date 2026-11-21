@@ -30,11 +30,11 @@ export function StepFrame({
             <StepProgress current={currentStep} total={totalSteps} />
 
             <div className="mt-10">
-                <h1 className="font-['Space_Grotesk',sans-serif] text-2xl font-bold tracking-tight text-slate-900 md:text-3xl dark:text-white">
+                <h1 className="font-grotesk text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                     {title}
                 </h1>
                 {subtitle && (
-                    <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-zinc-400">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                         {subtitle}
                     </p>
                 )}

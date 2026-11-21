@@ -37,12 +37,12 @@ const ExamStatTile = ({ exam, stat }: { exam: string; stat: SubjectStat }) => {
     const total = stat.total_available ?? 0;
 
     return (
-        <div className="flex flex-col gap-1.5 min-w-0">
+        <div className="flex min-w-0 flex-col gap-1.5 font-['Manrope']">
             <div className="flex items-baseline justify-between gap-1 font-mono text-[10px] tabular-nums">
-                <span className="font-bold text-[11px] text-slate-900 dark:text-white">
+                <span className="text-[11px] font-bold text-card-foreground">
                     {progress}%
                 </span>
-                <span className="text-slate-400 dark:text-zinc-500 truncate">
+                <span className="truncate text-muted-foreground">
                     {attempted}/{total}
                 </span>
             </div>
@@ -50,10 +50,10 @@ const ExamStatTile = ({ exam, stat }: { exam: string; stat: SubjectStat }) => {
             <Progress value={progress} className="h-1 w-full rounded-none" />
 
             <div className="flex items-baseline justify-between gap-1 font-mono text-[9px]">
-                <span className="font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+                <span className="font-bold uppercase tracking-wider text-muted-foreground">
                     {exam}
                 </span>
-                <span className="text-slate-400 dark:text-zinc-500 tabular-nums">
+                <span className="tabular-nums text-muted-foreground">
                     {accuracy}% accuracy
                 </span>
             </div>
@@ -61,19 +61,27 @@ const ExamStatTile = ({ exam, stat }: { exam: string; stat: SubjectStat }) => {
     );
 };
 
+const difficultyStyles: Record<string, string> = {
+    Easy: 'border-chart-2/30 bg-chart-2/10 text-chart-2',
+    Medium: 'border-chart-4/30 bg-chart-4/10 text-chart-4',
+    Hard: 'border-destructive/30 bg-destructive/10 text-destructive',
+};
+
 const Practice = () => {
     const navigate = useNavigate();
     const [activeFilter, setActiveFilter] = useState('all');
 
-    // User profile
     const user = useAuthStore((s) => s.user);
-    // Get the subjects of the branch and exams selected by the user
+
     const userGoal = useGoalStore((s) => s.userGoal);
     const loading = useGoalStore((s) => s.loading);
+
     const { getPracticeSubjects } = useGoal();
+
     const [showGoalAlert, setShowGoalAlert] = useState(user === null);
 
     const subjects = getPracticeSubjects();
+
     const subjectStatsMap = useStatsStore((s) => s.stats.subjectStatsMap);
 
     const activeExams = (userGoal?.target_exams as string[] | undefined) ?? [];
@@ -84,12 +92,11 @@ const Practice = () => {
         }
     }, [loading, subjects]);
 
-    // Tab Reference
     const filterRefs = useRef<Record<string, HTMLButtonElement>>({});
 
-    // Auto-scroll tab into view on overflow
     useEffect(() => {
         const activeEl = filterRefs.current[activeFilter];
+
         if (activeEl) {
             activeEl.scrollIntoView({
                 behavior: 'smooth',
@@ -99,7 +106,6 @@ const Practice = () => {
         }
     }, [activeFilter]);
 
-    // Filter Tabs Configuration
     const filterTabs = [
         {
             label: 'All Subjects',
@@ -123,13 +129,11 @@ const Practice = () => {
         },
     ];
 
-    // Filter subjects based on active tab
     const filteredSubjects = subjects.filter((subject) => {
         if (activeFilter === 'all') return true;
         return subject.category === activeFilter;
     });
 
-    // Handle subject selection
     const handleSubjectSelect = (slug: string) => {
         navigate(`${slug}`);
     };
@@ -143,40 +147,47 @@ const Practice = () => {
                 ),
             }))
             .filter(
-                (row): row is { exam: string; stat: SubjectStat } =>
-                    row.stat !== undefined
+                (
+                    row
+                ): row is {
+                    exam: string;
+                    stat: SubjectStat;
+                } => row.stat !== undefined
             );
 
     return (
-        <div className="relative min-h-dvh flex flex-col select-none">
-            {/* Goal Modal Alert */}
+        <div className="relative flex min-h-dvh select-none flex-col bg-background text-foreground font-['Manrope']">
+            {/* Goal Modal */}
             <AlertDialog open={showGoalAlert} onOpenChange={setShowGoalAlert}>
-                <AlertDialogContent className="rounded-none">
+                <AlertDialogContent className="rounded-none border border-border bg-popover text-popover-foreground shadow-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
+                        <AlertDialogTitle className="font-['Sora']">
                             Set your goal first.
                         </AlertDialogTitle>
-                        <AlertDialogDescription>
+
+                        <AlertDialogDescription className="text-muted-foreground">
                             {user === null
                                 ? 'You need to login first.'
                                 : 'You need to select a branch and target exam to view relevant subjects for your practice session.'}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
+
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-none">
+                        <AlertDialogCancel className="rounded-none border-border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground">
                             Cancel
                         </AlertDialogCancel>
+
                         {user === null ? (
                             <AlertDialogAction
                                 onClick={() => navigate('/dashboard')}
-                                className="rounded-none"
+                                className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 Go to Dashboard
                             </AlertDialogAction>
                         ) : (
                             <AlertDialogAction
                                 onClick={() => navigate('/settings/account')}
-                                className="rounded-none"
+                                className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 Account Settings
                             </AlertDialogAction>
@@ -185,16 +196,16 @@ const Practice = () => {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Main Content Layout */}
-            <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 pt-6 pb-24 flex-1 flex flex-col">
-                {/* HEADER */}
+            {/* Main Content */}
+            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 pb-24 pt-6 sm:px-8">
+                {/* Header */}
                 <PageHeader
                     primaryTitle="Practice by"
                     secondaryTitle="Subject"
                     caption="Select a subject and start practicing."
                 />
 
-                {/* STICKY SUB-HEADER FILTER TABS */}
+                {/* Filter Tabs */}
                 <div className="top-14">
                     <AnimatedTabs
                         tabs={filterTabs}
@@ -203,15 +214,15 @@ const Practice = () => {
                     />
                 </div>
 
-                {/* SUBJECT GRID */}
+                {/* Subject Grid */}
                 <motion.div
                     initial="initial"
                     animate="animate"
                     variants={stagger}
                     viewport={{ once: true, amount: 0.2 }}
-                    className="flex-1 mt-4"
+                    className="mt-4 flex-1"
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-16">
+                    <div className="grid grid-cols-1 gap-4 pb-16 md:grid-cols-2 lg:grid-cols-3">
                         {filteredSubjects.map((subject) => {
                             const rows = rowsForSubject(subject.slug);
 
@@ -224,10 +235,10 @@ const Practice = () => {
                                     variants={fadeInUp}
                                     key={subject.id}
                                 >
-                                    <Card className="rounded-none relative overflow-hidden flex flex-col h-full py-0 bg-white/40 dark:bg-zinc-900/40 backdrop-blur-xl border border-slate-200/80 dark:border-zinc-800/80 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+                                    <Card className="relative flex h-full flex-col overflow-hidden rounded-none border border-border bg-card/70 py-0 text-card-foreground shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                                         <CardHeader className="relative flex flex-row items-start space-x-3 p-5">
                                             <div
-                                                className={`p-3 border border-white/10 shrink-0 ${getBackgroundColor(
+                                                className={`shrink-0 border border-border p-3 ${getBackgroundColor(
                                                     subject.theme_color
                                                 )}`}
                                             >
@@ -236,30 +247,29 @@ const Practice = () => {
                                                 )}
                                             </div>
 
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start gap-2">
-                                                    <CardTitle className="font-semibold text-base leading-snug truncate">
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <CardTitle className="truncate font-['Sora'] text-base font-semibold leading-snug">
                                                         {subject.name}
                                                     </CardTitle>
+
                                                     <Badge
                                                         variant="secondary"
-                                                        className={`rounded-none shrink-0 px-2 py-0.5 text-[10px] font-medium border border-white/20 backdrop-blur-md ${
-                                                            subject.difficulty ===
-                                                            'Easy'
-                                                                ? 'bg-green-500/15 text-green-700 dark:text-green-300'
-                                                                : subject.difficulty ===
-                                                                    'Medium'
-                                                                  ? 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-300'
-                                                                  : 'bg-red-500/15 text-red-700 dark:text-red-300'
+                                                        className={`shrink-0 rounded-none border px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
+                                                            difficultyStyles[
+                                                                subject
+                                                                    .difficulty
+                                                            ] ??
+                                                            'border-border bg-muted text-muted-foreground'
                                                         }`}
                                                     >
                                                         {subject.difficulty}
                                                     </Badge>
                                                 </div>
 
-                                                {/* Per-exam stat rows */}
+                                                {/* Exam Statistics */}
                                                 <div
-                                                    className="mt-4 grid grid-flow-col gap-3 overflow-x-auto no-scrollbar"
+                                                    className="mt-4 grid md:grid-flow-col gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                                                     style={{
                                                         gridAutoColumns:
                                                             'minmax(120px, 1fr)',
@@ -279,7 +289,7 @@ const Practice = () => {
                                                             )
                                                         )
                                                     ) : (
-                                                        <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
+                                                        <p className="font-mono text-[11px] text-muted-foreground">
                                                             Not started
                                                         </p>
                                                     )}
@@ -287,6 +297,7 @@ const Practice = () => {
                                             </div>
                                         </CardHeader>
 
+                                        {/* Card Footer */}
                                         <CardFooter
                                             className="mt-2 p-5 pt-0"
                                             onClick={(e) => {
@@ -296,9 +307,9 @@ const Practice = () => {
                                                 );
                                             }}
                                         >
-                                            <Button className="w-full text-xs font-medium group rounded-none">
+                                            <Button className="group w-full rounded-none bg-primary text-xs font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring">
                                                 Start Practice
-                                                <span className="ml-1.5 group-hover:translate-x-1 transition-transform">
+                                                <span className="ml-1.5 transition-transform group-hover:translate-x-1">
                                                     →
                                                 </span>
                                             </Button>

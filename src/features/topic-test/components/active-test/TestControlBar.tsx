@@ -34,7 +34,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
     isPaletteOpen,
 }) => {
     return (
-        <div className="sticky bottom-0 z-50 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-slate-200 dark:border-zinc-800 p-2.5 md:p-3">
+        <div className="sticky bottom-0 z-50 bg-card/95 backdrop-blur-md border-t border-border p-2.5 md:p-3">
             <div className="w-full flex flex-col md:flex-row gap-2.5 md:items-center md:justify-between max-w-7xl mx-auto">
                 {/* 
                   MOBILE ROW 1 / DESKTOP LEFT: 
@@ -48,7 +48,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                             variant="outline"
                             size="sm"
                             aria-label="Clear response"
-                            className="flex-1 md:flex-initial h-9 px-3 rounded-none text-xs font-semibold text-slate-600 dark:text-zinc-300 border-slate-300 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                            className="flex-1 md:flex-initial h-9 px-3 rounded-none text-xs font-semibold text-muted-foreground border-border hover:bg-accent hover:text-accent-foreground"
                         >
                             <TrashSimpleIcon
                                 size={16}
@@ -64,8 +64,8 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                             aria-label="Mark for review"
                             className={`flex-1 md:flex-initial h-9 px-3 rounded-none text-xs font-semibold transition-colors border ${
                                 isReviewMarked
-                                    ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700'
-                                    : 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-100'
+                                    ? 'bg-chart-6 text-white border-chart-6 hover:bg-chart-6/90'
+                                    : 'bg-chart-6/10 text-chart-6 border-chart-6/30 hover:bg-chart-6/20'
                             }`}
                         >
                             <BookmarkSimpleIcon
@@ -85,7 +85,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                         variant="outline"
                         size="sm"
                         aria-label="Toggle questions palette"
-                        className="md:hidden h-9 px-3 rounded-none border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-200"
+                        className="md:hidden h-9 px-3 rounded-none border-border text-foreground"
                     >
                         <SquaresFourIcon size={16} className="mr-1" />
                         {isPaletteOpen ? (
@@ -107,7 +107,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                         variant="outline"
                         size="sm"
                         aria-label="Previous question"
-                        className="h-10 md:h-9 px-4 rounded-none text-xs font-semibold border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 disabled:opacity-40"
+                        className="h-10 md:h-9 px-4 rounded-none text-xs font-semibold border-border text-foreground disabled:opacity-40"
                     >
                         <ArrowLeftIcon size={16} className="mr-1.5" />
                         Previous
@@ -118,7 +118,7 @@ const TestControlBar: React.FC<TestControlBarProps> = ({
                         disabled={isLast}
                         size="sm"
                         aria-label="Next question"
-                        className="h-10 md:h-9 px-4 rounded-none text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40"
+                        className="h-10 md:h-9 px-4 rounded-none text-xs font-semibold bg-chart-1 hover:bg-chart-1/90 text-white disabled:opacity-40"
                     >
                         Next
                         <ArrowRightIcon size={16} className="ml-1.5" />

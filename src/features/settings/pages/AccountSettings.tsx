@@ -2,7 +2,6 @@ import {
     GraduationCap,
     IdentificationCard,
     Info,
-    User,
     UserGear,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
@@ -12,7 +11,9 @@ import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
 import { useProfile } from '@/features/profile/hooks/useProfile';
-import { Button } from '@/shared/components/ui/button';
+import { AvatarUploadButton } from '@/shared/components/AvatarUploadButton';
+import { BannerUploadButton } from '@/shared/components/BannerUploadButton';
+import { TieredName } from '@/shared/components/TieredName';
 import {
     Dialog,
     DialogContent,
@@ -20,7 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/shared/components/ui/dialog';
-import type { Settings } from '@/shared/types/Settings';
+import { getDonorTier } from '@/shared/types/donor';
 import { syncUserToSupabase } from '@/shared/utils/helper';
 import { getSocialSettingsValue } from '../api/social-settings';
 import { GoalSettings } from '../components/GoalSettings';
@@ -57,8 +58,6 @@ const AccountSettings = () => {
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [openSocialSettings, setOpenSocialSettings] = useState(false);
     const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
-
-    const userSettings = user?.settings as Settings | undefined;
 
     // Sync goal state from the store
     useEffect(() => {
@@ -148,44 +147,44 @@ const AccountSettings = () => {
     };
 
     return (
-        <div className="space-y-8 px-2 pb-20 pt-4">
-            {/* Header Identity Card */}
+        <div className="px-1 pb-20">
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white/60 p-6 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:from-white/[0.04] dark:to-white/[0.01]"
+                className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 shadow-xl backdrop-blur-2xl"
             >
-                <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 bg-[#2A5CFF]/10 blur-3xl" />
+                {/* Banner */}
+                <BannerUploadButton
+                    className="h-32 w-full"
+                    pencilPosition="top-right"
+                />
 
-                <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-5">
-                        <div className="relative shrink-0">
-                            <div className="flex h-16 w-16 items-center justify-center overflow-hidden border border-slate-900/10 bg-white shadow-md transition-transform duration-300 hover:scale-105 dark:border-white/20 dark:bg-white/10">
-                                {user?.avatar ? (
-                                    <img
-                                        src={user.avatar}
-                                        alt="User avatar"
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <User className="h-7 w-7 text-slate-500 dark:text-slate-300" />
-                                )}
-                            </div>
+                <div className="px-6 pb-6">
+                    <div className="flex items-start gap-4">
+                        <div className="-mt-14 shrink-0 rounded-full ring-4 ring-card">
+                            <AvatarUploadButton size="md" />
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="flex-1 min-w-0 space-y-1 pt-1">
                             <div className="flex items-center gap-2.5 flex-wrap">
-                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                    {user?.name || 'Anonymous Aspirant'}
+                                <h3 className="font-['Space_Grotesk',sans-serif] text-xl font-bold tracking-tight">
+                                    <TieredName
+                                        name={
+                                            user?.name || 'Anonymous Aspirant'
+                                        }
+                                        tier={getDonorTier(
+                                            user?.notification_tags
+                                        )}
+                                    />
                                 </h3>
-                                <span className="border border-slate-900/10 bg-slate-100 px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-slate-600 dark:border-white/15 dark:bg-white/10 dark:text-slate-300">
+                                <span className="border border-border bg-muted px-2.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-muted-foreground">
                                     v{user?.version_number ?? '1.0'}
                                 </span>
                             </div>
 
-                            <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-slate-500 dark:text-slate-400">
-                                <span className="text-[#2A5CFF]">
+                            <div className="flex items-center gap-2 font-['JetBrains_Mono',monospace] text-xs text-muted-foreground">
+                                <span className="text-chart-1">
                                     @{user?.username || 'candidate'}
                                 </span>
                                 {user?.targetYear && (
@@ -197,10 +196,10 @@ const AccountSettings = () => {
                             </div>
 
                             {user?.college && (
-                                <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-slate-500 dark:text-slate-400">
+                                <p className="flex items-center gap-1.5 font-['Fraunces',serif] text-xs text-muted-foreground">
                                     <GraduationCap
                                         size={14}
-                                        className="text-[#2A5CFF]"
+                                        className="text-chart-1"
                                     />
                                     {user.college}
                                 </p>
@@ -208,46 +207,44 @@ const AccountSettings = () => {
                         </div>
                     </div>
 
-                    <Button
-                        onClick={() => setOpenSocialSettings(true)}
-                        className="group rounded-none flex h-10 shrink-0 items-center gap-2 border border-slate-900/10 bg-white/80 px-4 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-800 shadow-sm transition hover:bg-slate-100 hover:shadow-md dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
-                    >
-                        <UserGear
-                            size={16}
-                            className="transition-transform group-hover:rotate-45"
-                        />
-                        <span>Manage Socials</span>
-                    </Button>
-                </div>
+                    {user?.about && (
+                        <div className="mt-5">
+                            <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs leading-relaxed text-muted-foreground">
+                                <Info
+                                    size={14}
+                                    className="mt-0.5 shrink-0 text-chart-1"
+                                />
+                                <span>{user.about}</span>
+                            </p>
+                        </div>
+                    )}
 
-                {user?.about && (
-                    <div className="mt-4 pt-3 border-t border-slate-900/5 dark:border-white/10">
-                        <p className="flex items-start gap-2 font-['Space_Grotesk',sans-serif] text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <Info
-                                size={16}
-                                className="mt-0.5 shrink-0 text-[#2A5CFF]"
-                            />
-                            <span>{user.about}</span>
-                        </p>
-                    </div>
-                )}
-
-                <div className="pt-1">
-                    <SocialLinksDisplay links={socialLinks} />
+                    {Object.keys(socialLinks).length > 0 && (
+                        <div className="mt-5 flex items-start justify-between gap-3">
+                            <SocialLinksDisplay links={socialLinks} />
+                            <button
+                                onClick={() => setOpenSocialSettings(true)}
+                                title="Manage socials"
+                                aria-label="Manage social links"
+                                className="group mt-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border bg-card/90 text-muted-foreground shadow-sm opacity-70 transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <UserGear size={14} weight="bold" />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </motion.div>
-
             {/* Social Settings Modal */}
             <Dialog
                 open={openSocialSettings}
                 onOpenChange={setOpenSocialSettings}
             >
-                <DialogContent className="border-slate-900/10 bg-white/90 p-6 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/90 sm:max-w-md rounded-none">
+                <DialogContent className="border-border bg-popover/90 p-6 backdrop-blur-2xl sm:max-w-md rounded-none">
                     <DialogHeader>
                         <DialogTitle className="font-['Space_Grotesk',sans-serif] text-lg font-bold rounded-none">
                             Social Media Presence
                         </DialogTitle>
-                        <DialogDescription className="text-xs text-slate-500 dark:text-slate-400 rounded-none">
+                        <DialogDescription className="text-xs text-muted-foreground rounded-none">
                             Connect your profiles so peers can find your work.
                         </DialogDescription>
                     </DialogHeader>
@@ -262,16 +259,16 @@ const AccountSettings = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="space-y-8"
+                className="mt-8"
             >
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                    <div className="flex items-center gap-2 border-b border-border pb-3">
                         <IdentificationCard
                             size={18}
-                            className="text-[#2A5CFF]"
+                            className="text-chart-1"
                         />
-                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                            Personal Dossier Settings
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-foreground">
+                            Profile Settings
                         </h4>
                     </div>
 
@@ -290,12 +287,12 @@ const AccountSettings = () => {
                 </section>
 
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-slate-900/10 pb-3 dark:border-white/10">
+                    <div className="flex items-center gap-2 border-b border-border pb-3">
                         <IdentificationCard
                             size={18}
-                            className="text-[#2A5CFF]"
+                            className="text-chart-1"
                         />
-                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                        <h4 className="font-['Space_Grotesk',sans-serif] text-sm font-bold uppercase tracking-wider text-foreground">
                             Goal Configuration
                         </h4>
                     </div>

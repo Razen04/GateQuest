@@ -91,9 +91,11 @@ export default function SocialSettingsForm({
     };
 
     if (isLoading)
-        return <div className="text-sm text-slate-500">Loading socials...</div>;
-
-    // ... inside SocialSettingsForm
+        return (
+            <div className="text-sm text-muted-foreground">
+                Loading socials...
+            </div>
+        );
 
     const socialFields = [
         {
@@ -207,7 +209,7 @@ export default function SocialSettingsForm({
                 ))}
             </div>
 
-            <div className="pt-4 border-t flex justify-end">
+            <div className="pt-4 border-t border-border flex justify-end">
                 <Button
                     type="submit"
                     disabled={isSaving}

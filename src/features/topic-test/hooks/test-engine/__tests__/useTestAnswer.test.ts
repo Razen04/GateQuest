@@ -125,7 +125,7 @@ describe('useTestAnswer hook', () => {
 
             const updated = result.current.answers.get('q1');
             expect(updated?.marked_for_review).toBe(true);
-            expect(updated?.status).toBe('visited');
+            expect(updated?.status).toBe('viewed');
             expect(saveAttempt).toHaveBeenCalledTimes(1);
         });
 
@@ -250,6 +250,145 @@ describe('useTestAnswer hook', () => {
             });
 
             expect(result.current.markedForReviewCount).toBe(2);
+        });
+    });
+
+    describe('markAsVisited', () => {
+        it('creates a viewed attempt when none exists', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            await act(async () => {
+                result.current.markAsVisited('q1', 1);
+            });
+            const a = result.current.answers.get('q1');
+            expect(a?.status).toBe('viewed');
+            expect(a?.user_answer).toBeNull();
+            expect(a?.time_spent_seconds).toBe(0);
+            expect(saveAttempt).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not overwrite an existing answered attempt', async () => {
+            const initialAttempts: Attempt[] = [
+                {
+                    session_id: testId,
+                    question_id: 'q1',
+                    attempt_order: 1,
+                    user_answer: [0],
+                    marked_for_review: false,
+                    status: 'answered',
+                    is_correct: false,
+                    score: 0,
+                    time_spent_seconds: 5,
+                    is_synced: 1,
+                },
+            ];
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts })
+            );
+            await act(async () => {
+                result.current.markAsVisited('q1', 1);
+            });
+            expect(result.current.answers.get('q1')?.status).toBe('answered');
+            expect(saveAttempt).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('selectOption with null answer', () => {
+        it('downgrades status to viewed', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            await act(async () => {
+                result.current.selectOption('q1', null, 1);
+            });
+            expect(result.current.answers.get('q1')?.status).toBe('viewed');
+        });
+    });
+
+    describe('predicates', () => {
+        it('isAnswered flips correctly', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            expect(result.current.isAnswered('q1')).toBe(false);
+            await act(async () => {
+                result.current.selectOption('q1', [0], 1);
+            });
+            expect(result.current.isAnswered('q1')).toBe(true);
+        });
+
+        it('isVisited is true after markAsVisited', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            expect(result.current.isVisited('q1')).toBe(false);
+            await act(async () => {
+                result.current.markAsVisited('q1', 1);
+            });
+            expect(result.current.isVisited('q1')).toBe(true);
+        });
+
+        it('isMarkedForReview reflects reviewList', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            await act(async () => {
+                result.current.toggleReview('q1', 1);
+            });
+            expect(result.current.isMarkedForReview('q1')).toBe(true);
+        });
+    });
+
+    describe('isSaving', () => {
+        it('is true while saveAttempt is pending', async () => {
+            let resolve: any;
+            vi.mocked(saveAttempt).mockReturnValueOnce(
+                new Promise((r) => (resolve = r)) as any
+            );
+
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            act(() => {
+                result.current.selectOption('q1', [0], 1);
+            });
+            expect(result.current.isSaving).toBe(true);
+
+            await act(async () => {
+                resolve();
+            });
+            expect(result.current.isSaving).toBe(false);
+        });
+    });
+
+    describe('toggleReview race', () => {
+        it('two toggles in the same tick leave the question unmarked', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            await act(async () => {
+                result.current.toggleReview('q1', 1);
+                result.current.toggleReview('q1', 1);
+            });
+            expect(result.current.isMarkedForReview('q1')).toBe(false);
+            expect(result.current.answers.get('q1')?.marked_for_review).toBe(
+                false
+            );
+        });
+    });
+
+    describe('updateTimeSpent with no prior attempt', () => {
+        it('creates a viewed attempt carrying the delta', async () => {
+            const { result } = renderHook(() =>
+                useTestAnswer({ testId, initialAttempts: [] })
+            );
+            await act(async () => {
+                result.current.updateTimeSpent('q1', 4, 1);
+            });
+            const a = result.current.answers.get('q1');
+            expect(a?.status).toBe('viewed');
+            expect(a?.time_spent_seconds).toBe(4);
         });
     });
 });

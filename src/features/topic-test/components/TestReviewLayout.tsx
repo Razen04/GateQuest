@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
     getTestSession,
     initializeTestSession,
 } from '@/features/topic-test/services/testSession';
 import ModernLoader from '@/shared/components/ModernLoader';
 import type { Question, TestSession } from '@/shared/types/storage';
+import { getMockSummary } from '../api/mockTest';
 import { fetchAttemptsWithQuestions, fetchTestById } from '../api/topicTest';
 
 type AttemptWithQuestion = {
     session_id: string;
     question_id: string;
     attempt_order: number;
-    user_answer: any; // Can be number, number[], or string depending on question type
+    user_answer: any;
     marked_for_review: boolean;
     status: string;
     is_correct: boolean | null;
@@ -24,13 +25,14 @@ type AttemptWithQuestion = {
 const TestReviewLayout = () => {
     const { testId } = useParams<{ testId: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
+    const isMockReviewRoute = location.pathname.includes('/topic-test-review/');
 
     const [session, setSession] = useState<TestSession | null>(null);
     const [attempts, setAttempts] = useState<AttemptWithQuestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // get the attempts and questions
     useEffect(() => {
         if (!testId) return;
 
@@ -63,9 +65,14 @@ const TestReviewLayout = () => {
                         })
                     );
 
+                    const sortedAttempts = [...mappedAttempts].sort(
+                        (a, b) =>
+                            (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+                    );
+
                     if (isMounted) {
                         setSession(localData.session);
-                        setAttempts(mappedAttempts);
+                        setAttempts(sortedAttempts);
                         setLoading(false);
                     }
                     return;
@@ -78,12 +85,59 @@ const TestReviewLayout = () => {
                     throw new Error('Test not found.');
                 }
 
+                // ─── Mock gate ────────────────────────────────────────
+                // Mocks never enter Dexie. Their canonical result page is
+                // /mock-tests/result/:testId; their review flow reuses the
+                // existing /topic-test-review/:testId/:idx route but is
+                // gated on donor/beta eligibility (analysis_unlocked).
+                const paperId =
+                    (sessionData as { paper_id?: string }).paper_id ?? '';
+                const isMock = paperId.startsWith('mock-');
+
+                if (isMock) {
+                    // Non-review route → mock result page
+                    if (!isMockReviewRoute) {
+                        navigate(`/mock-tests/result/${testId}`, {
+                            replace: true,
+                        });
+                        return;
+                    }
+
+                    // Review route → gate on eligibility
+                    const summary = await getMockSummary(testId);
+                    const canReview =
+                        !('error' in summary) &&
+                        summary.results_released === true &&
+                        summary.analysis_unlocked === true;
+
+                    if (!canReview) {
+                        navigate(`/mock-tests/result/${testId}`, {
+                            replace: true,
+                        });
+                        return;
+                    }
+
+                    const { data: mockAttemptsData, error: mockAttemptsError } =
+                        await fetchAttemptsWithQuestions(testId);
+                    if (mockAttemptsError) throw mockAttemptsError;
+
+                    if (isMounted) {
+                        setSession(sessionData);
+                        const sorted = [...(mockAttemptsData ?? [])].sort(
+                            (a, b) =>
+                                (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+                        );
+                        setAttempts(sorted);
+                    }
+                    return;
+                }
+
+                // ─── Topic-test path (unchanged) ──────────────────────
                 if (sessionData.status !== 'completed') {
                     navigate('/topic-test', { replace: true });
                     return;
                 }
 
-                // Load attempts WITH questions
                 const { data: attemptsData, error: attemptsError } =
                     await fetchAttemptsWithQuestions(testId);
 
@@ -113,7 +167,11 @@ const TestReviewLayout = () => {
 
                 if (isMounted) {
                     setSession(sessionData);
-                    setAttempts(attemptsData ?? []);
+                    const sorted = [...(attemptsData ?? [])].sort(
+                        (a, b) =>
+                            (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+                    );
+                    setAttempts(sorted);
                 }
             } catch (err) {
                 console.error(err);
@@ -136,7 +194,7 @@ const TestReviewLayout = () => {
         return () => {
             isMounted = false;
         };
-    }, [testId, navigate]);
+    }, [testId, navigate, isMockReviewRoute]);
 
     if (loading) return <ModernLoader />;
 

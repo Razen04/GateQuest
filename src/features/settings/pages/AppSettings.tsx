@@ -3,9 +3,6 @@ import {
     Clock,
     Cpu,
     GitBranch,
-    MoonStars,
-    Sliders,
-    Sparkle,
     SpeakerHigh,
     Timer,
     WarningCircle,
@@ -17,6 +14,8 @@ import { useWebPush } from '@/features/dashboard/hooks/useWebPush';
 import AskAI from '@/features/settings/components/AskAI';
 import ToggleSwitch from '@/shared/components/ToggleSwitch';
 import { last_updated, version } from '../../../../package.json';
+import AccentPicker from '../components/AccentPicker';
+import ThemeModePicker from '../components/ThemeModePicker';
 
 const AppSettings = () => {
     const settings = useSettingsStore((s) => s.settings);
@@ -63,28 +62,15 @@ const AppSettings = () => {
 
     return (
         <div className="space-y-8 px-2 pb-20 pt-4">
-            {/* Header Title */}
-            <div className="flex items-center justify-between border-b border-slate-900/10 pb-4 dark:border-white/10">
-                <div className="space-y-1">
-                    <p className="font-['JetBrains_Mono',monospace] text-[10px] font-bold uppercase tracking-[0.25em] text-[#2A5CFF]">
-                        CONTROL // CENTER
-                    </p>
-                    <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-                        Application Preferences
-                    </h2>
-                </div>
-                <div className="flex items-center gap-2 border border-slate-900/10 bg-slate-50/50 px-3 py-1.5 dark:border-white/10 dark:bg-white/[0.02]">
-                    <Sliders size={16} className="text-[#2A5CFF]" />
-                    <span className="font-['JetBrains_Mono',monospace] text-xs font-bold text-slate-600 dark:text-slate-300">
-                        CONFIG MATRIX
-                    </span>
-                </div>
+            <div className="flex items-center justify-between border-b border-border pb-4">
+                <h2 className="font-['Space_Grotesk',sans-serif] text-2xl font-black tracking-tight text-foreground">
+                    Application Preferences
+                </h2>
             </div>
 
-            {/* Core Preferences Matrix */}
             <div className="space-y-3">
-                <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    // USER EXPERIENCE & INTERACTION
+                <p className="font-['JetBrains_Mono',monospace] text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    USER EXPERIENCE & INTERACTION
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">
@@ -106,14 +92,9 @@ const AppSettings = () => {
                         disabled={isLoading}
                     />
 
-                    <ToggleSwitch
-                        icon={<MoonStars size={20} />}
-                        title="High-Contrast Dark Theme"
-                        description="Optimize UI contrast for nighttime study and reduced eye strain"
-                        isOn={settings.darkMode}
-                        onToggle={() => toggleSettings('darkMode')}
-                        disabled={isLoading}
-                    />
+                    <ThemeModePicker isLoading={isLoading} />
+
+                    <AccentPicker isLoading={isLoading} />
 
                     <ToggleSwitch
                         icon={<BellRinging size={20} />}
@@ -137,49 +118,38 @@ const AppSettings = () => {
             </div>
 
             {/* AI Assistant Module */}
-            <div className="relative overflow-hidden border border-slate-900/10 bg-gradient-to-b from-slate-50 to-white p-5 shadow-sm dark:border-white/10 dark:from-white/[0.03] dark:to-white/[0.01]">
-                <div className="mb-3 flex items-center gap-2">
-                    <Sparkle
-                        size={18}
-                        className="text-[#2A5CFF]"
-                        weight="fill"
-                    />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                        AI Integration (Cause Everyone is doing this shit, it is
-                        kinda helpful though)
-                    </span>
-                </div>
+            <div className="relative overflow-hidden border border-border bg-gradient-to-b from-card to-card/60 p-5 shadow-sm">
                 <AskAI />
             </div>
 
             {/* App Telemetry Footer */}
-            <div className="border border-slate-900/10 bg-slate-50/50 p-6 dark:border-white/10 dark:bg-white/[0.02]">
+            <div className="border border-border bg-muted/50 p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Cpu size={18} className="text-slate-400" />
-                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        <Cpu size={18} className="text-muted-foreground" />
+                        <h3 className="text-sm font-bold text-foreground">
                             Build Telemetry & Info
                         </h3>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 font-['JetBrains_Mono',monospace] sm:grid-cols-2">
-                    <div className="flex items-center justify-between border border-slate-900/5 bg-white p-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between border border-border bg-card p-3.5">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <GitBranch size={16} />
                             <span className="text-xs">Version</span>
                         </div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="text-xs font-bold text-foreground">
                             v{APP_VERSION}
                         </span>
                     </div>
 
-                    <div className="flex items-center justify-between border border-slate-900/5 bg-white p-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between border border-border bg-card p-3.5">
+                        <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock size={16} />
                             <span className="text-xs">Last Updated</span>
                         </div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        <span className="text-xs font-bold text-foreground">
                             {APP_LAST_UPDATED_AT}
                         </span>
                     </div>

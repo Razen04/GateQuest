@@ -5,6 +5,8 @@ export interface ProfileData {
         name: string | null;
         username: string | null;
         avatar: string | null;
+        banner: string | null;
+        notification_tags: string[];
         targetYear: number | null;
         college: string | null;
         joined_at: string | null;

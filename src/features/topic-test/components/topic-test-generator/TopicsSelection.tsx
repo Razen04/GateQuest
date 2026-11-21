@@ -93,7 +93,7 @@ const TopicsSelection = ({
                             variant="ghost"
                             size="sm"
                             onClick={handleSelectAll}
-                            className="h-10 px-3 rounded-none font-bold uppercase tracking-tighter bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-500/80"
+                            className="h-10 px-3 rounded-none font-bold uppercase tracking-tighter bg-chart-1 text-white hover:bg-chart-1/90"
                         >
                             {isAllSelected ? (
                                 <span className="flex items-center gap-1">
@@ -108,12 +108,12 @@ const TopicsSelection = ({
                     )}
 
                     <div className="flex justify-between items-end">
-                        <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
-                            <StackIcon className="w-4 h-4 text-purple-500" />
+                        <label className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground">
+                            <StackIcon className="w-4 h-4 text-chart-6" />
                             Step 2: Select Topics
                         </label>
 
-                        <span className="border border-white/20 dark:border-white/10 bg-black/5 dark:bg-white/5 backdrop-blur-xl px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span className="border border-border bg-foreground/[0.05] backdrop-blur-xl px-2 py-1 text-xs font-medium text-muted-foreground">
                             {selectedTopics.length} selected
                         </span>
                     </div>
@@ -123,7 +123,7 @@ const TopicsSelection = ({
                             {[...Array(6)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="h-14 bg-gray-200 dark:bg-zinc-800 animate-pulse"
+                                    className="h-14 bg-muted animate-pulse"
                                 />
                             ))}
                         </div>
@@ -143,13 +143,17 @@ const TopicsSelection = ({
                                             onClick={() =>
                                                 handleTopicToggle(topic)
                                             }
-                                            className={`border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10 hover:border-blue-300'}`}
+                                            className={`border backdrop-blur-xl cursor-pointer transition-all select-none flex items-center justify-between p-3 ${
+                                                isSelected
+                                                    ? 'bg-chart-1/10 border-chart-1 dark:bg-chart-1/20'
+                                                    : 'bg-card/40 border-border hover:border-chart-1/40'
+                                            }`}
                                         >
                                             <div>
-                                                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                                <p className="text-sm font-medium text-foreground">
                                                     {topic.name}
                                                 </p>
-                                                <p className="text-xs text-gray-400">
+                                                <p className="text-xs text-muted-foreground">
                                                     {includeAttempted
                                                         ? `${topic.questionCount} total questions`
                                                         : `${topic.unattemptedCount} available questions`}
@@ -157,7 +161,11 @@ const TopicsSelection = ({
                                             </div>
 
                                             <div
-                                                className={`w-5 h-5 border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 dark:border-zinc-700'}`}
+                                                className={`w-5 h-5 border flex items-center justify-center ${
+                                                    isSelected
+                                                        ? 'bg-chart-1 border-chart-1 text-white'
+                                                        : 'border-border'
+                                                }`}
                                             >
                                                 <Check
                                                     className="w-3 h-3"
@@ -228,14 +236,18 @@ const TopicsSelection = ({
                                                                     topic
                                                                 )
                                                             }
-                                                            className={`border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${isSelected ? 'bg-blue-500/10 border-blue-500 dark:bg-blue-500/20' : 'bg-white/40 dark:bg-zinc-900/40 border-white/30 dark:border-white/10'}`}
+                                                            className={`border backdrop-blur-xl cursor-pointer flex justify-between items-center p-2 text-sm ${
+                                                                isSelected
+                                                                    ? 'bg-chart-1/10 border-chart-1 dark:bg-chart-1/20'
+                                                                    : 'bg-card/40 border-border'
+                                                            }`}
                                                         >
                                                             <div>
-                                                                <span>
+                                                                <span className="text-foreground">
                                                                     {topic.name}
                                                                     :{' '}
                                                                 </span>
-                                                                <span className="text-stone-400">
+                                                                <span className="text-muted-foreground">
                                                                     {
                                                                         topic.questionCount
                                                                     }{' '}
@@ -244,7 +256,7 @@ const TopicsSelection = ({
                                                             </div>
 
                                                             <Check
-                                                                className={`w-3 h-3 ${isSelected ? 'text-blue-600' : 'text-transparent'}`}
+                                                                className={`w-3 h-3 ${isSelected ? 'text-chart-1' : 'text-transparent'}`}
                                                             />
                                                         </div>
                                                     );

@@ -136,11 +136,18 @@ const Navbar = () => {
     const isMobile = width < 1024;
 
     // Hide Navbar during test attempt screens
-    const isAttemptPage =
+
+    const isTopicAttemptPage =
         /\/topic-test\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/attempt/i.test(
             location.pathname
         );
-    if (isAttemptPage) {
+
+    const isMockAttemptPage =
+        /\/mock-tests\/attempt\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/?$/i.test(
+            location.pathname
+        );
+
+    if (isTopicAttemptPage || isMockAttemptPage) {
         return null;
     }
 
@@ -153,7 +160,7 @@ const Navbar = () => {
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                     onClick={() => navigate('/dashboard')}
-                    className="pointer-events-auto flex cursor-pointer items-center gap-2 p-1.5 pr-4 backdrop-blur-2xl dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.37)] hover:border-blue-500/30 transition-all duration-300 group"
+                    className="pointer-events-auto group flex cursor-pointer items-center gap-2 p-1.5 pr-4 backdrop-blur-2xl transition-all duration-300 hover:border-primary/30"
                 >
                     <motion.div
                         whileHover={{ scale: 1.08, rotate: 5 }}
@@ -168,8 +175,8 @@ const Navbar = () => {
                     </motion.div>
 
                     <div className="hidden md:flex flex-col">
-                        <h1 className="font-['Space_Grotesk',sans-serif] text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
-                            <span className="bg-blue-500 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
+                        <h1 className="font-display text-lg font-bold tracking-tight text-foreground leading-none">
+                            <span className="bg-gradient-to-r from-chart-1 to-primary bg-clip-text text-transparent">
                                 GATE
                             </span>
                             <span>Quest</span>
@@ -187,36 +194,39 @@ const Navbar = () => {
                             delay: 0.1,
                             ease: 'easeOut',
                         }}
-                        className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-1 p-1.5  dark:bg-zinc-900/60"
+                        className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-1 p-1.5"
                     >
                         {/* Light highlight edge */}
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20" />
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
 
                         {tabs.map((tab) => {
                             const isActive = location.pathname.startsWith(
                                 tab.path
                             );
+
                             return (
                                 <button
                                     key={tab.id}
                                     onClick={() => navigate(tab.path)}
                                     className={`relative flex items-center gap-2 px-4 py-1.5 text-xs font-semibold tracking-wide transition-colors duration-200 outline-none select-none ${
                                         isActive
-                                            ? 'text-slate-900 dark:text-white'
-                                            : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                                            ? 'text-foreground'
+                                            : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
                                     {isActive && (
                                         <motion.div
                                             layoutId="floating-nav-pill"
                                             transition={springTransition}
-                                            className="absolute inset-0 border border-blue-500/20 to-transparent shadow-[0_2px_12px_rgba(59,130,246,0.15)] backdrop-blur-md dark:border-blue-400/30 dark:from-blue-500/20 dark:via-indigo-500/20"
+                                            className="absolute inset-0 border border-chart-1/20 bg-gradient-to-br from-chart-1/10 via-primary/5 to-transparent shadow-[0_2px_12px_color-mix(in_oklch,var(--chart-1)_15%,transparent)] backdrop-blur-md"
                                         />
                                     )}
+
                                     <span className="relative z-10 text-base">
                                         {isActive ? tab.activeIcon : tab.icon}
                                     </span>
-                                    <span className="relative z-10 font-['Space_Grotesk',sans-serif]">
+
+                                    <span className="relative z-10 font-grotesk">
                                         {tab.name}
                                     </span>
                                 </button>
@@ -237,7 +247,7 @@ const Navbar = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="Discord"
-                        className="flex h-8 w-8 items-center justify-center text-slate-500 hover:bg-slate-900/5 hover:text-indigo-600 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-indigo-400 transition-all"
+                        className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-all hover:bg-accent hover:text-chart-1"
                     >
                         <DiscordLogo size={18} weight="bold" />
                     </a>
@@ -247,15 +257,16 @@ const Navbar = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="GitHub Repository"
-                        className="flex h-8 items-center gap-1.5 px-2.5 text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-all"
+                        className="flex h-8 items-center gap-1.5 px-2.5 text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
                     >
                         <GithubLogo size={18} weight="bold" />
+
                         {starCount !== null && (
-                            <span className="hidden md:flex items-center gap-0.5 border border-slate-900/10 bg-slate-100/80 px-1.5 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-bold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-300">
+                            <span className="hidden md:flex items-center gap-0.5 border border-border bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold text-secondary-foreground">
                                 <Star
                                     size={10}
                                     weight="fill"
-                                    className="text-amber-500"
+                                    className="text-chart-4"
                                 />
                                 {starCount}
                             </span>
@@ -267,12 +278,12 @@ const Navbar = () => {
                     <button
                         onClick={() => navigate('/donate')}
                         aria-label="Support Project"
-                        className="flex h-8 w-8 items-center justify-center border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 transition-all"
+                        className="flex h-8 w-8 items-center justify-center border border-success/20 bg-success/10 text-success transition-all hover:bg-success/20"
                     >
                         <Coffee size={17} weight="bold" />
                     </button>
 
-                    <div className="mx-0.5 h-4 w-px bg-slate-200 dark:bg-white/10" />
+                    <div className="mx-0.5 h-4 w-px bg-border" />
 
                     <div className="relative" ref={notificationRef}>
                         <button
@@ -280,14 +291,15 @@ const Navbar = () => {
                                 setShowNotifications(!showNotifications)
                             }
                             aria-label="Notifications"
-                            className="relative flex h-8 w-8 items-center justify-center text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-all"
+                            className="relative flex h-8 w-8 items-center justify-center text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
                         >
                             <Notification
                                 size={18}
                                 weight={showNotifications ? 'fill' : 'duotone'}
                             />
+
                             {unreadNotifications && (
-                                <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 ring-2 ring-white dark:ring-zinc-950" />
+                                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
                             )}
                         </button>
 

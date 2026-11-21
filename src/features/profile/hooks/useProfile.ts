@@ -12,20 +12,17 @@ export const invalidateProfileCache = (username?: string) => {
     }
 };
 
-export const useProfile = (username: string) => {
-    // Synchronously initialize state from cache if it exists
+export const useProfile = (username?: string) => {
     const [data, setData] = useState<ProfileData | null>(() => {
         return username ? profileCache.get(username) || null : null;
     });
 
-    // Only set initial loading to true if we don't already have cached data
     const [loading, setLoading] = useState<boolean>(() => !data);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!username) return;
 
-        // If cached data already exists, skip network request entirely
         if (profileCache.has(username)) {
             setData(profileCache.get(username)!);
             setLoading(false);
@@ -41,11 +38,10 @@ export const useProfile = (username: string) => {
             try {
                 const profileData = await getPublicProfile(username);
 
-                // Save to module cache
-                profileCache.set(username, profileData as ProfileData);
+                profileCache.set(username, profileData);
 
                 if (isMounted) {
-                    setData(profileData as ProfileData);
+                    setData(profileData);
                 }
             } catch (err: any) {
                 console.error('Failed to fetch profile:', err);

@@ -10,7 +10,7 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'relative overflow-hidden bg-blue-500/85 hover:bg-blue-500 text-white border backdrop-blur-xl active:scale-[0.98] transition-all duration-200',
+                    'relative overflow-hidden bg-chart-1/85 hover:bg-chart-1 text-white border backdrop-blur-xl active:scale-[0.98] transition-all duration-200',
                 destructive:
                     'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
                 outline:

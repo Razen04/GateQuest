@@ -1,4 +1,6 @@
-create or replace function generate_topic_test (p_filters jsonb, p_question_count int, p_total_seconds int, p_already_attempted_questions boolean, p_branch_id text, p_record_activity boolean)
+-- NOTE: p_total_seconds is accepted but IGNORED. The function computes
+-- v_actual_count * 162. Fixing that is a separate concern.
+create or replace function public.generate_topic_test (p_filters jsonb, p_question_count int, p_total_seconds int, p_already_attempted_questions boolean, p_branch_id text, p_record_activity boolean)
     returns jsonb
     language plpgsql
     security definer
@@ -10,16 +12,13 @@ declare
     v_actual_count int;
     v_total_marks int;
     v_topic_names text[];
-    -- bucket sizes (50/30/20 rule)
     v_limit_new int := floor(p_question_count * 0.50);
     v_limit_rev int := floor(p_question_count * 0.30);
     v_limit_att int := p_question_count - (v_limit_new + v_limit_rev);
 begin
-    -- authentication check
     if v_user_id is null then
         raise exception 'not authenticated';
     end if;
-    -- active test check
     select
         id
     into
@@ -34,15 +33,14 @@ begin
     if v_existing_test_id is not null then
         return jsonb_build_object('error', 'an active test already exists for this branch', 'test_id', v_existing_test_id, 'status', 'active_exists');
     end if;
-    -- extract topic names
     select
         array_agg(distinct topic)
     into
         v_topic_names
     from
         jsonb_to_recordset(p_filters) as f (topic text);
-    -- question selection
-    create temp table temp_selected_questions on commit drop as
+    drop table if exists temp_selected_questions;
+    create TEMP table temp_selected_questions on commit drop as
     with filter_params as (
         select
             subject_id,
@@ -82,6 +80,23 @@ from
         and q.topic = fp.topic
     left join user_history uh on q.id = uh.question_id
         left join revision_queue rq on q.id = rq.question_id
+    where
+        q.verified = true
+        and (not exists (
+                select
+                    1
+                from
+                    public.mock_questions mq
+                where
+                    mq.question_id = q.id)
+                or exists (
+                    select
+                        1
+                    from
+                        public.mock_questions mq
+                    where
+                        mq.question_id = q.id
+                        and public.user_can_access_mock (mq.mock_id)))
 ),
 bucket_new as (
     select
@@ -157,30 +172,26 @@ from (
     from
         bucket_att) combined
 limit p_question_count;
-    -- safety guard
     get diagnostics v_actual_count = row_count;
     if v_actual_count = 0 then
         raise exception 'no questions found matching these filters';
     end if;
-    -- create test session
-    insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, record_activity)
-        values (v_user_id, v_topic_names, v_actual_count, (v_actual_count * 162), 'created', 0, p_branch_id, coalesce(p_record_activity, true))
-    returning
-        id
-    into
-        v_new_test_id;
-    -- insert test questions
-    insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status)
+insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, record_activity)
+    values (v_user_id, v_topic_names, v_actual_count, (v_actual_count * 162), 'created', 0, p_branch_id, coalesce(p_record_activity, true))
+returning
+    id
+into
+    v_new_test_id;
+insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status)
+select
+    v_new_test_id,
+    id,
+    row_number() over (),
+    'unvisited'
+from
+    temp_selected_questions;
     select
-        v_new_test_id,
-        id,
-        row_number() over (),
-        'unvisited'
-    from
-        temp_selected_questions;
-    -- calculate total marks
-    select
-        sum(marks)
+        coalesce(sum(marks), 0)
     into
         v_total_marks
     from
@@ -193,3 +204,5 @@ limit p_question_count;
         id = v_new_test_id;
     return jsonb_build_object('test_id', v_new_test_id, 'actual_count', v_actual_count, 'total_marks', v_total_marks);
 end;
+$$;
+

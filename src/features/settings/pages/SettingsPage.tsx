@@ -74,7 +74,7 @@ const Settings = () => {
                 />
 
                 {/* STICKY SUB-NAVIGATION BAR */}
-                <div className="top-14 z-30 -mx-4 px-4 sm:-mx-8 sm:px-8 py-3 my-4 bg-slate-50/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200/60 dark:border-zinc-800/60">
+                <div className="top-14 z-30 -mx-4 px-4 sm:-mx-8 sm:px-8 py-3 my-4 bg-background/80 backdrop-blur-md">
                     <AnimatedTabs
                         tabs={tabs}
                         activeTab={activeTab}

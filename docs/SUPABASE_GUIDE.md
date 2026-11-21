@@ -143,7 +143,7 @@ Commit the new migration file along with any other code changes. The migration f
 This section is for project maintainers.
 
 1.  Review and merge the contributor's Pull Request containing the new migration file.
-2.  Pull the latest changes to your local `main` branch.
+2.  Pull the latest changes to your local `develop` branch.
 3.  Link the CLI to the **Staging** project and push the new migrations.
     ```bash
     supabase link --project-ref <staging-project-ref>

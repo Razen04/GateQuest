@@ -65,11 +65,11 @@ const SmartRevision = () => {
     const hasCriticalQuestions = criticalQuestionsCount > 0;
 
     return (
-        <div className="relative min-h-dvh overflow-y-auto max-w-7xl mx-auto bg-slate-50 px-4 py-6 pb-32 dark:bg-[#07090E] sm:px-8">
+        <div className="relative min-h-dvh overflow-y-auto max-w-7xl mx-auto bg-background px-4 py-6 pb-32 sm:px-8">
             {/* Ambient Background Glows */}
             <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-7xl -translate-x-1/2 overflow-hidden opacity-40 dark:opacity-20">
-                <div className="absolute -left-20 -top-20 h-96 w-96 bg-blue-500/30 blur-[120px]" />
-                <div className="absolute right-0 top-32 h-96 w-96 bg-indigo-500/20 blur-[120px]" />
+                <div className="absolute -left-20 -top-20 h-96 w-96 bg-chart-1/30 blur-[120px]" />
+                <div className="absolute right-0 top-32 h-96 w-96 bg-chart-6/20 blur-[120px]" />
             </div>
 
             <div className="space-y-8">
@@ -78,7 +78,7 @@ const SmartRevision = () => {
                     whileHover={{ x: -4 }}
                     whileTap={{ scale: 0.96 }}
                     onClick={() => navigate('/dashboard')}
-                    className="group inline-flex items-center gap-2 border border-slate-900/10 bg-white/60 px-3.5 py-2 font-['Space_Grotesk',sans-serif] text-xs font-bold text-slate-700 shadow-sm backdrop-blur-md transition-colors hover:border-blue-500/30 hover:text-[#2A5CFF] dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-blue-500/30 dark:hover:text-blue-400"
+                    className="group inline-flex items-center gap-2 border border-border bg-card/60 px-3.5 py-2 font-grotesk text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-colors hover:border-chart-1/30 hover:text-chart-1"
                 >
                     <ArrowLeft
                         size={16}
@@ -99,10 +99,10 @@ const SmartRevision = () => {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    className="group relative overflow-hidden border border-slate-900/10 bg-white/70 p-8 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-zinc-950/50 sm:p-12"
+                    className="group relative overflow-hidden border border-border bg-card/70 p-8 shadow-2xl backdrop-blur-2xl sm:p-12"
                 >
                     {/* Top Right Grid Overlay Effect */}
-                    <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 bg-[radial-gradient(#2A5CFF_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
+                    <div className="pointer-events-none absolute right-0 top-0 h-48 w-48 bg-[radial-gradient(var(--chart-1)_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
 
                     <div className="relative z-10 flex flex-col items-center text-center">
                         <AnimatePresence mode="wait">
@@ -114,7 +114,7 @@ const SmartRevision = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     className="w-full max-w-lg space-y-6"
                                 >
-                                    <div className="inline-flex items-center gap-2 border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:text-blue-400">
+                                    <div className="inline-flex items-center gap-2 border border-chart-1/20 bg-chart-1/10 px-4 py-1.5 font-mono text-xs font-bold text-chart-1">
                                         <Clock
                                             size={16}
                                             className="animate-spin-slow"
@@ -124,10 +124,10 @@ const SmartRevision = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+                                        <h3 className="font-grotesk text-2xl font-black text-foreground sm:text-3xl">
                                             Weekly Set in Progress
                                         </h3>
-                                        <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="font-serif text-sm text-muted-foreground">
                                             {currentSet?.expires_at
                                                 ? getTimeRemaining(
                                                       currentSet.expires_at
@@ -142,7 +142,7 @@ const SmartRevision = () => {
                                     >
                                         <Button
                                             onClick={startSet}
-                                            className="rounded-none h-12 w-full gap-2 bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+                                            className="rounded-none h-12 w-full gap-2 bg-chart-1 font-grotesk text-sm font-bold text-white shadow-lg shadow-chart-1/25 transition-all hover:bg-chart-1/90"
                                         >
                                             <Lightning
                                                 size={18}
@@ -162,7 +162,7 @@ const SmartRevision = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     className="max-w-md space-y-4"
                                 >
-                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400">
+                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-muted text-muted-foreground">
                                         <ShieldCheck
                                             size={36}
                                             weight="duotone"
@@ -170,10 +170,10 @@ const SmartRevision = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black text-slate-900 dark:text-white">
+                                        <h3 className="font-grotesk text-2xl font-black text-foreground">
                                             Weekly Set Concluded
                                         </h3>
-                                        <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="font-serif text-sm text-muted-foreground">
                                             You've finished this week's smart
                                             recovery sequence. Next set unlocks
                                             next week.
@@ -188,7 +188,7 @@ const SmartRevision = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     className="max-w-md space-y-6"
                                 >
-                                    <div className="inline-flex items-center gap-2 border border-orange-500/20 bg-orange-500/10 px-4 py-1.5 font-['JetBrains_Mono',monospace] text-xs font-bold text-orange-600 dark:text-orange-400">
+                                    <div className="inline-flex items-center gap-2 border border-chart-5/20 bg-chart-5/10 px-4 py-1.5 font-mono text-xs font-bold text-chart-5">
                                         <Fire
                                             size={16}
                                             weight="fill"
@@ -201,10 +201,10 @@ const SmartRevision = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+                                        <h3 className="font-grotesk text-2xl font-black text-foreground sm:text-3xl">
                                             Ready to Recover Marks?
                                         </h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="text-sm text-muted-foreground">
                                             Generate an algorithmic revision
                                             queue targeted specifically at your
                                             recent missteps.
@@ -218,7 +218,7 @@ const SmartRevision = () => {
                                         <Button
                                             disabled={loading}
                                             onClick={generateSet}
-                                            className="h-12 w-full rounded-none gap-2 bg-[#2A5CFF] font-['Space_Grotesk',sans-serif] text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+                                            className="h-12 w-full rounded-none gap-2 bg-chart-1 font-grotesk text-sm font-bold text-white shadow-lg shadow-chart-1/25 transition-all hover:bg-chart-1/90"
                                         >
                                             <Sparkle size={18} weight="fill" />
                                             Generate Focused Set
@@ -233,7 +233,7 @@ const SmartRevision = () => {
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     className="max-w-md space-y-4"
                                 >
-                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-emerald-500/10 text-emerald-500">
+                                    <div className="mx-auto flex h-16 w-16 items-center justify-center bg-chart-2/10 text-chart-2">
                                         <CheckCircle
                                             size={36}
                                             weight="duotone"
@@ -241,10 +241,10 @@ const SmartRevision = () => {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <h3 className="font-['Space_Grotesk',sans-serif] text-2xl font-black text-slate-900 dark:text-white">
+                                        <h3 className="font-grotesk text-2xl font-black text-foreground">
                                             All Clear This Week!
                                         </h3>
-                                        <p className="font-['Fraunces',serif] text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="font-serif text-sm text-muted-foreground">
                                             No pending critical questions
                                             detected. Great job keeping your
                                             retention rate high!

@@ -19,18 +19,40 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             variants={containerVariants}
             initial="initial"
             animate="animate"
-            className="mb-2"
+            className="mb-2 font-sans"
         >
-            <Title className="text-3xl font-bold">
+            <Title
+                className="
+                font-display
+                text-3xl font-bold
+                tracking-tight
+                text-foreground
+            "
+            >
                 {primaryTitle}{' '}
                 <span
                     className="
-            bg-gradient-to-br from-blue-400 to-blue-600 bg-clip-text text-transparent"
+                    bg-gradient-to-br
+                    from-primary to-chart-1
+                    bg-clip-text
+                    text-transparent
+                "
                 >
                     {secondaryTitle}
                 </span>
             </Title>
-            <Text className="text-gray-500">{caption}</Text>
+
+            {caption && (
+                <Text
+                    className="
+                    font-sans
+                    text-sm
+                    text-muted-foreground
+                "
+                >
+                    {caption}
+                </Text>
+            )}
         </motion.div>
     );
 };

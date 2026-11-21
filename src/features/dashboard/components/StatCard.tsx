@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { itemVariants } from '@/shared/utils/motionVariants.ts';
+import { itemVariants } from '@/shared/utils/motionVariants';
 
 type StatCardType = {
     icon: React.ElementType;
@@ -17,41 +17,78 @@ const StatCard = ({
     value,
     iconColor,
     bgColor,
-    textColor = 'text-gray-800 dark:text-gray-100',
+    textColor = 'text-card-foreground',
 }: StatCardType) => {
+    // Extract percentage when the value represents progress.
+    const percentage = value.endsWith('%')
+        ? Math.min(100, Math.max(0, Number.parseFloat(value) || 0))
+        : null;
+
     return (
         <motion.div
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="relative overflow-hidden border border-black/10 bg-white/20 p-4 backdrop-blur-xl backdrop-saturate-150 dark:border-white/10 dark:bg-white/[0.06]"
+            className="
+                relative overflow-hidden
+                border border-border
+                bg-card/80
+                p-4
+                shadow-sm
+                backdrop-blur-xl backdrop-saturate-150
+                transition-colors duration-200
+            "
         >
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 to-transparent dark:from-white/5" />
+            {/* Subtle glass highlight */}
+            <div
+                className="
+                    pointer-events-none absolute inset-0
+                    bg-gradient-to-b
+                    from-foreground/[0.035]
+                    to-transparent
+                "
+            />
 
             <div className="relative flex items-center">
+                {/* Icon Container */}
                 <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center border border-white/20 backdrop-blur-md mr-3 ${bgColor}`}
+                    className={`
+                        mr-3 flex h-12 w-12 shrink-0
+                        items-center justify-center
+                        border border-border/70
+                        backdrop-blur-md
+                        ${bgColor}
+                    `}
                 >
                     <Icon className={`h-6 w-6 ${iconColor}`} />
                 </div>
 
+                {/* Stat Information */}
                 <div className="w-full min-w-0">
                     <h3 className="truncate text-sm font-semibold text-muted-foreground">
                         {title}
                     </h3>
 
-                    <div className="flex items-center mt-0.5">
+                    <div className="mt-0.5 flex items-center">
                         <span className={`text-xl font-bold ${textColor}`}>
                             {value}
                         </span>
                     </div>
 
-                    <div className="mt-2 h-1.5 w-full overflow-hidden bg-black/10 dark:bg-white/10">
-                        <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out"
-                            style={{ width: value }}
-                        />
-                    </div>
+                    {/* Progress Indicator */}
+                    {percentage !== null && (
+                        <div className="mt-2 h-1.5 w-full overflow-hidden bg-muted">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${percentage}%` }}
+                                transition={{
+                                    duration: 0.8,
+                                    ease: 'easeOut',
+                                }}
+                                className="h-full bg-primary"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </motion.div>

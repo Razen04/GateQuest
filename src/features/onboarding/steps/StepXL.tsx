@@ -39,8 +39,8 @@ export function StepXL({ defaultValue, onNext, onBack, isFirst }: StepXLProps) {
                             key={subject.id}
                             className={`flex cursor-pointer items-center gap-3 border p-3 transition-colors ${
                                 isSelected
-                                    ? 'border-[#2A5CFF] bg-[#2A5CFF]/5'
-                                    : 'border-slate-200 hover:border-slate-300 dark:border-zinc-800 dark:hover:border-zinc-700'
+                                    ? 'border-chart-1 bg-chart-1/5'
+                                    : 'border-border hover:border-muted-foreground/40'
                             } ${isDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
                         >
                             <input
@@ -48,9 +48,9 @@ export function StepXL({ defaultValue, onNext, onBack, isFirst }: StepXLProps) {
                                 checked={isSelected}
                                 disabled={isDisabled}
                                 onChange={() => toggle(subject.id)}
-                                className="h-4 w-4 accent-[#2A5CFF]"
+                                className="h-4 w-4 accent-chart-1"
                             />
-                            <span className="font-['Space_Grotesk',sans-serif] text-sm text-slate-900 dark:text-white">
+                            <span className="font-grotesk text-sm text-foreground">
                                 {subject.name}
                             </span>
                         </label>
@@ -58,7 +58,7 @@ export function StepXL({ defaultValue, onNext, onBack, isFirst }: StepXLProps) {
                 })}
             </div>
 
-            <p className="mt-3 text-xs text-slate-500 dark:text-zinc-400">
+            <p className="mt-3 text-xs text-muted-foreground">
                 Select exactly two. {selected.length}/2 chosen.
             </p>
 

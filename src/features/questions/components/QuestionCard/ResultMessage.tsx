@@ -27,45 +27,59 @@ const ResultMessage = ({
 }: ResultMessageProps) => {
     const correctAnswer = getCorrectAnswerText(currentQuestion);
     const isNAT = isNumericalQuestion(currentQuestion);
+
+    const resultStyles =
+        result === 'correct'
+            ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30'
+            : result === 'incorrect'
+              ? 'bg-destructive/10 text-destructive border-destructive/30'
+              : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/30';
+
     return (
         <AnimatePresence>
             {showAnswer && (
                 <motion.div
-                    className={`p-4 mb-6 ${
-                        result === 'correct'
-                            ? 'bg-green-50 text-green-700'
-                            : result === 'incorrect'
-                              ? 'bg-red-50 text-red-700'
-                              : 'bg-yellow-50 text-yellow-700'
-                    }`}
+                    className={`p-4 mb-6 border ${resultStyles}`}
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
                 >
                     {result === 'correct' ? (
-                        <div className="flex items-center">
-                            <span>Correct! Well done.</span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold">
+                                Correct! Well done.
+                            </span>
                         </div>
                     ) : result === 'incorrect' ? (
-                        <div className="flex items-center">
+                        <div className="flex flex-col gap-2">
                             <div>
                                 Incorrect. The correct answer is:{' '}
-                                <span className="font-semibold">
+                                <span className="font-semibold text-foreground">
                                     <Suspense fallback={<ModernLoader />}>
                                         <MathRenderer text={correctAnswer} />
                                     </Suspense>
                                 </span>
-                                <br />
-                                {isNAT && `Your answer: ${numericalAnswer}`}
                             </div>
+
+                            {isNAT && (
+                                <div className="text-sm text-muted-foreground">
+                                    Your answer:{' '}
+                                    <span className="font-semibold text-foreground">
+                                        {numericalAnswer ?? 'Not provided'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     ) : (
-                        <div className="flex items-center">
+                        <div className="flex flex-col gap-2">
                             <div>
                                 Skipped. The correct answer is:{' '}
-                                <Suspense fallback={<ModernLoader />}>
-                                    <MathRenderer text={correctAnswer} />
-                                </Suspense>
+                                <span className="font-semibold text-foreground">
+                                    <Suspense fallback={<ModernLoader />}>
+                                        <MathRenderer text={correctAnswer} />
+                                    </Suspense>
+                                </span>
                             </div>
                         </div>
                     )}

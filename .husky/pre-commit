@@ -1,2 +1,10 @@
 #!/bin/sh
+
+echo "Running lint-staged..."
 npx lint-staged
+
+echo "Checking Supabase migration order..."
+bash scripts/check-migration-order.sh
+
+echo "All pre-commit checks passed!"
+

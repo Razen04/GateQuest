@@ -165,7 +165,7 @@ export const syncUserToSupabase = async (isLogin: boolean) => {
     const user = useAuthStore.getState().user;
     const settings = useSettingsStore.getState().settings;
 
-    if (!user?.id) {
+    if (!user?.id || user.id === '1') {
         console.warn('User missing id');
         return;
     }

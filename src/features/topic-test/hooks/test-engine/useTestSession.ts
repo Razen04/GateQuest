@@ -14,6 +14,8 @@ import type { TestData } from './useTestLoader';
 import useTestNavigation from './useTestNavigation';
 import useTestTimer from './useTestTimer';
 
+export type ResultRouteFn = (testId: string) => string;
+
 export interface UseTestSessionReturn {
     status: 'ready' | 'error' | 'submitting' | 'completed';
     timer: ReturnType<typeof useTestTimer>;
@@ -23,22 +25,35 @@ export interface UseTestSessionReturn {
     handleNext: () => void;
     handlePrev: () => void;
     handleJumpTo: (index: number) => void;
-    handleSubmit: () => void;
+    handleSubmit: (options?: { stagger?: boolean }) => void;
+    /** True when this session came from a mock. False for topic tests. */
+    isMockMode: boolean;
+    /** Display title — mock label if mock, else undefined (header falls back). */
+    mockLabel?: string | undefined;
+    /**
+     * Unix ms timestamp before which the Finish button should be locked.
+     * Undefined for topic tests (finish always enabled).
+     */
+    finishUnlockAt?: number | undefined;
 }
 
 const useTestSession = (
     testId: string,
-    data: TestData
+    data: TestData,
+    resultRoute?: ResultRouteFn
 ): UseTestSessionReturn => {
     const [status, setStatus] = useState<
         'ready' | 'error' | 'submitting' | 'completed'
     >('ready');
     const navigate = useNavigate();
 
-    // for tracking time_spent_seconds for each Attempt
+    const resultRouteRef = useRef<ResultRouteFn | undefined>(resultRoute);
+    useEffect(() => {
+        resultRouteRef.current = resultRoute;
+    }, [resultRoute]);
+
     const startTimeRef = useRef<number>(Date.now());
 
-    // sub-hooks
     const answers = useTestAnswer({ testId, initialAttempts: data.attempts });
     const navigation = useTestNavigation(data.questions.length);
     const timer = useTestTimer({
@@ -47,27 +62,38 @@ const useTestSession = (
     const grading = useTestGrading();
 
     const timerRef = useRef<number>(timer.secondsRemaining);
-    const statusRef = useRef(status);
 
-    // helper to commit time spent on current question
+    // ─── Mock meta derivation ────────────────────────────────
+    const isMockMode = data.mockMeta !== undefined;
+    const mockLabel = data.mockMeta?.label;
+    // finishWindowSeconds = min(30min, 20% of test duration)
+    // For 3h: 30min. For 1h: 12min. For 100s: 20s.
+    const finishUnlockAt =
+        data.mockMeta !== undefined
+            ? data.mockMeta.endsAt -
+              Math.max(
+                  5 * 60 * 1000, // floor: finish always unlocks in final 5 min
+                  Math.min(
+                      30 * 60 * 1000,
+                      data.mockMeta.durationSeconds * 0.2 * 1000
+                  )
+              )
+            : undefined;
+
     const commitCurrentTime = useCallback(() => {
         const index = navigation.currentIndex;
         const question = data.questions[index];
         if (!question) return;
-
         const questionId = question.id;
-
         const deltaSeconds = Math.floor(
             (Date.now() - startTimeRef.current) / 1000
         );
-
         const attemptOrder =
             data.questions.findIndex((q) => q.id === question.id) + 1;
         answers.updateTimeSpent(questionId, deltaSeconds, attemptOrder);
         startTimeRef.current = Date.now();
     }, [answers, navigation.currentIndex, data.questions]);
 
-    // wrappers for navigation coupled with commitCurrentTime
     const handleNext = useCallback(() => {
         commitCurrentTime();
         navigation.next();
@@ -99,65 +125,54 @@ const useTestSession = (
         }
     }, [currentIndex, data.questions, answers, status]);
 
-    // wrapper for submit button which will also sync with supabase
-    const handleSubmit = useCallback(async () => {
-        setStatus('submitting');
-
-        try {
-            commitCurrentTime();
-
-            // already submitted
-            const testSession = await getTestSession(testId);
-
-            if (testSession?.session?.status === 'completed') {
-                navigate(`/topic-test-result/${testId}`, { replace: true });
-                return;
+    const handleSubmit = useCallback(
+        async (options?: { stagger?: boolean }) => {
+            setStatus('submitting');
+            const toResult = (id: string) =>
+                resultRouteRef.current
+                    ? resultRouteRef.current(id)
+                    : `/topic-test-result/${id}`;
+            try {
+                commitCurrentTime();
+                const testSession = await getTestSession(testId);
+                if (testSession?.session?.status === 'completed') {
+                    navigate(toResult(testId), { replace: true });
+                    return;
+                }
+                await grading.submitTest(testId, options);
+                navigate(toResult(testId), { replace: true });
+                setStatus('completed');
+            } catch (err) {
+                console.error('Error in handleSubmit: ', err);
+                setStatus('error');
             }
+        },
+        [commitCurrentTime, grading, testId, navigate]
+    );
 
-            await grading.submitTest(testId);
-
-            navigate(`/topic-test-result/${testId}`, { replace: true });
-            setStatus('completed');
-        } catch (err) {
-            console.error('Error in handleSubmit: ', err);
-            setStatus('error');
-        }
-    }, [commitCurrentTime, grading, testId, navigate]);
-
-    // Heartbeat: Sync timer + unsynced attempts every 30 seconds
+    // Heartbeat — for mocks, skip updateTestTime (server derives time).
     useEffect(() => {
-        if (
-            statusRef.current !== 'ready' &&
-            statusRef.current !== 'submitting' &&
-            statusRef.current === 'completed'
-        )
-            return;
+        if (status === 'completed') return;
 
         let cancelled = false;
 
         const heartbeat = async () => {
             if (!testId) return;
-
             try {
-                // Sync remaining time to Supabase
-                await updateTestTime(testId, timerRef.current);
+                // Only sync timer for topic tests. Mock timer is
+                // server-derivable from started_at + mock_duration_seconds.
+                if (!isMockMode) {
+                    await updateTestTime(testId, timerRef.current);
+                }
 
-                // Fetch unsynced attempts from Dexie
                 const dirtyAttempts = await getPendingAttempts();
                 if (dirtyAttempts.length > 0) {
-                    // In handleSubmit AND in the Heartbeat useEffect:
-
                     const payload = dirtyAttempts.map((a) => {
-                        // Find the REAL index from the master list
                         const realIndex = data.questions.findIndex(
                             (q) => q.id === a.question_id
                         );
-
-                        // Calculate the order (1-based)
-                        // Fallback to a.attempt_order only if not found
                         const finalOrder =
                             realIndex !== -1 ? realIndex + 1 : a.attempt_order;
-
                         return {
                             session_id: a.session_id,
                             question_id: a.question_id,
@@ -169,11 +184,8 @@ const useTestSession = (
                             time_spent_seconds: a.time_spent_seconds,
                         };
                     });
-
                     const { error } = await upsertAttempts(payload);
-
                     if (!error) {
-                        // mark attempts as synced locally
                         await markAttemptsSynced(dirtyAttempts);
                     } else {
                         console.error('Heartbeat upsert error:', error);
@@ -184,19 +196,15 @@ const useTestSession = (
             }
         };
 
-        // run immediately once
         heartbeat();
-
-        // then every 60 seconds
         const interval = setInterval(() => {
             if (!cancelled) heartbeat();
         }, 60000);
-
         return () => {
             cancelled = true;
             clearInterval(interval);
         };
-    }, [testId, status, data.questions]);
+    }, [testId, status, data.questions, isMockMode]);
 
     useEffect(() => {
         if (
@@ -204,38 +212,34 @@ const useTestSession = (
             status !== 'completed' &&
             status !== 'submitting'
         )
-            handleSubmit();
+            handleSubmit({ stagger: true });
     }, [timer.isExpired, status, handleSubmit]);
 
-    // to save the timer value to appStorage every 5s
     useEffect(() => {
         if (status !== 'ready' && status !== 'submitting') return;
-
         timerRef.current = timer.secondsRemaining;
         const saveTimer = async () => {
+            // For mocks, don't write — server derives from started_at.
+            if (isMockMode) return;
             await updateSessionTimeAndStatus(
                 testId,
                 timer.secondsRemaining,
                 status
             );
         };
+        if (timer.secondsRemaining % 5 === 0) saveTimer();
+    }, [timer.secondsRemaining, testId, status, isMockMode]);
 
-        if (timer.secondsRemaining % 5 === 0) {
-            saveTimer();
-        }
-    }, [timer.secondsRemaining, testId, status]);
-
-    // save timer on unmount
     useEffect(() => {
         const saveTimer = async (time: number) => {
+            if (isMockMode) return;
             await updateSessionTimeAndStatus(testId, time, status);
         };
-
         return () => {
             const time = timerRef.current;
             saveTimer(time);
         };
-    }, [testId, status]);
+    }, [testId, status, isMockMode]);
 
     return {
         questions: data.questions,
@@ -247,6 +251,9 @@ const useTestSession = (
         timer,
         navigation,
         answers,
+        isMockMode,
+        mockLabel,
+        finishUnlockAt,
     };
 };
 

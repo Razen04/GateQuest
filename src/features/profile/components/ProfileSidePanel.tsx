@@ -1,4 +1,4 @@
-import { eyebrow, glassPanel, palette } from '../styles/profileTheme';
+import { eyebrow, glassPanel } from '../styles/profileTheme';
 import type { ProfileData } from '../types/profile';
 
 interface ProfileSidePanelProps {
@@ -16,10 +16,10 @@ export default function ProfileSidePanel({
 
     const typeColor = (type: string) =>
         type === 'multiple-choice'
-            ? palette.photon
+            ? 'bg-chart-1'
             : type === 'numerical'
-              ? palette.violet
-              : palette.ember;
+              ? 'bg-chart-6'
+              : 'bg-chart-5';
 
     return (
         <div className="flex flex-col gap-4">
@@ -36,34 +36,28 @@ export default function ProfileSidePanel({
                                           (qt.solved / qt.total_available) * 100
                                       )
                                     : 0;
-                            const color = typeColor(qt.type);
+                            const colorClass = typeColor(qt.type);
 
                             return (
                                 <div key={qt.type}>
                                     <div className="mb-2 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div
-                                                className="h-2.5 w-2.5"
-                                                style={{
-                                                    backgroundColor: color,
-                                                }}
+                                                className={`h-2.5 w-2.5 ${colorClass}`}
                                             />
-                                            <span className="text-xs text-slate-600 dark:text-white/65">
+                                            <span className="text-xs text-muted-foreground">
                                                 {getFixedType(qt.type)}
                                             </span>
                                         </div>
-                                        <span className="font-['JetBrains_Mono',monospace] text-xs font-medium text-slate-700 dark:text-white/75">
+                                        <span className="font-['JetBrains_Mono',monospace] text-xs font-medium text-foreground">
                                             {qt.solved}/{qt.total_available}
                                         </span>
                                     </div>
 
-                                    <div className="h-2 overflow-hidden bg-slate-900/5 dark:bg-white/10">
+                                    <div className="h-2 overflow-hidden bg-muted">
                                         <div
-                                            className="h-full transition-all"
-                                            style={{
-                                                width: `${pct}%`,
-                                                backgroundColor: color,
-                                            }}
+                                            className={`h-full transition-all ${colorClass}`}
+                                            style={{ width: `${pct}%` }}
                                         />
                                     </div>
                                 </div>

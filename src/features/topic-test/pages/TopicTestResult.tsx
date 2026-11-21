@@ -1,54 +1,26 @@
 import {
     ArrowLeftIcon,
     ArrowRight,
-    Clock,
     House,
     ListChecks,
-    PresentationChart,
-    Shapes,
     Target,
     Timer,
     Trophy,
-    WarningCircle,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import {
-    Bar,
-    BarChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
-import type { Attempt, Question, TestSession } from '@/shared/types/storage';
+import type { Attempt, TestSession } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
-import { QuestionGrid } from '../components/test-result/QuestionGrid';
+import TestAnalysisBody from '../components/test-result/TestAnalysisBody';
+import type { FullAttempt } from '../types/testTypes';
 
 type OutletContext = {
     session: TestSession;
     attempts: Attempt[];
 };
-
-interface FullAttempt extends Attempt {
-    questions: Question;
-    originalIndex: number;
-}
-
-interface GroupData {
-    attempts: FullAttempt[];
-    totalTime: number;
-    correct: number;
-}
-
-interface TypeGroupData {
-    total: number;
-    correct: number;
-}
 
 const StatCard = ({
     label,
@@ -59,153 +31,51 @@ const StatCard = ({
     label: string;
     value: string | number;
     subValue?: string;
-    icon: any;
+    icon: React.ComponentType<{
+        size?: number;
+        weight?: string;
+        className?: string;
+    }>;
 }) => (
-    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 shadow-sm flex items-start justify-between">
+    <div className="bg-card border border-border p-5 shadow-sm flex items-start justify-between">
         <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {label}
             </p>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {value}
-            </h3>
+            <h3 className="text-2xl font-bold text-foreground">{value}</h3>
             {subValue && (
-                <p className="text-xs text-slate-400 mt-1">{subValue}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
+                    {subValue}
+                </p>
             )}
         </div>
-        <Icon size={22} weight="duotone" />
+        <Icon size={22} weight="duotone" className="text-chart-1" />
     </div>
 );
-
-function SectionHeading({
-    icon: Icon,
-    title,
-    color = 'text-slate-900 dark:text-slate-100',
-}: {
-    icon: any;
-    title: string;
-    color?: string;
-}) {
-    return (
-        <div className="flex items-center gap-3">
-            <Icon size={22} className={color} weight="duotone" />
-            <h2
-                className={`font-black uppercase tracking-widest text-xs ${color}`}
-            >
-                {title}
-            </h2>
-        </div>
-    );
-}
 
 export default function TopicTestResult() {
     const { testId } = useParams<{ testId: string }>();
     const navigate = useNavigate();
     const { session, attempts } = useOutletContext<OutletContext>();
 
-    // Unified Data Analysis Engine
-    const analysis = useMemo(() => {
-        const diffGroups: Record<string, GroupData> = {
-            Easy: { attempts: [], totalTime: 0, correct: 0 },
-            Medium: { attempts: [], totalTime: 0, correct: 0 },
-            Hard: { attempts: [], totalTime: 0, correct: 0 },
-        };
-
-        const topicGroups: Record<string, GroupData> = {};
-        const typeGroups: Record<string, TypeGroupData> = {
-            MCQ: { total: 0, correct: 0 },
-            MSQ: { total: 0, correct: 0 },
-            NAT: { total: 0, correct: 0 },
-        };
-
-        attempts.forEach((a, idx) => {
-            const q = (a as FullAttempt).questions; // Extract full question from attempt
-            const diff = q?.difficulty || 'Medium';
-            const topic = q?.topic || 'Uncategorized';
-            const type =
-                q?.question_type === 'multiple-choice'
-                    ? 'MCQ'
-                    : q?.question_type === 'multiple-select'
-                      ? 'MSQ'
-                      : 'NAT';
-
-            const enrichedAttempt = { ...a, originalIndex: idx };
-
-            // Difficulty grouping
-            if (diffGroups[diff]) {
-                diffGroups[diff].attempts.push(enrichedAttempt);
-                diffGroups[diff].totalTime += a.time_spent_seconds || 0;
-                if (a.is_correct) diffGroups[diff].correct++;
-            }
-
-            // Topic grouping with Question Buttons
-            if (!topicGroups[topic]) {
-                topicGroups[topic] = { attempts: [], totalTime: 0, correct: 0 };
-            }
-            topicGroups[topic].attempts.push(enrichedAttempt);
-            topicGroups[topic].totalTime += a.time_spent_seconds || 0;
-            if (a.is_correct) topicGroups[topic].correct++;
-
-            // Question Type stats
-            if (typeGroups[type]) {
-                typeGroups[type].total++;
-                if (a.is_correct) typeGroups[type].correct++;
-            }
-        });
-
-        // Time Sinks Identification
-        const globalAvg =
-            attempts.reduce((acc, a) => acc + (a.time_spent_seconds || 0), 0) /
-            (attempts.length || 1);
-
-        const timeSinks = attempts
-            .filter(
-                (a) =>
-                    !a.is_correct &&
-                    (a.time_spent_seconds || 0) > globalAvg * 1.5
-            )
-            .sort(
-                (a, b) =>
-                    (b.time_spent_seconds || 0) - (a.time_spent_seconds || 0)
-            )
-            .slice(0, 3);
-
-        // Inside the analysis useMemo in TopicTestResult.tsx
-        const pacingData = attempts.map((a, idx) => {
-            let bgColor = '#808080';
-
-            if (a.status === 'answered') {
-                bgColor =
-                    a.is_correct === true
-                        ? '#10b981'
-                        : a.is_correct === false
-                          ? '#ef4444'
-                          : '#808080';
-            }
-
-            return {
-                name: `${idx + 1}`,
-                time: a.time_spent_seconds || 0,
-                isCorrect: a.is_correct,
-                fill: bgColor,
-            };
-        });
-
-        return { diffGroups, topicGroups, typeGroups, timeSinks, pacingData };
-    }, [attempts]);
-
     return (
-        <div className="max-w-7xl mx-auto pb-20 bg-slate-50/30 dark:bg-zinc-950/30">
+        <div className="max-w-7xl mx-auto pb-20">
             <div className="p-6">
-                <button
+                <motion.button
+                    whileHover={{ x: -4 }}
+                    whileTap={{ scale: 0.96 }}
                     onClick={() => navigate('/topic-test')}
-                    className="flex items-center mb-4 text-sm font-bold uppercase tracking-tight hover:text-blue-500 transition-colors"
+                    className="mb-2 group inline-flex items-center gap-2 border border-border bg-card/60 px-3.5 py-2 font-grotesk text-xs font-bold text-foreground shadow-sm backdrop-blur-md transition-colors hover:border-chart-1/30 hover:text-chart-1"
                 >
-                    <ArrowLeftIcon className="mr-2" />
-                    Exit Report
-                </button>
+                    <ArrowLeftIcon
+                        size={16}
+                        className="transition-transform group-hover:-translate-x-0.5"
+                    />
+                    <span>Back to Hub</span>
+                </motion.button>
+
                 <PageHeader
-                    primaryTitle="Topic Test"
+                    primaryTitle="Custom Test"
                     secondaryTitle="Performance Report"
                     caption={
                         session?.topics?.length
@@ -223,7 +93,6 @@ export default function TopicTestResult() {
                 initial="hidden"
                 animate="visible"
             >
-                {/* 2. Overview Stats */}
                 <motion.div
                     variants={itemVariants}
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
@@ -255,171 +124,13 @@ export default function TopicTestResult() {
                     />
                 </motion.div>
 
-                {/* 3. Difficulty-Wise Analysis (With Buttons) */}
-                <motion.div variants={itemVariants} className="space-y-6">
-                    <SectionHeading
-                        icon={PresentationChart}
-                        title="Difficulty Analysis"
+                <motion.div variants={itemVariants}>
+                    <TestAnalysisBody
+                        attempts={attempts as FullAttempt[]}
+                        testId={testId!}
                     />
-                    {Object.entries(analysis.diffGroups).map(
-                        ([diff, data]: [string, GroupData]) =>
-                            data.attempts.length > 0 && (
-                                <QuestionGrid
-                                    key={diff}
-                                    title={diff}
-                                    data={data}
-                                    testId={testId!}
-                                    navigate={navigate}
-                                />
-                            )
-                    )}
                 </motion.div>
 
-                {/* 4. Topic-Wise Performance (With Buttons) */}
-                <motion.div variants={itemVariants} className="space-y-6">
-                    <SectionHeading icon={ListChecks} title="Topic Breakdown" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Object.entries(analysis.topicGroups).map(
-                            ([topic, data]: [string, GroupData]) => (
-                                <QuestionGrid
-                                    key={topic}
-                                    title={topic}
-                                    data={data}
-                                    testId={testId!}
-                                    navigate={navigate}
-                                    isTopic
-                                />
-                            )
-                        )}
-                    </div>
-                </motion.div>
-
-                {/* Pacing Analysis Graph */}
-                <motion.div
-                    variants={itemVariants}
-                    className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm"
-                >
-                    <SectionHeading icon={Clock} title="Pacing Analysis" />
-                    <p className="text-[10px] text-slate-400 font-bold mb-6 uppercase tracking-widest">
-                        Time Spent per Question (Seconds)
-                    </p>
-
-                    <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={analysis.pacingData}>
-                                <XAxis
-                                    dataKey="name"
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fill: '#94a3b8' }}
-                                />
-                                <YAxis
-                                    fontSize={10}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fill: '#94a3b8' }}
-                                />
-                                <Tooltip
-                                    cursor={{ fill: 'transparent' }}
-                                    content={({ active, payload }) => {
-                                        if (active && payload?.length) {
-                                            const data = payload[0]?.payload;
-                                            return (
-                                                <div className="bg-slate-900 text-white p-2 text-[10px] font-bold shadow-xl border border-slate-700">
-                                                    QUESTION {data.name}:{' '}
-                                                    {data.time}s
-                                                    <br />
-                                                    RESULT:{' '}
-                                                    {data.isCorrect
-                                                        ? 'CORRECT'
-                                                        : data.isCorrect ===
-                                                            false
-                                                          ? 'INCORRECT'
-                                                          : 'SKIPPED'}
-                                                </div>
-                                            );
-                                        }
-                                        return null;
-                                    }}
-                                />
-                                <Bar dataKey="time" radius={[2, 2, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </motion.div>
-
-                {/* 5. Strategy Insights: Time Sinks & Question Types */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <motion.div variants={itemVariants} className="space-y-6">
-                        <SectionHeading
-                            icon={WarningCircle}
-                            title="Biggest Time Sinks"
-                            color="text-rose-500"
-                        />
-                        <div className="space-y-3">
-                            {analysis.timeSinks.length === 0 ? (
-                                <p className="text-gray-500 text-sm">
-                                    There are no timesinks in this test.
-                                </p>
-                            ) : (
-                                analysis.timeSinks.map((sink, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-8 h-8 bg-rose-500 text-white flex items-center justify-center font-black text-xs">
-                                                #{attempts.indexOf(sink) + 1}
-                                            </div>
-                                            <p className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase">
-                                                {(sink as any).questions
-                                                    ?.topic || 'Unknown Topic'}
-                                            </p>
-                                        </div>
-                                        <p className="font-mono font-black text-rose-600">
-                                            {formatTime(
-                                                sink.time_spent_seconds
-                                            )}
-                                        </p>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="space-y-6">
-                        <SectionHeading
-                            icon={Shapes}
-                            title="Question Type Accuracy"
-                        />
-                        <div className="grid grid-cols-3 gap-4">
-                            {Object.entries(analysis.typeGroups).map(
-                                ([type, data]: [string, TypeGroupData]) =>
-                                    data.total > 0 && (
-                                        <div
-                                            key={type}
-                                            className="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-center"
-                                        >
-                                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">
-                                                {type}
-                                            </p>
-                                            <p className="text-xl font-black text-blue-600">
-                                                {(
-                                                    (data.correct /
-                                                        data.total) *
-                                                    100
-                                                ).toFixed(0)}
-                                                %
-                                            </p>
-                                        </div>
-                                    )
-                            )}
-                        </div>
-                    </motion.div>
-                </div>
-
-                {/* Navigation Footer */}
                 <motion.div
                     variants={itemVariants}
                     className="flex justify-center gap-4 pt-8"

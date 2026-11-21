@@ -30,7 +30,7 @@ VALUES (
     gen_random_uuid(),
     :'TEST_USER',
     :'CS_BRANCH',
-    (to_timestamp(floor(extract(epoch FROM current_date) / (3 * 86400)) * (3 * 86400))::date),
+    (current_date - EXTRACT(DOW FROM current_date)::int)::date,
     'pending',
     now(),
     10

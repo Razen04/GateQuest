@@ -39,6 +39,7 @@ export type Database = {
                     branch_id: string;
                     exam_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     branch_id: string;
                     exam_id: string;
@@ -69,6 +70,7 @@ export type Database = {
                     branch_id: string;
                     subject_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     branch_id: string;
                     subject_id: string;
@@ -99,6 +101,7 @@ export type Database = {
                     id: string;
                     name: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     id: string;
                     name: string;
@@ -112,39 +115,46 @@ export type Database = {
             donations: {
                 Row: {
                     actual_amount: number | null;
+                    alerted_at: string | null;
                     anonymous: boolean | null;
                     created_at: string | null;
                     id: string;
                     message: string | null;
                     suggested_amount: number | null;
                     user_id: string | null;
-                    utr: string | null;
+                    utr: string;
                     verified: boolean | null;
                     verified_at: string | null;
+                    verified_by: string | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     actual_amount?: number | null;
+                    alerted_at?: string | null;
                     anonymous?: boolean | null;
                     created_at?: string | null;
                     id?: string;
                     message?: string | null;
                     suggested_amount?: number | null;
                     user_id?: string | null;
-                    utr?: string | null;
+                    utr: string;
                     verified?: boolean | null;
                     verified_at?: string | null;
+                    verified_by?: string | null;
                 };
                 Update: {
                     actual_amount?: number | null;
+                    alerted_at?: string | null;
                     anonymous?: boolean | null;
                     created_at?: string | null;
                     id?: string;
                     message?: string | null;
                     suggested_amount?: number | null;
                     user_id?: string | null;
-                    utr?: string | null;
+                    utr?: string;
                     verified?: boolean | null;
                     verified_at?: string | null;
+                    verified_by?: string | null;
                 };
                 Relationships: [
                     {
@@ -162,6 +172,7 @@ export type Database = {
                     name: string;
                     short_name: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     id: string;
                     name: string;
@@ -179,6 +190,7 @@ export type Database = {
                     exams_id: string;
                     subject_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     exams_id: string;
                     subject_id: string;
@@ -204,12 +216,105 @@ export type Database = {
                     },
                 ];
             };
+            mock_questions: {
+                Row: {
+                    mock_id: string;
+                    position: number;
+                    question_id: string;
+                };
+                ComputedFields: never;
+                Insert: {
+                    mock_id: string;
+                    position: number;
+                    question_id: string;
+                };
+                Update: {
+                    mock_id?: string;
+                    position?: number;
+                    question_id?: string;
+                };
+                Relationships: [
+                    {
+                        foreignKeyName: 'mock_questions_mock_id_fkey';
+                        columns: ['mock_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'mocks';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'mock_questions_question_id_fkey';
+                        columns: ['question_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'questions';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            mocks: {
+                Row: {
+                    announcement: string | null;
+                    attempt_min_tier: number;
+                    blurb: string | null;
+                    branch: string;
+                    created_at: string;
+                    duration_seconds: number;
+                    id: string;
+                    label: string;
+                    peer_stats_refreshed_at: string | null;
+                    post_min_tier: number;
+                    schedule_notified_at: string | null;
+                    series_number: number | null;
+                    start_reminder_sent_at: string | null;
+                    starts_at: string;
+                    status: string;
+                    updated_at: string;
+                };
+                ComputedFields: never;
+                Insert: {
+                    announcement?: string | null;
+                    attempt_min_tier?: number;
+                    blurb?: string | null;
+                    branch: string;
+                    created_at?: string;
+                    duration_seconds: number;
+                    id: string;
+                    label: string;
+                    peer_stats_refreshed_at?: string | null;
+                    post_min_tier?: number;
+                    schedule_notified_at?: string | null;
+                    series_number?: number | null;
+                    start_reminder_sent_at?: string | null;
+                    starts_at: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    announcement?: string | null;
+                    attempt_min_tier?: number;
+                    blurb?: string | null;
+                    branch?: string;
+                    created_at?: string;
+                    duration_seconds?: number;
+                    id?: string;
+                    label?: string;
+                    peer_stats_refreshed_at?: string | null;
+                    post_min_tier?: number;
+                    schedule_notified_at?: string | null;
+                    series_number?: number | null;
+                    start_reminder_sent_at?: string | null;
+                    starts_at?: string;
+                    status?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
             notification_reads: {
                 Row: {
                     notification_id: string;
                     read_at: string;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     notification_id: string;
                     read_at?: string;
@@ -246,10 +351,11 @@ export type Database = {
                     id: string;
                     link: string | null;
                     message: string | null;
-                    target: Json;
+                    target: NonNullable<Json>;
                     title: string | null;
                     type: string | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     active?: boolean | null;
                     audience_ids?: string[] | null;
@@ -258,7 +364,7 @@ export type Database = {
                     id?: string;
                     link?: string | null;
                     message?: string | null;
-                    target?: Json;
+                    target?: NonNullable<Json>;
                     title?: string | null;
                     type?: string | null;
                 };
@@ -270,7 +376,7 @@ export type Database = {
                     id?: string;
                     link?: string | null;
                     message?: string | null;
-                    target?: Json;
+                    target?: NonNullable<Json>;
                     title?: string | null;
                     type?: string | null;
                 };
@@ -285,6 +391,7 @@ export type Database = {
                     p256dh_key: string;
                     user_id: string | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     auth_key: string;
                     created_at?: string | null;
@@ -310,6 +417,7 @@ export type Database = {
                     question_id: string;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     created_at?: string;
                     notes?: string | null;
@@ -349,6 +457,7 @@ export type Database = {
                     updated_at: string;
                     wrong_attempts: number;
                 };
+                ComputedFields: never;
                 Insert: {
                     avg_time_seconds?: number | null;
                     correct_attempts?: number;
@@ -387,6 +496,7 @@ export type Database = {
                     status: string | null;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     created_at?: string | null;
                     id?: string;
@@ -426,7 +536,7 @@ export type Database = {
                 Row: {
                     added_by: string | null;
                     answer_text: string | null;
-                    correct_answer: Json;
+                    correct_answer: NonNullable<Json>;
                     created_at: string | null;
                     difficulty: string | null;
                     explanation: string | null;
@@ -447,10 +557,11 @@ export type Database = {
                     verified: boolean | null;
                     year: number;
                 };
+                ComputedFields: never;
                 Insert: {
                     added_by?: string | null;
                     answer_text?: string | null;
-                    correct_answer: Json;
+                    correct_answer: NonNullable<Json>;
                     created_at?: string | null;
                     difficulty?: string | null;
                     explanation?: string | null;
@@ -474,7 +585,7 @@ export type Database = {
                 Update: {
                     added_by?: string | null;
                     answer_text?: string | null;
-                    correct_answer?: Json;
+                    correct_answer?: NonNullable<Json>;
                     created_at?: string | null;
                     difficulty?: string | null;
                     explanation?: string | null;
@@ -512,6 +623,7 @@ export type Database = {
                     set_id: string;
                     time_spent_seconds: number | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     is_correct?: boolean | null;
                     question_id: string;
@@ -553,6 +665,7 @@ export type Database = {
                     slug: string;
                     theme_color: string | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     category?: string | null;
                     difficulty?: string | null;
@@ -586,10 +699,14 @@ export type Database = {
                     correct_count: number | null;
                     created_at: string | null;
                     id: string;
+                    mock_duration_seconds: number | null;
+                    mock_ends_at: string | null;
+                    mock_label: string | null;
                     paper_id: string | null;
                     record_activity: boolean;
                     remaining_time_seconds: number;
                     score: number | null;
+                    started_at: string | null;
                     status: string | null;
                     topics: string[] | null;
                     total_marks: number | null;
@@ -597,6 +714,7 @@ export type Database = {
                     updated_at: string | null;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     accuracy?: number | null;
                     attempted_count?: number | null;
@@ -605,10 +723,14 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    mock_duration_seconds?: number | null;
+                    mock_ends_at?: string | null;
+                    mock_label?: string | null;
                     paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds: number;
                     score?: number | null;
+                    started_at?: string | null;
                     status?: string | null;
                     topics?: string[] | null;
                     total_marks?: number | null;
@@ -624,10 +746,14 @@ export type Database = {
                     correct_count?: number | null;
                     created_at?: string | null;
                     id?: string;
+                    mock_duration_seconds?: number | null;
+                    mock_ends_at?: string | null;
+                    mock_label?: string | null;
                     paper_id?: string | null;
                     record_activity?: boolean;
                     remaining_time_seconds?: number;
                     score?: number | null;
+                    started_at?: string | null;
                     status?: string | null;
                     topics?: string[] | null;
                     total_marks?: number | null;
@@ -657,6 +783,7 @@ export type Database = {
                     time_spent_seconds: number | null;
                     user_answer: Json | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     attempt_order: number;
                     is_correct?: boolean | null;
@@ -705,6 +832,7 @@ export type Database = {
                     target_exams: Json | null;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     additional_subjects?: string[] | null;
                     branch_id: string;
@@ -746,6 +874,7 @@ export type Database = {
                     question_id: string;
                     user_id: string;
                 };
+                ComputedFields: never;
                 Insert: {
                     added_at?: string | null;
                     box?: number | null;
@@ -792,6 +921,7 @@ export type Database = {
                     user_version_number: number;
                     was_correct: boolean | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     attempt_number?: number | null;
                     attempted_at?: string | null;
@@ -848,6 +978,7 @@ export type Database = {
                 Row: {
                     about: string | null;
                     avatar: string | null;
+                    banner: string | null;
                     bookmark_questions: Json | null;
                     college: string | null;
                     deleted_at: string | null;
@@ -865,9 +996,11 @@ export type Database = {
                     username: string | null;
                     version_number: number;
                 };
+                ComputedFields: never;
                 Insert: {
                     about?: string | null;
                     avatar?: string | null;
+                    banner?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
                     deleted_at?: string | null;
@@ -888,6 +1021,7 @@ export type Database = {
                 Update: {
                     about?: string | null;
                     avatar?: string | null;
+                    banner?: string | null;
                     bookmark_questions?: Json | null;
                     college?: string | null;
                     deleted_at?: string | null;
@@ -922,6 +1056,7 @@ export type Database = {
                     x_url: string | null;
                     youtube_url: string | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     codeforces_url?: string | null;
                     discord_url?: string | null;
@@ -977,6 +1112,7 @@ export type Database = {
                         | null;
                     total_questions: number | null;
                 };
+                ComputedFields: never;
                 Insert: {
                     accuracy?: number | null;
                     branch_id?: string | null;
@@ -1030,11 +1166,12 @@ export type Database = {
         Views: {
             active_weekend_subscriptions: {
                 Row: {
-                    auth_key: string | null;
-                    endpoint: string | null;
-                    p256dh_key: string | null;
+                    auth_key: string;
+                    endpoint: string;
+                    p256dh_key: string;
                     user_id: string | null;
                 };
+                ComputedFields: never;
                 Relationships: [];
             };
             dynamic_difficulty_stats: {
@@ -1045,6 +1182,7 @@ export type Database = {
                     subject_rating: number | null;
                     total_attempts: number | null;
                 };
+                ComputedFields: never;
                 Relationships: [
                     {
                         foreignKeyName: 'user_question_activity_subject_id_fkey';
@@ -1059,18 +1197,19 @@ export type Database = {
                 Row: {
                     attempt_number: number | null;
                     attempted_at: string | null;
-                    branch_id: string | null;
+                    branch_id: string;
                     exam_tags: string[] | null;
-                    id: string | null;
+                    id: string;
                     is_universal: boolean | null;
                     question_id: string | null;
                     subject: string | null;
                     subject_id: string | null;
                     time_taken: number | null;
                     user_id: string | null;
-                    user_version_number: number | null;
+                    user_version_number: number;
                     was_correct: boolean | null;
                 };
+                ComputedFields: never;
                 Relationships: [
                     {
                         foreignKeyName: 'user_question_activity_branch_id_fkey';
@@ -1098,36 +1237,73 @@ export type Database = {
         };
         Functions: {
             calc_user_metrics: { Args: { p_user_id: string }; Returns: Json };
-            clear_user_data: { Args: never; Returns: Json };
-            create_test_from_paper:
-                | {
-                      Args: {
-                          p_branch: string;
-                          p_branch_id: string;
-                          p_duration_seconds: number;
-                          p_paper_id: string;
-                          p_paper_label: string;
-                          p_record_activity?: boolean;
-                          p_shift: number;
-                          p_year: number;
-                      };
-                      Returns: Json;
-                  }
-                | {
-                      Args: {
-                          p_branch: string;
-                          p_branch_id: string;
-                          p_duration_seconds: number;
-                          p_optional_subject_ids?: string[];
-                          p_paper_id: string;
-                          p_paper_label: string;
-                          p_record_activity?: boolean;
-                          p_shift: number;
-                          p_year: number;
-                      };
-                      Returns: Json;
-                  };
-            delete_account: { Args: never; Returns: undefined };
+            clear_user_data: {
+                Args: Record<PropertyKey, never>;
+                Returns: Json;
+            };
+            create_test_from_mock: {
+                Args: {
+                    p_branch_id: string;
+                    p_mock_id: string;
+                    p_record_activity?: boolean;
+                };
+                Returns: Json;
+            };
+            create_test_from_paper: {
+                Args: {
+                    p_branch: string;
+                    p_branch_id: string;
+                    p_duration_seconds: number;
+                    p_optional_subject_ids?: string[];
+                    p_paper_id: string;
+                    p_paper_label: string;
+                    p_record_activity?: boolean;
+                    p_shift: number;
+                    p_year: number;
+                };
+                Returns: Json;
+            };
+            delete_account: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
+            expire_mock_sessions: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
+            fetch_practice_questions: {
+                Args: { p_last_fetched_at?: string; p_subject_id: string };
+                Returns: {
+                    added_by: string | null;
+                    answer_text: string | null;
+                    correct_answer: NonNullable<Json>;
+                    created_at: string | null;
+                    difficulty: string | null;
+                    explanation: string | null;
+                    id: string;
+                    marks: number | null;
+                    metadata: Json | null;
+                    options: string[] | null;
+                    question: string;
+                    question_number: number | null;
+                    question_type: string;
+                    source: string | null;
+                    source_url: string | null;
+                    subject: string;
+                    subject_id: string | null;
+                    tags: string[] | null;
+                    topic: string | null;
+                    updated_at: string | null;
+                    verified: boolean | null;
+                    year: number;
+                }[];
+                SetofOptions: {
+                    from: '*';
+                    to: 'questions';
+                    isOneToOne: false;
+                    isSetofReturn: true;
+                };
+            };
             generate_topic_test: {
                 Args: {
                     p_already_attempted_questions: boolean;
@@ -1163,7 +1339,26 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
-            get_my_dashboard: { Args: never; Returns: Json };
+            get_mock_analysis: { Args: { p_test_id: string }; Returns: Json };
+            get_mock_catalog: { Args: { p_branch_id: string }; Returns: Json };
+            get_mock_leaderboard: {
+                Args: { p_mock_id: string };
+                Returns: Json;
+            };
+            get_mock_session_time: {
+                Args: { p_test_id: string };
+                Returns: Json;
+            };
+            get_mock_summary: { Args: { p_test_id: string }; Returns: Json };
+            get_monthly_donation_total: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
+            get_my_dashboard: {
+                Args: Record<PropertyKey, never>;
+                Returns: Json;
+            };
+            get_my_tier: { Args: Record<PropertyKey, never>; Returns: number };
             get_public_profile: { Args: { p_username: string }; Returns: Json };
             get_topic_counts: {
                 Args: { p_subject_id: string };
@@ -1195,8 +1390,9 @@ export type Database = {
                     topic: string;
                 }[];
             };
+            get_user_tier: { Args: { p_user_id: string }; Returns: number };
             get_verified_donations: {
-                Args: never;
+                Args: Record<PropertyKey, never>;
                 Returns: {
                     actual_amount: number;
                     anonymous: boolean;
@@ -1204,13 +1400,15 @@ export type Database = {
                     donation_id: string;
                     message: string;
                     user_avatar: string;
+                    user_banner: string;
                     user_id: string;
                     user_name: string;
+                    user_notification_tags: string[];
                     verified: boolean;
                 }[];
             };
             get_weekly_set:
-                | { Args: never; Returns: Json }
+                | { Args: Record<PropertyKey, never>; Returns: Json }
                 | { Args: { p_branch_id: string }; Returns: Json };
             insert_user_question_activity_batch: {
                 Args: { batch: Json };
@@ -1247,13 +1445,49 @@ export type Database = {
                     subject_id: string;
                 }[];
             };
-            refresh_dynamic_difficulty: { Args: never; Returns: undefined };
-            refresh_question_peer_stats: { Args: never; Returns: undefined };
+            is_mock_question: {
+                Args: { p_question_id: string };
+                Returns: boolean;
+            };
+            notify_mocks: { Args: Record<PropertyKey, never>; Returns: number };
+            practice_from_mock: { Args: { p_mock_id: string }; Returns: Json };
+            prune_topic_test_history: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
+            recompute_user_tier: {
+                Args: { v_user_id: string };
+                Returns: undefined;
+            };
+            refresh_closed_mock_stats: {
+                Args: Record<PropertyKey, never>;
+                Returns: number;
+            };
+            refresh_dynamic_difficulty: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
+            refresh_question_peer_stats: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
+            refresh_question_peer_stats_for_questions: {
+                Args: { p_question_ids?: string[] | null };
+                Returns: undefined;
+            };
             resolve_notification_target: {
                 Args: { p_target: Json };
                 Returns: string[];
             };
             resolve_segment: { Args: { p_target: Json }; Returns: string[] };
+            search_users: {
+                Args: { search_term: string };
+                Returns: {
+                    avatar: string;
+                    id: string;
+                    username: string;
+                }[];
+            };
             start_weekly_revision_set: {
                 Args: { v_set_id: string };
                 Returns: Json;
@@ -1270,6 +1504,10 @@ export type Database = {
                 Args: { p_note?: string; p_question_id: string };
                 Returns: boolean;
             };
+            trigger_donation_alerts: {
+                Args: Record<PropertyKey, never>;
+                Returns: undefined;
+            };
             update_question_bookmark_note: {
                 Args: { p_note?: string; p_question_id: string };
                 Returns: undefined;
@@ -1277,6 +1515,18 @@ export type Database = {
             update_status_of_weekly_set: {
                 Args: { v_set_id: string };
                 Returns: Json;
+            };
+            user_can_access_mock: {
+                Args: { p_mock_id: string };
+                Returns: boolean;
+            };
+            user_can_upload_animated: {
+                Args: Record<PropertyKey, never>;
+                Returns: boolean;
+            };
+            user_has_question_in_session: {
+                Args: { p_question_id: string };
+                Returns: boolean;
             };
         };
         Enums: {

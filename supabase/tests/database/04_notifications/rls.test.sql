@@ -1,7 +1,8 @@
--- Tests the SELECT policy: broadcast + targeted + read-state filtering.
+-- Tests the SELECT policy: broadcast + targeted + 30-day window.
+-- Read notifications stay visible; read state only drives the client badge.
 begin;
 select
-    plan (7);
+    plan (9);
 set local app.skip_dispatch = 'true';
 truncate public.notifications cascade;
 -- Seed users.
@@ -21,11 +22,12 @@ on conflict (id)
     do update set
         notification_tags = excluded.notification_tags;
 -- Seed notifications as superuser (service role context).
-insert into notifications (id, title, message, target, audience_ids)
+insert into notifications (id, title, message, target, audience_ids, created_at)
 values
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Broadcast', 'all', '{"type": "broadcast"}'::jsonb, null),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'CS Only', 'cs', '{"type": "tag", "tag": "branch:cs"}'::jsonb, array['11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222']::uuid[]),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'ME Only', 'me', '{"type": "tag", "tag": "branch:me"}'::jsonb, array['33333333-3333-3333-3333-333333333333']::uuid[]);
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Broadcast', 'all', '{"type": "broadcast"}'::jsonb, null, now()),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'CS Only', 'cs', '{"type": "tag", "tag": "branch:cs"}'::jsonb, array['11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222']::uuid[], now()),
+    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'ME Only', 'me', '{"type": "tag", "tag": "branch:me"}'::jsonb, array['33333333-3333-3333-3333-333333333333']::uuid[], now()),
+    ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'Old', 'older than a month', '{"type": "broadcast"}'::jsonb, null, now() - interval '31 days');
 -- ---------- user1 (CS) ----------
 set local role authenticated;
 select
@@ -58,7 +60,7 @@ select
 reset role;
 insert into notification_reads (notification_id, user_id)
     values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111');
--- ---------- user1 again: broadcast should be hidden ----------
+-- ---------- user1 again: broadcast stays visible but is marked read ----------
 set local role authenticated;
 select
     set_config('request.jwt.claims', '{"sub": "11111111-1111-1111-1111-111111111111"}', true);
@@ -68,8 +70,24 @@ select
                 count(*)::int
             from
                 notifications),
-            1,
-            'user1 sees only CS-only after marking broadcast as read');
+            2,
+            'user1 still sees broadcast + CS-only after marking broadcast as read');
+select
+    ok (exists (
+            select
+                1
+            from
+                notifications
+            where
+                title = 'Broadcast'), 'read notifications remain in the inbox');
+select
+    ok (not exists (
+            select
+                1
+            from
+                notifications
+            where
+                title = 'Old'), 'notifications older than 30 days are hidden');
 -- ---------- user2: broadcast still visible (read state is per-user) ----------
 reset role;
 set local role authenticated;

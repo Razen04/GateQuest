@@ -13,6 +13,7 @@ export type GuestUser = {
     id: '1';
     name?: string | null;
     avatar?: string | null;
+    banner?: string | null;
     bookmark_questions?: Json | null;
     college?: string | null;
     email?: string | null;
@@ -27,6 +28,7 @@ export type GuestUser = {
     is_public?: boolean | null;
     about?: string | null;
     onboarding_completed?: boolean | null;
+    notification_tags?: string[] | null;
 };
 
 export type AppUser = AuthenticatedAppUser | GuestUser;

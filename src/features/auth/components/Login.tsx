@@ -1,9 +1,8 @@
 import { X } from '@phosphor-icons/react';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
-import { Button } from '@/shared/components/ui/button';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 
 type LoginProp = {
@@ -32,7 +31,7 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
     return (
         <GoogleOAuthProvider clientId="635706138983-n2tb8pl1iltjs112g2faeoq26um4hj4r.apps.googleusercontent.com">
             <div className="relative mx-4 flex items-center justify-center bg-gradient-to-br from-blue-50/70 via-white/60 to-purple-100/70 dark:from-zinc-900/70 dark:via-zinc-800/60 dark:to-zinc-900/70 backdrop-blur-3xl">
-                <div className="w-full max-w-md bg-white/40 dark:bg-zinc-900/40 backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border border-white/30 dark:border-white/10 p-8 flex flex-col items-center animate-fade-in">
+                <div className="w-full max-w-md bg-background backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border border-white/30 dark:border-white/10 p-8 flex flex-col items-center animate-fade-in">
                     {canClose && (
                         <button
                             aria-label="Close"
@@ -108,10 +107,23 @@ const Login = ({ canClose = true, onClose }: LoginProp) => {
                     )}
 
                     <div className="mt-6 text-xs text-gray-400 text-center w-full">
-                        <span>
-                            By continuing, you agree to give your details like
-                            gmail, name and profile photo.
-                        </span>
+                        <p className="mt-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+                            By continuing, you agree to our{' '}
+                            <Link
+                                to="/terms"
+                                className="text-chart-1 hover:underline"
+                            >
+                                Terms of Service
+                            </Link>{' '}
+                            and{' '}
+                            <Link
+                                to="/privacy"
+                                className="text-chart-1 hover:underline"
+                            >
+                                Privacy Policy
+                            </Link>
+                            .
+                        </p>
                     </div>
                 </div>
             </div>

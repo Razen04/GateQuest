@@ -69,7 +69,7 @@ export function GoalSettings({
                     onValueChange={onBranchChange}
                     disabled={formDisabled}
                 >
-                    <SelectTrigger className="rounded-none h-11 border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold dark:border-white/10 dark:bg-white/[0.03] dark:text-white">
+                    <SelectTrigger className="rounded-none h-11 border-border bg-card/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold text-foreground">
                         <SelectValue
                             placeholder={
                                 goalsLoading
@@ -78,9 +78,9 @@ export function GoalSettings({
                             }
                         />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
+                    <SelectContent className="rounded-none border-border bg-popover/90 backdrop-blur-xl">
                         <SelectGroup>
-                            <SelectLabel className="rounded-none font-['JetBrains_Mono',monospace] text-[10px] uppercase text-slate-400">
+                            <SelectLabel className="rounded-none font-['JetBrains_Mono',monospace] text-[10px] uppercase text-muted-foreground">
                                 Engineering Branches
                             </SelectLabel>
                             {branches.map((b) => (
@@ -102,7 +102,7 @@ export function GoalSettings({
                         onValueChange={onExamsChange}
                         disabled={formDisabled}
                     >
-                        <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
+                        <ComboboxChips className="min-h-11 rounded-none border-border bg-card/50 p-1.5">
                             <ComboboxValue>
                                 {selectedExams.map((id) => {
                                     const exam = allExams.find(
@@ -114,7 +114,7 @@ export function GoalSettings({
                                         <ComboboxChip
                                             key={exam.id}
                                             showRemove
-                                            className="bg-[#2A5CFF]/10 rounded-none font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                            className="bg-chart-1/10 rounded-none font-['JetBrains_Mono',monospace] text-xs font-bold text-chart-1"
                                         >
                                             {exam.short_name}
                                         </ComboboxChip>
@@ -128,12 +128,12 @@ export function GoalSettings({
                                         ? 'Select target exams...'
                                         : ''
                                 }
-                                className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-slate-700 dark:text-slate-300"
+                                className="font-['Space_Grotesk',sans-serif] rounded-none text-xs text-foreground placeholder:text-muted-foreground"
                             />
                         </ComboboxChips>
 
-                        <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                            <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
+                        <ComboboxContent className="border-border bg-popover/90 backdrop-blur-xl">
+                            <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-muted-foreground">
                                 No matching exams found. Select a branch first.
                             </ComboboxEmpty>
                             <ComboboxList>
@@ -149,7 +149,7 @@ export function GoalSettings({
                             </ComboboxList>
                         </ComboboxContent>
                     </Combobox>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="text-[11px] text-muted-foreground">
                         Selecting multiple exams automatically merges relevant
                         syllabi into your custom practice modules.
                     </p>
@@ -168,7 +168,7 @@ export function GoalSettings({
                             }}
                             disabled={formDisabled}
                         >
-                            <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
+                            <ComboboxChips className="min-h-11 rounded-none border-border bg-card/50 p-1.5">
                                 <ComboboxValue>
                                     {(values) =>
                                         values.map((id) => {
@@ -182,7 +182,7 @@ export function GoalSettings({
                                                 <ComboboxChip
                                                     key={id}
                                                     showRemove
-                                                    className="rounded-none bg-[#2A5CFF]/10 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                                    className="rounded-none bg-chart-1/10 font-['JetBrains_Mono',monospace] text-xs font-bold text-chart-1"
                                                 >
                                                     {subject.name}
                                                 </ComboboxChip>
@@ -195,12 +195,12 @@ export function GoalSettings({
                                     placeholder={
                                         maxReached ? '' : 'Select 2 subjects...'
                                     }
-                                    className="rounded-none font-['Space_Grotesk',sans-serif] text-xs text-slate-700 dark:text-slate-300"
+                                    className="rounded-none font-['Space_Grotesk',sans-serif] text-xs text-foreground placeholder:text-muted-foreground"
                                 />
                             </ComboboxChips>
 
-                            <ComboboxContent className="border-slate-900/10 bg-white/90 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/90">
-                                <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-slate-500">
+                            <ComboboxContent className="border-border bg-popover/90 backdrop-blur-xl">
+                                <ComboboxEmpty className="p-3 font-['Fraunces',serif] text-xs text-muted-foreground">
                                     No optional subjects found.
                                 </ComboboxEmpty>
 
@@ -228,7 +228,7 @@ export function GoalSettings({
                             </ComboboxContent>
                         </Combobox>
 
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        <p className="text-[11px] text-muted-foreground">
                             Choose exactly 2 subjects.
                         </p>
                     </FormField>

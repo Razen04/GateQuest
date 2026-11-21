@@ -5,6 +5,8 @@
 
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import PrivacyPolicy from '@/features/legal/PrivacyPolicy';
+import TermsOfService from '@/features/legal/TermsOfService';
 import { OnboardingFlow } from '@/features/onboarding/OnboardingFlow';
 import ModernLoader from '@/shared/components/ModernLoader.js';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -63,8 +65,20 @@ const TopicTestResult = lazy(
 const TestSolutionView = lazy(
     () => import('@/features/topic-test/components/TestSolutionView')
 );
-const TopicReviewLayout = lazy(
-    () => import('@/features/topic-test/components/TopicReviewLayout')
+const TestReviewLayout = lazy(
+    () => import('@/features/topic-test/components/TestReviewLayout')
+);
+const MockTestAttempt = lazy(
+    () => import('@/features/topic-test/pages/MockTestAttempt')
+);
+const MockTestLobby = lazy(
+    () => import('@/features/topic-test/pages/MockTestLobby')
+);
+const MockTestResult = lazy(
+    () => import('@/features/topic-test/pages/MockTestResult')
+);
+const MockTestLeaderboard = lazy(
+    () => import('@/features/topic-test/pages/MockTestLeaderboard')
 );
 
 export default function AppRoutes() {
@@ -154,7 +168,7 @@ export default function AppRoutes() {
                         element={<TopicTestSessionPage />}
                     />
 
-                    <Route element={<TopicReviewLayout />}>
+                    <Route element={<TestReviewLayout />}>
                         <Route
                             path="topic-test-result/:testId"
                             element={<TopicTestResult />}
@@ -164,6 +178,41 @@ export default function AppRoutes() {
                             element={<TestSolutionView />}
                         />
                     </Route>
+
+                    {/* Mock Tests */}
+                    <Route
+                        path="mock-tests/attempt/:testId"
+                        element={<MockTestAttempt />}
+                    />
+                    <Route
+                        path="mock-tests/:mockId"
+                        element={<MockTestLobby />}
+                    />
+                    <Route
+                        path="mock-tests/result/:testId"
+                        element={<MockTestResult />}
+                    />
+                    <Route
+                        path="mock-tests/:mockId/leaderboard"
+                        element={<MockTestLeaderboard />}
+                    />
+
+                    <Route
+                        path="/privacy"
+                        element={
+                            <Suspense fallback={<ModernLoader />}>
+                                <PrivacyPolicy />
+                            </Suspense>
+                        }
+                    />
+                    <Route
+                        path="/terms"
+                        element={
+                            <Suspense fallback={<ModernLoader />}>
+                                <TermsOfService />
+                            </Suspense>
+                        }
+                    />
 
                     <Route path="/u/:username" element={<ProfilePage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

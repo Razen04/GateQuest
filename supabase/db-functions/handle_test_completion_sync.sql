@@ -7,11 +7,11 @@ begin
     -- Only run when status changes to 'completed'
     if new.status = 'completed' and old.status <> 'completed' and new.record_activity is true then
         -- ACTIVITY LOG
-        insert into public.user_question_activity (user_id, question_id, subject, subject_id, branch_id, user_version_number, was_correct, time_taken, attempted_at, attempt_number)
+        insert into public.user_question_activity (user_id, question_id, subject, subject_id, branch_id, user_version_number, was_correct, time_taken, attempted_at, attempt_number, selected_option_indices)
         select
             new.user_id,
             a.question_id,
-            q.subject,
+            s.name,
             q.subject_id,
             new.branch_id,
             (
@@ -27,10 +27,23 @@ begin
                     public.user_question_activity uqa
                 where
                     uqa.user_id = new.user_id
-                    and uqa.question_id = a.question_id)
+                    and uqa.question_id = a.question_id),
+            case when q.question_type = 'numerical'
+                or a.user_answer is null then
+                null
+            when jsonb_typeof(a.user_answer) = 'array' then
+            (
+                select
+                    array_agg(x::int)
+                from
+                    jsonb_array_elements_text(a.user_answer) as x)
+            else
+                array[(a.user_answer #>> '{}')::int]
+            end
         from
             public.topic_tests_attempts a
             join public.questions q on q.id = a.question_id
+            join public.subjects s on s.id = q.subject_id
         where
             a.session_id = new.id
             and a.user_answer is not null;
@@ -84,3 +97,4 @@ end if;
     return NEW;
 end;
 $$;
+

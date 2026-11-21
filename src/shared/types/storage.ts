@@ -27,6 +27,17 @@ export type NumericalAnswerSpec =
     | RangeAnswer
     | ToleranceAnswer;
 
+export interface QuestionMetadata {
+    set: string;
+    exam: string[] | string;
+    paperType: string;
+    language: string;
+    // Existing optional keys
+    section?: string;
+    sectionCode?: string;
+    shift?: number;
+}
+
 interface BaseQuestion {
     id: string;
     year: number;
@@ -44,12 +55,7 @@ interface BaseQuestion {
     verified: boolean;
     answer_text: string;
     explanation: string;
-    metadata: {
-        set: string;
-        exam: string; // To identify which exam this particular question belongs too.
-        paperType: string;
-        language: string;
-    };
+    metadata: QuestionMetadata;
     created_at: string;
     updated_at: string;
 }
@@ -102,6 +108,12 @@ export interface TestSession {
     correct_count: number;
     attempted_count: number;
     is_synced: number;
+
+    paper_id?: string;
+    started_at?: string;
+    mock_duration_seconds?: number;
+    mock_ends_at?: string;
+    mock_label?: string;
 }
 
 export interface Attempt {

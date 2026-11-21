@@ -1,7 +1,6 @@
 import { ResponsiveTimeRange } from '@nivo/calendar';
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
-import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import type { Stats } from '@/shared/types/Stats.ts';
 import { itemVariants } from '@/shared/utils/motionVariants.ts';
 
@@ -9,9 +8,18 @@ type StreakMapType = {
     stats: Stats;
 };
 
-const StreakMap = ({ stats }: StreakMapType) => {
-    const isDark = useSettingsStore((s) => s.settings.darkMode);
+// Sequential heatmap scale — matches ProfileHeatmap.
+// heatmap-0 is the empty/track color; heatmap-1..5 are the 5 activity levels.
+const HEATMAP_COLORS = [
+    'var(--heatmap-0)',
+    'var(--heatmap-1)',
+    'var(--heatmap-2)',
+    'var(--heatmap-3)',
+    'var(--heatmap-4)',
+    'var(--heatmap-5)',
+] as const;
 
+const StreakMap = ({ stats }: StreakMapType) => {
     const heatmapObj = useMemo(() => {
         return stats.heatmapData;
     }, [stats]);
@@ -59,17 +67,20 @@ const StreakMap = ({ stats }: StreakMapType) => {
         return entries.map(({ day, raw }) => {
             const normalized = raw / max;
             let value = 0;
+
             if (normalized > 0.8) value = 5;
             else if (normalized > 0.6) value = 4;
             else if (normalized > 0.4) value = 3;
             else if (normalized > 0.2) value = 2;
             else if (normalized > 0) value = 1;
+
             return { day, value };
         });
     }, [heatmapObj]);
 
     const rawLookup = useMemo(() => {
         const rawData = heatmapObj?.data ?? {};
+
         if (Array.isArray(rawData)) {
             return Object.fromEntries(
                 rawData.map((item) => [
@@ -78,6 +89,7 @@ const StreakMap = ({ stats }: StreakMapType) => {
                 ])
             );
         }
+
         return Object.fromEntries(
             Object.entries(rawData).map(([date, count]) => [
                 date,
@@ -86,35 +98,30 @@ const StreakMap = ({ stats }: StreakMapType) => {
         );
     }, [heatmapObj]);
 
-    const maxCount = useMemo(() => {
-        if (!bucketedData.length) return 1;
-        return Math.max(...bucketedData.map((d) => d.value), 1);
-    }, [bucketedData]);
-
-    const colors = isDark
-        ? ['#064e3b', '#047857', '#059669', '#10b981', '#34d399']
-        : ['#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a'];
-
     const streakCards = [
         {
             label: 'Study Longest',
             value: stats.streaks?.study_longest ?? 0,
-            color: 'yellow',
+            cardClass: 'border-chart-4/30 bg-chart-4/10',
+            valueClass: 'text-chart-4',
         },
         {
             label: 'Study Current',
             value: stats.streaks?.study_current ?? 0,
-            color: 'emerald',
+            cardClass: 'border-chart-2/30 bg-chart-2/10',
+            valueClass: 'text-chart-2',
         },
         {
             label: 'Learning Longest',
             value: stats.streaks?.learning_longest ?? 0,
-            color: 'yellow',
+            cardClass: 'border-chart-4/30 bg-chart-4/10',
+            valueClass: 'text-chart-4',
         },
         {
             label: 'Learning Current',
             value: stats.streaks?.learning_current ?? 0,
-            color: 'emerald',
+            cardClass: 'border-chart-2/30 bg-chart-2/10',
+            valueClass: 'text-chart-2',
         },
     ];
 
@@ -123,18 +130,43 @@ const StreakMap = ({ stats }: StreakMapType) => {
             variants={itemVariants}
             initial="initial"
             animate="animate"
-            className="relative border border-white/20 bg-white/40 dark:bg-white/[0.06] backdrop-blur-2xl shadow-sm p-4 overflow-visible"
+            className="
+                relative isolate overflow-visible
+                border border-border
+                bg-card/70 text-card-foreground
+                shadow-sm backdrop-blur-2xl
+                p-4 font-sans
+            "
         >
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/30 to-transparent dark:from-white/10" />
+            {/* Subtle glass overlay */}
+            <div
+                className="
+                pointer-events-none absolute inset-x-0 top-0 h-24
+                bg-gradient-to-b
+                from-foreground/[0.04] to-transparent
+            "
+            />
 
             <div className="relative">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between">
                     <div>
-                        <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
+                        <h3
+                            className="
+                            text-sm font-bold
+                            font-display
+                            text-card-foreground
+                        "
+                        >
                             Activity Streak
                         </h3>
-                        <p className="text-xs text-slate-500 dark:text-white/50">
+
+                        <p
+                            className="
+                            text-xs text-muted-foreground
+                            tabular-nums
+                        "
+                        >
                             {fromDate.toLocaleDateString('en-US', {
                                 month: 'short',
                                 year: 'numeric',
@@ -149,25 +181,31 @@ const StreakMap = ({ stats }: StreakMapType) => {
                 </div>
 
                 {/* Streak summary */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                <div
+                    className="
+                    mb-4 grid grid-cols-2 gap-2
+                    sm:grid-cols-4
+                "
+                >
                     {streakCards.map((item) => (
                         <div
                             key={item.label}
-                            className={`border px-3 py-2 backdrop-blur-xl ${
-                                item.color === 'yellow'
-                                    ? 'border-yellow-400/20 bg-yellow-400/10'
-                                    : 'border-emerald-400/20 bg-emerald-400/10'
-                            }`}
+                            className={`
+                                border ${item.cardClass}
+                                px-3 py-2 backdrop-blur-xl
+                            `}
                         >
-                            <p className="text-[10px] text-slate-500 dark:text-white/50">
+                            <p className="text-[10px] text-muted-foreground">
                                 {item.label}
                             </p>
+
                             <p
-                                className={`text-lg font-bold ${
-                                    item.color === 'yellow'
-                                        ? 'text-yellow-500'
-                                        : 'text-emerald-500'
-                                }`}
+                                className={`
+                                    text-lg font-bold
+                                    ${item.valueClass}
+                                    font-display
+                                    tabular-nums
+                                `}
                             >
                                 {item.value}
                             </p>
@@ -175,19 +213,22 @@ const StreakMap = ({ stats }: StreakMapType) => {
                     ))}
                 </div>
 
-                {/* Chart */}
-                <div className="relative w-full overflow-x-auto overflow-y-visible no-scrollbar pt-6">
+                {/* Activity heatmap */}
+                <div
+                    className="
+                    relative w-full overflow-x-auto
+                    overflow-y-visible pt-6
+                    [scrollbar-width:none]
+                    [&::-webkit-scrollbar]:hidden
+                "
+                >
                     <div className="h-[190px] min-w-[1200px] sm:min-w-full">
                         <ResponsiveTimeRange
                             data={bucketedData}
                             from={fromIso}
                             to={toIso}
-                            emptyColor={
-                                isDark
-                                    ? 'rgba(255,255,255,0.08)'
-                                    : 'rgba(15,23,42,0.06)'
-                            }
-                            colors={colors}
+                            emptyColor="var(--heatmap-0)"
+                            colors={[...HEATMAP_COLORS]}
                             minValue={0}
                             maxValue={5}
                             margin={{
@@ -201,23 +242,35 @@ const StreakMap = ({ stats }: StreakMapType) => {
                             dayBorderWidth={2}
                             dayBorderColor="transparent"
                             tooltip={({ day }) => (
-                                <div className="border border-white/20 bg-white/90 dark:bg-zinc-900/95 backdrop-blur-xl shadow-xl px-3 py-2 text-xs text-slate-800 dark:text-white z-10">
+                                <div
+                                    className="
+                                    z-10 border border-border
+                                    bg-popover text-popover-foreground
+                                    shadow-xl backdrop-blur-xl
+                                    px-3 py-2 text-xs
+                                    font-sans
+                                "
+                                >
                                     <strong>{day}</strong>
-                                    <div className="mt-1 text-slate-500 dark:text-white/60">
+
+                                    <div className="mt-1 text-muted-foreground">
                                         Questions solved:{' '}
-                                        <strong>{rawLookup[day] ?? 0}</strong>
+                                        <strong className="text-popover-foreground">
+                                            {rawLookup[day] ?? 0}
+                                        </strong>
                                     </div>
                                 </div>
                             )}
                             theme={{
                                 background: 'transparent',
-                                text: { fill: isDark ? '#CBD5E1' : '#64748B' },
+                                text: {
+                                    fill: 'var(--muted-foreground)',
+                                },
                                 labels: {
                                     text: {
                                         fontSize: 10,
-                                        fill: isDark ? '#94A3B8' : '#64748B',
-                                        fontFamily:
-                                            'Plus Jakarta Sans, sans-serif',
+                                        fill: 'var(--muted-foreground)',
+                                        fontFamily: 'Manrope, sans-serif',
                                     },
                                 },
                             }}
@@ -225,15 +278,24 @@ const StreakMap = ({ stats }: StreakMapType) => {
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-end gap-2 text-[11px] text-slate-500 dark:text-white/50">
+                {/* Heatmap legend */}
+                <div
+                    className="
+                    mt-4 flex items-center justify-end
+                    gap-2 text-[11px]
+                    text-muted-foreground
+                "
+                >
                     <span>Less</span>
-                    {colors.map((color, i) => (
+
+                    {HEATMAP_COLORS.map((color, i) => (
                         <div
                             key={i}
-                            className="h-2.5 w-2.5 border border-white/20"
+                            className="h-2.5 w-2.5 border border-border"
                             style={{ backgroundColor: color }}
                         />
                     ))}
+
                     <span>More</span>
                 </div>
             </div>

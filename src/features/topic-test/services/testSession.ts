@@ -1,5 +1,6 @@
 import type { Attempt, Question, TestSession } from '@/shared/types/storage';
 import { appStorage } from '@/storage/storageService';
+import { isOfficialMockPaper } from '../utils/mockState';
 
 const db = appStorage;
 
@@ -86,6 +87,8 @@ const getCompletedTestSessions = async (branchId?: string) => {
         .equals('completed')
         .toArray();
 
+    if (!branchId) return sessions;
+
     let filtered = sessions;
     if (branchId) {
         filtered = sessions.filter((s) => s.branch_id === branchId);
@@ -102,6 +105,51 @@ const cacheTestSessions = async (sessions: TestSession[]) => {
     await db.sessions.bulkPut(sessions);
 };
 
+/**
+ * Mirror the server retention rule in IndexedDB.
+ *
+ * Free users keep the newest `keep` completed non-mock sessions for a
+ * branch. Official mock attempts are never pruned (they back the
+ * leaderboard and the `already_attempted` gate), and unsynced sessions
+ * are always kept because the server may not know about them yet.
+ *
+ * Pass `keep = null` for donors: unlimited history is never pruned.
+ */
+const pruneLocalHistory = async (
+    branchId: string,
+    keep: number | null
+): Promise<number> => {
+    if (keep === null) return 0;
+
+    const sessions = await db.sessions
+        .where('status')
+        .equals('completed')
+        .and((session) => session.branch_id === branchId)
+        .toArray();
+
+    const doomed = sessions
+        .filter((session) => !isOfficialMockPaper(session.paper_id))
+        .sort((a, b) => {
+            const dateA = new Date(a.completed_at || 0).getTime();
+            const dateB = new Date(b.completed_at || 0).getTime();
+            return dateB - dateA;
+        })
+        .slice(keep)
+        // is_synced is absent on rows cached from Supabase; only the
+        // explicit 0 marker means "created locally, not uploaded yet".
+        .filter((session) => session.is_synced !== 0)
+        .map((session) => session.id);
+
+    if (!doomed.length) return 0;
+
+    await db.transaction('rw', db.sessions, db.attempts, async () => {
+        await db.attempts.where('session_id').anyOf(doomed).delete();
+        await db.sessions.bulkDelete(doomed);
+    });
+
+    return doomed.length;
+};
+
 // Saving an Attempt locally using saveAttempt method
 const saveAttempt = async (attempt: Attempt) => {
     return await db.attempts.put(attempt); // put is used for upserting
@@ -116,6 +164,10 @@ const updateSessionTimeAndStatus = async (
     const session = await db.sessions.get(sessionId);
     if (!session) return null;
 
+    if (session.status === 'completed' && status !== 'completed') {
+        return null;
+    }
+
     const updateSession = {
         remaining_time_seconds: time,
         status: status,
@@ -123,6 +175,10 @@ const updateSessionTimeAndStatus = async (
     };
 
     await db.sessions.update(sessionId, updateSession);
+};
+
+const getAttemptsBySessionId = async (sessionId: string) => {
+    return await db.attempts.where('session_id').equals(sessionId).toArray();
 };
 
 // Get pending sync attempts
@@ -141,6 +197,7 @@ const markAttemptsSynced = async (attempts: Attempt[]) => {
 
 export {
     cacheTestSessions,
+    getAttemptsBySessionId,
     getCompletedTestSessions,
     getOngoingTestSession,
     getPendingAttempts,
@@ -148,6 +205,7 @@ export {
     getTestSession,
     initializeTestSession,
     markAttemptsSynced,
+    pruneLocalHistory,
     saveAttempt,
     updateAttempts,
     updateSessionTimeAndStatus,

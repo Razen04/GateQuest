@@ -58,7 +58,7 @@ const Layout = () => {
         });
     }, [location.pathname]);
 
-    const FOCUS_PATHS = ['/topic-test'];
+    const FOCUS_PATHS = ['/topic-test', '/mock-tests'];
     const isPracticeCard = /^\/practice\/[^/]+\/[^/]+/.test(location.pathname);
 
     const hideMobileNavigation = FOCUS_PATHS.some(
@@ -66,7 +66,7 @@ const Layout = () => {
     );
 
     return (
-        <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
+        <div className="flex h-dvh flex-col overflow-hidden bg-background transition-colors duration-300">
             <Navbar />
 
             <main

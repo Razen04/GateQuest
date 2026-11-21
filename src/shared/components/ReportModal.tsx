@@ -50,7 +50,7 @@ const ReportModal = ({
             exit={{ opacity: 0 }}
         >
             <motion.div
-                className="bg-white dark:bg-neutral-900 shadow-xl w-full max-w-md p-6 relative"
+                className="bg-popover text-popover-foreground shadow-xl w-full max-w-md p-6 relative"
                 initial={{ y: 40, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 40, opacity: 0 }}
@@ -60,7 +60,7 @@ const ReportModal = ({
                         <h1 className="text-lg font-bold">
                             Report This Question
                         </h1>
-                        <div className="italic text-xs mt-4  text-red-400">
+                        <div className="italic text-xs mt-4 text-destructive">
                             <p>
                                 Only report if there is a genuine discrepancy,
                                 and always refer to GateOverflow as the
@@ -72,7 +72,7 @@ const ReportModal = ({
                     <Button
                         onClick={onClose}
                         variant="ghost"
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-neutral-800"
+                        className="p-1 hover:bg-accent hover:text-accent-foreground"
                     >
                         <X className="w-5 h-5" />
                     </Button>
@@ -113,7 +113,7 @@ const ReportModal = ({
                 <div className="mt-4 flex justify-end gap-2">
                     <Button
                         onClick={onClose}
-                        className="rounded-none text-sm bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700"
+                        className="rounded-none text-sm bg-secondary text-secondary-foreground hover:bg-secondary/80"
                     >
                         Cancel
                     </Button>
@@ -124,7 +124,7 @@ const ReportModal = ({
                             !reportText.trim() ||
                             reportSubmitting
                         }
-                        className="rounded-none text-sm bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                        className="rounded-none text-sm bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
                     >
                         Submit
                     </Button>

@@ -103,11 +103,11 @@ export function StepGoal({
                         <SelectTrigger
                             id="onboarding-branch"
                             aria-label="Branch"
-                            className="h-11 rounded-none border-slate-900/10 bg-white/50 font-['Space_Grotesk',sans-serif] text-sm font-semibold dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                            className="h-11 rounded-none border-border bg-card/50 font-grotesk text-sm font-semibold text-foreground"
                         >
                             <SelectValue placeholder="Select branch" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-none border-slate-900/10 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/95">
+                        <SelectContent className="rounded-none border-border bg-popover/95 backdrop-blur-xl">
                             {branches.map((b) => (
                                 <SelectItem key={b.id} value={b.id}>
                                     {b.name}
@@ -116,7 +116,7 @@ export function StepGoal({
                         </SelectContent>
                     </Select>
                 </FormField>
-                <p className="-mt-4 text-xs text-slate-500 dark:text-zinc-400">
+                <p className="-mt-4 text-xs text-muted-foreground">
                     We use this to show the right subjects and questions.
                 </p>
 
@@ -138,7 +138,7 @@ export function StepGoal({
                         }
                         disabled={!form.branchId}
                     >
-                        <ComboboxChips className="min-h-11 rounded-none border-slate-900/10 bg-white/50 p-1.5 dark:border-white/10 dark:bg-white/[0.03]">
+                        <ComboboxChips className="min-h-11 rounded-none border-border bg-card/50 p-1.5">
                             <ComboboxValue>
                                 {form.targetExams.map((id) => {
                                     const exam = exams.find((e) => e.id === id);
@@ -147,7 +147,7 @@ export function StepGoal({
                                         <ComboboxChip
                                             key={exam.id}
                                             showRemove
-                                            className="rounded-none bg-[#2A5CFF]/10 font-['JetBrains_Mono',monospace] text-xs font-bold text-[#2A5CFF] dark:bg-[#2A5CFF]/20 dark:text-blue-300"
+                                            className="rounded-none bg-chart-1/10 font-mono text-xs font-bold text-chart-1"
                                         >
                                             {exam.short_name}
                                         </ComboboxChip>
@@ -164,11 +164,11 @@ export function StepGoal({
                                           ? 'Select exams...'
                                           : ''
                                 }
-                                className="rounded-none font-['Space_Grotesk',sans-serif] text-xs"
+                                className="rounded-none font-grotesk text-xs text-foreground placeholder:text-muted-foreground"
                             />
                         </ComboboxChips>
-                        <ComboboxContent className="border-slate-900/10 bg-white/95 backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/95">
-                            <ComboboxEmpty className="p-3 text-xs text-slate-500">
+                        <ComboboxContent className="border-border bg-popover/95 backdrop-blur-xl">
+                            <ComboboxEmpty className="p-3 text-xs text-muted-foreground">
                                 No exams available for this branch.
                             </ComboboxEmpty>
                             <ComboboxList>
@@ -185,7 +185,7 @@ export function StepGoal({
                         </ComboboxContent>
                     </Combobox>
                 </FormField>
-                <p className="-mt-4 text-xs text-slate-500 dark:text-zinc-400">
+                <p className="-mt-4 text-xs text-muted-foreground">
                     Practice sessions are tailored to these exams.
                 </p>
 
@@ -204,7 +204,7 @@ export function StepGoal({
                                 targetYear: Number(e.target.value),
                             }))
                         }
-                        className="h-11 w-full rounded-none border border-slate-900/10 bg-white/50 px-3 font-['JetBrains_Mono',monospace] text-sm font-bold dark:border-white/10 dark:bg-white/[0.03] dark:text-white"
+                        className="h-11 w-full rounded-none border border-border bg-card/50 px-3 font-mono text-sm font-bold text-foreground"
                     >
                         {years.map((y) => (
                             <option key={y} value={y}>
@@ -213,7 +213,7 @@ export function StepGoal({
                         ))}
                     </select>
                 </FormField>
-                <p className="-mt-4 text-xs text-slate-500 dark:text-zinc-400">
+                <p className="-mt-4 text-xs text-muted-foreground">
                     Sets the timeline for your study plan and daily targets.
                 </p>
             </div>

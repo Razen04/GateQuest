@@ -14,18 +14,18 @@ const Pagination = ({
     totalPages,
 }: PaginationProps) => {
     return (
-        <div className="flex justify-between items-center w-full py-3 mt-3 bg-white/30 dark:bg-zinc-950 backdrop-blur-xl shadow-lg">
+        <div className="mt-3 flex w-full items-center justify-between py-3 shadow-sm backdrop-blur-xl">
             <Button
                 variant="ghost"
                 size="icon-lg"
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="w-20 rounded-none bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-all disabled:opacity-40"
+                className="w-20 rounded-none border border-border bg-secondary/70 text-secondary-foreground backdrop-blur-md transition-all hover:bg-accent hover:text-accent-foreground disabled:opacity-40"
             >
-                <ArrowLeft />
+                <ArrowLeft weight="bold" />
             </Button>
 
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <span className="font-['Manrope'] text-sm font-semibold text-muted-foreground tabular-nums">
                 Page {currentPage} of {totalPages}
             </span>
 
@@ -36,9 +36,9 @@ const Pagination = ({
                     setCurrentPage((p) => Math.min(p + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="w-20 rounded-none bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20 transition-all disabled:opacity-40"
+                className="w-20 rounded-none border border-border bg-secondary/70 text-secondary-foreground backdrop-blur-md transition-all hover:bg-accent hover:text-accent-foreground disabled:opacity-40"
             >
-                <ArrowRight />
+                <ArrowRight weight="bold" />
             </Button>
         </div>
     );

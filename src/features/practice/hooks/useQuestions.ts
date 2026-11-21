@@ -46,36 +46,28 @@ const getLatestTimestamp = (
     return max;
 };
 
-// Questions fetch using supabase
+// Questions fetch using supabase, routed through the RPC so mock
+// questions are gated by tier + session server-side. RLS alone would
+// allow any participant; the RPC is stricter (tier-1+ AND completed
+// session via user_can_access_mock()).
 const fetchQuestionsBySubject = async (
     subject_id: string | undefined,
     last_fetched_at: string | undefined,
-    examId: string | undefined
+    _examId: string | undefined
 ) => {
-    let query = supabase
-        .from('questions')
-        .select('*')
-        .eq('subject_id', subject_id)
-        .eq('verified', true);
+    if (!subject_id) return [];
 
-    if (examId) {
-        query = query.contains('metadata->exam', [examId.toUpperCase()]);
+    const { data, error } = await supabase.rpc('fetch_practice_questions', {
+        p_subject_id: subject_id,
+        p_last_fetched_at: last_fetched_at ?? null,
+    });
+
+    if (error) {
+        console.error('Error fetching questions: ', error.message);
+        return [];
     }
 
-    if (last_fetched_at) {
-        query = query.gt('updated_at', last_fetched_at);
-    }
-    if (subject_id) {
-        const { data, error } = await query;
-        if (error) {
-            console.error('Error fetching questions: ', error.message);
-            return [];
-        }
-
-        return data;
-    }
-
-    return [];
+    return (data || []) as Question[];
 };
 
 // Fetches questions for a specific subject.

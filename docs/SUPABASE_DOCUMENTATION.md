@@ -19,7 +19,7 @@ The database is designed around a few core concepts. Understanding their relatio
 - **`branch_subjects`**: Links subjects to branches to ensure users only see content relevant to their stream.
 - **`questions`**: Contains all the exam questions. This is the central content of the app.
 - **`user_question_activity`**: Acts as a logbook. Every time a user attempts a question, a record is created here, linking a `user` to a `question`.
-- **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question, calculated from the `user_question_activity` data.
+- **`question_peer_stats`**: An aggregate table that stores statistics (like average time, correct attempts) for each question. It is built from first practice attempts in `user_question_activity` plus completed official mock attempts in `topic_tests` (once the mock window closes).
 - **`question_reports`**: Allows users to report issues with specific questions.
 - **`question_bookmarks`**: Stores user question bookmarks with notes attached for later revision.
 - **`notifications`**: Stores notification rows with targeting metadata. Each row describes _who_ should receive it; delivery across push and in-app channels is handled by a dedicated dispatcher pipeline.
@@ -73,10 +73,12 @@ A complete inventory of every object in the `public` schema and the surrounding 
 
 **Test System**
 
-| Table                                                       | Purpose                                  |
-| :---------------------------------------------------------- | :--------------------------------------- |
-| [`topic_tests`](#table-publictopic_tests)                   | Custom Topic Test and PYQ Mock sessions  |
-| [`topic_tests_attempts`](#table-publictopic_tests_attempts) | Per-question state within a test session |
+| Table                                                       | Purpose                                            |
+| :---------------------------------------------------------- | :------------------------------------------------- |
+| [`topic_tests`](#table-publictopic_tests)                   | Custom Topic Test, PYQ Mock and live Mock sessions |
+| [`topic_tests_attempts`](#table-publictopic_tests_attempts) | Per-question state within a test session           |
+| [`mocks`](#table-publicmocks)                               | Mock schedule, gating and notification bookkeeping |
+| [`mock_questions`](#table-publicmock_questions)             | Question membership and ordering for a mock        |
 
 **Spaced Repetition**
 
@@ -105,7 +107,8 @@ A complete inventory of every object in the `public` schema and the surrounding 
 | View                                                                       | Purpose                                                                   |
 | :------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
 | [`active_weekend_subscriptions`](#view-publicactive_weekend_subscriptions) | Users who attempted a question in the last 14 days, distinct per endpoint |
-| [`v_user_cycle_stats`](#view-publicv_user_cycle_stats)                     | Per-user success-cycle view used by the difficulty sync                   |
+| [`v_user_cycle_stats`](#view-publicv_user_cycle_stats)                     | Per-user first-attempt data used by the difficulty sync                   |
+| [`dynamic_difficulty_stats`](#view-publicdynamic_difficulty_stats)         | Materialized view backing the Easy/Medium/Hard difficulty refresh         |
 
 ---
 
@@ -122,6 +125,8 @@ A complete inventory of every object in the `public` schema and the surrounding 
 | [`get_exam_subject_counts(target_exams text[])`](#function-get_exam_subject_counts)              | Verified question pool per subject                |
 | [`get_critical_question_count(...)`](#function-get_critical_question_count)                      | Overdue queue count for the dashboard badge       |
 | [`get_verified_donations()`](#function-get_verified_donations)                                   | Verified donations list for the donors page       |
+| [`search_users(search_term text)`](#function-search_users)                                       | Prefix search over public usernames               |
+| [`get_monthly_donation_total()`](#function-get_monthly_donation_total)                           | Verified donations this month (₹2,500 goal bar)   |
 | [`calc_user_metrics(p_user_id uuid)`](#function-calc_user_metricsp_user_id-uuid)                 | Raw metric bundle for a given user                |
 | [`clear_user_data()`](#function-clear_user_data)                                                 | User-initiated data reset (Settings → Clear Data) |
 | [`delete_account()`](#function-delete_account)                                                   | Full account deletion with anonymisation          |
@@ -134,13 +139,51 @@ A complete inventory of every object in the `public` schema and the surrounding 
 | [`create_test_from_paper(...)`](#function-create_test_from_paper) | Create a PYQ Mock session from a paper catalog entry |
 | [`submit_test_grading(...)`](#function-submit_test_grading)       | Grade a completed test and finalise the session      |
 
+**Live Mock System**
+
+| Function                                                                                     | Purpose                                                    |
+| :------------------------------------------------------------------------------------------- | :--------------------------------------------------------- |
+| [`get_mock_catalog(p_branch_id text)`](#function-get_mock_catalog)                           | Catalog rows with schedule, gates and caller session state |
+| [`create_test_from_mock(...)`](#function-create_test_from_mock)                              | Start a live mock session (or a donor re-attempt)          |
+| [`get_mock_session_time(p_test_id uuid)`](#function-get_mock_session_time)                   | Server-authoritative remaining time for a mock session     |
+| [`get_mock_summary(p_test_id uuid)`](#function-get_mock_summary)                             | Score and results-embargo state for one attempt            |
+| [`get_mock_analysis(p_test_id uuid)`](#function-get_mock_analysis)                           | Rank, percentile and participants after the gate           |
+| [`get_mock_leaderboard(p_mock_id text)`](#function-get_mock_leaderboard)                     | First-attempt leaderboard                                  |
+| [`practice_from_mock(p_mock_id text)`](#function-practice_from_mock)                         | Practice session from a completed mock's questions         |
+| [`fetch_practice_questions(...)`](#function-fetch_practice_questions)                        | Practice read path with mock-aware filtering               |
+| [`expire_mock_sessions()`](#function-expire_mock_sessions)                                   | Force-submit open sessions after the window closes         |
+| [`notify_mocks()`](#function-notify_mocks)                                                   | Exactly-once scheduled/start broadcasts                    |
+| [`user_can_access_mock(p_mock_id text)`](#function-user_can_access_mock)                     | Post-attempt access gate for analysis/practice             |
+| [`user_has_question_in_session(p_question_id uuid)`](#function-user_has_question_in_session) | RLS helper for reading your own mock questions             |
+| [`is_mock_question(p_question_id uuid)`](#function-is_mock_question)                         | RLS helper that identifies mock questions                  |
+| [`mocks_touch_updated_at()`](#function-mocks_touch_updated_at)                               | Trigger: bump `mocks.updated_at`                           |
+| [`topic_tests_set_started_at()`](#function-topic_tests_set_started_at)                       | Trigger: stamp `started_at` on first `ongoing` transition  |
+| [`get_user_tier(p_user_id uuid)`](#function-get_user_tier)                                   | Cron-safe tier derivation for retention jobs               |
+| [`prune_topic_test_history()`](#function-prune_topic_test_history)                           | Retention sweep for free-tier non-mock history             |
+
 **Activity Logging**
 
-| Function                                                                                            | Purpose                                      |
-| :-------------------------------------------------------------------------------------------------- | :------------------------------------------- |
-| [`insert_user_question_activity_batch(batch jsonb)`](#function-insert_user_question_activity_batch) | Batched attempt recording + revision context |
-| [`refresh_question_peer_stats()`](#function-refresh_question_peer_stats)                            | Rebuild `question_peer_stats` from activity  |
-| [`refresh_dynamic_difficulty()`](#function-refresh_dynamic_difficulty)                              | Recompute dynamic difficulty scores          |
+| Function                                                                                                   | Purpose                                              |
+| :--------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- |
+| [`insert_user_question_activity_batch(batch jsonb)`](#function-insert_user_question_activity_batch)        | Batched attempt recording + revision context         |
+| [`refresh_question_peer_stats()`](#function-refresh_question_peer_stats)                                   | Full rebuild of `question_peer_stats`                |
+| [`refresh_question_peer_stats_for_questions(uuid[])`](#function-refresh_question_peer_stats_for_questions) | Rebuild stats for specific questions only            |
+| [`refresh_closed_mock_stats()`](#function-refresh_closed_mock_stats)                                       | Fold newly closed mocks into peer stats + difficulty |
+| [`refresh_dynamic_difficulty()`](#function-refresh_dynamic_difficulty)                                     | Recompute dynamic difficulty scores                  |
+
+**Donor Tiers & Donation Automation**
+
+| Function                                                                 | Purpose                                                  |
+| :----------------------------------------------------------------------- | :------------------------------------------------------- |
+| [`recompute_user_tier(p_user_id uuid)`](#function-recompute_user_tier)   | Derive `donor:tier-*` from verified donations            |
+| [`get_my_tier()`](#function-get_my_tier)                                 | Caller's tier (`0`–`3`) from notification tags           |
+| [`handle_donation_tier_change()`](#function-handle_donation_tier_change) | Trigger: recompute tier on donation verification changes |
+| [`autofill_verified_by()`](#function-autofill_verified_by)               | Trigger: stamp `'manual'` on manual verification         |
+| [`announce_verified_donation()`](#function-announce_verified_donation)   | Trigger: broadcast a verified donation                   |
+| [`trigger_donation_alerts()`](#function-trigger_donation_alerts)         | Cron: call the `donations/alerts` Edge Function          |
+| [`user_can_upload_animated()`](#function-user_can_upload_animated)       | Tier gate for GIF/WebM uploads                           |
+| [`guard_username_immutable()`](#function-guard_username_immutable)       | Trigger: prevent changing a username once set            |
+| [`guard_ai_custom_prompt()`](#function-guard_ai_custom_prompt)           | Trigger: tier-gate the custom AI prompt                  |
 
 **Spaced Repetition**
 
@@ -186,35 +229,67 @@ A complete inventory of every object in the `public` schema and the surrounding 
 | [`handle_test_completion_sync()`](#trigger-function-handle_test_completion_sync)     | Sync test attempts into `user_question_activity` on completion |
 | [`handle_report_event_webhook()`](#trigger-function-handle_report_event_webhook)     | Forward report events to the reminders Edge Function           |
 | [`update_subject_question_count()`](#trigger-function-update_subject_question_count) | Keep `subjects.question_count` in sync with `questions`        |
+| [`refresh_user_goal_tags()`](#trigger-function-refresh_user_goal_tags)               | Recompute `branch:*`/`exam:*` tags on goal changes             |
+| [`handle_donation_tier_change()`](#trigger-function-handle_donation_tier_change)     | Recompute donor tier after verification changes                |
+| [`autofill_verified_by()`](#trigger-function-autofill_verified_by)                   | Mark manual verification                                       |
+| [`announce_verified_donation()`](#trigger-function-announce_verified_donation)       | Broadcast verified donations                                   |
+| [`guard_username_immutable()`](#trigger-function-guard_username_immutable)           | Freeze username after first set                                |
+| [`guard_ai_custom_prompt()`](#trigger-function-guard_ai_custom_prompt)               | Gate custom AI prompt behind tier 1                            |
 
 ---
 
 ### Triggers
 
-| Trigger                         | Table              | Timing                     | Function                        |
-| :------------------------------ | :----------------- | :------------------------- | :------------------------------ |
-| `on_topic_test_completed`       | `topic_tests`      | AFTER UPDATE               | `handle_test_completion_sync`   |
-| `trigger_on_report_insert`      | `question_reports` | AFTER INSERT               | `handle_report_event_webhook`   |
-| `trigger_on_report_update`      | `question_reports` | AFTER UPDATE               | `handle_report_event_webhook`   |
-| `trg_update_question_count`     | `questions`        | AFTER INSERT/UPDATE/DELETE | `update_subject_question_count` |
-| `handle_questions_updated_at`   | `questions`        | BEFORE UPDATE              | `moddatetime('updated_at')`     |
-| `on_notification_before_insert` | `notifications`    | BEFORE INSERT              | `before_notification_insert`    |
-| `on_notification_after_insert`  | `notifications`    | AFTER INSERT               | `dispatch_notification_http`    |
+| Trigger                            | Table              | Timing                     | Function                        |
+| :--------------------------------- | :----------------- | :------------------------- | :------------------------------ |
+| `on_topic_test_completed`          | `topic_tests`      | AFTER UPDATE               | `handle_test_completion_sync`   |
+| `trigger_on_report_insert`         | `question_reports` | AFTER INSERT               | `handle_report_event_webhook`   |
+| `trigger_on_report_update`         | `question_reports` | AFTER UPDATE               | `handle_report_event_webhook`   |
+| `trg_update_question_count`        | `questions`        | AFTER INSERT/UPDATE/DELETE | `update_subject_question_count` |
+| `handle_questions_updated_at`      | `questions`        | BEFORE UPDATE              | `moddatetime('updated_at')`     |
+| `on_notification_before_insert`    | `notifications`    | BEFORE INSERT              | `before_notification_insert`    |
+| `on_notification_after_insert`     | `notifications`    | AFTER INSERT               | `dispatch_notification_http`    |
+| `on_user_goal_change`              | `user_goals`       | AFTER INSERT/UPDATE/DELETE | `refresh_user_goal_tags`        |
+| `on_donation_tier_change`          | `donations`        | AFTER INSERT/UPDATE/DELETE | `handle_donation_tier_change`   |
+| `on_donation_announce`             | `donations`        | AFTER UPDATE               | `announce_verified_donation`    |
+| `on_donation_autofill_verified_by` | `donations`        | BEFORE UPDATE              | `autofill_verified_by`          |
+| `trg_mocks_updated_at`             | `mocks`            | BEFORE UPDATE              | `mocks_touch_updated_at`        |
+| `trg_topic_tests_set_started_at`   | `topic_tests`      | BEFORE UPDATE              | `topic_tests_set_started_at`    |
+| `guard_username_immutable`         | `users`            | BEFORE UPDATE              | `guard_username_immutable`      |
+| `guard_ai_custom_prompt`           | `users`            | BEFORE UPDATE              | `guard_ai_custom_prompt`        |
 
 ---
 
 ### Cron Jobs
 
-Scheduled via `pg_cron`. Three invoke the `process-reminders` Edge Function, two run pure SQL.
+Scheduled via `pg_cron`. Seven run pure SQL (six scheduled from migrations plus the hosted-only `refresh-peer-stats-midnight`), and four invoke the `process-reminders` Edge Function. `donation-alerts` is SQL-scheduled but posts to the separate `donations/alerts` Edge Function.
 
-| Job                               | Schedule     | Action                                         |
-| :-------------------------------- | :----------- | :--------------------------------------------- |
-| `refresh-peer-stats-midnight`     | `0 0 * * *`  | `select public.refresh_question_peer_stats();` |
-| `nightly-difficulty-sync`         | `0 0 * * *`  | `select refresh_dynamic_difficulty();`         |
-| `revision-hourly-reminder`        | `0 * * * *`  | POST `?task=revision-hourly`                   |
-| `weekend-topic-test-saturday`     | `30 3 * * 6` | POST `?task=weekend-topic-test`                |
-| `weekend-topic-test-sunday`       | `30 3 * * 0` | POST `?task=weekend-topic-test`                |
-| `donation-reminder-every-2-weeks` | `30 6 * * 0` | POST `?task=donation-reminder`                 |
+| Job                               | Schedule      | Action                                         |
+| :-------------------------------- | :------------ | :--------------------------------------------- |
+| `refresh-peer-stats-midnight`     | `0 0 * * *`   | `select public.refresh_question_peer_stats();` |
+| `nightly-difficulty-sync`         | `0 0 * * *`   | `select refresh_dynamic_difficulty();`         |
+| `prune-topic-test-history`        | `0 4 * * *`   | `select public.prune_topic_test_history();`    |
+| `refresh-mock-stats`              | `* * * * *`   | `select public.refresh_closed_mock_stats();`   |
+| `notify-mocks`                    | `* * * * *`   | `select public.notify_mocks();`                |
+| `expire-mock-sessions`            | `*/5 * * * *` | `select public.expire_mock_sessions();`        |
+| `donation-alerts`                 | `*/5 * * * *` | `select public.trigger_donation_alerts();`     |
+| `revision-hourly-reminder`        | `0 * * * *`   | POST `?task=revision-hourly`                   |
+| `weekend-topic-test-saturday`     | `30 3 * * 6`  | POST `?task=weekend-topic-test`                |
+| `weekend-topic-test-sunday`       | `30 3 * * 0`  | POST `?task=weekend-topic-test`                |
+| `donation-reminder-every-2-weeks` | `30 6 * * 0`  | POST `?task=donation-reminder`                 |
+
+`refresh-peer-stats-midnight` is configured in the hosted/remote databases directly; it has no `cron.schedule` call in the local migrations, so a fresh local stack started with `supabase db reset` will not contain it. `refresh-mock-stats`, `expire-mock-sessions`, `notify-mocks`, `prune-topic-test-history` and `nightly-difficulty-sync` are all scheduled from migrations.
+
+---
+
+### Storage Buckets
+
+| Bucket    | Purpose                                                    |
+| :-------- | :--------------------------------------------------------- |
+| `avatars` | Public profile pictures, 3 MB, tier-gated animated uploads |
+| `banners` | Public profile banners, 5 MB, tier-gated animated uploads  |
+
+See the [Storage](#storage) section for policies and MIME limits.
 
 ---
 
@@ -225,6 +300,8 @@ Scheduled via `pg_cron`. Three invoke the `process-reminders` Edge Function, two
 | [`welcome-notification`](#edge-function-welcome-notification)   | Client call on subscribe               | Push ack that confirms a new subscription works |
 | [`process-reminders`](#edge-function-process-reminders)         | Cron (`?task=` param) + report webhook | Router for five notification producers          |
 | [`dispatch-notification`](#edge-function-dispatch-notification) | `notifications` AFTER INSERT trigger   | Fan out push deliveries for a notification row  |
+| `donations`                                                     | Payment provider webhook               | Auto-verifies donations and broadcasts them     |
+| `donations/alerts`                                              | `donation-alerts` cron                 | Reminds about pending unverified donations      |
 
 ---
 
@@ -234,8 +311,10 @@ RLS is enabled on every table in `public` except:
 
 - `question_peer_stats` — public read, no per-row authorisation needed
 - `revision_set_questions` — accessed only via RPCs with `SECURITY DEFINER`, RLS disabled at the table level
+- `mocks` — RLS enabled with a single public `SELECT` policy; writes are reserved for the service role
+- `mock_questions` — RLS enabled, `SELECT` revoked from clients; membership is read only inside `SECURITY DEFINER` functions
 
-All other tables either restrict reads to the owner (`auth.uid()`), restrict to the row's `user_id`, or expose public read for global catalogs (`branches`, `exams`, `subjects`, `questions`). Per-table policies are documented within each table's section.
+All other tables either restrict reads to the owner (`auth.uid()`), restrict to the row's `user_id`, or expose public read for global catalogs (`branches`, `exams`, `subjects`, `questions`). `questions` has a mock-aware read policy (see the table section), and `storage.objects` has its own policies for the `avatars` and `banners` buckets. Per-table policies are documented within each table's section.
 
 ---
 
@@ -253,42 +332,45 @@ This section provides a detailed breakdown of each table in the `public` schema.
 
 Stores public profile information for authenticated users. This table is linked 1-to-1 with the private `auth.users` table.
 
-| Column Name            | Data Type     | Constraints & Defaults                          | Description                                                                              |
-| :--------------------- | :------------ | :---------------------------------------------- | :--------------------------------------------------------------------------------------- |
-| `id`                   | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.             |
-| `joined_at`            | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                         |
-| `email`                | `text`        | `NULL` allowed                                  | The user's email address.                                                                |
-| `name`                 | `text`        | `NULL` allowed                                  | The user's full display name.                                                            |
-| `avatar`               | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                                     |
-| `show_name`            | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                          |
-| `total_xp`             | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                                    |
-| `settings`             | `jsonb`       | `NULL` allowed                                  | A JSON object for storing user-specific settings.                                        |
-| `college`              | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                           |
-| `"targetYear"`         | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                                |
-| `bookmark_questions`   | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                                   |
-| `version_number`       | `integer`     | `NOT NULL`, `DEFAULT 1`                         | Used for versioning or schema updates related to user settings Clear Data feature.       |
-| `deleted_at`           | `timestamptz` | `DEFAULT NULL`                                  | Used when the user deletes their account to store the date and time of deletion.         |
-| `username`             | `text`        | `UNIQUE`, `NULL` allowed                        | Public handle for the user, used in profile URLs.                                        |
-| `about`                | `text`        | `NULL` allowed                                  | Short bio text displayed on the public profile.                                          |
-| `is_public`            | `boolean`     | `DEFAULT true`                                  | Whether the profile is visible in public search.                                         |
-| `notification_tags`    | `text[]`      | `NOT NULL`, `DEFAULT '{}'`                      | Precomputed tags for notification targeting (`branch:cs`, `exam:gate`, `role:donor`, …). |
-| `onboarding_completed` | `boolean`     | `DEFAULT false`                                 | Runs the onboarding step if the value is false otherwise skip                            |
+| Column Name            | Data Type     | Constraints & Defaults                          | Description                                                                                                          |
+| :--------------------- | :------------ | :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `id`                   | `uuid`        | `PRIMARY KEY`, `NOT NULL`, `DEFAULT auth.uid()` | The user's unique ID. This is a foreign key that references `auth.users.id`.                                         |
+| `joined_at`            | `timestamptz` | `NOT NULL`, `DEFAULT now()`                     | The timestamp when the user profile was created.                                                                     |
+| `email`                | `text`        | `NULL` allowed                                  | The user's email address.                                                                                            |
+| `name`                 | `text`        | `NULL` allowed                                  | The user's full display name.                                                                                        |
+| `avatar`               | `text`        | `NULL` allowed                                  | A URL to the user's profile picture.                                                                                 |
+| `show_name`            | `boolean`     | `DEFAULT true`                                  | A setting to control if the user's real name is shown publicly.                                                      |
+| `total_xp`             | `integer`     | `DEFAULT 0`                                     | The total experience points the user has accumulated.                                                                |
+| `settings`             | `jsonb`       | `NULL` allowed                                  | User settings. `mode` holds `dark`/`light` (migrated from the old `darkMode` key); `aiCustomPrompt` is tier-1 gated. |
+| `college`              | `text`        | `NULL` allowed                                  | The name of the user's college or institution.                                                                       |
+| `"targetYear"`         | `integer`     | `NULL` allowed                                  | The user's target year for the GATE exam.                                                                            |
+| `bookmark_questions`   | `jsonb`       | `NULL` allowed                                  | A JSON object for storing IDs of bookmarked questions.                                                               |
+| `version_number`       | `integer`     | `NOT NULL`, `DEFAULT 1`                         | Used for versioning or schema updates related to user settings Clear Data feature.                                   |
+| `deleted_at`           | `timestamptz` | `DEFAULT NULL`                                  | Used when the user deletes their account to store the date and time of deletion.                                     |
+| `username`             | `text`        | `UNIQUE`, `NULL` allowed                        | Public handle for profile URLs; immutable once set (`guard_username_immutable` trigger).                             |
+| `about`                | `text`        | `NULL` allowed                                  | Short bio text displayed on the public profile.                                                                      |
+| `is_public`            | `boolean`     | `DEFAULT true`                                  | Whether the profile is visible in public search.                                                                     |
+| `notification_tags`    | `text[]`      | `NOT NULL`, `DEFAULT '{}'`                      | Targeting/segregation tags: `branch:*`, `exam:*`, `role:*`, `donor:tier-1/2/3`. Not client-writable.                 |
+| `onboarding_completed` | `boolean`     | `DEFAULT false`                                 | Runs the onboarding step if the value is false otherwise skip                                                        |
+| `banner`               | `text`        | `NULL` allowed                                  | A URL to the user's profile banner.                                                                                  |
 
 **Row Level Security (RLS) Policies:**
 
 - **Policy:** A user can view, insert, or update their own row in the `users` table. They cannot access anyone else's.
 - **SQL Logic:** `USING (auth.uid() = id) WITH CHECK (auth.uid() = id)`
+- **Column-level writes:** table-level `UPDATE` is revoked from clients; only `name, avatar, banner, show_name, college, "targetYear", settings, username, about, is_public, onboarding_completed` are grantable. `notification_tags`, `email`, `total_xp` and similar columns can only be changed by `SECURITY DEFINER` functions. Two `BEFORE UPDATE` triggers additionally freeze `username` and gate `settings.aiCustomPrompt` by tier.
 
 Public profile reads are served by the `get_public_profile()` RPC, which runs as `SECURITY DEFINER` and reads around RLS for anonymous visitors.
 
 **Indexes:**
 
-| Index Name                    | Columns             | Type   | Purpose                                               |
-| :---------------------------- | :------------------ | :----- | :---------------------------------------------------- |
-| `users_pkey`                  | `id`                | B-tree | Primary key.                                          |
-| `users_username_key`          | `username`          | B-tree | Unique constraint on handle; used by profile lookups. |
-| `users_joined_at_idx`         | `joined_at`         | B-tree | Optimises recent-user queries.                        |
-| `idx_users_notification_tags` | `notification_tags` | GIN    | Enables `= any(notification_tags)` targeting lookups. |
+| Index Name                    | Columns                                          | Type   | Purpose                                               |
+| :---------------------------- | :----------------------------------------------- | :----- | :---------------------------------------------------- |
+| `users_pkey`                  | `id`                                             | B-tree | Primary key.                                          |
+| `users_username_key`          | `username`                                       | B-tree | Unique constraint on handle; used by profile lookups. |
+| `users_joined_at_idx`         | `joined_at`                                      | B-tree | Optimises recent-user queries.                        |
+| `idx_users_notification_tags` | `notification_tags`                              | GIN    | Enables `= any(notification_tags)` targeting lookups. |
+| `users_username_search_idx`   | `lower(username)` (partial: public, not deleted) | B-tree | Backs `search_users()` prefix lookups.                |
 
 ---
 
@@ -604,10 +686,10 @@ Contains the full details for every question in the GATEQuest database. This is 
 
 **Row Level Security (RLS) Policies:**
 
-- **Policy:** Anyone (including unauthenticated users) can read questions.
-- **SQL Logic:** `FOR SELECT USING (true)`
+- **Policy:** `"Read non-mock, or mock within my session"` — `FOR SELECT USING (not public.is_mock_question(id) or public.user_has_question_in_session(id))`.
+- The old unconditional `"Enable read access for all users"` policy was dropped.
 
-Questions are public content. There's no per-user filtering at the RLS level — the client filters by the user's goal, branch, and exams, but any authenticated or anonymous request can read the full catalog.
+Non-mock questions remain public catalog content. Questions belonging to a mock (`metadata.paperType = 'mock'`) are readable only by a user who has that question in one of their own test sessions — this keeps a live paper hidden from non-participants while still letting participants read it during the exam. Both helpers are `SECURITY DEFINER` because clients cannot SELECT `mock_questions` directly.
 
 **Indexes:**
 
@@ -679,7 +761,7 @@ All three are served by the `idx_questions_exams_path` GIN index. Without it, ea
 
 Append-only log of every question attempt. This is the source of truth for all progress tracking, analytics, dashboard aggregates, peer statistics, and spaced repetition.
 
-Rows are never updated — a new row is inserted for every attempt, and the "current state" of any question for any user is derived by reading the latest row (or counting all rows, depending on the aggregation). The only exception is that a row can be deleted in `delete_account()` when a user opts to fully remove their data.
+Rows are never updated — a new row is inserted for every attempt, and the "current state" of any question for any user is derived by reading the latest row (or counting all rows, depending on the aggregation). `delete_account()` intentionally keeps these rows and detaches the identity instead, so anonymous stats survive.
 
 | Column Name               | Data Type     | Constraints & Defaults                     | Description                                                                                                                                            |
 | :------------------------ | :------------ | :----------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -774,8 +856,12 @@ The old `FOR SELECT USING (true)` policy that used to be on this table has been 
 
 **Notes:**
 
-- **How it stays current.** Refreshed nightly by the `refresh-peer-stats-midnight` cron (`0 0 * * *`), which calls `refresh_question_peer_stats()`. This is a full-table refresh — every row is recomputed from `user_question_activity`. On a catalog with hundreds of thousands of attempts, it takes a few seconds. The trade-off is that stats are up to 24 hours stale, which is fine for a "compare to peers" feature.
-- **First-attempt semantics.** Only rows with `attempt_number = 1` contribute. A user who retries a question 10 times and gets it right on the 10th attempt contributes to `wrong_attempts`, not `correct_attempts`. This is the correct metric — it reflects first-look ability, not eventual learning.
+- **How it stays current.** Two paths:
+  - `refresh-peer-stats-midnight` (`0 0 * * *`, hosted/remote only) calls `refresh_question_peer_stats()` for a full rebuild. Every row is recomputed from both contribution sources. On a catalog with hundreds of thousands of attempts this takes a few seconds.
+  - `refresh-mock-stats` (`* * * * *`) calls `refresh_closed_mock_stats()`, which folds each newly closed mock into the stats within a minute of its window ending and stamps `mocks.peer_stats_refreshed_at`. This is what makes mock questions current before the nightly rebuild.
+- **Client cache.** Each question's row is cached in IndexedDB for 30 minutes, so a freshly closed mock shows up without a hard refresh. The 10-attempt display gate is also client-side.
+- **Contribution sources.** First practice attempts from `user_question_activity` (`attempt_number = 1`) plus completed official mock attempts read from `topic_tests`/`topic_tests_attempts`. Mock attempts are only counted after the mock window closes, never while results are embargoed. `mock-*-practice-*` sessions are excluded. One contribution per (user, question): the mock attempt wins; a question skipped in the mock (`user_answer is null`) falls back to the practice row. Nothing is written back to `user_question_activity`.
+- **First-attempt semantics.** Only a user's first attempt contributes. A user who retries a question 10 times and gets it right on the 10th attempt contributes to `wrong_attempts`, not `correct_attempts`; re-attempts of a mock (`mock-id-r2`) collapse into the first completion. This reflects first-look ability, not eventual learning.
 - **`option_distribution` covers one attempt per option.** For MSQ questions, a single attempt can contribute to multiple options (the user selected two). So the sum of option counts can exceed `total_attempts`. This is correct for the "what fraction of users picked A" question — but the client should divide each count by `total_attempts`, not by the sum of counts.
 - **`NULL` vs. `{}` for `option_distribution`.** `NULL` means no first attempts recorded any option indices (either a brand new question or a numerical-only question). `{}` would mean an empty distribution — a state the refresh never produces. The client treats `NULL` as "no bars to show" and skips rendering.
 - **`updated_at` is not `created_at`.** Rows are inserted by the refresh function and updated on conflict. There's no separate "when was this question first tracked" timestamp — if it matters, `questions.created_at` serves that purpose.
@@ -863,10 +949,10 @@ Standard "own rows only" pattern. All operations scoped to `auth.uid()`:
 
 **Indexes:**
 
-| Index Name                            | Columns                    | Type   | Purpose                                                                       |
-| :------------------------------------ | :------------------------- | :----- | :---------------------------------------------------------------------------- |
-| `question_bookmarks_pkey`             | `user_id, question_id`     | B-tree | Primary key; also serves as the uniqueness check.                             |
-| `idx_question_bookmarks_user_created` | `user_id, created_at DESC` | B-tree | Optimises "list my bookmarks, newest first" queries via `get_user_bookmarks`. |
+| Index Name                               | Columns                    | Type   | Purpose                                                                       |
+| :--------------------------------------- | :------------------------- | :----- | :---------------------------------------------------------------------------- |
+| `question_bookmarks_pkey`                | `user_id, question_id`     | B-tree | Primary key; also serves as the uniqueness check.                             |
+| `idx_question_bookmarks_user_created_at` | `user_id, created_at DESC` | B-tree | Optimises "list my bookmarks, newest first" queries via `get_user_bookmarks`. |
 
 **Notes:**
 
@@ -911,7 +997,11 @@ Stores the header row for each test session — the "envelope" that holds metada
 | `attempted_count`        | `integer`          | `DEFAULT 0`                                | Number of attempted questions (excludes skipped). Populated by grading.                                                                                                     |
 | `branch_id`              | `text`             | `NOT NULL`, `FK → branches.id`             | The user's branch at the time of the test. Used for the active-test guard.                                                                                                  |
 | `record_activity`        | `boolean`          | `NOT NULL`, `DEFAULT true`                 | If `true`, completion writes attempts into `user_question_activity`. If `false`, the test is isolated — it does not affect dashboard stats, peer stats, or revision queues. |
-| `paper_id`               | `text`             | `NULL` allowed                             | Non-null for PYQ Mocks, format like `gate-cs-2024-s1`. `NULL` for custom Topic Tests.                                                                                       |
+| `paper_id`               | `text`             | `NULL` allowed                             | Paper identifier: `gate-cs-2024-s1` (PYQ), `mock-id` / `mock-id-r2` (live mock), `mock-id-practice-<epoch>` (practice), `NULL` for custom tests.                            |
+| `started_at`             | `timestamptz`      | `NULL` allowed                             | Stamped by `topic_tests_set_started_at` on the first `created → ongoing` transition.                                                                                        |
+| `mock_duration_seconds`  | `integer`          | `NULL` allowed                             | Authoritative mock duration copied from `mocks.duration_seconds`; `NULL` for non-mocks.                                                                                     |
+| `mock_ends_at`           | `timestamptz`      | `NULL` allowed                             | Session's effective end (window close, or `now() + duration` for a post-window attempt).                                                                                    |
+| `mock_label`             | `text`             | `NULL` allowed                             | Mock label copied at session creation so results survive config edits.                                                                                                      |     |
 
 **Relationships:**
 
@@ -930,18 +1020,23 @@ Standard own-rows-only pattern:
 
 **Indexes:**
 
-| Index Name                                   | Columns                                                 | Type           | Purpose                                                                                                                                                                                                   |
-| :------------------------------------------- | :------------------------------------------------------ | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `topic_tests_pkey`                           | `id`                                                    | B-tree         | Primary key.                                                                                                                                                                                              |
-| `idx_one_active_test_per_user_branch_active` | `user_id, branch_id` (partial: `status <> 'completed'`) | B-tree, UNIQUE | **Enforces one active test per (user, branch).** Trying to insert a second active test violates the constraint; both `generate_topic_test` and `create_test_from_paper` guard against this before insert. |
-| `idx_topic_tests_user_status`                | `user_id, status`                                       | B-tree         | Optimises "get my active test" and "get my test history" queries.                                                                                                                                         |
-| `idx_topic_tests_paper`                      | `user_id, paper_id` (partial: `paper_id IS NOT NULL`)   | B-tree         | Feeds paper-scoped analytics and the paper history view.                                                                                                                                                  |
+| Index Name                                   | Columns                                                      | Type           | Purpose                                                                                                                                                                                                   |
+| :------------------------------------------- | :----------------------------------------------------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `topic_tests_pkey`                           | `id`                                                         | B-tree         | Primary key.                                                                                                                                                                                              |
+| `idx_one_active_test_per_user_branch_active` | `user_id, branch_id` (partial: `status <> 'completed'`)      | B-tree, UNIQUE | **Enforces one active test per (user, branch).** Trying to insert a second active test violates the constraint; both `generate_topic_test` and `create_test_from_paper` guard against this before insert. |
+| `idx_topic_tests_user_status`                | `user_id, status`                                            | B-tree         | Optimises "get my active test" and "get my test history" queries.                                                                                                                                         |
+| `idx_topic_tests_paper`                      | `user_id, paper_id` (partial: `paper_id IS NOT NULL`)        | B-tree         | Feeds paper-scoped analytics and the paper history view.                                                                                                                                                  |
+| `idx_topic_tests_completed_paper`            | `paper_id` (partial: `status = 'completed'`)                 | B-tree         | Serves `get_mock_leaderboard` and `get_mock_analysis`, which filter by bare `paper_id` across all users. Without it those queries seq-scan.                                                               |
+| `idx_topic_tests_active_paper`               | `paper_id` (partial: `status <> 'completed'`)                | B-tree         | Serves the five-minute `expire_mock_sessions` sweep. Stays tiny because at most one non-completed row exists per `(user, branch)`.                                                                        |
+| `idx_topic_tests_user_branch_completed`      | `user_id, branch_id, completed_at desc` (partial: completed) | B-tree         | Ranks a user's history in `prune_topic_test_history`.                                                                                                                                                     |
+| `idx_topic_tests_user_paper_completed`       | `user_id, paper_id` (partial: completed)                     | B-tree         | Supports catalog/session lookups by user and paper.                                                                                                                                                       |     |
 
 **Triggers:**
 
-| Trigger                   | Timing       | Function                        |
-| :------------------------ | :----------- | :------------------------------ |
-| `on_topic_test_completed` | AFTER UPDATE | `handle_test_completion_sync()` |
+| Trigger                          | Timing        | Function                        |
+| :------------------------------- | :------------ | :------------------------------ |
+| `on_topic_test_completed`        | AFTER UPDATE  | `handle_test_completion_sync()` |
+| `trg_topic_tests_set_started_at` | BEFORE UPDATE | `topic_tests_set_started_at()`  |
 
 The trigger fires when `status` transitions to `'completed'` for the first time and `record_activity = true`. It is documented in detail in the [Triggers](#triggers) section.
 
@@ -952,6 +1047,69 @@ The trigger fires when `status` transitions to `'completed'` for the first time 
 - **`record_activity` is enforced by the trigger, not the writer.** A test with `record_activity = false` still grades and stores scores in `topic_tests` — it just doesn't propagate attempts to `user_question_activity`. This allows a user to do a test without affecting their dashboard, which is the whole point of the toggle in the test configuration UI.
 - **`paper_id` is null for custom tests.** The name is a slight misnomer — a custom Topic Test has no "paper." The column exists to distinguish "came from a PYQ catalog" from "came from a topic selection," and the client uses this to render history differently (paper label vs. topic list).
 - **`updated_at` is bumped manually.** Unlike `questions.updated_at`, which uses a `moddatetime` trigger, `topic_tests.updated_at` is set by each RPC that touches the row. This is because updates happen from multiple clients (timer persists, status changes, grading) and a trigger would need to distinguish "meaningful" from "cosmetic" updates.
+- **History retention.** The nightly `prune-topic-test-history` cron keeps only the newest 10 completed non-mock sessions per `(user_id, branch_id)` for free users. Donor tiers (`>= 1`) are exempt, and official mock attempts are never pruned — they back the leaderboard, mock catalog and the `already_attempted` gate. Practice-from-mock sessions (`mock-*-practice-*`) are ordinary history. Long-term analytics survive because they live in `user_question_activity`, not here.
+
+---
+
+### Table: `public.mocks`
+
+One row per live mock: schedule, duration, access gates, announcement text and cron bookkeeping. Mock IDs are strings (e.g. `mock-cs-01`); related sessions use `paper_id = id`, `id-r2`, or `id-practice-<epoch>`.
+
+| Column Name               | Data Type     | Constraints & Defaults                                              | Description                                                                             |
+| :------------------------ | :------------ | :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------- |
+| `id`                      | `text`        | `PRIMARY KEY`                                                       | Mock identifier used in `paper_id`.                                                     |
+| `label`                   | `text`        | `NOT NULL`                                                          | Display label.                                                                          |
+| `branch`                  | `text`        | `NOT NULL`                                                          | Branch code, matched case-insensitively.                                                |
+| `starts_at`               | `timestamptz` | `NOT NULL`                                                          | Window start; `starts_at + duration_seconds` is the shared window end.                  |
+| `duration_seconds`        | `int`         | `NOT NULL`, `> 0`                                                   | Mock duration.                                                                          |
+| `attempt_min_tier`        | `smallint`    | `DEFAULT 0`                                                         | Minimum donor tier to start the mock. `0` = everyone.                                   |
+| `post_min_tier`           | `smallint`    | `DEFAULT 0`                                                         | Minimum tier for analysis/leaderboard/review after close. `0` = beta, open to everyone. |
+| `series_number`           | `int`         | `NULL` allowed                                                      | Optional display/order label for a cohort of mocks.                                     |
+| `blurb`                   | `text`        | `NULL` allowed                                                      | Short description.                                                                      |
+| `announcement`            | `text`        | `NULL` allowed                                                      | One-shot announcement shown in the client.                                              |
+| `status`                  | `text`        | `DEFAULT 'scheduled'`, `IN ('draft','scheduled','live','archived')` | Lifecycle marker. Only `scheduled`/`live`/`archived` appear in the catalog.             |
+| `created_at`              | `timestamptz` | `DEFAULT now()`                                                     | Creation time.                                                                          |
+| `updated_at`              | `timestamptz` | `DEFAULT now()`                                                     | Bumped by `trg_mocks_updated_at`.                                                       |
+| `schedule_notified_at`    | `timestamptz` | `NULL` allowed                                                      | Set once by `notify_mocks()` after the "new mock" broadcast.                            |
+| `start_reminder_sent_at`  | `timestamptz` | `NULL` allowed                                                      | Set once by `notify_mocks()` after the "~1 minute" reminder.                            |
+| `peer_stats_refreshed_at` | `timestamptz` | `NULL` allowed                                                      | Set by `refresh_closed_mock_stats()` once the window closes; idempotency marker.        |
+
+**RLS / privileges:** RLS is enabled. `anon` and `authenticated` may only `SELECT` (policy `"Anyone can read mock catalog"`); `INSERT`/`UPDATE`/`DELETE`/`TRUNCATE` are revoked from both. Mocks are created out-of-band by the owner via SQL (`supabase/snippets/insert_test_mock.sql`), never from the client.
+
+**Indexes:** `idx_mocks_branch_status (branch, status)`, `idx_mocks_starts_at (starts_at)`, `idx_mocks_pending_schedule_notice` and `idx_mocks_pending_start_reminder` (partial, keep the minutely notification sweep cheap).
+
+**Trigger:** `trg_mocks_updated_at` BEFORE UPDATE → `mocks_touch_updated_at()`.
+
+---
+
+### Table: `public.mock_questions`
+
+Join table defining which questions belong to a mock and in what order.
+
+| Column Name   | Data Type | Constraints & Defaults                             | Description                                  |
+| :------------ | :-------- | :------------------------------------------------- | :------------------------------------------- |
+| `mock_id`     | `text`    | `NOT NULL`, `FK → mocks.id ON DELETE CASCADE`      | Owning mock.                                 |
+| `question_id` | `uuid`    | `NOT NULL`, `FK → questions.id ON DELETE RESTRICT` | Question in the paper.                       |
+| `position`    | `int`     | `NOT NULL`, `> 0`, `UNIQUE (mock_id, position)`    | Paper order. PK is `(mock_id, question_id)`. |
+
+**RLS / privileges:** RLS is enabled and `SELECT` is revoked from `anon`/`authenticated` — membership is read only inside `SECURITY DEFINER` functions. Index: `idx_mock_questions_question_id (question_id)`.
+
+---
+
+### Mock exams — operational notes
+
+Mock configuration lives in [`mocks`](#table-publicmocks) (schedule, gating, label, announcement) and [`mock_questions`](#table-publicmock_questions) (paper composition). The client catalog is built by [`get_mock_catalog`](#function-get_mock_catalog); the start path is [`create_test_from_mock`](#function-create_test_from_mock).
+
+- **Two independent gates.** `attempt_min_tier` controls who may start; `post_min_tier` controls who may see analysis, rank, review and practice after the window. `post_min_tier = 0` marks a beta mock (open to everyone), but re-attempts always require tier 1 and use `paper_id = mock-id-r2`.
+- **Results embargo.** `get_mock_summary`, `get_mock_analysis` and `get_mock_leaderboard` all refuse to release results before `starts_at + duration_seconds`. The session timer is server-derived from `started_at`, `mock_duration_seconds` and `mock_ends_at` via [`get_mock_session_time`](#function-get_mock_session_time).
+- **Free-tier isolation.** `create_test_from_mock` forces `record_activity = false` for tier 0, so free mock attempts never write to `user_question_activity`; they still contribute to peer stats directly from `topic_tests`. `practice_from_mock` records activity for donors only.
+
+- **Start burst.** Creating a mock session inserts one `topic_tests` row plus one `topic_tests_attempts` row per question (~65). 500 users starting in the same second is ~32,500 inserts. The lobby therefore applies a deterministic per-user delay of up to **30 seconds** before calling `create_test_from_mock` (`src/features/topic-test/utils/stagger.ts`). The delay is clamped so it never consumes the final **90 seconds** of the live window, and practice runs outside the window skip it entirely.
+- **Submit burst.** Automatic submits (timer / window expiry) apply a deterministic delay of up to **10 seconds** before `submit_test_grading`. Manual `Finish` clicks are never delayed. Because starts are staggered, normal finish times are already spread; the submit delay covers the synchronized window-close case.
+- **Determinism.** Both delays hash `(user_id, mock_id | session_id)` with FNV-1a, so retries, resumes and page reloads always land in the same slot instead of re-randomising.
+- **Indexes.** `idx_topic_tests_completed_paper` serves the leaderboard/analysis `paper_id` lookups; `idx_topic_tests_active_paper` serves the `expire_mock_sessions` sweep. Existing indexes lead with `user_id` and cannot serve either query.
+- **Notifications.** The `notify-mocks` cron broadcasts once when a mock is scheduled and once about a minute before it starts; see [Job: `notify-mocks`](#job-notify-mocks).
+- **Free-plan sizing.** Staggering smooths the peaks but does not change the storage ceiling. Mock attempts are retained forever for leaderboard integrity, so recurring 500-user mocks should run on Pro (8 GB disk) rather than Free (500 MB).
 
 ---
 
@@ -1020,7 +1178,7 @@ The lifecycle:
 
 1. User answers a question wrong in any context → row is inserted into `user_incorrect_queue` at Box 1.
 2. User answers the same question right in a _revision_ context → the row is promoted to Box 2 (next review in 2 weeks), then Box 3 (next review in 4 weeks), then removed entirely.
-3. A cron generates a weekly revision set from the queue, prioritized by box level (lower boxes first) and by how long ago the mistake was made.
+3. The client calls `generate_weekly_revision_set()` to generate a weekly set from the queue, prioritized by box level (lower boxes first) and by how long ago the mistake was made. There is no cron for this.
 4. After the user finishes a revision set, the queue is updated to reflect their performance.
 
 The critical distinction is between **practice** and **revision**. Practice (regular practice sessions, topic tests, PYQ Mocks) can _add_ questions to the queue but cannot _advance_ them. Only official revision attempts move boxes forward. This is what makes the spaced repetition actually spaced — a user can't shortcut mastery by hammering practice questions.
@@ -1314,20 +1472,22 @@ The common use of `active = false` is admin takedown: a notification was sent wi
 
 ### Table: `public.donations`
 
-Stores donation records submitted by users or guests, including amounts, messages, and verification status. UPI-based donation flow: users submit a transaction reference (UTR) along with the amount they sent, and an admin manually verifies each record.
+Stores donation records submitted by users or guests, including amounts, messages, and verification status. UPI-based donation flow: users submit a transaction reference (UTR) and amount; verification is either automatic (payment-provider webhook) or manual, and both paths feed the donor-tier and broadcast triggers.
 
-| Column Name        | Data Type       | Constraints & Defaults                     | Description                                                 |
-| :----------------- | :-------------- | :----------------------------------------- | :---------------------------------------------------------- |
-| `id`               | `uuid`          | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique donation ID.                                         |
-| `user_id`          | `uuid`          | `NULL`, `FK → users.id`                    | User who made the donation; `NULL` if submitted by a guest. |
-| `anonymous`        | `boolean`       | `DEFAULT false`                            | True if donor wants to hide their name.                     |
-| `message`          | `text`          | `NULL` allowed                             | Optional message from the donor (max 100 chars).            |
-| `suggested_amount` | `numeric(10,2)` | `NULL` allowed                             | Amount suggested by the donor.                              |
-| `actual_amount`    | `numeric(10,2)` | `NULL` allowed                             | Verified amount received.                                   |
-| `utr`              | `text`          | `UNIQUE`                                   | UPI transaction reference number.                           |
-| `verified`         | `boolean`       | `DEFAULT false`                            | True after manual verification.                             |
-| `created_at`       | `timestamp`     | `DEFAULT current_timestamp`                | Time the donation was submitted.                            |
-| `verified_at`      | `timestamp`     | `NULL` allowed                             | Time when the donation was verified manually.               |
+| Column Name        | Data Type       | Constraints & Defaults                     | Description                                                                |
+| :----------------- | :-------------- | :----------------------------------------- | :------------------------------------------------------------------------- |
+| `id`               | `uuid`          | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique donation ID.                                                        |
+| `user_id`          | `uuid`          | `NULL`, `FK → users.id`                    | User who made the donation; `NULL` if submitted by a guest.                |
+| `anonymous`        | `boolean`       | `DEFAULT false`                            | True if donor wants to hide their name.                                    |
+| `message`          | `text`          | `NULL` allowed                             | Optional message from the donor (max 100 chars).                           |
+| `suggested_amount` | `numeric(10,2)` | `NULL` allowed                             | Amount suggested by the donor.                                             |
+| `actual_amount`    | `numeric(10,2)` | `NULL` allowed                             | Verified amount received.                                                  |
+| `utr`              | `text`          | `UNIQUE`, `NOT NULL`                       | UPI transaction reference number.                                          |
+| `verified`         | `boolean`       | `DEFAULT false`                            | True after automatic or manual verification.                               |
+| `verified_by`      | `text`          | `NULL`, `IN ('auto','manual')`             | Which path verified the donation; auto-filled by trigger for manual flips. |
+| `alerted_at`       | `timestamptz`   | `NULL` allowed                             | When the pending-donation alert was sent.                                  |
+| `created_at`       | `timestamp`     | `DEFAULT current_timestamp`                | Time the donation was submitted.                                           |
+| `verified_at`      | `timestamp`     | `NULL` allowed                             | Time when the donation was verified.                                       |
 
 **Relationships:**
 
@@ -1335,36 +1495,58 @@ Stores donation records submitted by users or guests, including amounts, message
 
 **Row Level Security (RLS) Policies:**
 
-- **Insert:** Anyone (authenticated or anonymous) can insert a donation. Guests can donate without signing up; the `user_id` is `NULL` in that case.
-- **SQL Logic:** `FOR INSERT TO public`
-- **Select:** Anyone can read donations.
-- **SQL Logic:** `FOR SELECT TO public`
+- **Insert:** Table-level `INSERT` is revoked from `anon` and `authenticated`. Only authenticated users may insert, and only the columns `user_id, anonymous, message, suggested_amount, actual_amount, utr` are grantable — the verification columns cannot be set by clients.
+- **Select:** Anyone can read donations (`FOR SELECT TO public`).
 
-Public read is intentional — the donations page shows verified donations to everyone, including guests, as a way of encouraging further contributions. The `get_verified_donations()` RPC is the read path used by the client and it joins `users` to attach the donor's name and avatar (respecting `anonymous = true` by nulling those fields).
+Public read is intentional — the donations page shows verified donations to everyone, including guests. The `get_verified_donations()` RPC is the client read path; it joins `users` to attach name, avatar, banner and tier tags. Guest donations have `user_id = NULL` naturally; the `anonymous` flag does not redact data in that RPC.
 
 **Indexes:**
 
-| Index Name               | Columns    | Type   | Purpose                                                    |
-| :----------------------- | :--------- | :----- | :--------------------------------------------------------- |
-| `donations_pkey`         | `id`       | B-tree | Primary key ensuring unique donation IDs.                  |
-| `donations_utr_key`      | `utr`      | B-tree | Unique constraint on UTR — prevents duplicate submissions. |
-| `idx_donations_utr`      | `utr`      | B-tree | Lookup by UTR for verification.                            |
-| `idx_donations_verified` | `verified` | B-tree | Optimises filtering verified/unverified in admin view.     |
+| Index Name                        | Columns                                                  | Type   | Purpose                                                    |
+| :-------------------------------- | :------------------------------------------------------- | :----- | :--------------------------------------------------------- |
+| `donations_pkey`                  | `id`                                                     | B-tree | Primary key ensuring unique donation IDs.                  |
+| `donations_utr_key`               | `utr`                                                    | B-tree | Unique constraint on UTR — prevents duplicate submissions. |
+| `idx_donations_utr`               | `utr`                                                    | B-tree | Lookup by UTR for verification.                            |
+| `idx_donations_verified`          | `verified`                                               | B-tree | Optimises filtering verified/unverified in admin view.     |
+| `idx_donations_pending_unalerted` | `created_at` (partial: unverified, `alerted_at IS NULL`) | B-tree | Backs the pending-donation alert sweep.                    |
+| `idx_donations_verified_by`       | `verified_by` (partial: not null)                        | B-tree | Groups auto vs manual verification.                        |
 
 **Notes:**
 
 - **The UTR is the deduplication key.** A user who accidentally submits the same donation twice (double-click, network retry) is rejected at the database level. This is the correct behavior — each real transaction has exactly one UTR.
 - **`suggested_amount` vs. `actual_amount`.** The suggested amount is what the user _said_ they'd pay when they started the flow. The actual amount is what was verified after the transaction went through. In practice, these usually match, but the two-column design allows an admin to correct mistakes during verification ("the user said ₹500 but the UTR shows ₹100 — mark actual as 100").
 - **Guest donations are allowed.** `user_id` is nullable because donors aren't required to sign up. The donations page shows these as "Anonymous Donor" or the donor's chosen display name if they provided one in the message.
-- **`verified` is set by admin, not by the app.** There's no automated verification path — a human marks each row verified after cross-checking the UTR against the UPI transaction log. `verified_at` records when that happened for audit purposes.
+- **Two verification paths.** The payment-provider webhook (Edge Function `donations`) sets `verified = true` and `verified_by = 'auto'`; a manual flip is stamped `'manual'` by the `on_donation_autofill_verified_by` trigger. `verified_at` records when it happened. Both paths fire `on_donation_tier_change` and `on_donation_announce`.
+- **Pending alerts.** The `donation-alerts` cron (`*/5 * * * *`) calls `donations/alerts` for unverified rows and stamps `alerted_at`.
+- **Triggers:** `on_donation_tier_change` (INSERT/UPDATE/DELETE), `on_donation_announce` (AFTER UPDATE), `on_donation_autofill_verified_by` (BEFORE UPDATE). See [Trigger Inventory](#trigger-inventory).
 - **`ON DELETE` behavior is handled by `delete_account()`.** When a user deletes their account, the `delete_account()` function updates `donations.user_id` to `NULL` for all their donations rather than deleting the rows. This preserves the historical donation record (important for financial audit) while removing the identity relationship (important for privacy). The row remains visible on the donations page as an anonymous donation.
 - **`anonymous` is a display flag, not a privacy flag.** The `user_id` and `utr` fields are still stored even for anonymous donations. Anonymity affects what's shown on the public donations page, not what's recorded in the database. Admin verification always has access to the true identity.
 
 ---
 
+## Storage
+
+Two public buckets hold profile media. Their `storage.objects` policies are owned by migrations, not by the dashboard UI.
+
+| Bucket    | Public | Size limit             | Allowed MIME types                                                              |
+| :-------- | :----- | :--------------------- | :------------------------------------------------------------------------------ |
+| `avatars` | yes    | 3 MB (3,145,728 bytes) | `image/jpg`, `image/jpeg`, `image/png`, `image/webp`, `image/gif`, `video/webm` |
+| `banners` | yes    | 5 MB (5,242,880 bytes) | `image/jpeg`, `image/png`, `image/webp`, `image/gif`, `video/webm`              |
+
+**`storage.objects` policies** (same four per bucket):
+
+- `<bucket>_public_read` — `SELECT` to `anon, authenticated` for that bucket.
+- `<bucket>_own_upload` — `INSERT` to `authenticated` when `(storage.foldername(name))[1] = auth.uid()::text` **and** the tier gate passes: `jpg/jpeg/png/webp` require `get_my_tier() >= 1`, while `gif/webm` require `>= 2` (`user_can_upload_animated()`).
+- `<bucket>_own_delete` — `DELETE` to `authenticated` with the same folder-ownership check.
+- `<bucket>_no_update` — `UPDATE` denied (`USING (false)`); clients delete and re-upload instead.
+
+The `users.banner` and `users.avatar` columns store the resulting object URLs. The `darkMode → mode` settings migration happened in the same release window but affects only `users.settings` JSON, not storage.
+
+---
+
 ## Views
 
-Two views provide reusable query shapes that other database objects depend on. Views are not tables — they don't store data. Every read re-runs the query. This is deliberate for the two views here: one needs to reflect fresh activity data, and the other needs to reflect fresh difficulty metrics.
+Two regular views and one materialized view provide reusable query shapes. Regular views don't store data — every read re-runs the query. `dynamic_difficulty_stats` is materialized: it stores rows and is refreshed by `refresh_dynamic_difficulty()` (and by `refresh_closed_mock_stats()` after a mock window closes).
 ---
 
 ### View: `public.active_weekend_subscriptions`
@@ -1441,61 +1623,58 @@ Cron (Sat/Sun 3:30 UTC)
 
 ### View: `public.v_user_cycle_stats`
 
-Per-user success-cycle statistics used by `refresh_dynamic_difficulty()` to recompute question difficulty scores. The nightly `nightly-difficulty-sync` cron (`0 0 * * *`) drives the refresh.
-
-> **Note:** The exact definition of this view has not been captured in this document yet. The description below reflects what can be inferred from its sole consumer (`refresh_dynamic_difficulty()`) and the cron schedule. When the definition is captured, this section will be updated.
-
-**Inferred purpose:**
-
-The `refresh_dynamic_difficulty()` function recomputes the `subjects.difficulty_score` (and possibly `questions.metadata` difficulty hints) based on real user performance. To do that, it needs per-user, per-question "success cycles" — how many times a user got a question wrong before getting it right, how many times they got it right without error, and so on.
-
-A "success cycle" typically means:
-
-- The sequence of consecutive incorrect attempts followed by a correct one (a "recovery cycle").
-- A first-attempt success (a "clean cycle").
-
-Aggregating across users, a question that requires many recovery cycles to succeed has higher difficulty than one answered correctly on the first attempt by most users.
-
-**What the view likely returns:**
-
-The schema likely includes one row per (user, question) pair with derived fields like:
-
-| Inferred Column                 | Purpose                                                                                                                                                               |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user_id`                       | The user for whom the cycle is being computed.                                                                                                                        |
-| `question_id`                   | The question the cycle refers to.                                                                                                                                     |
-| `attempts_before_first_correct` | How many wrong attempts preceded the first correct one. `0` for a first-try success, higher for a recovery, `NULL` if the question has never been answered correctly. |
-| `total_attempts`                | Total attempts on this question by this user.                                                                                                                         |
-| `final_outcome`                 | Whether the user eventually got it right, or never did.                                                                                                               |
-
-This shape would let `refresh_dynamic_difficulty()` compute per-question statistics like "average attempts before success" or "proportion of users who never succeed" — both classic difficulty metrics.
-
-**Row Level Security:**
-
-No RLS is defined on this view. It's accessed only by `refresh_dynamic_difficulty()`, which runs as `SECURITY DEFINER` from the nightly cron. Direct client access is not exposed.
-
-**How it's consumed:**
-
-The `nightly-difficulty-sync` cron runs pure SQL:
+One row per `(user, question, user_version_number)` — the **first** attempt (`distinct on ... order by attempt_number asc`) joined to `questions` and `subjects`.
 
 ```sql
-select refresh_dynamic_difficulty();
+create or replace view public.v_user_cycle_stats as
+select distinct on (uqa.user_id, uqa.question_id, uqa.user_version_number)
+    uqa.id, uqa.user_id, uqa.question_id, uqa.subject, uqa.was_correct,
+    uqa.time_taken, uqa.attempt_number, uqa.user_version_number,
+    uqa.attempted_at, uqa.subject_id, uqa.branch_id, s.is_universal,
+    case when jsonb_typeof(q.metadata->'exam') = 'array'
+             then array(select jsonb_array_elements_text(q.metadata->'exam'))
+         when jsonb_typeof(q.metadata->'exam') = 'string'
+             then array[(q.metadata->>'exam')]
+         else array['GATE']::text[]
+    end as exam_tags
+from public.user_question_activity uqa
+left join public.questions q on uqa.question_id = q.id
+left join public.subjects s on uqa.subject_id = s.id
+order by uqa.user_id, uqa.question_id, uqa.user_version_number, uqa.attempt_number asc;
 ```
 
-The function reads `v_user_cycle_stats`, aggregates across users, and writes back to whichever table holds the difficulty metric (likely `subjects.difficulty_score`, possibly with additional fields on `questions`). The exact write target is documented in the `refresh_dynamic_difficulty()` section, not here.
+`exam_tags` is normalized to `text[]` from either a string or an array in `questions.metadata.exam`, defaulting to `GATE`. `SELECT` is granted to `authenticated`.
 
-**Notes:**
+**Note:** the dynamic-difficulty pipeline does **not** read this view — it reads the `dynamic_difficulty_stats` materialized view below, which aggregates `user_question_activity` directly. This view remains a reusable first-attempt shape for consumers that need subject/exam metadata alongside the attempt.
 
-- **Why a view, not a function.** A view lets `refresh_dynamic_difficulty()` do its own aggregation with `GROUP BY` and window functions. A function returning the same data would force the aggregation logic into the function body, which is harder to reuse and harder to inspect. The view is the "raw material" and the function is the "consumer."
-- **The view likely reads only from `user_question_activity`.** No other table has per-attempt data. The join chain is probably `user_question_activity` filtered to `was_correct IS NOT NULL` (attempted questions only), grouped by `(user_id, question_id)`, with window functions to number attempts in sequence.
-- **Staleness is acceptable.** Difficulty scores only affect display (the "Easy/Medium/Hard" badge on question cards). A day of staleness is invisible to users. This is why the cron runs nightly rather than on every attempt — recomputing difficulty on every attempt would be prohibitively expensive.
-- **The view definition should be captured.** When updating this documentation in the future, run:
+---
 
-  ```sql
-  select pg_get_viewdef('public.v_user_cycle_stats'::regclass, true);
-  ```
+### View: `public.dynamic_difficulty_stats`
 
-  and paste the output here. This section will then be rewritten from inferred to authoritative.
+Materialized view backing the Easy/Medium/Hard difficulty badges. It is **not** refreshed by a read — `refresh_dynamic_difficulty()` calls `refresh materialized view dynamic_difficulty_stats` and then writes the derived labels to `questions.difficulty` and `subjects.difficulty` (text values `Easy`/`Medium`/`Hard`). There is no `subjects.difficulty_score` column.
+
+```sql
+create materialized view dynamic_difficulty_stats as
+with first_attempts as (
+    select question_id, subject_id, was_correct
+    from public.user_question_activity
+    where attempt_number = 1
+), question_stats as (
+    select question_id, subject_id, count(*) as total_attempts,
+           (count(*) filter (where was_correct = false) + 5.0)
+             / (count(*) + 10) as calculated_difficulty
+    from first_attempts
+    group by question_id, subject_id
+)
+select qs.question_id, qs.subject_id,
+       qs.calculated_difficulty as question_rating,
+       avg(qs.calculated_difficulty) over (partition by qs.subject_id) as subject_rating,
+       qs.total_attempts
+from question_stats qs
+where qs.total_attempts > 10;
+```
+
+Laplace smoothing uses `K = 10` and baseline `0.5`. The `> 10` threshold prevents noisy percentages from controlling a badge. Refresh paths: the `nightly-difficulty-sync` cron (`0 0 * * *`) and `refresh_closed_mock_stats()` when a mock window closes (so donor mock attempts landing in `user_question_activity` are reflected immediately).
 
 ## Functions
 
@@ -1548,19 +1727,12 @@ The functions the client calls directly. These are the read paths that drive the
     "study_current": 7, "study_longest": 14,
     "learning_current": 2, "learning_longest": 5
   },
-  "heatmap": [ { "date": "2026-10-01", "count": 5 }, ... ]
+  "heatmap": [ { "date": "2026-10-01", "count": 5 }, ... ],
+  "recent_history": [ ... ]
 }
 ```
 
-**Logic flow:**
-
-1. **Version resolution.** Reads the calling user's `version_number` from `users`. All subsequent queries filter by this version so that Clear Data resets the dashboard.
-2. **Goal lookup.** Reads the user's active `user_goals` row to determine `target_exams`.
-3. **Per-exam aggregation.** Delegates to `internal_calc_exam_stats(user_id, version)` for each target exam. That helper returns the `overall_*` and `subjects[]` block for one exam.
-4. **Global stats.** Calls `internal_calc_global_stats(user_id, version)` for days left, daily target, today's counts.
-5. **Streaks.** Calls `internal_calc_user_streaks(user_id, version)` — returns both study and learning streaks.
-6. **Heatmap.** Calls `internal_calc_user_heatmap(user_id, version)` — returns daily attempt counts for the last year.
-7. **Assembles and returns.** Composes the four sub-results into the response shape above.
+**Logic flow:** this is now a thin wrapper — `v_dashboard_data := calc_user_metrics(auth.uid())`. All aggregation lives in [`calc_user_metrics()`](#function-calc_user_metricsp_user_id-uuid), which resolves the caller's version and goal, then calls `internal_calc_exam_stats`, `internal_calc_global_stats`, `internal_calc_user_streaks`, `internal_calc_user_heatmap` and `internal_calc_recent_history`. `get_my_dashboard()` returns that payload unchanged.
 
 **Key behaviors:**
 
@@ -1586,38 +1758,35 @@ The functions the client calls directly. These are the read paths that drive the
 | :----------- | :----- | :----------------- |
 | `p_username` | `text` | The user's handle. |
 
-**Return shape:**
+**Return shape:** the `calc_user_metrics()` payload with `dashboard_stats` removed, plus a nested `profile` object:
 
 ```jsonc
 {
-  "id": "uuid",
-  "username": "razen",
-  "name": "Razen",
-  "avatar": "https://...",
-  "about": "...",
-  "college": "...",
-  "targetYear": 2027,
-  "total_xp": 4200,
-  "joined_at": "2026-04-04T...",
-  "social": { "github_url": "...", "x_url": null, ... } | null,
-  "stats": { "total_attempts": 412, "accuracy": 68.4, "streak": 7 },
-  "is_public": true
+  // ...calc_user_metrics keys (streaks, heatmap, recent_history, ...)
+  "profile": {
+    "name": "Razen", "about": "...", "avatar": "https://...", "banner": null,
+    "notification_tags": ["donor:tier-1", ...],
+    "username": "razen", "is_public": true,
+    "socials": { "github": "...", "x": null, "reddit": null, "spotify": null,
+                 "discord": null, "linkedin": null, "mastodon": null,
+                 "youtube": null, "lemmy": null, "leetcode": null, "codeforces": null }
+  }
 }
 ```
 
 **Logic flow:**
 
-1. Look up the user by `username`. `NOT FOUND` returns a `{success: false, reason: 'not_found'}` payload.
-2. Check `is_public`. If `false`, return `{success: false, reason: 'private'}` — do not expose the profile.
-3. Look up the corresponding `users_social` row if it exists.
-4. Aggregate public stats from `user_question_activity` (total attempts, accuracy, current streak).
-5. Compose and return.
+1. Look up the user by `username`; raise `Profile not found.` if absent.
+2. Compare `auth.uid()` with the target id to compute `v_is_owner`.
+3. If `is_public = false` and the caller is not the owner, raise `This profile is private.`
+4. Call `calc_user_metrics(target_id)`, strip `dashboard_stats`.
+5. Compose the `profile` object: non-owners see `Anonymous User` for `name` when `show_name = false`; owners always see the real name. Attach socials from `users_social`.
 
 **Key behaviors:**
 
-- **Privacy is enforced in the function.** A private profile returns a structured "private" response — the caller learns the username exists but nothing else. This is a product decision; an alternative would be to return "not found" for private profiles to hide existence, but that would break the "is this username taken" UX.
-- **Guest and anonymous callers see the same thing.** There's no privilege escalation for logged-in users — every caller gets the same public view.
-- **Social handles are returned flat, not joined.** The client uses `SocialLinksDisplay` to render them, filtering out nulls.
+- Errors are raised as exceptions, not structured `{success:false}` payloads.
+- The owner gets elevated access to their own private profile — the earlier "every caller sees the same view" behavior is gone.
+- Social handles are nested under `socials` with shortened keys (e.g. `github`, not `github_url`).
 
 **Called from:** `useProfile()` hook.
 
@@ -1658,39 +1827,23 @@ The functions the client calls directly. These are the read paths that drive the
 
 ### Function: `get_verified_donations()`
 
-**Security:** `SECURITY DEFINER`
-**Returns:** `TABLE(donation_id uuid, actual_amount numeric, anonymous boolean, message varchar, verified boolean, created_at timestamp, user_id uuid, user_name text, user_avatar text)`
+**Security:** `SECURITY DEFINER`, `STABLE`, `SET search_path = public`
+**Returns:** `TABLE(donation_id uuid, actual_amount numeric, anonymous boolean, message varchar, verified boolean, created_at timestamp, user_id uuid, user_name text, user_avatar text, user_banner text, user_notification_tags text[])`
 
-**Purpose:** Returns the list of verified donations for the public donations page. Joins `donations` to `users` to attach the donor's name and avatar, with anonymity applied at the row level.
+**Purpose:** Returns verified donations for the public donations page. Joins `donations` to `users` and attaches name, avatar, banner and tier tags.
 
 **Arguments:** None.
 
 **Logic flow:**
 
 1. Select from `donations` where `verified = true`.
-2. Left join `users` on `user_id`.
-3. For rows where `anonymous = true`, null out `user_name` and `user_avatar` — the donation stays visible, but the identity doesn't.
-4. Order by `created_at DESC`.
-
-**Return shape (per row):**
-
-| Column          | Value for verified, non-anonymous | Value for verified, anonymous |
-| :-------------- | :-------------------------------- | :---------------------------- |
-| `donation_id`   | UUID                              | UUID                          |
-| `actual_amount` | The verified amount               | The verified amount           |
-| `anonymous`     | `false`                           | `true`                        |
-| `message`       | The donor's message               | The donor's message           |
-| `verified`      | `true`                            | `true`                        |
-| `created_at`    | Submission time                   | Submission time               |
-| `user_id`       | The donor's UUID                  | `NULL` (redacted)             |
-| `user_name`     | The donor's display name          | `NULL` (redacted)             |
-| `user_avatar`   | Avatar URL                        | `NULL` (redacted)             |
+2. `LEFT JOIN users` on `user_id` — no redaction is applied; guest rows naturally have NULL user data.
+3. Order by `created_at DESC`.
 
 **Key behaviors:**
 
-- **Only verified.** Unverified donations are never exposed to the public page.
-- **Anonymous rows are structurally identical, just redacted.** The `anonymous` flag tells the client to render "Anonymous Donor" instead of a name, but the amount, message, and timestamp stay.
-- **Guest donations have null user data naturally.** `user_id` is `NULL` in the row, so `user_name` and `user_avatar` are `NULL` after the join regardless of the anonymous flag.
+- Only verified donations are exposed.
+- `anonymous` is a client display flag; the RPC returns the stored user data as-is. `user_banner` and `user_notification_tags` were added for tier-aware rendering on the donations page.
 
 **Called from:** `useDonations` hook on the donations page.
 
@@ -1732,26 +1885,41 @@ The functions the client calls directly. These are the read paths that drive the
 
 ---
 
+### Function: `delete_account()`
+
+**Security:** `SECURITY DEFINER`, `SET search_path = auth, public`
+**Returns:** `void`
+
+Detaches a user's identity while keeping anonymous activity. The `public.users` row is **not** deleted — `user_question_activity` and the peer-stats aggregates reference it, and deleting it would cascade the community data away. Instead:
+
+- Deletes `topic_tests` (+ attempts), `weekly_revision_set` (+ questions), `user_incorrect_queue`, `question_bookmarks`, `push_subscriptions`, `user_goals`, `users_social` and `notification_reads`.
+- Detaches `question_reports.user_id` and `donations.user_id` (rows are kept).
+- Deletes avatar/banner objects from `storage.objects` by enabling the transaction-scoped `storage.allow_delete_query` guard.
+- Clears `username`, `is_public`, `about`, `banner`, `college`, `"targetYear"`, `show_name`, `notification_tags`, `settings` and other profile fields, sets `deleted_at`, then deletes the `auth.users` row.
+
+`get_public_profile()` filters `deleted_at IS NULL`, so the old username no longer resolves. The client wipes IndexedDB/Cache Storage first and does not depend on `signOut()` succeeding. See `supabase/tests/database/07_account_cleanup/`.
+
+---
+
 ### Function: `clear_user_data()`
 
-**Security:** `SECURITY DEFINER`
-**Returns:** `jsonb`
+**Security:** `SECURITY DEFINER`, `SET search_path = public`
+**Returns:** `jsonb` — `{status: 'ok', version: <int>}`
 
-**Purpose:** Increments the calling user's `version_number`. Used by Settings → Clear Data to reset a user's progress to zero without deleting their account.
+**Purpose:** Increments the calling user's `version_number` and clears the session data that isn't version-scoped. Used by Settings → Clear Data to reset progress without deleting the account. A fresh account starts at version 1 and may reset until version 6 — five resets in total; the quota is shown as `5/5` after the fifth.
 
 **Arguments:** None. Uses `auth.uid()`.
 
 **Logic flow:**
 
-1. Read `auth.uid()`. Throw `'Not authenticated'` if null.
-2. `update users set version_number = version_number + 1 where id = auth.uid()`.
-3. Return `{success: true, new_version: <int>}`.
+1. Read `auth.uid()` and the user's `version_number`; throw if missing.
+2. Allow up to version 5, then increment.
+3. Delete `user_incorrect_queue`, `weekly_revision_set` (cascading to `revision_set_questions`) and `topic_tests` (cascading to `topic_tests_attempts`) for the user.
 
 **Key behaviors:**
 
-- **This does not delete data.** All historical rows in `user_question_activity`, `topic_tests`, `weekly_revision_set`, and so on remain. They're attributed to the _old_ version number. The bump means all subsequent queries filtered by `user_version_number = <new value>` return zero rows.
-- **Why this design.** Historical data is valuable for platform analytics ("how many questions were attempted across all time?"). Deleting it would lose that signal. Version-scoping preserves history while giving the user the _experience_ of a reset.
-- **The queue and revision tables are _not_ reset.** `user_incorrect_queue` doesn't have a version number — it's per (user, question) with no version column. This means Clear Data does not clear the incorrect queue, which may or may not be desirable. A user who expects "clear everything" gets their dashboard reset but their queue intact. This is a known limitation; see the `delete_account()` function for the "nuke everything" path.
+- `user_question_activity` is intentionally kept — the version bump hides old rows from dashboards and stats while preserving the analytics history.
+- The client also wipes IndexedDB after the RPC, via `purgeLocalData()` in `useAuthStore.ts`.
 
 ---
 
@@ -1781,16 +1949,9 @@ Creates a custom Topic Test session. Uses a 50/30/20 bucketing strategy (new que
 
 Creates a PYQ Mock session from a paper catalog entry. Assembles questions deterministically (GA first, then TECH, ordered by `question_number`), inserts the session and attempts, and returns the session ID and totals.
 
-**Two overloads exist in production:**
-
-| Signature                                    | Purpose                                                                          |
-| :------------------------------------------- | :------------------------------------------------------------------------------- |
-| 8-arg                                        | Standard paper (CS, DA, EC, EE, ME). No optional subjects.                       |
-| 9-arg (adds `p_optional_subject_ids uuid[]`) | XL papers, which require the caller to specify exactly two optional subject IDs. |
+Only the **9-argument** signature exists in production — migration `20261103150853_remove_create_test_from_paper_not_needed_one.sql` dropped the older 8-argument overload. `p_optional_subject_ids` filters XL papers (GA, Chemistry/XL-P plus exactly two chosen optionals); for other branches it is `NULL` or ignored. The client validates the "exactly two" rule before calling.
 
 **Detailed documentation:** See [the existing entry](#function-create_test_from_paperp_paper_id-text-p_paper_label-text-p_year-int-p_shift-int-p_branch-text-p_branch_id-text-p_duration_seconds-int-p_record_activity-boolean) above for the full logic flow, active-test guard, GA-first ordering, and return shape.
-
-**Note on the 9-arg overload:** The `p_optional_subject_ids` parameter filters questions for XL papers — only GA, Chemistry (XL-P), and the two chosen optionals are included. For non-XL branches, the parameter is either `NULL` or ignored — the standard branch + year + shift filter applies. The 9-arg overload is `SECURITY DEFINER` and does not enforce "exactly two" at the SQL level; the client validates this before calling.
 
 ---
 
@@ -1804,6 +1965,110 @@ Grades a completed test session — evaluates answers, writes per-question resul
 **Detailed documentation:** See [the existing entry](#function-submit_test_gradingp_session_id-uuid-p_payload-jsonb-p_remaining_time_seconds-int) above for the complete flow, answer normalization, grading rules per question type, negative marking logic, and the session-completion guard.
 
 **Note:** The grading RPC is idempotent — calling it twice returns `{status: 'already_completed'}` on the second call. This is enforced by the session-status check at the top of the function.
+
+---
+
+### Live Mock System
+
+The RPCs behind the mock hub, attempt, results, and practice flows. All are `SECURITY DEFINER` with `SET search_path = public`.
+
+### Function: `get_mock_catalog`
+
+**Returns:** `jsonb` (array). **Arguments:** `p_branch_id text`.
+
+Lists `scheduled`/`live`/`archived` mocks for a branch (never `draft`), ordered by `series_number NULLS last, starts_at`. Each row carries `question_count`, gates, `is_live` (`starts_at <= now() < window end`), `results_released`, `can_attempt`, `attempt_lock_reason`, and the caller's session id/status/score. Scores are withheld until results are released. The client is the source of truth for display; see [`useMockCatalog`](../../src/features/topic-test/hooks/useMockCatalog.ts).
+
+### Function: `create_test_from_mock`
+
+**Returns:** `jsonb`. **Arguments:** `p_mock_id text, p_branch_id text, p_record_activity boolean DEFAULT false`.
+
+Starts a mock session. Serialises per `(user, branch)` with an advisory lock, then guards: prior active session, `re_attempt_gated` (free users may not re-attempt), `not_live`, `attempt_min_tier`, `window_closing` (< 60 s). First attempt gets `paper_id = mock-id`; a donor re-attempt gets `mock-id-r2`, `-r3`, … . Time allowed is the remaining window (or full duration for a post-window attempt), stored in `remaining_time_seconds`, `mock_duration_seconds`, `mock_ends_at`, `mock_label`. Attempts are inserted GA-section first, then by position. `record_activity` is forced `false` for tier 0; donors only get it when they opt in.
+
+### Function: `get_mock_session_time`
+
+**Returns:** `jsonb`. **Arguments:** `p_test_id uuid`.
+
+Authoritative timer for official mock sessions (rejects practice/other tests). Returns `time_allowed` before start; after start, `remaining_seconds = max(0, min(duration - (now - started_at), window_end - now))`, using the session's frozen `mock_ends_at` for post-window sessions. Also returns `label`, `duration_seconds` and `window_ends_at`.
+
+### Function: `get_mock_summary`
+
+**Returns:** `jsonb`. **Arguments:** `p_test_id uuid`.
+
+Score card for one own, completed, non-practice attempt. Returns `{error: ...}` for missing/practice/incomplete sessions; before window close returns `{results_released: false, results_at}`. After close: total/positive/negative scores, attempted count, `is_re_attempt`, and `analysis_unlocked = (post_min_tier = 0 OR tier >= post_min_tier)`.
+
+### Function: `get_mock_analysis`
+
+**Returns:** `jsonb`. **Arguments:** `p_test_id uuid`.
+
+Same identity/embargo checks as the summary, then enforces `post_min_tier`. Returns `rank`, `percentile`, `total_participants` from first attempts ranked by score desc, remaining time desc, completion time asc. Re-attempts return null rank/percentile with an explanatory note.
+
+### Function: `get_mock_leaderboard`
+
+**Returns:** `jsonb`. **Arguments:** `p_mock_id text`.
+
+Embargo + `post_min_tier` gated. Ranks first completed attempts with exact `paper_id = p_mock_id` (so `-r2` rows are naturally excluded), returns top 100 plus the caller's rank and total participants.
+
+### Function: `practice_from_mock`
+
+**Returns:** `jsonb`. **Arguments:** `p_mock_id text`.
+
+Creates `<mock-id>-practice-<epoch>` sessions from a mock's questions. Requires a completed session for the mock and passes the `post_min_tier` gate. `record_activity = (tier >= 1)` — free-tier practice stays out of `user_question_activity` so repeated attempts cannot skew peer stats or difficulty. Errors: `must_complete_first`, `mock_not_found`, `tier_required`, `active_exists`.
+
+### Function: `fetch_practice_questions`
+
+**Returns:** `setof public.questions`. **Arguments:** `p_subject_id uuid, p_last_fetched_at timestamptz DEFAULT null`.
+
+Practice-tab read path. Excludes mock questions unless `user_can_access_mock()` passes; supports delta sync via `p_last_fetched_at`.
+
+### Function: `expire_mock_sessions`
+
+**Returns:** `int`. **Arguments:** none. Cron-only (`expire-mock-sessions`).
+
+Force-submits any open official mock session past `starts_at + duration_seconds` with 0 remaining time, then marks it completed. Practice sessions are excluded; `submit_test_grading()` short-circuits already-completed sessions.
+
+### Function: `notify_mocks`
+
+**Returns:** `integer`. **Arguments:** none. Cron-only (`notify-mocks`).
+
+Inserts the "new mock scheduled" and "starts in ~1 minute" broadcasts exactly once per mock, using `schedule_notified_at` / `start_reminder_sent_at` as stamps and `FOR UPDATE SKIP LOCKED` for concurrency.
+
+### Function: `user_can_access_mock`
+
+**Returns:** `boolean`. **Arguments:** `p_mock_id text`.
+
+True when the caller has a completed session for the mock (base, `-rN`, or `-practice-`) **and** (`post_min_tier = 0` OR tier >= gate). Missing mock/gate fails closed. Used across practice read paths and content-count RPCs.
+
+### Function: `user_has_question_in_session`
+
+**Returns:** `boolean`. **Arguments:** `p_question_id uuid`.
+
+RLS helper: true when the caller has an attempt row for this question in any of their sessions. Lets participants read mock questions during the exam without exposing them to non-participants.
+
+### Function: `is_mock_question`
+
+**Returns:** `boolean`. **Arguments:** `p_question_id uuid`.
+
+RLS helper that checks `questions.metadata.paperType = 'mock'` (case-insensitive) without requiring clients to read `mock_questions`.
+
+### Function: `mocks_touch_updated_at`
+
+**Returns:** `trigger`. Trigger `trg_mocks_updated_at`: bumps `mocks.updated_at` on every update.
+
+### Function: `topic_tests_set_started_at`
+
+**Returns:** `trigger`. Trigger `trg_topic_tests_set_started_at`: stamps `started_at` when a session first moves `created → ongoing`.
+
+### Function: `get_user_tier`
+
+**Returns:** `smallint`. **Arguments:** `p_user_id uuid`. Cron-only.
+
+Same tier derivation as `get_my_tier()` but parameterised by user id (pg_cron has no `auth.uid()`). Used by `prune_topic_test_history()`.
+
+### Function: `prune_topic_test_history`
+
+**Returns:** `integer`. **Arguments:** none. Cron-only (`prune-topic-test-history`).
+
+Deletes completed non-mock sessions beyond the newest 10 per `(user, branch)` for tier-0 users. Official mock attempts are never deleted; practice sessions are ordinary history. `user_question_activity` is untouched.
 
 ---
 
@@ -1830,12 +2095,45 @@ Processes a batch of question attempts — writes each to `user_question_activit
 
 **Security:** `SECURITY DEFINER`
 **Returns:** `void`
+**Arguments:** None.
 
-Full-table refresh of `question_peer_stats` from `user_question_activity`. Called nightly by the `refresh-peer-stats-midnight` cron.
+Thin wrapper that calls `refresh_question_peer_stats_for_questions(null::uuid[])`, i.e. a full rebuild of `question_peer_stats`. Called nightly by the `refresh-peer-stats-midnight` cron in the hosted/remote databases, and once as a backfill by migration `20261118140000_add_mock_peer_stats.sql`. There is no local `cron.schedule` entry for it; local stacks get the per-mock refresh from `refresh-mock-stats` instead.
 
-**Detailed documentation:** See [the existing entry](#function-refresh_question_peer_stats) above for the CTE structure, option-distribution assembly, and the `ON CONFLICT` upsert.
+**Note on `SECURITY DEFINER`:** Required because the function reads attempt data across all users. RLS on `user_question_activity` restricts reads to `auth.uid()`, and the refresh needs the full picture.
 
-**Note on `SECURITY DEFINER`:** Required because the function reads `user_question_activity` across all users. RLS on that table restricts reads to `auth.uid()`, and the refresh needs the full picture.
+---
+
+### Function: `refresh_question_peer_stats_for_questions`
+
+**Security:** `SECURITY DEFINER`
+**Returns:** `void`
+**Arguments:** `p_question_ids uuid[] default null` — `null` rebuilds every question; an empty array is a no-op.
+
+The actual aggregation behind `question_peer_stats`. It builds one contribution per (user, question) from two sources:
+
+1. `mock_first` — the **earliest completed official mock attempt** (`paper_id like 'mock-%'`, excluding `-practice-%`), only after `mocks.starts_at + duration_seconds <= now()`. Skipped questions (`user_answer is null`) and re-attempts are excluded.
+2. `practice_first` — `user_question_activity` rows with `attempt_number = 1`.
+
+A mock contribution wins over the practice row; a question skipped in the mock falls back to the practice row. From those contributions it computes `total_attempts`, correct/wrong counts, average time and the per-option `option_distribution`, then upserts into `question_peer_stats` with `ON CONFLICT (question_id) DO UPDATE`. It never writes back to `user_question_activity`.
+
+**Note:** There is no attempt-count threshold in this function — questions with a single contribution still get a row. The 10-attempt minimum is a client-side display gate (`hasEnoughPeerData` in `src/features/questions/utils/peerStats.ts`).
+
+---
+
+### Function: `refresh_closed_mock_stats`
+
+**Security:** `SECURITY DEFINER`
+**Returns:** `integer` (number of mocks folded in)
+**Arguments:** None. Cron-only; `EXECUTE` is revoked from `anon`/`authenticated`.
+
+Scheduled by `refresh-mock-stats` (`* * * * *`). For each mock whose window has closed and which has not yet been stamped (`peer_stats_refreshed_at is null or < window end`), it:
+
+1. Collects the distinct question IDs from completed official sessions for that mock (excluding `-practice-%`).
+2. Calls `refresh_question_peer_stats_for_questions(ids)` — an empty list is a harmless no-op.
+3. Stamps `mocks.peer_stats_refreshed_at = now()`, making the sweep idempotent.
+4. After the loop, calls `refresh_dynamic_difficulty()` once if anything was refreshed, so donor mock attempts that landed in `user_question_activity` are reflected immediately instead of waiting for `nightly-difficulty-sync`.
+
+Per-mock failures are logged as warnings so one bad mock cannot stall the others.
 
 ---
 
@@ -1850,20 +2148,87 @@ Recomputes subject difficulty scores from real user performance. Called nightly 
 
 **Logic flow:**
 
-1. Read `v_user_cycle_stats` — the view that returns per-user, per-question success-cycle data.
-2. Aggregate across users: for each `(subject_id, question_id)`, compute the average number of attempts before success, the proportion of users who never succeed, and the median time-to-first-correct.
-3. Combine into a per-question difficulty score in `[0, 1]`.
-4. Roll up to `subjects.difficulty_score` (weighted average across the subject's questions).
-5. `UPDATE subjects SET difficulty_score = ...`.
+1. `REFRESH MATERIALIZED VIEW dynamic_difficulty_stats` — recomputes first-attempt ratings with Laplace smoothing (`K = 10`, baseline `0.5`) and a `> 10` attempt threshold.
+2. `UPDATE questions SET difficulty = CASE WHEN question_rating < 0.35 THEN 'Easy' WHEN < 0.7 THEN 'Medium' ELSE 'Hard' END FROM dynamic_difficulty_stats`.
+3. `UPDATE subjects SET difficulty` similarly, using `avg(subject_rating)` grouped by subject.
 
 **Key behaviors:**
 
-- **Overwrites the static score.** `subjects.difficulty_score` is set to a fixed `0.5` in seed data and adjusted by this function thereafter. The static value is only used as the initial state for a fresh database.
-- **The rollup is weighted by attempt count.** A subject with 500 attempts across its questions has a more reliable difficulty score than one with 5 attempts. Low-attempt subjects are pulled toward the global average rather than the noisy local average.
-- **Idempotent.** Running the function twice produces the same result. Safe to run manually for debugging.
-- **No return value.** Writes are the entire effect.
+- The persisted values are text labels (`Easy`/`Medium`/`Hard`) in `questions.difficulty` and `subjects.difficulty` — not a numeric `difficulty_score` column.
+- Subjects/questions below the 10-attempt threshold are absent from the materialized view and keep their previous label.
+- Idempotent; safe to run manually for debugging. No return value.
 
-**Called from:** `nightly-difficulty-sync` cron (`0 0 * * *`), pure SQL: `select refresh_dynamic_difficulty();`.
+**Called from:** `nightly-difficulty-sync` cron (`0 0 * * *`) and `refresh_closed_mock_stats()` after a mock window closes.
+
+---
+
+### Donor Tiers & Donation Automation
+
+### Function: `recompute_user_tier`
+
+**Returns:** `void`. **Arguments:** `p_user_id uuid`. `SECURITY DEFINER`, service_role only.
+
+Locks the user row, sums `actual_amount` over verified donations and writes the `donor:tier-*` tag family: **₹50 → tier 1 (Bronze)**, **₹169 → tier 2 (Gold)**, **₹569 → tier 3 (Platinum)**, otherwise 0. It also adds `role:donor` when any verified donation exists. A tier increase inserts a "🎉 Welcome to <tier> tier" notification for that user (failures are warnings only). `get_my_tier()` and `get_user_tier()` read the resulting tags.
+
+### Function: `get_my_tier`
+
+**Returns:** `smallint`. **Arguments:** none. `STABLE SECURITY DEFINER`, granted to `authenticated`.
+
+Derives the caller's tier from `users.notification_tags` (`donor:tier-3/2/1`, else `0`). Used by gating functions such as `user_can_upload_animated()`, `guard_ai_custom_prompt()` and the mock RPCs.
+
+### Function: `handle_donation_tier_change`
+
+**Returns:** `trigger`. Trigger `on_donation_tier_change` on `donations` (AFTER INSERT/UPDATE/DELETE).
+
+Calls `recompute_user_tier()` when a donation is verified, unverified, deleted, or its verified amount changes. `alerted_at` updates are explicitly ignored so reminders don't recompute tiers.
+
+### Function: `autofill_verified_by`
+
+**Returns:** `trigger`. Trigger `on_donation_autofill_verified_by` (BEFORE UPDATE).
+
+When `verified` flips to true and `verified_by IS NULL`, stamps `'manual'`. The webhook path sets `'auto'` explicitly.
+
+### Function: `announce_verified_donation`
+
+**Returns:** `trigger`. Trigger `on_donation_announce` (AFTER UPDATE).
+
+On a false→true `verified` transition, inserts a "🎉 New patron joined" broadcast. Uses the ₹2,500 monthly goal (`get_monthly_donation_total()`) to compute a percentage, attributes the donor when `user_id` is present and `anonymous = false` (link `/u/<username>`), otherwise announces an anonymous patron (link `/donate`). Failures are warnings only.
+
+### Function: `get_monthly_donation_total`
+
+**Returns:** `numeric`. **Arguments:** none. `STABLE SECURITY DEFINER`, granted to `anon, authenticated`.
+
+`COALESCE(SUM(actual_amount), 0)` for verified donations since `date_trunc('month', now())` (UTC). Powers the ₹2,500 infrastructure-goal bar on `/donate`.
+
+### Function: `trigger_donation_alerts`
+
+**Returns:** `void`. **Arguments:** none. `SECURITY DEFINER`, cron-only (`donation-alerts`).
+
+Reads Vault secrets `DONATION_ALERTS_URL` and `CRON_ISOLATED_SECRET`, then posts to the `donations/alerts` Edge Function with a 15-second timeout. Missing secrets log a warning and return.
+
+### Function: `user_can_upload_animated`
+
+**Returns:** `boolean`. **Arguments:** none. `STABLE SECURITY DEFINER`, granted to `authenticated`.
+
+`SELECT get_my_tier() >= 2` — the GIF/WebM upload gate in `storage.objects` policies.
+
+### Function: `guard_username_immutable`
+
+**Returns:** `trigger`. Trigger `guard_username_immutable` on `users` (BEFORE UPDATE).
+
+Raises SQLSTATE `42501` if an existing username is changed.
+
+### Function: `guard_ai_custom_prompt`
+
+**Returns:** `trigger`. Trigger `guard_ai_custom_prompt` on `users` (BEFORE UPDATE).
+
+If `settings.aiCustomPrompt` changes and `get_my_tier() < 1`, restores the previous value (or empty string).
+
+### Function: `search_users`
+
+**Returns:** `TABLE(id uuid, username text, avatar text)`. **Arguments:** `search_term text`. `STABLE SECURITY DEFINER SET search_path = ''`, granted to `authenticated`.
+
+Requires a logged-in caller and at least 2 non-space characters. Prefix-matches `lower(username)`, only public, non-deleted users, exact match first, `LIMIT 20`. Backed by `users_username_search_idx`.
 
 ---
 
@@ -1875,14 +2240,14 @@ Four functions managing the weekly revision lifecycle.
 
 ### Function: `generate_weekly_revision_set(p_valid_subjects uuid[], p_target_exams text[], p_branch_id text)`
 
-**Security:** `SECURITY INVOKER`
+**Security:** `SECURITY DEFINER`, `SET search_path = public` (hardened by `20261117130000`).
 **Returns:** `json`
 
 Generates the current week's revision set for the caller. Idempotent — returns the existing set if one was already generated this week.
 
 **Detailed documentation:** See [the existing entry](#function-generate_weekly_revision_setp_valid_subjects-uuid-p_target_exams-text-p_branch_id-text) above for the deduplication check, mistake retrieval, branch/exam relevance filtering, 30-question cap, and prioritization.
 
-**Note:** `SECURITY INVOKER` — the function reads and writes only the caller's rows, respecting RLS throughout.
+**Note:** now `SECURITY DEFINER` — it filters by `auth.uid()` itself and excludes mock questions unless the caller can access that mock, so elevated privileges are needed to read `mock_questions`.
 
 ---
 
@@ -1977,7 +2342,7 @@ Two functions returning question counts for the practice page and topic selectio
 
 ### Function: `get_exam_subject_counts(target_exams text[])`
 
-**Security:** `SECURITY INVOKER`
+**Security:** `SECURITY DEFINER`, `SET search_path = public` (hardened by `20261117130000`).
 **Returns:** `TABLE(subject_id uuid, exam_specific_count bigint)`
 
 Returns the number of unique verified questions per subject, filtered by the given exams.
@@ -1988,7 +2353,7 @@ Returns the number of unique verified questions per subject, filtered by the giv
 
 ### Function: `get_topic_counts(p_subject_id uuid)`
 
-**Security:** `SECURITY INVOKER`
+**Security:** `SECURITY DEFINER`, `SET search_path = public` (hardened by `20261117130000`).
 **Returns:** `TABLE(topic text, question_count bigint, unattempted_count bigint, subject_id uuid)`
 
 Returns per-topic counts of verified questions and the caller's unattempted questions in each topic.
@@ -1997,19 +2362,12 @@ Returns per-topic counts of verified questions and the caller's unattempted ques
 
 ---
 
-### Function: `get_critical_question_count(p_valid_subjects uuid[], p_target_exams text[] DEFAULT NULL)`
+### Function: `get_critical_question_count(p_valid_subjects uuid[])`
 
 **Security:** `SECURITY DEFINER`
 **Returns:** `integer`
 
-Returns the count of overdue questions in the caller's incorrect queue.
-
-**Two overloads exist in production:**
-
-| Signature                            | Purpose                                                                                                                                |
-| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
-| 1-arg (`p_valid_subjects`)           | Original version. Filters by branch only.                                                                                              |
-| 2-arg (adds `p_target_exams text[]`) | Filters by branch _and_ target exams. Used by the dashboard to make the "critical" badge reflect only the user's current exam targets. |
+Returns the count of overdue questions in the caller's incorrect queue. Only the 1-argument signature exists; the function also excludes mock questions unless `user_can_access_mock()` passes.
 
 **Detailed documentation:** See [the existing entry](#function-get_critical_question_countp_valid_subjects-uuid) above.
 
@@ -2221,6 +2579,32 @@ Keeps `subjects.question_count` in sync with the actual count of verified questi
 
 ---
 
+### Trigger Function: `refresh_user_goal_tags`
+
+Fires `on_user_goal_change` on `user_goals`. Recomputes `branch:*` and `exam:*` tags from the goal, and preserves every other tag (including `role:*` and `donor:tier-*`) via `where t not like 'branch:%' and t not like 'exam:%'`. `SECURITY DEFINER`.
+
+### Trigger Function: `handle_donation_tier_change`
+
+Fires `on_donation_tier_change` on `donations`. See [its function entry](#function-handle_donation_tier_change).
+
+### Trigger Function: `autofill_verified_by`
+
+Fires `on_donation_autofill_verified_by` on `donations`. Stamps `verified_by = 'manual'` when a human verifies a row. See [its function entry](#function-autofill_verified_by).
+
+### Trigger Function: `announce_verified_donation`
+
+Fires `on_donation_announce` on `donations`. Broadcasts a newly verified donation. See [its function entry](#function-announce_verified_donation).
+
+### Trigger Function: `guard_username_immutable`
+
+Fires `guard_username_immutable` on `users`; rejects changes to an existing username.
+
+### Trigger Function: `guard_ai_custom_prompt`
+
+Fires `guard_ai_custom_prompt` on `users`; strips changes to `settings.aiCustomPrompt` below tier 1.
+
+---
+
 ### Internal Helpers
 
 Functions called only by other functions. Not exposed to the client, not documented in the client's TypeScript types. Their signatures may change without client updates.
@@ -2289,7 +2673,7 @@ Computes the study plan block for `get_my_dashboard` — days left, daily target
 **Security:** `SECURITY DEFINER`
 **Returns:** `jsonb`
 
-Returns the recent attempts feed for the dashboard (used by the "Continue where you left off" widget).
+Returns the recent attempts feed for the dashboard. Called by `calc_user_metrics()` (which `get_my_dashboard()` wraps).
 
 **Return shape:** An array of the last N attempts, each with `{question_id, subject, attempted_at, was_correct}`.
 
@@ -2388,7 +2772,7 @@ Arguments are prefixed `p_` and locals are prefixed `v_`. This makes it unambigu
 | **Why INVOKER** | Function only touches data the caller already has access to. Examples: `toggle_question_bookmark` (writes to the caller's own bookmarks), `generate_topic_test` (reads questions the caller can already see, writes to their own `topic_tests`).              |                    |
 | **Default**     | Prefer `INVOKER`. Only escalate to `DEFINER` when RLS would block the intended read/write.                                                                                                                                                                    |                    |
 
-**The `search_path` rule.** Every `SECURITY DEFINER` function in this codebase sets `search_path = 'public'` (or `'public', net` for functions using `pg_net`). This is not optional — without it, a malicious caller who controls their own `search_path` could shadow `public` functions with custom implementations that run with the function owner's privileges. This is a known Postgres attack vector.
+**The `search_path` rule.** Most `SECURITY DEFINER` functions set `search_path = 'public'` (or `'public', net` for functions using `pg_net`); `search_users()` is hardened further with `SET search_path = ''` and fully qualified names. This is not optional — without it, a malicious caller who controls their own `search_path` could shadow `public` functions with custom implementations that run with the function owner's privileges. This is a known Postgres attack vector.
 
 ---
 
@@ -2398,16 +2782,23 @@ A consolidated view of every trigger in the database. Triggers are grouped by th
 
 ### Trigger Inventory
 
-| Table                 | Trigger                         | Timing                     | Events                   | Function                          | Purpose                                                                                                       |
-| :-------------------- | :------------------------------ | :------------------------- | :----------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| `questions`           | `handle_questions_updated_at`   | BEFORE                     | UPDATE                   | `moddatetime('updated_at')`       | Auto-update the `updated_at` column on any row change.                                                        |
-| `questions`           | `trg_update_question_count`     | AFTER                      | INSERT, UPDATE, DELETE   | `update_subject_question_count()` | Recompute `subjects.question_count` when verified questions are added, edited, or removed.                    |
-| `question_reports`    | `trigger_on_report_insert`      | AFTER                      | INSERT                   | `handle_report_event_webhook()`   | Forward new report to the `process-reminders` Edge Function → notification to admin.                          |
-| `question_reports`    | `trigger_on_report_update`      | AFTER                      | UPDATE                   | `handle_report_event_webhook()`   | Forward status transitions to the `process-reminders` Edge Function → notification to reporter when resolved. |
-| `topic_tests`         | `on_topic_test_completed`       | AFTER                      | UPDATE                   | `handle_test_completion_sync()`   | Sync test attempts into `user_question_activity` and update the queue on session completion.                  |
-| `notifications`       | `on_notification_before_insert` | BEFORE                     | INSERT                   | `before_notification_insert()`    | Default `active`, resolve `audience_ids` from `target`.                                                       |
-| `notifications`       | `on_notification_after_insert`  | AFTER                      | INSERT                   | `dispatch_notification_http()`    | Fire async HTTP to the `dispatch-notification` Edge Function for push fanout.                                 |
-| `on_user_goal_change` | `user_goals`                    | AFTER INSERT/UPDATE/DELETE | `refresh_user_goal_tags` |
+| Table              | Trigger                            | Timing | Events                 | Function                          | Purpose                                                                                                       |
+| :----------------- | :--------------------------------- | :----- | :--------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------ |
+| `questions`        | `handle_questions_updated_at`      | BEFORE | UPDATE                 | `moddatetime('updated_at')`       | Auto-update the `updated_at` column on any row change.                                                        |
+| `questions`        | `trg_update_question_count`        | AFTER  | INSERT, UPDATE, DELETE | `update_subject_question_count()` | Recompute `subjects.question_count` when verified questions are added, edited, or removed.                    |
+| `question_reports` | `trigger_on_report_insert`         | AFTER  | INSERT                 | `handle_report_event_webhook()`   | Forward new report to the `process-reminders` Edge Function → notification to admin.                          |
+| `question_reports` | `trigger_on_report_update`         | AFTER  | UPDATE                 | `handle_report_event_webhook()`   | Forward status transitions to the `process-reminders` Edge Function → notification to reporter when resolved. |
+| `topic_tests`      | `on_topic_test_completed`          | AFTER  | UPDATE                 | `handle_test_completion_sync()`   | Sync test attempts into `user_question_activity` and update the queue on session completion.                  |
+| `notifications`    | `on_notification_before_insert`    | BEFORE | INSERT                 | `before_notification_insert()`    | Default `active`, resolve `audience_ids` from `target`.                                                       |
+| `notifications`    | `on_notification_after_insert`     | AFTER  | INSERT                 | `dispatch_notification_http()`    | Fire async HTTP to the `dispatch-notification` Edge Function for push fanout.                                 |
+| `user_goals`       | `on_user_goal_change`              | AFTER  | INSERT, UPDATE, DELETE | `refresh_user_goal_tags()`        | Recompute `branch:*` / `exam:*` tags; preserve all other families.                                            |
+| `donations`        | `on_donation_tier_change`          | AFTER  | INSERT, UPDATE, DELETE | `handle_donation_tier_change()`   | Recompute `donor:tier-*` from verified donations.                                                             |
+| `donations`        | `on_donation_announce`             | AFTER  | UPDATE                 | `announce_verified_donation()`    | Broadcast a newly verified donation.                                                                          |
+| `donations`        | `on_donation_autofill_verified_by` | BEFORE | UPDATE                 | `autofill_verified_by()`          | Stamp `verified_by = 'manual'` on manual verification.                                                        |
+| `mocks`            | `trg_mocks_updated_at`             | BEFORE | UPDATE                 | `mocks_touch_updated_at()`        | Keep `mocks.updated_at` current.                                                                              |
+| `topic_tests`      | `trg_topic_tests_set_started_at`   | BEFORE | UPDATE                 | `topic_tests_set_started_at()`    | Stamp `started_at` on first `created → ongoing` transition.                                                   |
+| `users`            | `guard_username_immutable`         | BEFORE | UPDATE                 | `guard_username_immutable()`      | Reject username changes after first set.                                                                      |
+| `users`            | `guard_ai_custom_prompt`           | BEFORE | UPDATE                 | `guard_ai_custom_prompt()`        | Strip `settings.aiCustomPrompt` changes below tier 1.                                                         |
 
 ---
 
@@ -2597,7 +2988,7 @@ Three conditions must all hold:
 4. Preserve existing `role:*` tags — the trigger does not own them.
 5. Write the combined array back to `users.notification_tags`.
 
-**Why preserve `role:*` tags.** The trigger fires on goal changes, not donor changes. If it wiped the entire array, verifying a donation and then changing the goal would lose the `role:donor` tag. The `where t like 'role:%'` filter in the function keeps role tags intact across recomputation.
+**Tag preservation.** The trigger fires on goal changes, not donor changes, so it recomputes only the `branch:*` and `exam:*` families. Since `20261110150554_fix_refresh_user_goal_tags_preserve_donor.sql` it preserves **every** other tag (`where t not like 'branch:%' and t not like 'exam:%'`), including `role:*` and `donor:tier-*`. The older `role:%`-only filter is superseded.
 
 **Guest users:** users with `id = '1'` have no goal and no donor status, so the trigger produces `{}`. No special-casing needed.
 
@@ -2615,10 +3006,17 @@ All jobs are stored in `cron.job`. The `active` column is `true` for all current
 | :-------------------------------- | :------------- | :------- | :--------------------------------------------- |
 | `refresh-peer-stats-midnight`     | `0 0 * * *`    | Pure SQL | `select public.refresh_question_peer_stats();` |
 | `nightly-difficulty-sync`         | `0 0 * * *`    | Pure SQL | `select refresh_dynamic_difficulty();`         |
+| `prune-topic-test-history`        | `0 4 * * *`    | Pure SQL | `select public.prune_topic_test_history();`    |
+| `refresh-mock-stats`              | `* * * * *`    | Pure SQL | `select public.refresh_closed_mock_stats();`   |
+| `expire-mock-sessions`            | `*/5 * * * *`  | Pure SQL | `select public.expire_mock_sessions();`        |
+| `donation-alerts`                 | `*/5 * * * *`  | Pure SQL | `select public.trigger_donation_alerts();`     |
+| `notify-mocks`                    | `* * * * *`    | Pure SQL | `select public.notify_mocks();`                |
 | `revision-hourly-reminder`        | `0 * * * *`    | HTTP     | POST `?task=revision-hourly`                   |
 | `weekend-topic-test-saturday`     | `30 3 * * 6`   | HTTP     | POST `?task=weekend-topic-test`                |
 | `weekend-topic-test-sunday`       | `30 3 * * 0`   | HTTP     | POST `?task=weekend-topic-test`                |
 | `donation-reminder-every-2-weeks` | `30 6 * * 0`   | HTTP     | POST `?task=donation-reminder`                 |
+
+`refresh-peer-stats-midnight` is present in the hosted/remote databases but is not created by any local migration. All other jobs above are scheduled from `supabase/migrations` and are created by `supabase db reset` / `db push`. `donation-alerts` is SQL-scheduled but posts to the `donations/alerts` Edge Function rather than `process-reminders`.
 
 Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 
@@ -2626,6 +3024,11 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 | :-------------------------------- | :------------- | :------------- |
 | `refresh-peer-stats-midnight`     | 00:00          | 05:30          |
 | `nightly-difficulty-sync`         | 00:00          | 05:30          |
+| `prune-topic-test-history`        | 04:00          | 09:30          |
+| `refresh-mock-stats`              | every minute   | every minute   |
+| `expire-mock-sessions`            | every 5 min    | every 5 min    |
+| `donation-alerts`                 | every 5 min    | every 5 min    |
+| `notify-mocks`                    | every minute   | every minute   |
 | `revision-hourly-reminder`        | every hour :00 | every hour :30 |
 | `weekend-topic-test-saturday`     | Sat 03:30      | Sat 09:00      |
 | `weekend-topic-test-sunday`       | Sun 03:30      | Sun 09:00      |
@@ -2638,12 +3041,49 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 **Schedule:** `0 0 * * *` (daily at 00:00 UTC)
 **Type:** Pure SQL
 **Command:** `select public.refresh_question_peer_stats();`
+**Availability:** Configured in the hosted/remote databases. It is not created by a local migration, so a fresh local stack does not have this job.
 
-**Purpose:** Recomputes the `question_peer_stats` aggregate table from `user_question_activity`. This is what keeps the "68% of users got this right" statistic current.
+**Purpose:** Full rebuild of the `question_peer_stats` aggregate table. `refresh_question_peer_stats()` delegates to `refresh_question_peer_stats_for_questions(null)`, so every row is recomputed from both contribution sources: first practice attempts in `user_question_activity` and completed official mock attempts in `topic_tests` (after their window closes). This is what keeps the "68% of users got this right" statistic current.
 
-**Why nightly:** The aggregation is a full-table scan of `user_question_activity` — potentially hundreds of thousands of rows. Running it on every read would be prohibitive; running it on every attempt would also be too expensive. Nightly is the sweet spot: stats are at most 24 hours stale, which is invisible for a "compare to peers" feature.
+**Why nightly:** The aggregation is a full scan of all contribution rows — potentially hundreds of thousands. Running it on every read or every attempt would be prohibitive. The minutely `refresh-mock-stats` job covers newly closed mocks in the meantime, so this nightly pass is a safety net / full rebuild rather than the only refresh path.
 
-**Cost:** A full refresh on a catalog with ~500K attempts takes 2-5 seconds. The `ON CONFLICT (question_id) DO UPDATE` pattern means only new/changed rows trigger writes, so the update phase is fast. The read phase (aggregating activity) is the bulk of the cost.
+**Cost:** A full refresh on a catalog with ~500K attempts takes 2-5 seconds. The `ON CONFLICT (question_id) DO UPDATE` pattern means only new/changed rows trigger writes, so the update phase is fast. The read phase (aggregating activity and mock attempts) is the bulk of the cost.
+
+---
+
+### Job: `refresh-mock-stats`
+
+**Schedule:** `* * * * *` (every minute)
+**Type:** Pure SQL
+**Command:** `select public.refresh_closed_mock_stats();`
+
+**Purpose:** Makes mock questions current as soon as a mock window closes. For every closed mock whose `peer_stats_refreshed_at` has not been stamped, it gathers the official question IDs, calls `refresh_question_peer_stats_for_questions(ids)` for just those questions, stamps the mock, and — if anything changed — calls `refresh_dynamic_difficulty()` once so donor attempts are reflected without waiting for `nightly-difficulty-sync`.
+
+**Why not on every submission:** Refreshing during a live window burns CPU on data nobody can see and would expose partial results. The scoping to closed mocks also keeps each run cheap.
+
+**Idempotence:** `peer_stats_refreshed_at` is the marker; a second run returns 0 mocks refreshed. Failures are isolated per mock with `FOR UPDATE SKIP LOCKED` and warnings.
+
+---
+
+### Job: `expire-mock-sessions`
+
+**Schedule:** `*/5 * * * *` (every 5 minutes)
+**Type:** Pure SQL
+**Command:** `select public.expire_mock_sessions();`
+
+**Purpose:** Force-submits any official mock session still open after `mocks.starts_at + duration_seconds`, using the answers recorded so far and 0 remaining time, then marks it completed. Practice-from-mock sessions (`mock-*-practice-*`) are excluded.
+
+**Why it matters:** A user who closes the tab during a mock still gets a graded attempt, the countdown ends deterministically for everyone, and the session reaches `completed` state so results/RPCs treat it consistently. `submit_test_grading()` short-circuits on already-completed sessions, so overlapping runs are harmless.
+
+---
+
+### Job: `donation-alerts`
+
+**Schedule:** `*/5 * * * *` (every 5 minutes)
+**Type:** Pure SQL that calls an Edge Function
+**Command:** `select public.trigger_donation_alerts();`
+
+**Purpose:** Reminds maintainers about pending unverified donations. `trigger_donation_alerts()` reads the Vault secrets `DONATION_ALERTS_URL` and `CRON_ISOLATED_SECRET`; if either is missing it logs a warning and returns. Otherwise it `net.http_post`s an empty JSON body to the `donations/alerts` Edge Function with a 15-second timeout. That Edge Function claims pending rows by stamping `donations.alerted_at`, so a donation is not re-alerted continuously.
 
 ---
 
@@ -2653,11 +3093,59 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 **Type:** Pure SQL
 **Command:** `select refresh_dynamic_difficulty();`
 
-**Purpose:** Recomputes subject difficulty scores from real user performance data (`v_user_cycle_stats` view).
+**Purpose:** Refreshes the `dynamic_difficulty_stats` materialized view from first attempts in `user_question_activity`, then writes `Easy`/`Medium`/`Hard` labels to `questions.difficulty` and the subject average to `subjects.difficulty`.
 
-**Why nightly:** Same reasoning as peer stats — the aggregation is expensive, and difficulty scores are display-only (the Easy/Medium/Hard badge). A day of staleness is invisible.
+**Why nightly:** The aggregation is expensive and difficulty labels are display-only; a day of staleness is invisible. `refresh-mock-stats` also calls it when a mock window closes.
 
-**Why pure SQL and not an Edge Function:** No network I/O. The whole computation is Postgres-native — reading `user_question_activity`, aggregating via `v_user_cycle_stats`, writing back to `subjects`. Sending this to an Edge Function would add cold-start latency and a round-trip for zero benefit.
+**Why pure SQL:** No network I/O — the whole computation is Postgres-native.
+
+---
+
+### Job: `prune-topic-test-history`
+
+**Schedule:** `0 4 * * *` (daily at 04:00 UTC)
+**Type:** Pure SQL
+**Command:** `select public.prune_topic_test_history();`
+
+**Purpose:** Trims old test sessions for free users while preserving data that official features depend on.
+
+**What is deleted:** Completed non-mock sessions beyond the newest 10 per `(user_id, branch_id)` for users whose donor tier is 0. `topic_tests_attempts` follows via `ON DELETE CASCADE`.
+
+**What is never deleted:**
+
+- **Official mock attempts** (`paper_id LIKE 'mock-%'` excluding `-practice-`). The leaderboard, mock catalog, result pages and the `already_attempted` gate read `topic_tests`, so pruning a mock row would corrupt standings and re-open the attempt. Exempt forever.
+- **In-progress sessions** (`status <> 'completed'`).
+- **Donor history** — `get_user_tier(user_id) >= 1`. Donors keep unlimited history, and a tier lapse never retroactively prunes rows.
+- **Long-term analytics** — `user_question_activity` is a separate table and is untouched; dashboards, streaks and heatmaps are unaffected.
+
+**Practice-from-mock:** `paper_id LIKE 'mock-%-practice-%'` is ordinary practice history and is pruned like any other test.
+
+**Privileges:** The function is `SECURITY DEFINER` and bypasses RLS because it operates across all users. `EXECUTE` is revoked from `anon` and `authenticated`; only the cron owner and `service_role` can run it.
+
+**Cost:** One indexed window-function pass over completed sessions, plus cascade deletes for the overflow only. The index `idx_topic_tests_user_branch_completed` backs the ranking.
+
+---
+
+### Job: `notify-mocks`
+
+**Schedule:** `* * * * *` (every minute)
+**Type:** Pure SQL
+**Command:** `select public.notify_mocks();`
+
+**Purpose:** Keeps mock exams visible. It inserts two broadcast notifications per mock, exactly once each:
+
+1. **New mock scheduled** — as soon as a `scheduled`/`live` row exists with `starts_at` more than a minute away.
+2. **Mock starts in ~1 minute** — once the start is inside the next 90 seconds.
+
+Both target `{"type":"broadcast"}`, so every user sees them in the notification dialog and receives a push through `dispatch-notification`. Both carry `link = '/topic-test-generate?tab=mocks'`, so the push opens the mock tab rather than a specific lobby. The 90-second reminder window (rather than exactly 60) guarantees a reminder even when a mock starts off the minute boundary; the cron itself only runs once a minute.
+
+**Deduplication:** `mocks.schedule_notified_at` and `mocks.start_reminder_sent_at` are the idempotency keys. `notify_mocks()` locks pending rows with `FOR UPDATE SKIP LOCKED` and stamps the column in the same transaction as the insert, so overlapping runs cannot double-send. Both columns are written only by this function.
+
+**Deploy behaviour:** The migration stamps `schedule_notified_at` on all pre-existing mocks, so deploying this feature does not re-announce old mocks. Future reminders for still-upcoming mocks remain pending. Mocks that already started are stamped too and are never back-broadcast.
+
+**Privileges:** `SECURITY DEFINER` and cron-only. `EXECUTE` is revoked from `anon` and `authenticated`.
+
+**Cost:** Two indexed lookups per minute. The partial indexes `idx_mocks_pending_schedule_notice` and `idx_mocks_pending_start_reminder` keep each sweep proportional to the number of pending mocks (normally zero).
 
 ---
 
@@ -2713,7 +3201,7 @@ Schedules are in UTC. To convert to IST (UTC+5:30), add 5 hours 30 minutes:
 
 **Why weekly cron if it only fires bi-weekly:** The cron schedule is weekly, but the handler's own `biWeeklyIndex % 2 !== 0` check skips odd weeks. This is a design choice: the cron runs every Sunday, but the handler short-circuits and returns a "skip this week" response on odd weeks. The alternative would be a cron expression that runs bi-weekly, but `pg_cron` doesn't support that cleanly (the closest would be `0 6 1,15 * *`, which fires on specific dates, not "every other week"). The handler-level gate is simpler.
 
-**Broadcast audience:** The notification is inserted with `target: {type: 'broadcast'}` — it goes to every user, not just donors. This is the same as the previous behavior (the old handler queried all push subscriptions). A future enhancement would target `role:donor` to skip users who have already donated, but that tag doesn't exist yet.
+**Broadcast audience:** The notification is inserted with `target: {type: 'broadcast'}` — it goes to every user, not just donors. Targeting only `role:donor` would be a possible future refinement; that tag now exists (written by `recompute_user_tier()`), but the handler still broadcasts to everyone.
 
 ---
 
@@ -2766,7 +3254,7 @@ where jobname = 'job-name';
 
 Server-side functions deployed to Supabase's Edge Runtime (Deno). Unlike the database functions documented above, Edge Functions run outside Postgres — they can make network requests, use VAPID for push encryption, and import npm packages.
 
-All Edge Functions in this project are deployed under the `zewzixicpoxirmouyeje` project. Their source lives in `supabase/functions/`. Three functions are in production:
+All Edge Functions in this project are deployed under the `zewzixicpoxirmouyeje` project. Their source lives in `supabase/functions/`. Four entry points are in production (`welcome-notification`, `process-reminders`, `dispatch-notification`, `donations`), plus the `donations/alerts` sub-function:
 
 | Function                | Status | Purpose                                                  |
 | :---------------------- | :----- | :------------------------------------------------------- |
@@ -2779,7 +3267,7 @@ All Edge Functions in this project are deployed under the `zewzixicpoxirmouyeje`
 ### Edge Function: `welcome-notification`
 
 **Deployed slug:** `welcome-notification`
-**Source:** `supabase/functions/welcome/index.ts`
+**Source:** `supabase/functions/welcome-notification/index.ts`
 **Auth:** Client-authenticated (called from the subscribe flow)
 **Trigger:** Direct HTTP call from the client when the user enables push notifications
 
@@ -2813,7 +3301,7 @@ The client sends the subscription object exactly as returned by `PushManager.sub
 **Notes:**
 
 - **No auth check.** The function accepts any subscription object. In practice, this isn't exploitable (a user can only spam themselves), but a `x-client-info` presence check would be a cheap hardening step if abuse ever becomes a concern.
-- **The source file is `welcome/index.ts`, the deployed slug is `welcome-notification`.** This mismatch is historical — the function was renamed at deploy time. When referring to it in docs, use the deployed name.
+- The source lives in `supabase/functions/welcome-notification/`; the deployed slug is `welcome-notification`.
 - **Not migrated to the notification pipeline.** The architecture doc explicitly excludes this function from the migration: "the welcome is a systems ack, not a notification." See the `NOTIFICATION_ARCHITECTURE.md` for the full rationale.
 
 ---
@@ -2823,7 +3311,7 @@ The client sends the subscription object exactly as returned by `PushManager.sub
 **Deployed slug:** `process-reminders`
 **Source:** `supabase/functions/process-reminders/`
 **Auth:** Shared secret (`x-cron-secret` header) validated against `CRON_SECRET` env var
-**Triggers:** Cron jobs (three of them) and the `handle_report_event_webhook()` trigger
+**Triggers:** Four cron jobs (`revision-hourly-reminder`, two weekend reminders, `donation-reminder-every-2-weeks`) and the `handle_report_event_webhook()` trigger
 
 **Purpose:** Router for five notification producers. Each producer is a handler module that determines who should receive a notification and inserts a row into `notifications`. The router itself is thin — it validates auth, reads the `?task=` parameter, and dispatches to the appropriate handler.
 
@@ -2924,6 +3412,14 @@ Content-Type: application/json
 
 ---
 
+### Edge Function: `donations`
+
+**Source:** `supabase/functions/donations/` (`index.ts` + `handler.ts`), with `donations/alerts/` (`index.ts` + `handler.ts`) as a second entry point.
+
+**Purpose:** Webhook receiver for the payment provider. On a verified payment it inserts or updates the `donations` row with `verified = true` and `verified_by = 'auto'`, which fires the tier-change and announcement triggers. `donations/alerts` is called by the `donation-alerts` cron (via `trigger_donation_alerts()`) to find stale pending donations, stamp `alerted_at` and escalate repeated alerts. Both use the shared-supabase client and Vault-backed secrets.
+
+---
+
 ### Shared Modules (`_shared/`)
 
 Not deployed as functions themselves, but imported by the functions above.
@@ -3016,5 +3512,3 @@ supabase functions logs process-reminders --project-ref <project-ref>
 Deploying in the reverse order means reports filed during the window produce notifications that never get delivered — a temporary inconsistency that resolves once the dispatcher lands, but avoidable by deploying in the correct order.
 
 ---
-
-_End of Supabase documentation. For the notification system's full architecture rationale, see `NOTIFICATION_ARCHITECTURE.md` in the repository root._
