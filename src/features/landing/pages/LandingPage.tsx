@@ -137,6 +137,8 @@ function Hero({ dark }: { dark: boolean }) {
                         key={screenshots.ipad}
                         src={screenshots.ipad}
                         alt="GATEQuest iPad dashboard preview"
+                        width={1446}
+                        height={1044}
                         className="relative z-10 -mr-[15%] block h-auto w-[35%] shrink-0 object-contain"
                     />
 
@@ -145,6 +147,9 @@ function Hero({ dark }: { dark: boolean }) {
                         key={screenshots.desktop}
                         src={screenshots.desktop}
                         alt="GATEQuest desktop dashboard preview"
+                        width={2274}
+                        height={1307}
+                        fetchPriority="high"
                         className="relative z-0 block h-auto w-[65%] shrink-0 object-contain"
                     />
 
@@ -153,6 +158,8 @@ function Hero({ dark }: { dark: boolean }) {
                         key={screenshots.mobile}
                         src={screenshots.mobile}
                         alt="GATEQuest mobile dashboard preview"
+                        width={717}
+                        height={1460}
                         className="relative z-20 -ml-[9.8%] block h-auto w-[11%] shrink-0 object-contain"
                     />
                 </div>
