@@ -20,6 +20,7 @@ import { getDonorTier } from '@/shared/types/donor';
 import type { MockState, ResolvedMock } from '@/shared/types/mock';
 import { createTestFromMock } from '../api/mockTest';
 import { InstructionRuleCard } from '../components/InstructionRuleCard';
+import AddToCalendarButton from '../components/mock/AddToCalendarButton';
 import { TestPageShell } from '../components/TestPageShell';
 import { useMockCatalog } from '../hooks/useMockCatalog';
 import {
@@ -333,6 +334,12 @@ export default function MockTestLobby() {
                                             ).toISOString()
                                         )}
                                     </span>
+                                    <div className="pt-1">
+                                        <AddToCalendarButton
+                                            mock={mock}
+                                            compact={false}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

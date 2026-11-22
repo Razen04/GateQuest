@@ -9,6 +9,7 @@ import {
     formatDuration,
 } from '../../utils/mockFormat';
 import { isMockBlocked } from '../../utils/mockState';
+import AddToCalendarButton from '../mock/AddToCalendarButton';
 
 type CtaVariant = 'primary' | 'secondary' | 'warn' | 'muted';
 
@@ -209,9 +210,12 @@ const MockTestCard = ({ mock, onSelect }: MockTestCardProps) => {
                 {timingText(mock)}
             </p>
             {mock.state === 'upcoming' && (
-                <p className="font-mono text-[11px] text-muted-foreground -mt-2 mb-3">
-                    {formatDateTime(new Date(mock.startsAt).toISOString())}
-                </p>
+                <div className="-mt-2 mb-3 flex items-center justify-between gap-2">
+                    <p className="font-mono text-[11px] text-muted-foreground">
+                        {formatDateTime(new Date(mock.startsAt).toISOString())}
+                    </p>
+                    <AddToCalendarButton mock={mock} compact />
+                </div>
             )}
 
             {/* CTA — span, not button (parent is the button) */}

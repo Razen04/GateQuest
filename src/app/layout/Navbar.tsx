@@ -299,7 +299,7 @@ const Navbar = () => {
                             />
 
                             {unreadNotifications && (
-                                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+                                <span className="absolute top-1 right-1 h-2 w-2 bg-destructive ring-2 ring-background" />
                             )}
                         </button>
 
