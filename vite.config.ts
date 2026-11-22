@@ -47,43 +47,10 @@ export default defineConfig({
         }),
     ],
     build: {
-        rollupOptions: {
-            output: {
-                manualChunks(id) {
-                    // React Core
-                    if (
-                        id.includes('node_modules/react/') ||
-                        id.includes('node_modules/react-dom/') ||
-                        id.includes('node_modules/react-router-dom/')
-                    ) {
-                        return 'vendor-react';
-                    }
-                    // Math rendering engine
-                    if (id.includes('node_modules/katex')) {
-                        return 'vendor-katex';
-                    }
-                    // Radix UI primitives
-                    if (id.includes('node_modules/@radix-ui')) {
-                        return 'vendor-radix';
-                    }
-                    // Charting (Nivo / Recharts)
-                    if (
-                        id.includes('node_modules/@nivo') ||
-                        id.includes('node_modules/recharts')
-                    ) {
-                        return 'vendor-charts';
-                    }
-                    // Phosphor icons
-                    if (id.includes('node_modules/@phosphor-icons')) {
-                        return 'vendor-icons';
-                    }
-                    // Animation & Framer Motion
-                    if (id.includes('node_modules/framer-motion')) {
-                        return 'vendor-motion';
-                    }
-                },
-            },
-        },
+        // Let Rollup code-split naturally. The previous manualChunks forced
+        // whole ecosystems (all Phosphor icons, Recharts + Nivo, etc.) into
+        // single eager chunks that the entry imported, adding ~600 KB gzip
+        // to every page load even though those pages are lazy-loaded.
     },
     resolve: {
         alias: {

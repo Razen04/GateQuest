@@ -44,6 +44,7 @@ vi.mock('sonner', () => ({
 
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
+import { useSettingsStore } from '@/app/stores/useSettingsStore';
 import { supabase } from '@/shared/utils/supabaseClient';
 import { useAuthEffects } from '../useAuthEffects';
 
@@ -241,6 +242,30 @@ describe('handleSession: beta mode change', () => {
         await flush();
 
         expect(supabase.from).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('handleSession: settings hydration is idempotent', () => {
+    it('does not replace the settings object when a re-hydration has identical values', async () => {
+        mockUsersQuery({
+            existingRow: makeDbRow({ id: 'u1', settings: { is_beta: true } }),
+        });
+
+        renderHook(() => useAuthEffects());
+
+        authMock.callback!('SIGNED_IN', makeSession('u1'));
+        await flush();
+
+        const settingsRef = useSettingsStore.getState().settings;
+
+        // Simulates the USER_UPDATED event emitted by the settings sync's own
+        // auth.updateUser() call. The guard re-queries but must not create a
+        // new settings object when nothing actually changed.
+        authMock.callback!('USER_UPDATED', makeSession('u1'));
+        await flush();
+
+        expect(supabase.from).toHaveBeenCalledTimes(2);
+        expect(useSettingsStore.getState().settings).toBe(settingsRef);
     });
 });
 

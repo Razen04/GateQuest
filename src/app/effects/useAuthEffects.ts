@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore.ts';
 import useStudyPlan from '@/features/dashboard/hooks/useStudyPlan.js';
 import type { AppUser, GuestUser } from '@/shared/types/AppUser.ts';
+import type { Settings } from '@/shared/types/Settings.ts';
 import { supabase } from '@/shared/utils/supabaseClient.ts';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
@@ -120,16 +121,33 @@ export function useAuthEffects() {
                         },
                     };
 
-                    useSettingsStore.setState(
-                        (state) => ({
-                            settings: {
-                                ...state.settings,
-                                ...profile.settings,
-                            },
-                        }),
-                        false,
-                        'settings/hydrateFromProfile'
+                    // Re-hydration happens on every auth event (including the
+                    // USER_UPDATED emitted by our own settings sync). Only
+                    // produce a new settings object when a value actually
+                    // changed — otherwise the reference change re-triggers
+                    // the debounced settings sync and a duplicate toast.
+                    const profileSettings = profile.settings as Record<
+                        string,
+                        unknown
+                    >;
+                    const currentSettings = useSettingsStore.getState()
+                        .settings as unknown as Record<string, unknown>;
+                    const settingsChanged = Object.keys(profileSettings).some(
+                        (key) => currentSettings[key] !== profileSettings[key]
                     );
+
+                    if (settingsChanged) {
+                        useSettingsStore.setState(
+                            (state) => ({
+                                settings: {
+                                    ...state.settings,
+                                    ...profile.settings,
+                                } as Settings,
+                            }),
+                            false,
+                            'settings/hydrateFromProfile'
+                        );
+                    }
 
                     refreshRef.current();
                     useAuthStore

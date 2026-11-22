@@ -20,6 +20,7 @@ import { getDonorTier } from '@/shared/types/donor';
 import type { MockState, ResolvedMock } from '@/shared/types/mock';
 import { createTestFromMock } from '../api/mockTest';
 import { InstructionRuleCard } from '../components/InstructionRuleCard';
+import AddToCalendarButton from '../components/mock/AddToCalendarButton';
 import { TestPageShell } from '../components/TestPageShell';
 import { useMockCatalog } from '../hooks/useMockCatalog';
 import {
@@ -321,11 +322,24 @@ export default function MockTestLobby() {
                                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
                                         Starts in
                                     </span>
-                                    <span className="text-chart-1 font-mono font-bold">
+                                    <span className="text-chart-1 font-mono font-bold block">
                                         {formatCountdown(
                                             mock.secondsUntilStart
                                         )}
                                     </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {formatDateTime(
+                                            new Date(
+                                                mock.startsAt
+                                            ).toISOString()
+                                        )}
+                                    </span>
+                                    <div className="pt-1">
+                                        <AddToCalendarButton
+                                            mock={mock}
+                                            compact={false}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

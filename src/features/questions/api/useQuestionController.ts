@@ -110,8 +110,8 @@ export const useQuestionController = ({
 
     useEffect(() => {
         if (settings?.sound) {
-            correctSoundRef.current = new Audio('/audio/correct.wav');
-            wrongSoundRef.current = new Audio('/audio/wrong.wav');
+            correctSoundRef.current = new Audio('/audio/correct.opus');
+            wrongSoundRef.current = new Audio('/audio/wrong.opus');
         }
         return () => {
             correctSoundRef.current?.pause();

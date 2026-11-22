@@ -8,3 +8,7 @@
 .env.*.local
 .env.staging
 .env.production
+.link.json
+..link.json.*.tmp
+.supabase.lock.*.tmp
+.supabase.lock.lease

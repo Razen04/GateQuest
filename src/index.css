@@ -1,9 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+/* Fonts are loaded via a single <link> in index.html to avoid six
+   render-blocking, serial @import requests. */
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";

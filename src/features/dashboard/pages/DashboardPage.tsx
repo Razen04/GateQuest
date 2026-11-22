@@ -18,6 +18,7 @@ import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useStatsStore } from '@/app/stores/useStatsStore';
 // UI Components
 import Login from '@/features/auth/components/Login';
+import AddToCalendarButton from '@/features/topic-test/components/mock/AddToCalendarButton';
 import { useMockCatalog } from '@/features/topic-test/hooks/useMockCatalog';
 import {
     formatCountdown,
@@ -373,6 +374,10 @@ const Dashboard = () => {
                                 >
                                     All mocks
                                 </Button>
+
+                                {heroMock.state === 'upcoming' && (
+                                    <AddToCalendarButton mock={heroMock} />
+                                )}
                             </div>
                         </motion.div>
                     )}
