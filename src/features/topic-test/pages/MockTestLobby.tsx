@@ -321,9 +321,16 @@ export default function MockTestLobby() {
                                     <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
                                         Starts in
                                     </span>
-                                    <span className="text-chart-1 font-mono font-bold">
+                                    <span className="text-chart-1 font-mono font-bold block">
                                         {formatCountdown(
                                             mock.secondsUntilStart
+                                        )}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        {formatDateTime(
+                                            new Date(
+                                                mock.startsAt
+                                            ).toISOString()
                                         )}
                                     </span>
                                 </div>

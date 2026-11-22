@@ -208,6 +208,11 @@ const MockTestCard = ({ mock, onSelect }: MockTestCardProps) => {
             <p className="text-xs text-muted-foreground mb-3">
                 {timingText(mock)}
             </p>
+            {mock.state === 'upcoming' && (
+                <p className="font-mono text-[11px] text-muted-foreground -mt-2 mb-3">
+                    {formatDateTime(new Date(mock.startsAt).toISOString())}
+                </p>
+            )}
 
             {/* CTA — span, not button (parent is the button) */}
             <div className="mt-auto flex justify-end">
