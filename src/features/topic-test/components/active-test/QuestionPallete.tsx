@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/shared/components/ui/button';
 import type { Question } from '@/shared/types/storage';
 import {
+    getDisplayNumber,
     getPaletteSections,
     type PaletteSection,
 } from '../../utils/questionPalette';
@@ -94,6 +95,7 @@ const PaletteGrid = ({
                 )}
 
                 {section.indices.map((index) => {
+                    const displayNumber = getDisplayNumber(questions, index);
                     const question = questions[index];
                     if (!question) return null;
 
@@ -130,7 +132,7 @@ const PaletteGrid = ({
                                     stateClasses
                                 )}
                             >
-                                {index + 1}
+                                {displayNumber}
                             </Button>
                         );
                     }
@@ -144,7 +146,7 @@ const PaletteGrid = ({
                                 stateClasses
                             )}
                         >
-                            {index + 1}
+                            {displayNumber}
                         </button>
                     );
                 })}

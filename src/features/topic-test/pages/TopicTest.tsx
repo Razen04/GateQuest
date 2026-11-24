@@ -525,6 +525,7 @@ const TopicTest = () => {
                                 {hasMore && (
                                     <div className="flex justify-center pt-3">
                                         <Button
+                                            className="rounded-none"
                                             variant="outline"
                                             size="sm"
                                             onClick={loadMore}

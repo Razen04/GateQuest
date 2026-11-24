@@ -29,16 +29,25 @@ const getTestSession = async (sessionId: string) => {
     const session = await db.sessions.get(sessionId);
     if (!session) return null;
 
-    const attempts = await db.attempts
-        .where('session_id')
-        .equals(sessionId)
-        .toArray();
+    const attempts = (
+        await db.attempts.where('session_id').equals(sessionId).toArray()
+    ).sort((a, b) => (a.attempt_order ?? 0) - (b.attempt_order ?? 0));
 
+    // Dexie's anyOf().toArray() returns rows in key order, not in the order
+    // of the supplied ids. Build the question list from the sorted attempts
+    // so questions[] always matches attempt_order (GA section first).
     const questionIds = attempts.map((a) => a.question_id);
+    const byId = new Map(
+        questionIds.length
+            ? (await db.questions.where('id').anyOf(questionIds).toArray()).map(
+                  (q) => [q.id, q]
+              )
+            : []
+    );
 
-    const questions = questionIds.length
-        ? await db.questions.where('id').anyOf(questionIds).toArray()
-        : [];
+    const questions = questionIds
+        .map((id) => byId.get(id))
+        .filter((q): q is NonNullable<typeof q> => Boolean(q));
 
     return { session, attempts, questions };
 };

@@ -10,6 +10,12 @@ import {
 } from '@/features/questions/utils/questionUtils';
 import ReportModal from '@/shared/components/ReportModal';
 import { supabase } from '@/shared/utils/supabaseClient';
+import type { AttemptWithQuestion } from '../components/TestReviewLayout';
+import {
+    getAdjacentIndex,
+    getDisplayNumber,
+    getDisplayTotal,
+} from '../utils/questionPalette';
 
 const TestSolutionView = () => {
     const { testId, questionIndex } = useParams<{
@@ -17,7 +23,9 @@ const TestSolutionView = () => {
         questionIndex: string;
     }>();
 
-    const { attempts } = useOutletContext();
+    const { attempts } = useOutletContext<{
+        attempts: AttemptWithQuestion[];
+    }>();
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
 
@@ -27,12 +35,13 @@ const TestSolutionView = () => {
     const currentIndex = parseInt(questionIndex || '0', 10);
     const currentAttempt = attempts[currentIndex];
     const currentQuestion = currentAttempt?.questions;
-    const subjectSlug = currentQuestion.subject;
 
-    if (!currentAttempt) {
-        toast.error('No question present.');
-        navigate(`/topic-test-result/${testId}`, { replace: true });
-    }
+    const subjectSlug = currentQuestion?.subject ?? '';
+    const reviewQuestions = attempts
+        .map((a) => a.questions)
+        .filter((q): q is NonNullable<typeof q> => Boolean(q));
+    const displayNumber = getDisplayNumber(reviewQuestions, currentIndex);
+    const displayTotal = getDisplayTotal(reviewQuestions, currentIndex);
 
     const safeQuestion = useMemo(() => {
         return (
@@ -83,16 +92,20 @@ const TestSolutionView = () => {
         message: statsMessage,
     } = usePeerBenchmark(safeQuestion.id, true); // enable is true because in TestSolution we need to see the peer_stats since all the questions are already answered
 
+    if (!currentAttempt || !currentQuestion) return null;
+
     // Navigation Handlers
     const handleNext = () => {
-        if (currentIndex < attempts.length - 1) {
-            navigate(`/topic-test-review/${testId}/${currentIndex + 1}`);
+        const next = getAdjacentIndex(reviewQuestions, currentIndex, 1);
+        if (next != null) {
+            navigate(`/topic-test-review/${testId}/${next}`);
         }
     };
 
     const handlePrev = () => {
-        if (currentIndex > 0) {
-            navigate(`/topic-test-review/${testId}/${currentIndex - 1}`);
+        const prev = getAdjacentIndex(reviewQuestions, currentIndex, -1);
+        if (prev != null) {
+            navigate(`/topic-test-review/${testId}/${prev}`);
         }
     };
 
@@ -104,8 +117,9 @@ const TestSolutionView = () => {
         reportType: string,
         reportText: string
     ) => {
+        if (!user?.id) return;
         const report = {
-            user_id: user?.id,
+            user_id: user.id,
             question_id: safeQuestion.id,
             report_type: reportType,
             report_text: reportText,
@@ -178,18 +192,23 @@ const TestSolutionView = () => {
         <div>
             <QuestionCard
                 question={currentQuestion}
-                totalQuestions={attempts.length}
-                questionNumber={currentIndex + 1}
+                totalQuestions={displayTotal}
+                questionNumber={displayNumber}
                 subjectSlug={subjectSlug}
                 userAnswerIndex={normalizedProps?.userAnswerIndex ?? null}
                 selectedOptionIndices={
                     normalizedProps?.selectedOptionIndices ?? []
                 }
                 numericalAnswer={normalizedProps?.numericalAnswer ?? null}
-                marked={normalizedProps?.marked}
+                marked={normalizedProps?.marked ?? false}
                 onOptionSelect={() => {}}
                 showAnswer={true}
-                result={normalizedProps?.result}
+                result={
+                    normalizedProps?.result === 'correct' ||
+                    normalizedProps?.result === 'incorrect'
+                        ? normalizedProps.result
+                        : 'unattempted'
+                }
                 peerStats={{
                     loading: statsLoading,
                     message: statsMessage,
@@ -202,8 +221,12 @@ const TestSolutionView = () => {
                 onReport={() => setShowReportModal(true)}
                 onShare={handleShare}
                 onCopy={onCopyQuestion}
-                isFirst={currentIndex === 0}
-                isLast={currentIndex === attempts.length - 1}
+                isFirst={
+                    getAdjacentIndex(reviewQuestions, currentIndex, -1) === null
+                }
+                isLast={
+                    getAdjacentIndex(reviewQuestions, currentIndex, 1) === null
+                }
             />
 
             {showReportModal && (
@@ -211,6 +234,7 @@ const TestSolutionView = () => {
                     show={showReportModal}
                     onClose={() => setShowReportModal(false)}
                     onSubmit={handleReportSubmit}
+                    reportSubmitting={false}
                 />
             )}
         </div>

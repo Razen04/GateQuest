@@ -257,7 +257,7 @@ describe('useTestSession', () => {
         expect(mockUpdateTestTime).toHaveBeenCalledTimes(2);
     });
 
-    it('upserts dirty attempts with 1-based attempt_order recalculated from the question list', async () => {
+    it('upserts dirty attempts while preserving their stored attempt_order', async () => {
         mockGetPendingAttempts.mockResolvedValueOnce([
             {
                 session_id: 'test-1',
@@ -281,7 +281,7 @@ describe('useTestSession', () => {
         expect(mockUpsertAttempts).toHaveBeenCalledWith([
             expect.objectContaining({
                 question_id: 'q2',
-                attempt_order: 2,
+                attempt_order: 999,
                 time_spent_seconds: 10,
             }),
         ]);

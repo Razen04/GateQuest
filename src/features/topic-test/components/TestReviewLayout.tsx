@@ -5,11 +5,11 @@ import {
     initializeTestSession,
 } from '@/features/topic-test/services/testSession';
 import ModernLoader from '@/shared/components/ModernLoader';
-import type { Question, TestSession } from '@/shared/types/storage';
+import type { Attempt, Question, TestSession } from '@/shared/types/storage';
 import { getMockSummary } from '../api/mockTest';
 import { fetchAttemptsWithQuestions, fetchTestById } from '../api/topicTest';
 
-type AttemptWithQuestion = {
+export type AttemptWithQuestion = {
     session_id: string;
     question_id: string;
     attempt_order: number;
@@ -42,46 +42,44 @@ const TestReviewLayout = () => {
             setLoading(true);
             setError(null);
 
+            const localData = await getTestSession(testId);
+
             try {
-                const localData = await getTestSession(testId);
-
-                const hasAllQuestions = localData?.attempts?.every((attempt) =>
-                    localData.questions.some(
-                        (q) => q.id === attempt.question_id
-                    )
-                );
-
-                if (
-                    localData?.session?.status === 'completed' &&
-                    localData.attempts.length > 0 &&
-                    hasAllQuestions
-                ) {
-                    const mappedAttempts = localData.attempts.map(
-                        (attempt) => ({
-                            ...attempt,
-                            questions: localData.questions.find(
-                                (q) => q.id === attempt.question_id
-                            ) as Question,
-                        })
-                    );
-
-                    const sortedAttempts = [...mappedAttempts].sort(
-                        (a, b) =>
-                            (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
-                    );
-
-                    if (isMounted) {
-                        setSession(localData.session);
-                        setAttempts(sortedAttempts);
-                        setLoading(false);
-                    }
-                    return;
-                }
-
                 const { data: sessionData, error: sessionError } =
                     await fetchTestById(testId);
 
+                // Offline fallback: use the cached session only when Supabase
+                // is unreachable. Server data is always authoritative when
+                // available — Dexie attempts carry placeholder grades.
                 if (sessionError || !sessionData) {
+                    if (
+                        localData?.session?.status === 'completed' &&
+                        localData.attempts.length > 0
+                    ) {
+                        const byId = new Map(
+                            localData.questions.map((q) => [q.id, q])
+                        );
+                        const mapped = localData.attempts
+                            .slice()
+                            .sort(
+                                (a, b) =>
+                                    (a.attempt_order ?? 0) -
+                                    (b.attempt_order ?? 0)
+                            )
+                            .map((attempt) => ({
+                                ...attempt,
+                                questions: byId.get(attempt.question_id),
+                            }));
+                        if (isMounted) {
+                            setSession(
+                                localData.session as unknown as TestSession
+                            );
+                            setAttempts(
+                                mapped as unknown as AttemptWithQuestion[]
+                            );
+                        }
+                        return;
+                    }
                     throw new Error('Test not found.');
                 }
 
@@ -122,12 +120,12 @@ const TestReviewLayout = () => {
                     if (mockAttemptsError) throw mockAttemptsError;
 
                     if (isMounted) {
-                        setSession(sessionData);
+                        setSession(sessionData as unknown as TestSession);
                         const sorted = [...(mockAttemptsData ?? [])].sort(
                             (a, b) =>
                                 (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
                         );
-                        setAttempts(sorted);
+                        setAttempts(sorted as unknown as AttemptWithQuestion[]);
                     }
                     return;
                 }
@@ -159,19 +157,19 @@ const TestReviewLayout = () => {
                     );
 
                     await initializeTestSession(
-                        sessionData,
-                        pureAttemptsToCache,
+                        sessionData as unknown as TestSession,
+                        pureAttemptsToCache as unknown as Attempt[],
                         questionsToCache
                     );
                 }
 
                 if (isMounted) {
-                    setSession(sessionData);
+                    setSession(sessionData as unknown as TestSession);
                     const sorted = [...(attemptsData ?? [])].sort(
                         (a, b) =>
                             (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
                     );
-                    setAttempts(sorted);
+                    setAttempts(sorted as unknown as AttemptWithQuestion[]);
                 }
             } catch (err) {
                 console.error(err);

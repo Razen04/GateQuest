@@ -47,3 +47,55 @@ export function getPaletteSections(questions: Question[]): PaletteSection[] {
         { label: 'Technical', indices: tech },
     ];
 }
+
+/** A session is sectioned only when both GA and TECH questions are present. */
+export function isSectioned(questions: Question[]): boolean {
+    return getPaletteSections(questions)[0]?.label !== null;
+}
+
+/** Section containing a question index, or null for a flat session. */
+export function getQuestionSection(
+    questions: Question[],
+    index: number
+): PaletteSection | null {
+    const section = getPaletteSections(questions).find((s) =>
+        s.indices.includes(index)
+    );
+    return section?.label ? section : null;
+}
+
+/**
+ * Number shown to the student for a question index. Numbering is continuous
+ * across the paper (GA 1–10, TECH 11–65) so the same number never appears
+ * twice. The question array is kept in attempt_order order, so this matches
+ * the DB's attempt_order. Navigation uses the global index too.
+ */
+export function getDisplayNumber(
+    _questions: Question[],
+    index: number
+): number {
+    return index + 1;
+}
+
+/** Total number of questions in the paper. */
+export function getDisplayTotal(questions: Question[], _index: number): number {
+    return questions.length;
+}
+
+/** Adjacent question within the same section, or null at a section edge. */
+export function getAdjacentIndex(
+    questions: Question[],
+    index: number,
+    delta: -1 | 1
+): number | null {
+    const section = getQuestionSection(questions, index);
+    if (!section) {
+        const next = index + delta;
+        return next >= 0 && next < questions.length ? next : null;
+    }
+    const position = section.indices.indexOf(index);
+    const nextPosition = position + delta;
+    return nextPosition >= 0 && nextPosition < section.indices.length
+        ? (section.indices[nextPosition] ?? null)
+        : null;
+}
