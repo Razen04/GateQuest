@@ -55,7 +55,7 @@ const useTestSession = (
     const startTimeRef = useRef<number>(Date.now());
 
     const answers = useTestAnswer({ testId, initialAttempts: data.attempts });
-    const navigation = useTestNavigation(data.questions.length);
+    const navigation = useTestNavigation(data.questions.length, data.questions);
     const timer = useTestTimer({
         initialSeconds: data.session.remaining_time_seconds,
     });
@@ -88,7 +88,9 @@ const useTestSession = (
         const deltaSeconds = Math.floor(
             (Date.now() - startTimeRef.current) / 1000
         );
+        const storedOrder = answers.answers.get(questionId)?.attempt_order;
         const attemptOrder =
+            storedOrder ??
             data.questions.findIndex((q) => q.id === question.id) + 1;
         answers.updateTimeSpent(questionId, deltaSeconds, attemptOrder);
         startTimeRef.current = Date.now();
@@ -116,11 +118,9 @@ const useTestSession = (
     useEffect(() => {
         const question = data.questions[currentIndex];
         if (question) {
-            const realIndex = data.questions.findIndex(
-                (q) => q.id === question.id
-            );
             const attemptOrder =
-                realIndex !== -1 ? realIndex + 1 : currentIndex + 1;
+                answers.answers.get(question.id)?.attempt_order ??
+                currentIndex + 1;
             answers.markAsVisited(question.id, attemptOrder);
         }
     }, [currentIndex, data.questions, answers, status]);
@@ -168,15 +168,12 @@ const useTestSession = (
                 const dirtyAttempts = await getPendingAttempts();
                 if (dirtyAttempts.length > 0) {
                     const payload = dirtyAttempts.map((a) => {
-                        const realIndex = data.questions.findIndex(
-                            (q) => q.id === a.question_id
-                        );
-                        const finalOrder =
-                            realIndex !== -1 ? realIndex + 1 : a.attempt_order;
                         return {
                             session_id: a.session_id,
                             question_id: a.question_id,
-                            attempt_order: finalOrder,
+                            // attempt_order comes from the assembled paper —
+                            // never recompute it from the local array index.
+                            attempt_order: a.attempt_order,
                             user_answer: a.user_answer ?? null,
                             marked_for_review: a.marked_for_review ?? false,
                             status: a.status ?? 'unvisited',

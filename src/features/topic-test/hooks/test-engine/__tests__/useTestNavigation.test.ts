@@ -1,6 +1,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import useTestNavigation from '@/features/topic-test/hooks/test-engine/useTestNavigation';
+import type { Question } from '@/shared/types/storage';
+
+const makeQuestion = (section: string): Question =>
+    ({ id: section, metadata: { section } }) as Question;
 
 describe('useTestNavigation hook tests', () => {
     it('initializes at index 0 and marks it visited', () => {
@@ -67,5 +71,40 @@ describe('useTestNavigation hook tests', () => {
         expect(result.current.currentIndex).toBe(5);
         expect(result.current.visitedIndices.has(0)).toBe(true);
         expect(result.current.visitedIndices.has(5)).toBe(true);
+    });
+
+    it('keeps next/prev inside the current section', () => {
+        const questions = [
+            makeQuestion('GA'),
+            makeQuestion('GA'),
+            makeQuestion('TECH'),
+            makeQuestion('TECH'),
+        ];
+        const { result } = renderHook(() =>
+            useTestNavigation(questions.length, questions)
+        );
+
+        expect(result.current.isFirst).toBe(true);
+        act(() => {
+            result.current.next();
+        });
+        expect(result.current.currentIndex).toBe(1);
+        expect(result.current.isLast).toBe(true);
+
+        let success = true;
+        act(() => {
+            success = result.current.next();
+        });
+        expect(success).toBe(false);
+        expect(result.current.currentIndex).toBe(1); // no jump into TECH
+
+        act(() => {
+            result.current.jumpTo(2);
+        });
+        expect(result.current.isFirst).toBe(true);
+        act(() => {
+            result.current.prev();
+        });
+        expect(result.current.currentIndex).toBe(2); // no jump back into GA
     });
 });

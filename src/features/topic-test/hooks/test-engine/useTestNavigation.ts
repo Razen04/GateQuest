@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import type { Question } from '@/shared/types/storage';
+import { getAdjacentIndex } from '../../utils/questionPalette';
 
 interface useTestNavigationResult {
     next: () => boolean;
@@ -6,43 +8,58 @@ interface useTestNavigationResult {
     jumpTo: (i: number) => boolean;
     currentIndex: number;
     visitedIndices: Set<number>;
+    isFirst: boolean;
+    isLast: boolean;
 }
-const useTestNavigation = (totalQuestions: number): useTestNavigationResult => {
+const useTestNavigation = (
+    totalQuestions: number,
+    questions: Question[] = []
+): useTestNavigationResult => {
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [visitedIndices, setVisitedIndices] = useState<Set<number>>(
         () => new Set([0])
     );
 
-    const markAsVisited = (index: number) => {
-        setVisitedIndices((prev) => {
-            return new Set(prev).add(index);
-        });
-    };
+    const markAsVisited = useCallback((index: number) => {
+        setVisitedIndices((prev) => new Set(prev).add(index));
+    }, []);
 
-    const next = () => {
-        if (currentIndex >= totalQuestions - 1) return false;
-
-        const nextIndex = currentIndex + 1;
+    const next = useCallback(() => {
+        const nextIndex = questions.length
+            ? getAdjacentIndex(questions, currentIndex, 1)
+            : currentIndex + 1;
+        if (nextIndex == null || nextIndex >= totalQuestions) return false;
         setCurrentIndex(nextIndex);
         markAsVisited(nextIndex);
         return true;
-    };
+    }, [currentIndex, questions, totalQuestions, markAsVisited]);
 
-    const prev = () => {
-        if (currentIndex === 0) return false;
-
-        const prevIndex = currentIndex - 1;
+    const prev = useCallback(() => {
+        const prevIndex = questions.length
+            ? getAdjacentIndex(questions, currentIndex, -1)
+            : currentIndex - 1;
+        if (prevIndex == null || prevIndex < 0) return false;
         setCurrentIndex(prevIndex);
         markAsVisited(prevIndex);
         return true;
-    };
+    }, [currentIndex, questions, markAsVisited]);
 
-    const jumpTo = (index: number) => {
-        if (index < 0 || index >= totalQuestions) return false;
-        setCurrentIndex(index);
-        markAsVisited(index);
-        return true;
-    };
+    const jumpTo = useCallback(
+        (index: number) => {
+            if (index < 0 || index >= totalQuestions) return false;
+            setCurrentIndex(index);
+            markAsVisited(index);
+            return true;
+        },
+        [totalQuestions, markAsVisited]
+    );
+
+    const isFirst =
+        questions.length > 0 &&
+        getAdjacentIndex(questions, currentIndex, -1) === null;
+    const isLast =
+        questions.length > 0 &&
+        getAdjacentIndex(questions, currentIndex, 1) === null;
 
     return {
         next,
@@ -50,6 +67,8 @@ const useTestNavigation = (totalQuestions: number): useTestNavigationResult => {
         jumpTo,
         visitedIndices,
         currentIndex,
+        isFirst,
+        isLast,
     };
 };
 

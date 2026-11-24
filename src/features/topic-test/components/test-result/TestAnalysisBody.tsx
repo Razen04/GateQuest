@@ -20,6 +20,7 @@ import {
 import { formatTime } from '@/shared/utils/helper';
 import { itemVariants } from '@/shared/utils/motionVariants';
 import type { FullAttempt } from '../../types/testTypes';
+import { getDisplayNumber, getDisplayTotal } from '../../utils/questionPalette';
 import { QuestionGrid } from './QuestionGrid';
 
 interface GroupData {
@@ -74,6 +75,10 @@ export default function TestAnalysisBody({
             (a, b) => (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
         );
 
+        const orderedQuestions = sortedAttempts
+            .map((a) => (a as FullAttempt).questions)
+            .filter((q): q is NonNullable<typeof q> => Boolean(q));
+
         const diffGroups: Record<string, GroupData> = {
             Easy: { attempts: [], totalTime: 0, correct: 0 },
             Medium: { attempts: [], totalTime: 0, correct: 0 },
@@ -98,7 +103,12 @@ export default function TestAnalysisBody({
                       ? 'MSQ'
                       : 'NAT';
 
-            const enrichedAttempt = { ...a, originalIndex: idx };
+            const enrichedAttempt: FullAttempt = {
+                ...a,
+                originalIndex: idx,
+                displayNumber: getDisplayNumber(orderedQuestions, idx),
+                displayTotal: getDisplayTotal(orderedQuestions, idx),
+            };
 
             if (diffGroups[diff]) {
                 diffGroups[diff].attempts.push(enrichedAttempt);

@@ -1,4 +1,10 @@
-# v0.12.0 - 2026-11-21 (Latest)
+# v0.12.1 - 2026-11-24 (Latest)
+
+- Fixed the error in PYQ mode custom test being all wrong with the numbering and result page. Old tests can't be fixed, further new tests won't have any issues (hope so). _Tanks_ [@Aliya_TM](https://gate-quest.vercel.app/u/Aliya_TM) for reporting the issue.
+- **NOTE**: Please keep reporting issues and use Discord or Github so that it can reach me faster. Do join the Discord.
+- Added **Add to your Calendar** button for upcoming mocks.
+
+# v0.12.0 - 2026-11-21
 
 - Donations auto-verify within ~5 minutes (mostly maybe); uncertain matches alert the admin for manual review. [#112](https://github.com/Razen04/GateQuest/issues/112)
 - Donations page redesigned with Mission/Contribute tabs, a live ₹2,500 monthly infrastructure goal, and the public patron ledger with perks for donors. More at [Donation Page](https://gate-quest.vercel.app/donate)

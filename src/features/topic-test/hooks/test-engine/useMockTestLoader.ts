@@ -89,7 +89,7 @@ const useMockTestLoader = (testId: string) => {
                 return;
             }
 
-            const joined = joinedRaw as RawJoinedAttempt[];
+            const joined = joinedRaw as unknown as RawJoinedAttempt[];
             const supabaseAttempts = joined.map(toAttempt);
             const pendingLocal = (await getPendingAttempts()).filter(
                 (a) => a.session_id === testId
@@ -107,13 +107,22 @@ const useMockTestLoader = (testId: string) => {
                 (a, b) => a.attempt_order - b.attempt_order
             );
 
-            const questions: Question[] = joined.flatMap((row) =>
-                row.questions
-                    ? Array.isArray(row.questions)
-                        ? row.questions
-                        : [row.questions]
-                    : []
-            );
+            // Build questions[] in attempt_order order so it lines up with
+            // attempts[] — flat-mapping raw joined rows can be unordered.
+            const byQuestionId = new Map<string, Question>();
+            joined.forEach((row) => {
+                const rows = Array.isArray(row.questions)
+                    ? row.questions
+                    : row.questions
+                      ? [row.questions]
+                      : [];
+                rows.forEach((question) => {
+                    byQuestionId.set(question.id, question);
+                });
+            });
+            const questions: Question[] = attempts
+                .map((a) => byQuestionId.get(a.question_id))
+                .filter((q): q is Question => Boolean(q));
 
             // ─── 5. Override remaining_time_seconds ──────────
             const remaining = timeRes.not_started

@@ -77,9 +77,9 @@ export function QuestionGrid({
                                         `/topic-test-review/${testId}/${attempt.originalIndex}`
                                     )
                                 }
-                                title={`Question ${attempt.originalIndex + 1} - ${formatTime(attempt.time_spent_seconds)}`}
+                                title={`Question ${attempt.displayNumber} - ${formatTime(attempt.time_spent_seconds)}`}
                             >
-                                {attempt.originalIndex + 1}
+                                {attempt.displayNumber}
                                 {attempt.marked_for_review && (
                                     <FlagIcon
                                         size={8}
@@ -146,7 +146,7 @@ export function QuestionGrid({
                             }
                         >
                             <span className="text-xs font-black mb-0.5">
-                                {attempt.originalIndex + 1}
+                                {attempt.displayNumber}
                             </span>
                             <span className="text-[10px] font-mono font-bold opacity-70">
                                 {formatTime(attempt.time_spent_seconds)}

@@ -1,12 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import type { Question } from '@/shared/types/storage';
-import { getPaletteSections } from '../questionPalette';
+import {
+    getDisplayNumber,
+    getDisplayTotal,
+    getPaletteSections,
+} from '../questionPalette';
 
 const make = (id: string, section?: string): Question =>
     ({
         id,
         metadata: section ? { section } : {},
     }) as unknown as Question;
+
+describe('continuous numbering', () => {
+    it('numbers questions across the whole paper without repeats', () => {
+        const questions = [
+            make('q1', 'GA'),
+            make('q2', 'GA'),
+            make('q3', 'TECH'),
+            make('q4', 'TECH'),
+        ];
+        expect(questions.map((_, i) => getDisplayNumber(questions, i))).toEqual(
+            [1, 2, 3, 4]
+        );
+        expect(getDisplayTotal(questions, 0)).toBe(4);
+        expect(getDisplayNumber([make('q1'), make('q2')], 1)).toBe(2);
+    });
+});
 
 describe('getPaletteSections', () => {
     it('splits into General Aptitude and Technical when both exist', () => {

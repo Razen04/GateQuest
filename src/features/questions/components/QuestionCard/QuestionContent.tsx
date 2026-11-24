@@ -104,7 +104,7 @@ const QuestionContent = ({
                                 whileHover={{ scale: showAnswer ? 1 : 1.01 }}
                                 whileTap={{ scale: showAnswer ? 1 : 0.99 }}
                                 style={{ position: 'relative' }}
-                                className={`relative overflow-hidden p-4 border bg-card text-card-foreground transition-all min-w-0 ${
+                                className={`relative p-4 border bg-card text-card-foreground transition-all min-w-0 ${
                                     showAnswer
                                         ? 'cursor-default'
                                         : 'cursor-pointer'
@@ -139,7 +139,7 @@ const QuestionContent = ({
 
                                 {percentage !== null && (
                                     <span
-                                        className={`absolute -top-2 right-3 px-1.5 text-xs font-semibold tabular-nums bg-card ${
+                                        className={`absolute -top-2 right-3 z-10 whitespace-nowrap px-1.5 text-xs font-semibold tabular-nums bg-card ${
                                             isCorrect
                                                 ? 'text-green-700 dark:text-green-400'
                                                 : 'text-destructive'

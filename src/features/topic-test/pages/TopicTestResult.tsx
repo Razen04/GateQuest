@@ -1,13 +1,16 @@
 import {
     ArrowLeftIcon,
     ArrowRight,
+    FlagIcon,
     House,
     ListChecks,
+    PackageIcon,
     Target,
     Timer,
     Trophy,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import PageHeader from '@/shared/components/PageHeader';
 import { Button } from '@/shared/components/ui/button';
@@ -57,6 +60,14 @@ export default function TopicTestResult() {
     const { testId } = useParams<{ testId: string }>();
     const navigate = useNavigate();
     const { session, attempts } = useOutletContext<OutletContext>();
+
+    const orderedAttempts = useMemo(
+        () =>
+            [...attempts].sort(
+                (a, b) => (a.attempt_order ?? 0) - (b.attempt_order ?? 0)
+            ),
+        [attempts]
+    );
 
     return (
         <div className="max-w-7xl mx-auto pb-20">
@@ -122,6 +133,52 @@ export default function TopicTestResult() {
                         value={`${session.attempted_count}/${attempts.length}`}
                         icon={ListChecks}
                     />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <div className="flex items-center gap-2 mb-4">
+                        <PackageIcon size={20} />
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                            Questions
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-13 gap-2">
+                        {orderedAttempts.map((attempt, index) => {
+                            const isCorrect =
+                                attempt.status === 'answered' &&
+                                attempt.is_correct === true;
+                            const isWrong =
+                                attempt.status === 'answered' &&
+                                attempt.is_correct === false;
+                            const styles = isCorrect
+                                ? 'bg-chart-2/10 text-chart-2 border-chart-2/30'
+                                : isWrong
+                                  ? 'bg-destructive/10 text-destructive border-destructive/30'
+                                  : 'bg-muted text-muted-foreground border-border';
+
+                            return (
+                                <button
+                                    key={attempt.question_id}
+                                    onClick={() =>
+                                        navigate(
+                                            `/topic-test-review/${testId}/${index}`
+                                        )
+                                    }
+                                    className={`relative flex h-10 items-center justify-center border text-xs font-black transition-colors hover:opacity-80 ${styles}`}
+                                    title={`Question ${index + 1}`}
+                                >
+                                    {index + 1}
+                                    {attempt.marked_for_review && (
+                                        <FlagIcon
+                                            size={8}
+                                            weight="fill"
+                                            className="absolute -top-1 -right-1 text-chart-6"
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </motion.div>
 
                 <motion.div variants={itemVariants}>

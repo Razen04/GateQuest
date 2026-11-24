@@ -7,6 +7,7 @@ import {
 } from '@/features/questions/utils/questionUtils';
 import useTest from '@/features/topic-test/hooks/test-engine/useTest';
 import { Button } from '@/shared/components/ui/button';
+import { getDisplayNumber, getDisplayTotal } from '../../utils/questionPalette';
 import QuestionPalette from './QuestionPallete';
 import TestControlBar from './TestControlBar';
 import TestHeader from './TestHeader';
@@ -35,11 +36,13 @@ const ActiveTest = () => {
     if (!currentQ) return null;
 
     const currentAttempt = answers.answers.get(currentQ.id);
-    const isFirst = currentIndex === 0;
-    const isLast = currentIndex === totalQuestions - 1;
+    const isFirst = navigation.isFirst;
+    const isLast = navigation.isLast;
 
     const realIndex = questions.findIndex((q) => q.id === currentQ.id);
     const attemptOrder = realIndex + 1;
+    const displayNumber = getDisplayNumber(questions, currentIndex);
+    const displayTotal = getDisplayTotal(questions, currentIndex);
     const isMSQ = isMultipleSelection(currentQ);
     const isNAT = isNumericalQuestion(currentQ);
 
@@ -103,7 +106,7 @@ const ActiveTest = () => {
         <div className="flex flex-col h-full overflow-hidden text-foreground">
             <TestHeader
                 timeDisplay={timer.timeDisplay}
-                questionStatus={`${currentIndex + 1} of ${totalQuestions}`}
+                questionStatus={`${displayNumber} of ${displayTotal}`}
                 onEndTest={() => handleSubmit()}
                 isMockMode={isMockMode}
                 title={isMockMode ? mockLabel : 'Custom Test'}

@@ -1,5 +1,6 @@
 import type { PyqPaper } from '@/shared/types/pyq';
 import type { Attempt, Question } from '@/shared/types/storage';
+import type { Json } from '@/shared/types/supabase';
 import { supabase } from '@/shared/utils/supabaseClient';
 
 type RawJoinedAttempt = {
@@ -122,7 +123,7 @@ export const submitTestGrading = async (
 ) => {
     const { data, error } = await supabase.rpc('submit_test_grading', {
         p_session_id: sessionId,
-        p_payload: payload,
+        p_payload: payload as unknown as Json,
         p_remaining_time_seconds: remainingTime,
     });
     return { data, error };
@@ -165,7 +166,10 @@ export const fetchFullTestData = async (userId: string, branchId: string) => {
 
     // Strip the join field so it never reaches Dexie (destructure, don't delete).
     const { topic_tests_attempts, ...testSession } = raw;
-    const joined = (topic_tests_attempts ?? []) as RawJoinedAttempt[];
+    // Order by attempt_order so questions[] lines up with the assembled paper.
+    const joined = (
+        (topic_tests_attempts ?? []) as unknown as RawJoinedAttempt[]
+    ).sort((a, b) => (a.attempt_order ?? 0) - (b.attempt_order ?? 0));
 
     const questions = joined.flatMap((row) =>
         row.questions
