@@ -8,7 +8,7 @@ import {
     TrophyIcon,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthStore } from '@/app/stores/useAuthStore';
 import { useGoalStore } from '@/app/stores/useGoalStore';
@@ -99,8 +99,14 @@ export default function MockTestLobby() {
         }
     }, [mock, navigate]);
 
+    const startingRef = useRef(false);
+    const navigatingRef = useRef(false);
+
     const handleStart = async () => {
-        if (!mockId || !branchId || !mock || starting) return;
+        // State updates are async, so a rapid second click can get past the
+        // `starting` check. Lock synchronously as well.
+        if (startingRef.current || !mockId || !branchId || !mock) return;
+        startingRef.current = true;
         setStarting(true);
         setActionError(null);
 
@@ -135,6 +141,7 @@ export default function MockTestLobby() {
             switch (res.status) {
                 case 'created':
                 case 'already_attempted':
+                    navigatingRef.current = true;
                     navigate(`/mock-tests/attempt/${res.test_id}`, {
                         replace: true,
                     });
@@ -170,7 +177,10 @@ export default function MockTestLobby() {
             setActionError('Something went wrong. Please try again.');
         } finally {
             setQueueUntil(null);
-            setStarting(false);
+            startingRef.current = false;
+            // On success we navigate away; stay in the loading state so the
+            // button can't be clicked again during the hand-off.
+            if (!navigatingRef.current) setStarting(false);
         }
     };
 
@@ -216,6 +226,10 @@ export default function MockTestLobby() {
     ) {
         return <ModernLoader />;
     }
+
+    // Once the load-spreading countdown reaches zero, cover the whole page
+    // so a second click can't restart the queue while the session is created.
+    if (starting && queueUntil === null) return <ModernLoader />;
 
     const isUpcoming = mock.state === 'upcoming';
     const isOpen = mock.state === 'open';

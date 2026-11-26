@@ -1,6 +1,6 @@
 begin;
 select
-    plan (3);
+    plan (4);
 \set user_1    'e1e1e1e1-e1e1-e1e1-e1e1-e1e1e1e1e1e1'
 \set subject_id '8e8e8e8e-8e8e-8e8e-8e8e-8e8e8e8e8e8e'
 \set mock_id    'mock-lb-test'
@@ -34,8 +34,8 @@ insert into public.questions (id, year, question_number, subject, subject_id, to
 insert into public.mock_questions (mock_id, question_id, position)
     values (:'mock_id', :'question_id', 1);
 -- Completed donor session
-insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity, score)
-    values (:'user_1', array['X'], 1, 5000, 'completed', 1, 'cs', :'mock_id', true, 75);
+insert into public.topic_tests (user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity, score, started_at, completed_at)
+    values (:'user_1', array['X'], 1, 5000, 'completed', 1, 'cs', :'mock_id', true, 75, now() - interval '2 hours', now() - interval '1 hour');
 -- Test 1: leaderboard top has our user
 set LOCAL role authenticated;
 select
@@ -51,6 +51,11 @@ select
     is ((public.get_mock_leaderboard (:'mock_id') ->> 'my_rank')::int,
         1,
         'my_rank is 1');
+-- Test 3: time_seconds is the real attempt duration, not window - remaining
+select
+    is ((public.get_mock_leaderboard (:'mock_id') -> 'top' -> 0 ->> 'time_seconds')::int,
+        3600,
+        'time_seconds is completed_at - started_at');
 -- Test 3: free user gets tier_required
 reset role;
 update

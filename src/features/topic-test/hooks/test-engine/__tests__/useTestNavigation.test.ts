@@ -73,7 +73,7 @@ describe('useTestNavigation hook tests', () => {
         expect(result.current.visitedIndices.has(5)).toBe(true);
     });
 
-    it('keeps next/prev inside the current section', () => {
+    it('navigates across the GA/TECH boundary in paper order', () => {
         const questions = [
             makeQuestion('GA'),
             makeQuestion('GA'),
@@ -89,22 +89,32 @@ describe('useTestNavigation hook tests', () => {
             result.current.next();
         });
         expect(result.current.currentIndex).toBe(1);
-        expect(result.current.isLast).toBe(true);
+        expect(result.current.isLast).toBe(false);
 
+        // Last GA -> first TECH
         let success = true;
         act(() => {
             success = result.current.next();
         });
-        expect(success).toBe(false);
-        expect(result.current.currentIndex).toBe(1); // no jump into TECH
+        expect(success).toBe(true);
+        expect(result.current.currentIndex).toBe(2);
+        expect(result.current.isFirst).toBe(false);
 
-        act(() => {
-            result.current.jumpTo(2);
-        });
-        expect(result.current.isFirst).toBe(true);
+        // First TECH -> last GA
         act(() => {
             result.current.prev();
         });
-        expect(result.current.currentIndex).toBe(2); // no jump back into GA
+        expect(result.current.currentIndex).toBe(1);
+
+        // Only the ends of the paper stop navigation
+        act(() => {
+            result.current.jumpTo(3);
+        });
+        expect(result.current.isLast).toBe(true);
+        act(() => {
+            success = result.current.next();
+        });
+        expect(success).toBe(false);
+        expect(result.current.currentIndex).toBe(3);
     });
 });

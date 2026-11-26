@@ -3,7 +3,6 @@ import {
     ArrowRight,
     FlagIcon,
     House,
-    ListChecks,
     PackageIcon,
     Target,
     Timer,
@@ -17,6 +16,7 @@ import { Button } from '@/shared/components/ui/button';
 import type { Attempt, TestSession } from '@/shared/types/storage';
 import { formatTime } from '@/shared/utils/helper';
 import { containerVariants, itemVariants } from '@/shared/utils/motionVariants';
+import { AttemptCountsStrip } from '../components/AttemptCountsStrip';
 import TestAnalysisBody from '../components/test-result/TestAnalysisBody';
 import type { FullAttempt } from '../types/testTypes';
 
@@ -106,7 +106,7 @@ export default function TopicTestResult() {
             >
                 <motion.div
                     variants={itemVariants}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                 >
                     <StatCard
                         label="Score"
@@ -128,10 +128,16 @@ export default function TopicTestResult() {
                         )}
                         icon={Timer}
                     />
-                    <StatCard
-                        label="Attempted"
-                        value={`${session.attempted_count}/${attempts.length}`}
-                        icon={ListChecks}
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <AttemptCountsStrip
+                        attempted={session.attempted_count ?? 0}
+                        correct={session.correct_count ?? 0}
+                        incorrect={
+                            (session.attempted_count ?? 0) -
+                            (session.correct_count ?? 0)
+                        }
                     />
                 </motion.div>
 

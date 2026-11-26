@@ -172,7 +172,7 @@ const QuestionCard = ({
             {/* Main Card Container */}
             <div
                 ref={pageRef}
-                className="mx-auto mt-6 max-w-6xl flex-1 overflow-y-auto border border-border bg-card text-card-foreground shadow-sm 2xl:max-w-7xl"
+                className="mx-auto mt-6 max-w-6xl flex-1 overflow-y-auto bg-card text-card-foreground shadow-sm 2xl:max-w-7xl"
             >
                 {/* Header Section */}
                 <QuestionHeader

@@ -210,7 +210,9 @@ export const useQuestionController = ({
         if (currentQuestion?.source_url) {
             window.open(currentQuestion.source_url, '_blank');
         } else {
-            toast.message('No explanation available. Please use AskAI.');
+            toast.message(
+                'No GATEOverflow explanation available. Please use AskAI or refer to the AI Explanation provided.'
+            );
         }
     };
 

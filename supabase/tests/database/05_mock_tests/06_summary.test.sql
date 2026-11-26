@@ -1,6 +1,6 @@
 begin;
 select
-    plan (5);
+    plan (7);
 \set user_free  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 \set user_donor 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
 -- Unique subject + mock IDs per file
@@ -61,10 +61,10 @@ values
     (:'mock_id', 'ee000000-0000-0000-0000-000000000011', 1),
     (:'mock_id', 'ee000000-0000-0000-0000-000000000012', 2);
 -- ─── Completed sessions ───────────────────────────────────────────
-insert into public.topic_tests (id, user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity, score, attempted_count)
+insert into public.topic_tests (id, user_id, topics, total_questions, remaining_time_seconds, status, total_marks, branch_id, paper_id, record_activity, score, attempted_count, correct_count)
 values
-    (:'sess_free', :'user_free', array['Summary Test'], 2, 0, 'completed', 4, 'cs', :'mock_id', false, 1, 2),
-    (:'sess_donor', :'user_donor', array['Summary Test'], 2, 0, 'completed', 4, 'cs', :'mock_id', true, 1, 2);
+    (:'sess_free', :'user_free', array['Summary Test'], 2, 0, 'completed', 4, 'cs', :'mock_id', false, 1, 2, 1),
+    (:'sess_donor', :'user_donor', array['Summary Test'], 2, 0, 'completed', 4, 'cs', :'mock_id', true, 1, 2, 1);
 -- ─── Attempt records ──────────────────────────────────────────────
 insert into public.topic_tests_attempts (session_id, question_id, attempt_order, status, score, is_correct)
 select
@@ -118,6 +118,15 @@ select
     is ((public.get_mock_summary (:'sess_free') ->> 'negative_score')::numeric,
         - 1::numeric,
         'free user gets negative_score');
+-- Test 2b/c: counts are available to free users too
+select
+    is ((public.get_mock_summary (:'sess_free') ->> 'correct_count')::int,
+        1,
+        'free user gets correct_count');
+select
+    is ((public.get_mock_summary (:'sess_free') ->> 'incorrect_count')::int,
+        1,
+        'free user gets incorrect_count');
 -- Test 3: analysis_unlocked=false for free (post_min_tier=1)
 select
     is ((public.get_mock_summary (:'sess_free') ->> 'analysis_unlocked')::boolean,

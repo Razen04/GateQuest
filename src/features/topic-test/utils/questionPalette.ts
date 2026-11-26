@@ -82,20 +82,17 @@ export function getDisplayTotal(questions: Question[], _index: number): number {
     return questions.length;
 }
 
-/** Adjacent question within the same section, or null at a section edge. */
+/**
+ * Adjacent question in paper order. Sections group the palette for display,
+ * but they are not navigation boundaries: next from the last GA question
+ * moves to the first TECH question, and prev does the reverse. Only the first
+ * and last questions of the paper have no neighbour.
+ */
 export function getAdjacentIndex(
     questions: Question[],
     index: number,
     delta: -1 | 1
 ): number | null {
-    const section = getQuestionSection(questions, index);
-    if (!section) {
-        const next = index + delta;
-        return next >= 0 && next < questions.length ? next : null;
-    }
-    const position = section.indices.indexOf(index);
-    const nextPosition = position + delta;
-    return nextPosition >= 0 && nextPosition < section.indices.length
-        ? (section.indices[nextPosition] ?? null)
-        : null;
+    const next = index + delta;
+    return next >= 0 && next < questions.length ? next : null;
 }
