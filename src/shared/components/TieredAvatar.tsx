@@ -27,7 +27,10 @@ export function TieredAvatar({
 }: TieredAvatarProps) {
     const ariaLabel = tier > 0 ? `${alt} (${DONOR_TIER_LABELS[tier]})` : alt;
 
-    const Ring = tier > 0 ? TIER_RINGS[tier] : null;
+    const Ring = tier > 0 ? TIER_RINGS[tier as Exclude<DonorTier, 0>] : null;
+    // Supporters can change their avatar (uploaded image, or the Google image
+    // seeded at signup). Everyone else gets the fallback.
+    const avatarSrc = tier > 0 ? src : null;
 
     return (
         <div className={`relative ${className}`}>
@@ -40,9 +43,9 @@ export function TieredAvatar({
             )}
 
             <div className="relative h-full w-full overflow-hidden rounded-full border border-border ring-2 ring-card">
-                {src ? (
+                {avatarSrc ? (
                     <Avatar
-                        src={src}
+                        src={avatarSrc}
                         alt={ariaLabel}
                         priority={priority}
                         className="h-full w-full object-cover"
