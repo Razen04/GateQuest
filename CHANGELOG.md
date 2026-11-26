@@ -1,4 +1,10 @@
-# v0.12.1 - 2026-11-24 (Latest)
+# v0.12.2 - 2026-11-26 (Latest)
+
+- Fixed time taken in Mock Test Leaderboard.
+- Fixed theming in few components.
+- Refactored Mock Test result into tab layout.
+
+# v0.12.1 - 2026-11-24
 
 - Fixed the error in PYQ mode custom test being all wrong with the numbering and result page. Old tests can't be fixed, further new tests won't have any issues (hope so). _Tanks_ [@Aliya_TM](https://gate-quest.vercel.app/u/Aliya_TM) for reporting the issue.
 - **NOTE**: Please keep reporting issues and use Discord or Github so that it can reach me faster. Do join the Discord.

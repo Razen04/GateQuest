@@ -72,7 +72,7 @@ function Changelog() {
                             remarkPlugins={[remarkGfm]}
                             components={{
                                 h1: ({ children }) => (
-                                    <h1 className="inline-flex items-center gap-2 text-xl text-primary font-semibold border-b border-border pb-2">
+                                    <h1 className="flex w-fit items-center gap-2 mb-2 text-xl text-primary font-semibold border-b border-border">
                                         <MegaphoneIcon className="w-4 h-4 text-destructive rotate-y-180" />
                                         {children}
                                     </h1>
@@ -98,7 +98,7 @@ function Changelog() {
                                     );
                                 },
                                 ul: ({ children }) => (
-                                    <ul className="list-disc pl-6 space-y-1">
+                                    <ul className="list-disc pl-6 mt-0">
                                         {children}
                                     </ul>
                                 ),
