@@ -18,7 +18,7 @@ export default function ProfileSidePanel({
         type === 'multiple-choice'
             ? 'bg-chart-1'
             : type === 'numerical'
-              ? 'bg-chart-6'
+              ? 'bg-chart-3'
               : 'bg-chart-5';
 
     return (
