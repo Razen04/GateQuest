@@ -9,16 +9,19 @@ import { useEffect } from 'react';
  * - Enter/Space: submit if an option is selected, otherwise show answer
  * - Slash (/): open explanation
  * - Option selection using A/B/C/D/E or 1/2/3/4/5
+ *   (turn this off with `enableOptionSelection: false` in review mode,
+ *   where the answer is already visible and options are read-only)
  * The hook ensures these shortcuts don't interfere with text inputs.
  */
 
 type useKeyboardShortcutsProps = {
     onPrev: () => void;
     onNext: () => void;
-    onShowAnswer: () => void;
+    onShowAnswer?: () => void;
     onSubmit?: () => void;
     canSubmit?: boolean;
     onExplain?: () => void;
+    enableOptionSelection?: boolean;
 };
 export default function useKeyboardShortcuts({
     onPrev,
@@ -27,6 +30,7 @@ export default function useKeyboardShortcuts({
     onSubmit,
     canSubmit,
     onExplain,
+    enableOptionSelection = true,
 }: useKeyboardShortcutsProps) {
     const getOptionCodeFromKey = (code: string) => {
         const map: Record<string, number> = {
@@ -66,7 +70,7 @@ export default function useKeyboardShortcuts({
 
             // Option selection
             const optionIndex = getOptionCodeFromKey(e.code);
-            if (optionIndex !== null) {
+            if (optionIndex !== null && enableOptionSelection) {
                 window.dispatchEvent(
                     new CustomEvent('selectOptionByIndex', {
                         detail: optionIndex,
@@ -107,5 +111,13 @@ export default function useKeyboardShortcuts({
         // The cleanup function removes the event listener when the component unmounts to prevent memory leaks.
         return () => document.removeEventListener('keydown', handleKeyStroke);
         // The eslint-disable comment is here because the dependencies (`deps`) are intentionally passed from the parent component to control when the effect re-runs.
-    }, [onPrev, onNext, onShowAnswer, onSubmit, canSubmit, onExplain]);
+    }, [
+        onPrev,
+        onNext,
+        onShowAnswer,
+        onSubmit,
+        canSubmit,
+        onExplain,
+        enableOptionSelection,
+    ]);
 }

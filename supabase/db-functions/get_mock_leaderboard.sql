@@ -7,17 +7,13 @@ create or replace function public.get_mock_leaderboard (p_mock_id text)
     as $$
 declare
     v_window_end timestamptz;
-    v_duration_seconds int;
     v_post_min_tier smallint;
 begin
-    -- Read authoritative mock configuration.
     select
         m.starts_at + make_interval(secs => m.duration_seconds),
-        m.duration_seconds,
         m.post_min_tier
     into
         v_window_end,
-        v_duration_seconds,
         v_post_min_tier
     from
         public.mocks m
@@ -38,6 +34,8 @@ begin
                 id,
                 score,
                 remaining_time_seconds,
+                started_at,
+                created_at,
                 completed_at
             from
                 public.topic_tests
@@ -47,17 +45,23 @@ begin
             order by
                 user_id,
                 created_at asc),
-            ranked as (
-                select
-                    *,
-                    row_number() over (order by score desc,
-                        remaining_time_seconds desc,
-                        completed_at asc,
-                        id asc) as rank,
+        ranked as (
+            select
+                *,
+                greatest(
+                    0,
+                    extract(epoch from (
+                        completed_at - coalesce(started_at, created_at)
+                    ))::int
+                ) as time_seconds,
+                row_number() over (order by score desc,
+                    remaining_time_seconds desc,
+                    completed_at asc,
+                    id asc) as rank,
                 count(*) over () as total_participants
             from
                 first_attempts
-)
+    )
             select
                 jsonb_build_object('top', (
                         select
@@ -69,7 +73,7 @@ begin
                                             1
                                         else
                                             0
-                                        end, 'score', r.score, 'time_seconds', v_duration_seconds - r.remaining_time_seconds)
+                                        end, 'score', r.score, 'time_seconds', r.time_seconds)
                                 order by r.rank), '[]'::jsonb)
                         from ranked r
                         join public.users u on u.id = r.user_id
@@ -85,4 +89,3 @@ begin
                             from ranked)));
 end;
 $$;
-

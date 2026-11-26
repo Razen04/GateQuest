@@ -92,6 +92,8 @@ export type MockSummaryResponse =
           negative_score: number;
           total_marks: number;
           attempted_count: number;
+          correct_count: number;
+          incorrect_count: number;
           analysis_unlocked: boolean;
       }
     | { error: 'not_found' | 'not_completed' | 'not_a_mock_attempt' };

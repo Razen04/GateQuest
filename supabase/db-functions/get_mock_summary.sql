@@ -75,7 +75,7 @@ begin
         public.topic_tests_attempts
     where
         session_id = p_test_id;
-    return jsonb_build_object('results_released', true, 'mock_id', v_base_mock_id, 'is_re_attempt', v_is_re_attempt, 'total_score', v_test.score, 'positive_score', v_positive, 'negative_score', v_negative, 'total_marks', v_test.total_marks, 'attempted_count', v_test.attempted_count, 'analysis_unlocked', (v_post_min_tier = 0
+    return jsonb_build_object('results_released', true, 'mock_id', v_base_mock_id, 'is_re_attempt', v_is_re_attempt, 'total_score', v_test.score, 'positive_score', v_positive, 'negative_score', v_negative, 'total_marks', v_test.total_marks, 'attempted_count', coalesce(v_test.attempted_count, 0), 'correct_count', coalesce(v_test.correct_count, 0), 'incorrect_count', greatest(0, coalesce(v_test.attempted_count, 0) - coalesce(v_test.correct_count, 0)), 'analysis_unlocked', (v_post_min_tier = 0
             or coalesce(public.get_my_tier (), 0) >= v_post_min_tier));
 end;
 $$;

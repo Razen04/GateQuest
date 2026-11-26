@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Question } from '@/shared/types/storage';
 import {
+    getAdjacentIndex,
     getDisplayNumber,
     getDisplayTotal,
     getPaletteSections,
@@ -25,6 +26,25 @@ describe('continuous numbering', () => {
         );
         expect(getDisplayTotal(questions, 0)).toBe(4);
         expect(getDisplayNumber([make('q1'), make('q2')], 1)).toBe(2);
+    });
+});
+
+describe('getAdjacentIndex', () => {
+    const questions = [
+        make('1', 'GA'),
+        make('2', 'GA'),
+        make('3', 'TECH'),
+        make('4', 'TECH'),
+    ];
+
+    it('crosses the GA/TECH boundary in both directions', () => {
+        expect(getAdjacentIndex(questions, 1, 1)).toBe(2);
+        expect(getAdjacentIndex(questions, 2, -1)).toBe(1);
+    });
+
+    it('only stops at the ends of the paper', () => {
+        expect(getAdjacentIndex(questions, 0, -1)).toBeNull();
+        expect(getAdjacentIndex(questions, 3, 1)).toBeNull();
     });
 });
 

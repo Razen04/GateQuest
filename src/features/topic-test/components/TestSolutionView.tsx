@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/app/stores/useAuthStore';
@@ -9,6 +9,7 @@ import {
     isNumericalQuestion,
 } from '@/features/questions/utils/questionUtils';
 import ReportModal from '@/shared/components/ReportModal';
+import useKeyboardShortcuts from '@/shared/hooks/useKeyboardShortcuts';
 import { supabase } from '@/shared/utils/supabaseClient';
 import type { AttemptWithQuestion } from '../components/TestReviewLayout';
 import {
@@ -37,9 +38,13 @@ const TestSolutionView = () => {
     const currentQuestion = currentAttempt?.questions;
 
     const subjectSlug = currentQuestion?.subject ?? '';
-    const reviewQuestions = attempts
-        .map((a) => a.questions)
-        .filter((q): q is NonNullable<typeof q> => Boolean(q));
+    const reviewQuestions = useMemo(
+        () =>
+            attempts
+                .map((a) => a.questions)
+                .filter((q): q is NonNullable<typeof q> => Boolean(q)),
+        [attempts]
+    );
     const displayNumber = getDisplayNumber(reviewQuestions, currentIndex);
     const displayTotal = getDisplayTotal(reviewQuestions, currentIndex);
 
@@ -92,22 +97,43 @@ const TestSolutionView = () => {
         message: statsMessage,
     } = usePeerBenchmark(safeQuestion.id, true); // enable is true because in TestSolution we need to see the peer_stats since all the questions are already answered
 
-    if (!currentAttempt || !currentQuestion) return null;
-
-    // Navigation Handlers
-    const handleNext = () => {
+    // Navigation handlers stay above the early return so the shortcut hook
+    // can be registered unconditionally on every render.
+    const handleNext = useCallback(() => {
         const next = getAdjacentIndex(reviewQuestions, currentIndex, 1);
         if (next != null) {
             navigate(`/topic-test-review/${testId}/${next}`);
         }
-    };
+    }, [reviewQuestions, currentIndex, navigate, testId]);
 
-    const handlePrev = () => {
+    const handlePrev = useCallback(() => {
         const prev = getAdjacentIndex(reviewQuestions, currentIndex, -1);
         if (prev != null) {
             navigate(`/topic-test-review/${testId}/${prev}`);
         }
-    };
+    }, [reviewQuestions, currentIndex, navigate, testId]);
+
+    const handleExplanation = useCallback(() => {
+        if (currentQuestion?.source_url) {
+            window.open(currentQuestion.source_url, '_blank');
+        } else {
+            toast.message(
+                'No GATEOverflow explanation available. Please use AskAI or refer to the AI Explanation provided.'
+            );
+        }
+    }, [currentQuestion]);
+
+    // Review is read-only: Q/W and the arrow keys move between questions and
+    // Slash opens the explanation. Selection, submit and show-answer
+    // shortcuts are intentionally inert here.
+    useKeyboardShortcuts({
+        onPrev: handlePrev,
+        onNext: handleNext,
+        onExplain: handleExplanation,
+        enableOptionSelection: false,
+    });
+
+    if (!currentAttempt || !currentQuestion) return null;
 
     const handleBack = () => {
         navigate(`/topic-test-result/${testId}`);
@@ -154,14 +180,6 @@ const TestSolutionView = () => {
         } else {
             await navigator.clipboard.writeText(shareUrl);
             toast.success('Public practice link copied!');
-        }
-    };
-
-    const handleExplanation = () => {
-        if (currentQuestion?.source_url) {
-            window.open(currentQuestion.source_url, '_blank');
-        } else {
-            toast.message('No explanation available. Please use AskAI.');
         }
     };
 
